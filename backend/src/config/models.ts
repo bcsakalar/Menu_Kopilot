@@ -60,6 +60,11 @@ export interface ModelSpec {
   /** Preview models may disappear without notice → never the only entry of a chain. */
   preview: boolean;
   maxOutputTokens: number;
+  /**
+   * Groq only — how reasoning text is suppressed: gpt-oss models take `include_reasoning: false`,
+   * other reasoning models take `reasoning_format: "hidden"`.
+   */
+  reasoningControl?: 'include_reasoning' | 'reasoning_format';
 }
 
 const MB = 1024 * 1024;
@@ -131,6 +136,7 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     structured: 'strict',
     preview: false,
     maxOutputTokens: 65_536,
+    reasoningControl: 'include_reasoning',
   },
   [MODELS.groqGptOss20b]: {
     id: MODELS.groqGptOss20b,
@@ -144,6 +150,7 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     structured: 'strict',
     preview: false,
     maxOutputTokens: 65_536,
+    reasoningControl: 'include_reasoning',
   },
   [MODELS.groqQwen38]: {
     id: MODELS.groqQwen38,
@@ -157,6 +164,7 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     structured: 'strict',
     preview: true,
     maxOutputTokens: 16_384,
+    reasoningControl: 'reasoning_format',
   },
   [MODELS.groqQwen36]: {
     id: MODELS.groqQwen36,
@@ -170,6 +178,7 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     structured: 'json_object',
     preview: true,
     maxOutputTokens: 16_384,
+    reasoningControl: 'reasoning_format',
   },
   [MODELS.groqWhisperTurbo]: {
     id: MODELS.groqWhisperTurbo,

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 1 done.
+Last update: 2026-09-15 — Faz 2 done.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -14,7 +14,7 @@ Last update: 2026-09-15 — Faz 1 done.
 - [x] **Faz 0** — git init, `.gitignore`/`.gitattributes`, `docs/PROVIDER_NOTES.md`, DECISIONS, PROGRESS, README skeleton
 - [x] **Faz 1** — backend skeleton, Docker Compose, Drizzle schema + reversible migrations, health, auth, seed
       (12 cuisines + 40 templates, `source='seed'`), `pnpm db:export-seed`
-- [ ] **Faz 2** — AI layer: provider interface, Gemini + Groq adapters, router, retry/circuit breaker,
+- [x] **Faz 2** — AI layer: provider interface, Gemini + Groq adapters, router, retry/circuit breaker,
       prompt templates repo, usage_log, smoke tests
 - [ ] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
 - [ ] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
@@ -23,9 +23,23 @@ Last update: 2026-09-15 — Faz 1 done.
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 1 complete. Next: Faz 2 — `backend/src/ai/` (types, json-schema sanitizers, Gemini/Groq providers, rate-limit,
-circuit breaker, router, prompt repository, budget, usage/quota) + settings/prompts routes + tests + smoke tests.
-`src/config/models.ts` (catalog + DEFAULT_ROUTES) and the prompt seed (`src/db/seed/prompts.ts`) already exist.
+Faz 2 complete. Next: Faz 3 — `/suggest` pipeline (`src/modules/suggest/`): prompt-parse, Stage A (vision extract,
+one image per call, extraction cache), Stage B (exact → alias → trigram → vector, approved only), Stage B′
+canonicalize (gated), Stage C (enrich batches [3, ≤10], few-shot), Stage D (sanitize → item-level Zod → one repair →
+needs_review), Stage E (SSE), run manager (cancel/continue/snapshot/async), accept/skip, BullMQ embedding jobs,
+Redis cache, fixture images (`scripts/generate-fixture-images.ps1`) + recorded fixtures + e2e.
+
+### Faz 2 inventory (backend/src/ai/)
+- `types.ts` (LLMProvider — spec signature + optional extensions), `errors.ts` (ProviderError kinds),
+  `json-schema.ts` (Zod→JSON Schema, `forGemini`, `forGroqStrict`), `rate-limit.ts` (headers, RetryInfo, cooldowns,
+  backoff), `circuit-breaker.ts`, `budget.ts` (RequestBudget + token estimates), `usage.ts` (UsageLogger,
+  QuotaService, startOfDay/Month), `prompt-repository.ts` (active prompt versions, render, admin ops),
+  `route-repository.ts` (provider_configs chain + setPrimary), `router.ts` (AiRouter: generate / generateOnRoute /
+  embed / availability), `index.ts` (createAiServices), `providers/{gemini,groq,shared}.ts`.
+- API: `GET/PUT /api/v1/settings/providers[/:taskKey]`, `GET /api/v1/settings/quota`, `GET/POST /api/v1/prompts`,
+  `POST /api/v1/prompts/:id/activate` (admin).
+- Tests: 179 passing (+ `test/smoke/providers.smoke.test.ts`, skipped without keys). Test helpers:
+  `test/helpers/fake-provider.ts` (FakeProvider, hashEmbedding), `test/helpers/test-app.ts` (createTestApp with fakes).
 
 ### Faz 1 inventory (backend/)
 - `src/config/env.ts` (Zod env, only reader of process.env), `src/config/models.ts` (all model IDs + routes)
@@ -57,7 +71,7 @@ circuit breaker, router, prompt repository, budget, usage/quota) + settings/prom
 | 6 | Same item in two screenshots counted once | ⏳ |
 | 7 | No TL amounts; `sets_base` correct | ◐ schema + seed enforced; pipeline pending |
 | 8 | Descriptions ≤ 160 chars (schema-enforced) | ◐ Zod + DB CHECK done; pipeline pending |
-| 9 | Provider down → fallback keeps working | ⏳ |
+| 9 | Provider down → fallback keeps working | ◐ router tests (500 / missing key / auth / 429 / circuit) pass; pipeline e2e pending |
 | 10 | Broken JSON → item `needs_review`, request survives | ⏳ |
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ⏳ |
 | 12 | Release APK builds and runs on a real device | ⏳ |
@@ -68,3 +82,5 @@ circuit breaker, router, prompt repository, budget, usage/quota) + settings/prom
 - Fix Docker Desktop (D-056), then from the repo root: `docker compose up -d --build` and open
   `http://localhost:3000/health/ready` (expects `{"status":"ready"}`) and `http://localhost:3000/docs`.
 - Review `backend/exports/seed-templates.csv` (regenerate with `pnpm db:export-seed --from=files`).
+- Put `GEMINI_API_KEY` / `GROQ_API_KEY` in `.env`, then `cd backend; pnpm test:smoke` (verifies model IDs incl.
+  `gemini-embedding-2`, strict schemas, vision).

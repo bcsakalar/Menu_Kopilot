@@ -42,3 +42,9 @@ export function getAuthUser(request: FastifyRequest): AuthUser {
   if (!request.authUser) throw new AppError('UNAUTHORIZED', 'Oturum gerekli');
   return request.authUser;
 }
+
+export function requireAdmin(request: FastifyRequest): AuthUser {
+  const user = getAuthUser(request);
+  if (user.role !== 'admin') throw new AppError('FORBIDDEN', 'Bu işlem için yönetici yetkisi gerekli');
+  return user;
+}

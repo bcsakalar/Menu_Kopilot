@@ -11,6 +11,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
+import { type AiServices, createAiServices } from './ai/index.js';
 import type { Cache } from './cache/cache.js';
 import type { AppConfig } from './config/env.js';
 import type { DbHandle } from './db/client.js';
@@ -20,6 +21,9 @@ import { loggerOptions } from './lib/logger.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
 import { healthRoutes } from './modules/health/routes.js';
+import { promptRoutes } from './modules/prompts/routes.js';
+import { settingsRoutes } from './modules/settings/routes.js';
+import { SettingsService } from './modules/settings/service.js';
 import { authPlugin } from './plugins/auth.js';
 
 export const APP_VERSION = '0.1.0';
@@ -30,6 +34,8 @@ export interface AppDeps {
   config: AppConfig;
   db: DbHandle;
   cache: Cache;
+  /** AI services (router, prompts, routes, quota). Built from config when omitted. */
+  ai?: AiServices;
   /** Overrides pino options (tests pass `false`). */
   logger?: boolean;
 }
@@ -121,9 +127,25 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     ],
   });
 
+  const ai =
+    deps.ai ??
+    createAiServices(config, deps.db.db, {
+      onUsageError: (err) => app.log.error({ err }, 'usage_log write failed'),
+    });
+  const settingsService = new SettingsService(ai, {
+    localOnlyMode: config.providers.localOnlyMode,
+    timezone: config.quota.timezone,
+  });
+
   await app.register(
     async (api) => {
       await api.register(authRoutes, { service: authService });
+      // Everything below requires a valid access token.
+      await api.register(async (secured) => {
+        secured.addHook('onRequest', secured.authenticate);
+        await secured.register(settingsRoutes, { service: settingsService });
+        await secured.register(promptRoutes, { prompts: ai.prompts });
+      });
     },
     { prefix: '/api/v1' },
   );

@@ -1,5 +1,9 @@
 # pnpm 11 settings for this single-package project.
 allowBuilds:
   esbuild: true
+  # Only a no-op preinstall echo.
+  '@google/genai': false
   # Optional native accelerator for msgpackr (BullMQ); pure-JS fallback is fine.
   msgpackr-extract: false
+  # postinstall only checks dependent versions.
+  protobufjs: false

@@ -128,3 +128,29 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   belongs to Docker Desktop's own state, so it was not deleted by the assistant; the crashed processes that the
   assistant started were stopped again. Fix on the user side: reboot, or quit Docker Desktop and delete
   `%LOCALAPPDATA%\Docker\run\sailor-ingest.sock`, then `docker compose up -d --build`. All tests run on PGlite. (F1)
+
+## Faz 2
+
+- **D-060** — `GeminiProvider` talks to the SDK through a thin `GeminiTransport` (the only file touching SDK types)
+  so it can be tested with a fake. SDK errors are classified structurally (status / message / RetryInfo) because the
+  SDK throws several unrelated error class families. (F2)
+- **D-061** — All SDK-level retries are disabled (`maxRetries: 0` on interactions; `retryOptions.attempts: 1` on
+  `embedContent`, whose default is 5 attempts). The router owns retry/backoff. (F2)
+- **D-062** — Router policy per attempt: 429 asking ≤ 3 s → one same-provider retry (plus jitter), longer → cooldown
+  of that provider:model and fallback; 5xx/network → one retry with full-jitter backoff, then fallback; timeout →
+  immediate fallback (no retry on a slow provider); 401/403/missing key → provider tripped for 10 min; invalid
+  output → returned to the caller for the single repair (no fallback). Circuit breaker is keyed per provider
+  (3 consecutive failures → 60 s open → one half-open trial). (F2)
+- **D-063** — Every provider attempt (success or failure) writes a `usage_log` row; the daily quota counts all attempts
+  and their tokens (failed calls can cost too). Quota day = Europe/Istanbul midnight (`QUOTA_TIMEZONE`). (F2)
+- **D-064** — Query/document embeddings are not charged to the 6-call per-request budget (they are cheap and needed
+  for retrieval), but they are logged and count toward the daily quota. (F2)
+- **D-065** — For JSON-mode-only models (qwen3.6) the router renders the `json.instructions` prompt template (DB) with
+  the sanitized schema and passes it to the adapter. (F2)
+- **D-066** — Gemini 3 has no temperature knob (`thinking_level` + `max_output_tokens` only). Groq calls use
+  temperature 0.3 unless a route overrides it (0 is rejected by Groq's semantics, so values ≤ 0 fall back to 0.3). (F2)
+- **D-067** — API DTOs carry dates as ISO strings (no `z.date()` in response schemas → clean OpenAPI output). (F2)
+- **D-068** — "Model selection" in settings = pick the primary model of a task; the other chain entries stay as
+  fallbacks in their existing order. Only capability-eligible models are accepted (vision tasks → vision models). (F2)
+- **D-069** — Live smoke tests (`pnpm test:smoke`) read keys from `../.env` and skip without them; vision smoke tests
+  also need the fixture images generated in Faz 3. (F2)
