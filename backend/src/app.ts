@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import fastifyJwt from '@fastify/jwt';
+import fastifyMultipart from '@fastify/multipart';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -15,15 +16,26 @@ import { type AiServices, createAiServices } from './ai/index.js';
 import type { Cache } from './cache/cache.js';
 import type { AppConfig } from './config/env.js';
 import type { DbHandle } from './db/client.js';
+import { EmbeddingService } from './jobs/embedding.service.js';
+import { InlineJobQueue, type JobQueue } from './jobs/queue.js';
 import { durationToSeconds } from './lib/duration.js';
 import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
+import { VisionExtractor } from './modules/extraction/vision-extractor.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { promptRoutes } from './modules/prompts/routes.js';
+import { RetrievalService } from './modules/retrieval/retrieval.service.js';
 import { settingsRoutes } from './modules/settings/routes.js';
 import { SettingsService } from './modules/settings/service.js';
+import { EnrichmentService } from './modules/suggest/enrichment.js';
+import { SuggestPipeline } from './modules/suggest/pipeline.js';
+import { suggestRoutes } from './modules/suggest/routes.js';
+import { RunRegistry } from './modules/suggest/run-registry.js';
+import type { SuggestEvent } from './modules/suggest/schemas.js';
+import { SuggestService } from './modules/suggest/service.js';
+import { SuggestionStore } from './modules/suggest/store.js';
 import { authPlugin } from './plugins/auth.js';
 
 export const APP_VERSION = '0.1.0';
@@ -36,8 +48,23 @@ export interface AppDeps {
   cache: Cache;
   /** AI services (router, prompts, routes, quota). Built from config when omitted. */
   ai?: AiServices;
+  /** Background jobs (BullMQ in runtime). Defaults to running embedding jobs inline. */
+  queue?: JobQueue;
   /** Overrides pino options (tests pass `false`). */
   logger?: boolean;
+}
+
+export interface AppServices {
+  ai: AiServices;
+  queue: JobQueue;
+  embedding: EmbeddingService;
+  suggest: SuggestService;
+}
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    services: AppServices;
+  }
 }
 
 export type App = FastifyInstance;
@@ -106,6 +133,14 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   app.get('/openapi.json', { schema: { hide: true } }, () => app.swagger());
 
   await app.register(fastifyRateLimit, { global: false });
+  await app.register(fastifyMultipart, {
+    limits: {
+      files: config.uploads.maxFiles,
+      fileSize: config.uploads.maxFileBytes,
+      fields: 20,
+      fieldSize: 64 * 1024,
+    },
+  });
   await app.register(fastifyJwt, {
     secret: config.auth.jwtSecret,
     sign: { algorithm: 'HS256', expiresIn: config.auth.accessTtl, iss: JWT_ISSUER, aud: JWT_AUDIENCE },
@@ -137,6 +172,39 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     timezone: config.quota.timezone,
   });
 
+  const db = deps.db.db;
+  const embedding = new EmbeddingService(db, ai.router, ai.prompts);
+  const queue = deps.queue ?? new InlineJobQueue(embedding);
+  const store = new SuggestionStore(db);
+  const retrieval = new RetrievalService(db, ai.router, ai.prompts, {
+    trigramThreshold: config.retrieval.trigramThreshold,
+    vectorThreshold: config.retrieval.vectorThreshold,
+  });
+  const extractor = new VisionExtractor(ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
+  const enrichment = new EnrichmentService(db, ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
+  const pipeline = new SuggestPipeline({
+    db,
+    router: ai.router,
+    prompts: ai.prompts,
+    retrieval,
+    extractor,
+    enrichment,
+    store,
+    cache: deps.cache,
+    cacheTtlSeconds: config.cacheTtlSeconds,
+    budget: config.budget,
+  });
+  const suggestService = new SuggestService({
+    db,
+    store,
+    pipeline,
+    registry: new RunRegistry<SuggestEvent>(),
+    queue,
+    budget: config.budget,
+    log: app.log,
+  });
+  app.decorate('services', { ai, queue, embedding, suggest: suggestService });
+
   await app.register(
     async (api) => {
       await api.register(authRoutes, { service: authService });
@@ -145,6 +213,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         secured.addHook('onRequest', secured.authenticate);
         await secured.register(settingsRoutes, { service: settingsService });
         await secured.register(promptRoutes, { prompts: ai.prompts });
+        await secured.register(suggestRoutes, { service: suggestService, uploads: config.uploads });
       });
     },
     { prefix: '/api/v1' },

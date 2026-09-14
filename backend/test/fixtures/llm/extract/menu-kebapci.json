@@ -1,0 +1,19 @@
+{
+  "items": [
+    { "rawName": "Adana Kebap", "priceText": "320 TL", "sectionText": "KEBAPLAR", "confidence": 0.98 },
+    { "rawName": "Urfa Kebap", "priceText": "320 TL", "sectionText": "KEBAPLAR", "confidence": 0.98 },
+    { "rawName": "Beyti Sarma", "priceText": "360 TL", "sectionText": "KEBAPLAR", "confidence": 0.97 },
+    { "rawName": "Ali Nazik", "priceText": "380 TL", "sectionText": "KEBAPLAR", "confidence": 0.97 },
+    { "rawName": "Tavuk Şiş", "priceText": "260 TL", "sectionText": "KEBAPLAR", "confidence": 0.97 },
+    { "rawName": "Lahmacun", "priceText": "90 TL", "sectionText": "PİDE & LAHMACUN", "confidence": 0.98 },
+    { "rawName": "Kıymalı Pide", "priceText": "210 TL", "sectionText": "PİDE & LAHMACUN", "confidence": 0.97 },
+    { "rawName": "Kaşarlı Pide", "priceText": "200 TL", "sectionText": "PİDE & LAHMACUN", "confidence": 0.97 },
+    { "rawName": "İçli Köfte (2 adet)", "priceText": "70 TL", "sectionText": "ARA SICAKLAR", "confidence": 0.95 },
+    { "rawName": "Humus", "priceText": "110 TL", "sectionText": "ARA SICAKLAR", "confidence": 0.96 },
+    { "rawName": "Künefe", "priceText": "180 TL", "sectionText": "TATLILAR", "confidence": 0.98 },
+    { "rawName": "Katmer", "priceText": "170 TL", "sectionText": "TATLILAR", "confidence": 0.97 },
+    { "rawName": "Ayran", "priceText": "40 TL", "sectionText": "İÇECEKLER", "confidence": 0.98 },
+    { "rawName": "Şalgam", "priceText": "45 TL", "sectionText": "İÇECEKLER", "confidence": 0.97 },
+    { "rawName": "Türk Kahvesi", "priceText": "60 TL", "sectionText": "İÇECEKLER", "confidence": 0.97 }
+  ]
+}

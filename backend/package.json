@@ -23,6 +23,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "vitest run --config vitest.smoke.config.ts",
+    "fixtures:images": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-fixture-images.ps1",
+    "fixtures:record": "tsx --env-file-if-exists=../.env scripts/record-fixtures.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=../.env src/db/migrate.ts",
     "db:rollback": "tsx --env-file-if-exists=../.env src/db/rollback.ts",

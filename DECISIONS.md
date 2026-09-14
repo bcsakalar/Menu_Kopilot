@@ -154,3 +154,35 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   fallbacks in their existing order. Only capability-eligible models are accepted (vision tasks → vision models). (F2)
 - **D-069** — Live smoke tests (`pnpm test:smoke`) read keys from `../.env` and skip without them; vision smoke tests
   also need the fixture images generated in Faz 3. (F2)
+
+## Faz 3
+
+- **D-070** — The spec's run-level cache (`image_hash + cuisine + prompt_hash`) is realised as the composition of
+  per-stage caches: extraction per image hash, canonicalize decision per name + candidate set, enrichment per
+  cuisine + name (all keyed with prompt versions, 30-day TTL). A repeated request makes zero external calls
+  (`cache_hit=true`) while DB retrieval always runs first, so newly approved templates are never shadowed by stale
+  cached AI output. Redis keys are namespaced `mk:x|c|e:…`. (F3)
+- **D-071** — Only calls the model actually processed (success or invalid output) count toward the 6-call request
+  budget; 5xx/429/timeouts are logged in `usage_log` but do not consume budget. (F3)
+- **D-072** — Canonicalization only runs for names whose best trigram near miss scores ≥ 0.45 (candidates are collected
+  from 0.30), and accepts a mapping at confidence ≥ 0.8. It never runs when fewer than 2 budget calls remain. (F3)
+- **D-073** — Extraction items with confidence < 0.25 are dropped as noise; photo prices are kept only inside the stored
+  extraction record (`suggestion_items.payload.extraction.priceText`), never in card DTOs or exports. (F3)
+- **D-074** — Streaming order: prompt names are resolved first; each photo is retrieved as soon as it is read, so DB
+  cards arrive right after the first extraction; enrichment runs after all photos (batches [3, 10, …], 2 in flight).
+  An `extracted` event carries the names early so the app can show placeholders. (F3)
+- **D-075** — A card with no description and no option groups cannot be accepted (prevents empty templates).
+  Accepting a seed card turns it into `source='user'` even without edits (D-023); accepting an AI card approves its
+  draft (`source='ai'`, or `'user'` if edited); name collisions with an existing approved template update that
+  template instead. Aliases for the raw and final names are added; an embedding job is queued. (F3)
+- **D-076** — Unknown items (model confidence < 0.5) keep whatever the model filled and get
+  `reviewReason = "Bunu bilmiyorum, sen doldur."`; unparseable output after the single repair becomes an empty review
+  card. When AI is unavailable (local-only/quota) unmatched names become review cards; when providers are down or the
+  budget runs out they become `pending_work` for "Devam et". (F3)
+- **D-077** — The embedding worker runs inside the API process (ROLE=all) with a BullMQ queue (`embeddings`,
+  8 attempts, exponential backoff from 30 s) plus a 30-minute sweep for approved templates missing vectors; tests use
+  an inline queue. Only approved templates are embedded (drafts never enter the vector index). (F3)
+- **D-078** — Test fixtures: synthetic menu photos and panel screenshots are rendered by
+  `scripts/generate-fixture-images.ps1` (System.Drawing, Windows) from `test/fixtures/images/menus.json`; LLM
+  responses are hand-authored "recorded" fixtures (see `test/fixtures/llm/README.md`); `pnpm fixtures:record`
+  re-records them with real keys into `*.recorded.json` for comparison. (F3)

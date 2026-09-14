@@ -1,0 +1,15 @@
+{
+  "items": [
+    { "rawName": "Kıymalı Kaşarlı Pide", "priceText": "240 TL", "sectionText": "PİDELER", "confidence": 0.96 },
+    { "rawName": "Kuşbaşılı Pide", "priceText": "260 TL", "sectionText": "PİDELER", "confidence": 0.97 },
+    { "rawName": "Karışık Pide", "priceText": "250 TL", "sectionText": "PİDELER", "confidence": 0.97 },
+    { "rawName": "Sucuklu Yumurtalı Pide", "priceText": "230 TL", "sectionText": "PİDELER", "confidence": 0.96 },
+    { "rawName": "Ispanaklı Pide", "priceText": "190 TL", "sectionText": "PİDELER", "confidence": 0.96 },
+    { "rawName": "Tahinli Pide", "priceText": "120 TL", "sectionText": "PİDELER", "confidence": 0.95 },
+    { "rawName": "Fındık Lahmacun", "priceText": "70 TL", "sectionText": "LAHMACUN", "confidence": 0.97 },
+    { "rawName": "Acılı Lahmacun", "priceText": "95 TL", "sectionText": "LAHMACUN", "confidence": 0.97 },
+    { "rawName": "Çoban Salata", "priceText": "80 TL", "sectionText": "YANINDA", "confidence": 0.97 },
+    { "rawName": "Ayran", "priceText": "40 TL", "sectionText": "YANINDA", "confidence": 0.98 },
+    { "rawName": "Kola", "priceText": "50 TL", "sectionText": "YANINDA", "confidence": 0.98 }
+  ]
+}

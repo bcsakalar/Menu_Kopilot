@@ -85,6 +85,10 @@ export class CooldownTracker {
     return this.remainingMs(key) > 0;
   }
 
+  reset(): void {
+    this.until.clear();
+  }
+
   /** Proactive throttle: if the provider says we are out of tokens/requests, wait for its reset. */
   observe(key: string, snapshot: RateLimitSnapshot | undefined, nextRequestTokens = 0): void {
     if (!snapshot) return;

@@ -1,0 +1,464 @@
+{
+  "icli kofte": {
+    "name": "İçli Köfte",
+    "description": "İnce bulgur hamurunun içi cevizli, baharatlı kıymalı harçla doldurulur; kızartılarak limon ve yeşillikle servis edilir.",
+    "serving_note": "Sıcak servis; limon dilimi ve yeşillikle, kağıt kapta gönderilir.",
+    "portion_info": "2 adet",
+    "option_groups": [
+      {
+        "name": "Adet",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "1 Adet", "price_mode": "sets_base" },
+          { "name": "2 Adet", "price_mode": "sets_base" },
+          { "name": "4 Adet", "price_mode": "sets_base" },
+          { "name": "6 Adet", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Pişirme",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Kızartma", "price_mode": "free" },
+          { "name": "Haşlama", "price_mode": "free" },
+          { "name": "Fırında", "price_mode": "free" }
+        ]
+      },
+      {
+        "name": "Sos",
+        "selection_type": "multi",
+        "is_required": false,
+        "min_select": 0,
+        "max_select": 4,
+        "options": [
+          { "name": "Yoğurt", "price_mode": "surcharge" },
+          { "name": "Acı Sos", "price_mode": "free" },
+          { "name": "Nar Ekşisi", "price_mode": "free" },
+          { "name": "Limon", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Ceviz", "Pul Biber", "Maydanoz"],
+    "extra_ingredients": [
+      { "name": "Ekstra Yoğurt", "price_delta_hint": "ek ücretli" },
+      { "name": "Ekstra Limon", "price_delta_hint": "ücretsiz" }
+    ],
+    "tags": ["kırmızı et", "ara sıcak", "kızartma"],
+    "allergen_notes": ["Gluten (bulgur)", "Kuruyemiş (ceviz)"],
+    "upsell_suggestion": "Yanına ayran veya şalgam önerilebilir.",
+    "confidence": 0.93
+  },
+  "humus": {
+    "name": "Humus",
+    "description": "Haşlanmış nohut, tahin, limon ve sarımsakla pürüzsüz kıvamda ezilir; üzerine zeytinyağı ve pul biber gezdirilerek sıcak pide ile birlikte, isteğe göre pastırma veya kavurma ile zenginleştirilerek servis edilen geleneksel meze.",
+    "serving_note": "Oda sıcaklığında servis; üzerine zeytinyağı, yanında sıcak pide ile.",
+    "portion_info": "1 porsiyon ~200 g",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Küçük", "price_mode": "sets_base" },
+          { "name": "Büyük (+15 TL)", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Üzerine",
+        "selection_type": "multi",
+        "is_required": false,
+        "min_select": 0,
+        "max_select": 5,
+        "options": [
+          { "name": "Sade", "price_mode": "free" },
+          { "name": "Pastırmalı", "price_mode": "surcharge" },
+          { "name": "Kavurmalı", "price_mode": "surcharge" },
+          { "name": "Tereyağlı", "price_mode": "free" },
+          { "name": "Çam Fıstıklı", "price_mode": "surcharge" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Sarımsak", "Pul Biber", "Zeytinyağı"],
+    "extra_ingredients": [{ "name": "Ekstra Pide (10 TL)", "price_delta_hint": "ek ücretli" }],
+    "tags": ["vejetaryen", "meze"],
+    "allergen_notes": ["Susam (tahin)"],
+    "upsell_suggestion": "Yanına sıcak lavaş ve ayran önerilebilir.",
+    "confidence": 0.9
+  },
+  "salgam": {
+    "name": "Şalgam",
+    "description": "Mor havuç ve bulgur ekşisiyle fermente edilen geleneksel içecek; acılı veya acısız seçenekleriyle soğuk servis edilir.",
+    "serving_note": "Soğuk servis; şişe veya kapaklı bardakta gönderilir.",
+    "portion_info": "1 adet ~300 ml",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Küçük (~200 ml)", "price_mode": "surcharge" },
+          { "name": "Orta (~300 ml)", "price_mode": "surcharge" },
+          { "name": "Büyük (~1 L)", "price_mode": "surcharge" }
+        ]
+      },
+      {
+        "name": "Acılık",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Acısız", "price_mode": "sets_base" },
+          { "name": "Acılı", "price_mode": "sets_base" }
+        ]
+      }
+    ],
+    "removable_ingredients": [],
+    "extra_ingredients": [],
+    "tags": ["içecek", "fermente", "soğuk"],
+    "allergen_notes": ["Gluten (bulgur ekşisi)"],
+    "upsell_suggestion": "Adana veya Urfa kebabın yanına önerilebilir.",
+    "confidence": 0.95
+  },
+  "kiymali kasarli pide": {
+    "name": "Kıymalı Kaşarlı Pide",
+    "description": "Tekne hamur üzerine soğanlı kıyma harcı ve kaşar peyniri konup taş fırında pişirilir; tereyağı sürülerek servis edilir.",
+    "serving_note": "Sıcak servis; dilimlenmiş olarak kutuda, yeşillikle.",
+    "portion_info": "1 adet ~35 cm",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Küçük", "price_mode": "sets_base" },
+          { "name": "Normal", "price_mode": "sets_base" },
+          { "name": "Büyük", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Yumurta",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Yumurtasız", "price_mode": "free" },
+          { "name": "Yumurtalı", "price_mode": "surcharge" }
+        ]
+      },
+      {
+        "name": "Pişirme",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Normal", "price_mode": "free" },
+          { "name": "Az Pişmiş", "price_mode": "free" },
+          { "name": "Kıtır", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Soğan", "Biber", "Tereyağı"],
+    "extra_ingredients": [{ "name": "Ekstra Kaşar", "price_delta_hint": "ek ücretli" }],
+    "tags": ["kırmızı et", "peynirli", "fırın"],
+    "allergen_notes": ["Gluten (hamur)", "Süt ürünü (kaşar)"],
+    "upsell_suggestion": "Yanına ayran önerilebilir.",
+    "confidence": 0.9
+  },
+  "ispanakli pide": {
+    "name": "Ispanaklı Pide",
+    "description": "Tekne hamur üzerine soğanla kavrulmuş ıspanak ve beyaz peynir konup taş fırında pişirilir; dilimlenerek servis edilir.",
+    "serving_note": "Sıcak servis; dilimlenmiş olarak kutuda.",
+    "portion_info": "1 adet ~35 cm",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Küçük", "price_mode": "sets_base" },
+          { "name": "Normal", "price_mode": "sets_base" },
+          { "name": "Büyük", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Peynir",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Beyaz Peynirli", "price_mode": "free" },
+          { "name": "Kaşarlı", "price_mode": "surcharge" },
+          { "name": "Peynirsiz", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Soğan", "Peynir"],
+    "extra_ingredients": [{ "name": "Yumurta", "price_delta_hint": "ek ücretli" }],
+    "tags": ["vejetaryen", "fırın"],
+    "allergen_notes": ["Gluten (hamur)", "Süt ürünü (peynir)"],
+    "upsell_suggestion": "Yanına ayran önerilebilir.",
+    "confidence": 0.88
+  },
+  "tahinli pide": {
+    "name": "Tahinli Pide",
+    "description": "Açılan hamura tahin ve şeker sürülüp rulo yapılır, fırında kızartılır; çay yanında tatlı atıştırmalık olarak servis edilir.",
+    "serving_note": "Ilık servis; kağıt torbada.",
+    "portion_info": "1 adet",
+    "option_groups": [
+      {
+        "name": "Adet",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "1 Adet", "price_mode": "sets_base" },
+          { "name": "3 Adet", "price_mode": "sets_base" },
+          { "name": "6 Adet", "price_mode": "sets_base" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Susam"],
+    "extra_ingredients": [{ "name": "Ekstra Tahin", "price_delta_hint": "ek ücretli" }],
+    "tags": ["tatlı", "hamur işi"],
+    "allergen_notes": ["Gluten", "Susam"],
+    "upsell_suggestion": "Yanına çay önerilebilir.",
+    "confidence": 0.82
+  },
+  "coban salata": {
+    "name": "Çoban Salata",
+    "description": "Domates, salatalık, biber, soğan ve maydanoz küp doğranır; zeytinyağı, limon ve sumakla harmanlanarak servis edilir.",
+    "serving_note": "Soğuk servis; kapaklı kapta, sos ayrı.",
+    "portion_info": "1 porsiyon ~250 g",
+    "option_groups": [
+      {
+        "name": "Porsiyon",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Yarım Porsiyon", "price_mode": "sets_base" },
+          { "name": "1 Porsiyon", "price_mode": "sets_base" },
+          { "name": "Paylaşımlık", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Sos",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Zeytinyağı & Limon", "price_mode": "free" },
+          { "name": "Nar Ekşili", "price_mode": "free" },
+          { "name": "Sossuz", "price_mode": "free" },
+          { "name": "Sos Ayrı", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Soğan", "Biber", "Maydanoz", "Sumak"],
+    "extra_ingredients": [{ "name": "Beyaz Peynir", "price_delta_hint": "ek ücretli" }],
+    "tags": ["vegan", "salata"],
+    "allergen_notes": [],
+    "upsell_suggestion": "Kebap ve pide siparişlerinin yanına önerilebilir.",
+    "confidence": 0.95
+  },
+  "kola": {
+    "name": "Kola",
+    "description": "Gazlı kola içeceği; kutu veya şişe seçenekleriyle soğuk olarak servis edilir.",
+    "serving_note": "Soğuk servis; kapalı kutu veya şişe.",
+    "portion_info": "1 adet 330 ml",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Kutu (330 ml)", "price_mode": "sets_base" },
+          { "name": "Şişe (1 L)", "price_mode": "sets_base" },
+          { "name": "Şişe (2,5 L)", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Çeşit",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Normal", "price_mode": "free" },
+          { "name": "Şekersiz", "price_mode": "free" },
+          { "name": "Light", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": [],
+    "extra_ingredients": [],
+    "tags": ["içecek", "gazlı"],
+    "allergen_notes": [],
+    "upsell_suggestion": "Pizza ve burger siparişlerine eklenebilir.",
+    "confidence": 0.96
+  },
+  "kazandibi": {
+    "name": "Kazandibi",
+    "description": "Tavuk göğüslü muhallebinin tabanı tepside karamelize edilir, rulo kesilip tarçınla soğuk olarak servis edilir.",
+    "serving_note": "Soğuk servis; kapaklı kapta, tarçın ayrı.",
+    "portion_info": "1 porsiyon ~180 g",
+    "option_groups": [
+      {
+        "name": "Porsiyon",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "1 Porsiyon", "price_mode": "sets_base" },
+          { "name": "Duble", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Dondurma",
+        "selection_type": "single",
+        "is_required": false,
+        "min_select": 0,
+        "max_select": 1,
+        "options": [
+          { "name": "Dondurmasız", "price_mode": "free" },
+          { "name": "Kaymaklı Dondurma", "price_mode": "surcharge" },
+          { "name": "Fıstıklı Dondurma", "price_mode": "surcharge" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Tarçın"],
+    "extra_ingredients": [{ "name": "Dondurma", "price_delta_hint": "ek ücretli" }],
+    "tags": ["tatlı", "sütlü", "soğuk"],
+    "allergen_notes": ["Süt ürünü", "Gluten (pirinç unu karışımına göre)"],
+    "upsell_suggestion": "Yanına Türk kahvesi önerilebilir.",
+    "confidence": 0.9
+  },
+  "trilece": {
+    "name": "Trileçe",
+    "description": "Üç çeşit sütle ıslatılmış pandispanya, karamel sosla kaplanarak soğuk servis edilir.",
+    "serving_note": "Soğuk servis; kapaklı plastik kapta.",
+    "portion_info": "1 dilim ~200 g",
+    "option_groups": [
+      {
+        "name": "Sos",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Karamel", "price_mode": "free" },
+          { "name": "Çikolata", "price_mode": "free" },
+          { "name": "Frambuaz", "price_mode": "surcharge" },
+          { "name": "Fıstık", "price_mode": "surcharge" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Karamel Sos"],
+    "extra_ingredients": [],
+    "tags": ["tatlı", "sütlü", "soğuk"],
+    "allergen_notes": ["Süt ürünü", "Gluten", "Yumurta"],
+    "upsell_suggestion": "Yanına Türk kahvesi önerilebilir.",
+    "confidence": 0.9
+  },
+  "cay": {
+    "name": "Çay",
+    "description": "Demlikte demlenen siyah çay; ince belli bardakta veya karton bardakta sıcak servis edilir.",
+    "serving_note": "Sıcak servis; kapaklı karton bardakta, şeker ayrı.",
+    "portion_info": "1 bardak",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Küçük", "price_mode": "sets_base" },
+          { "name": "Büyük", "price_mode": "sets_base" },
+          { "name": "Termos (1 L)", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Demleme",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Açık", "price_mode": "free" },
+          { "name": "Normal", "price_mode": "free" },
+          { "name": "Tavşan Kanı", "price_mode": "free" },
+          { "name": "Koyu", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": [],
+    "extra_ingredients": [{ "name": "Limon Dilimi", "price_delta_hint": "ücretsiz" }],
+    "tags": ["içecek", "sıcak"],
+    "allergen_notes": [],
+    "upsell_suggestion": "Tatlı veya börek siparişlerine eklenebilir.",
+    "confidence": 0.96
+  },
+  "limonata": {
+    "name": "Limonata",
+    "description": "Taze sıkılmış limon, şeker ve nane ile hazırlanır; buzlu ve soğuk olarak servis edilir.",
+    "serving_note": "Soğuk servis; kapaklı bardakta, buz ayrı.",
+    "portion_info": "1 bardak ~400 ml",
+    "option_groups": [
+      {
+        "name": "Boy",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Orta", "price_mode": "sets_base" },
+          { "name": "Büyük", "price_mode": "sets_base" }
+        ]
+      },
+      {
+        "name": "Çeşit",
+        "selection_type": "single",
+        "is_required": true,
+        "min_select": 1,
+        "max_select": 1,
+        "options": [
+          { "name": "Klasik", "price_mode": "free" },
+          { "name": "Naneli", "price_mode": "free" },
+          { "name": "Çilekli", "price_mode": "surcharge" },
+          { "name": "Şekersiz", "price_mode": "free" }
+        ]
+      }
+    ],
+    "removable_ingredients": ["Nane", "Buz"],
+    "extra_ingredients": [],
+    "tags": ["içecek", "soğuk"],
+    "allergen_notes": [],
+    "upsell_suggestion": "Tatlı siparişlerinin yanına önerilebilir.",
+    "confidence": 0.93
+  }
+}

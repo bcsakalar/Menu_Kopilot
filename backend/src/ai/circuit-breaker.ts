@@ -83,4 +83,8 @@ export class CircuitBreaker {
     const entry = this.entries.get(key);
     if (entry) entry.trialInFlight = false;
   }
+
+  reset(): void {
+    this.entries.clear();
+  }
 }

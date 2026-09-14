@@ -1,0 +1,148 @@
+{
+  "menus": [
+    {
+      "file": "menu-kebapci.jpg",
+      "title": "ÖRNEK OCAKBAŞI",
+      "subtitle": "Kebap • Pide • Tatlı",
+      "sections": [
+        {
+          "name": "KEBAPLAR",
+          "items": [
+            ["Adana Kebap", "320 TL"],
+            ["Urfa Kebap", "320 TL"],
+            ["Beyti Sarma", "360 TL"],
+            ["Ali Nazik", "380 TL"],
+            ["Tavuk Şiş", "260 TL"]
+          ]
+        },
+        {
+          "name": "PİDE & LAHMACUN",
+          "items": [
+            ["Lahmacun", "90 TL"],
+            ["Kıymalı Pide", "210 TL"],
+            ["Kaşarlı Pide", "200 TL"]
+          ]
+        },
+        {
+          "name": "ARA SICAKLAR",
+          "items": [
+            ["İçli Köfte (2 adet)", "70 TL"],
+            ["Humus", "110 TL"]
+          ]
+        },
+        {
+          "name": "TATLILAR",
+          "items": [
+            ["Künefe", "180 TL"],
+            ["Katmer", "170 TL"]
+          ]
+        },
+        {
+          "name": "İÇECEKLER",
+          "items": [
+            ["Ayran", "40 TL"],
+            ["Şalgam", "45 TL"],
+            ["Türk Kahvesi", "60 TL"]
+          ]
+        }
+      ]
+    },
+    {
+      "file": "menu-pideci.jpg",
+      "title": "KARADENİZ PİDE SALONU",
+      "subtitle": "Taş fırından",
+      "sections": [
+        {
+          "name": "PİDELER",
+          "items": [
+            ["Kıymalı Kaşarlı Pide", "240 TL"],
+            ["Kuşbaşılı Pide", "260 TL"],
+            ["Karışık Pide", "250 TL"],
+            ["Sucuklu Yumurtalı Pide", "230 TL"],
+            ["Ispanaklı Pide", "190 TL"],
+            ["Tahinli Pide", "120 TL"]
+          ]
+        },
+        {
+          "name": "LAHMACUN",
+          "items": [
+            ["Fındık Lahmacun", "70 TL"],
+            ["Acılı Lahmacun", "95 TL"]
+          ]
+        },
+        {
+          "name": "YANINDA",
+          "items": [
+            ["Çoban Salata", "80 TL"],
+            ["Ayran", "40 TL"],
+            ["Kola", "50 TL"]
+          ]
+        }
+      ]
+    },
+    {
+      "file": "menu-tatli-kafe.jpg",
+      "title": "TATLI & KAHVE EVİ",
+      "subtitle": "Günlük taze",
+      "sections": [
+        {
+          "name": "TATLILAR",
+          "items": [
+            ["Künefe", "190 TL"],
+            ["Fıstıklı Baklava", "260 TL"],
+            ["Fırın Sütlaç", "110 TL"],
+            ["Kazandibi", "120 TL"],
+            ["Trileçe", "130 TL"]
+          ]
+        },
+        {
+          "name": "SICAK İÇECEKLER",
+          "items": [
+            ["Türk Kahvesi", "70 TL"],
+            ["Çay", "25 TL"]
+          ]
+        },
+        {
+          "name": "SOĞUK İÇECEKLER",
+          "items": [
+            ["Limonata", "80 TL"],
+            ["Ayran", "40 TL"]
+          ]
+        }
+      ]
+    }
+  ],
+  "panelColumns": ["Ürün Adı", "Kategori", "Açıklama", "Opsiyonlar", "Çıkarılabilir", "Fiyat"],
+  "panelEmptyText": "(boş)",
+  "panels": [
+    {
+      "file": "panel-1.png",
+      "title": "Restoran Paneli — Ürünler (1/2)",
+      "cutLastRow": true,
+      "rows": [
+        { "name": "Adana Kebap", "category": "Kebaplar", "description": "Acılı kuzu kıyma, közde; lavaş ile", "options": "3 grup", "removables": "—", "price": "320,00" },
+        { "name": "Urfa Kebap", "category": "Kebaplar", "description": "Acısız kuzu kıyma, közde", "options": "—", "removables": "—", "price": "320,00" },
+        { "name": "Tavuk Şiş", "category": "Kebaplar", "description": "", "options": "2 grup", "removables": "", "price": "260,00" },
+        { "name": "Lahmacun", "category": "Pide & Lahmacun", "description": "", "options": "—", "removables": "—", "price": "90,00" },
+        { "name": "Kıymalı Pide", "category": "Pide & Lahmacun", "description": "Kıymalı harç, taş fırın", "options": "2 grup", "removables": "Soğan, Biber", "price": "210,00" },
+        { "name": "Karışık Pide", "category": "Pide & Lahmacun", "description": "", "options": "1 grup", "removables": "—", "price": "250,00" },
+        { "name": "Ayran", "category": "İçecekler", "description": "Açık ayran", "options": "—", "removables": "—", "price": "40,00" }
+      ]
+    },
+    {
+      "file": "panel-2.png",
+      "title": "Restoran Paneli — Ürünler (2/2)",
+      "cutLastRow": false,
+      "rows": [
+        { "name": "Kıymalı Pide", "category": "Pide & Lahmacun", "description": "Kıymalı harç, taş fırın", "options": "2 grup", "removables": "Soğan, Biber", "price": "210,00" },
+        { "name": "Karışık Pide", "category": "Pide & Lahmacun", "description": "", "options": "1 grup", "removables": "—", "price": "250,00" },
+        { "name": "Ayran", "category": "İçecekler", "description": "Açık ayran", "options": "—", "removables": "—", "price": "40,00" },
+        { "name": "Künefe", "category": "Tatlılar", "description": "", "options": "—", "removables": "—", "price": "180,00" },
+        { "name": "Mercimek Çorbası", "category": "Çorbalar", "description": "Süzme kırmızı mercimek", "options": "—", "removables": "—", "price": "90,00" },
+        { "name": "İçli Köfte", "category": "Ara Sıcaklar", "description": "", "options": "—", "removables": "—", "price": "70,00" },
+        { "name": "Şalgam", "category": "İçecekler", "description": "Adana şalgamı", "options": "2 grup", "removables": "—", "price": "45,00" },
+        { "name": "Çoban Salata", "category": "Salatalar", "description": "", "options": "—", "removables": "Soğan", "price": "80,00" }
+      ]
+    }
+  ]
+}

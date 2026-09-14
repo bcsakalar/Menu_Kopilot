@@ -162,7 +162,9 @@ export class AiRouter {
       });
       last = result;
       const tokensIn = result.meta.tokensIn > 0 ? result.meta.tokensIn : estimate;
-      ctx.budget?.charge(tokensIn, result.meta.tokensOut);
+      // Only calls the model actually processed count toward the per-request budget (a 503 or 429 costs nothing).
+      const processed = result.ok || result.error.kind === 'invalid_output' || result.meta.tokensOut > 0;
+      if (processed) ctx.budget?.charge(tokensIn, result.meta.tokensOut);
       await this.deps.usage.log({
         userId: ctx.userId,
         runId: ctx.runId,

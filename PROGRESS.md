@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 2 done.
+Last update: 2026-09-15 — Faz 3 done.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -16,18 +16,29 @@ Last update: 2026-09-15 — Faz 2 done.
       (12 cuisines + 40 templates, `source='seed'`), `pnpm db:export-seed`
 - [x] **Faz 2** — AI layer: provider interface, Gemini + Groq adapters, router, retry/circuit breaker,
       prompt templates repo, usage_log, smoke tests
-- [ ] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
+- [x] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
 - [ ] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
 - [ ] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
 - [ ] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 2 complete. Next: Faz 3 — `/suggest` pipeline (`src/modules/suggest/`): prompt-parse, Stage A (vision extract,
-one image per call, extraction cache), Stage B (exact → alias → trigram → vector, approved only), Stage B′
-canonicalize (gated), Stage C (enrich batches [3, ≤10], few-shot), Stage D (sanitize → item-level Zod → one repair →
-needs_review), Stage E (SSE), run manager (cancel/continue/snapshot/async), accept/skip, BullMQ embedding jobs,
-Redis cache, fixture images (`scripts/generate-fixture-images.ps1`) + recorded fixtures + e2e.
+Faz 3 complete. Next: Faz 4 — Flutter app in `mobile/` (flutter create, packages via `flutter pub add`, l10n
+`app_tr.arb`, theme, go_router with auth redirect, Dio + auth/retry interceptors, SSE client/parser, Drift offline
+cache + pending request queue, login, home (cuisine picker, prompt, camera multi-shot + gallery, compression),
+results screen (streaming cards, badges, copy, inline edit, accept/skip, cancel, "Devam et")).
+
+### Faz 3 inventory (backend/src)
+- `modules/suggest/`: `schemas.ts` (LLM schemas, CardDto, RunDto, events), `prompt-parse.ts`, `sanitize.ts`,
+  `canonicalize.ts`, `enrichment.ts`, `pipeline.ts`, `store.ts`, `run-registry.ts`, `service.ts` (start/continue/
+  cancel/snapshot/accept/skip), `routes.ts`.
+- `modules/retrieval/` (`retrieval.service.ts`, `cuisine-graph.ts`), `modules/extraction/vision-extractor.ts`,
+  `modules/branches/branch-menu.ts`, `jobs/{embedding.service,queue}.ts`, `lib/{sse,uploads,images,trigram,clean-name,concurrency}.ts`.
+- API: `POST /api/v1/suggest` (multipart/JSON; SSE | `?async=1` | sync), `GET /suggest/:runId`,
+  `GET /suggest/:runId/events`, `POST /suggest/:runId/cancel`, `POST /suggest/:runId/continue`,
+  `POST /suggestion-items/:id/accept|skip`. SSE contract: `docs/SSE_EVENTS.md`.
+- Fixtures: `test/fixtures/images/*` (3 menus + 2 panels, generated), `test/fixtures/llm/*` (recorded stand-ins).
+- Tests: 211 passing incl. `test/e2e/suggest.e2e.test.ts` (14 scenarios).
 
 ### Faz 2 inventory (backend/src/ai/)
 - `types.ts` (LLMProvider — spec signature + optional extensions), `errors.ts` (ProviderError kinds),
@@ -65,15 +76,15 @@ Redis cache, fixture images (`scripts/generate-fixture-images.ps1`) + recorded f
 |---|---|---|
 | 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ⏳ files done, `.env.example` sync tested; run blocked by Docker Desktop (D-056) |
 | 2 | No provider key in Flutter (grep) | ⏳ |
-| 3 | 40 seed items → `/suggest` with zero LLM calls | ⏳ (seed done) |
-| 4 | Photo → editable cards, first card < 6 s (15 items) | ⏳ |
+| 3 | 40 seed items → `/suggest` with zero LLM calls | ✅ e2e (`llmCalls=0`, usage_log unchanged, cache_hit) |
+| 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
 | 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ⏳ |
 | 6 | Same item in two screenshots counted once | ⏳ |
-| 7 | No TL amounts; `sets_base` correct | ◐ schema + seed enforced; pipeline pending |
-| 8 | Descriptions ≤ 160 chars (schema-enforced) | ◐ Zod + DB CHECK done; pipeline pending |
-| 9 | Provider down → fallback keeps working | ◐ router tests (500 / missing key / auth / 429 / circuit) pass; pipeline e2e pending |
-| 10 | Broken JSON → item `needs_review`, request survives | ⏳ |
-| 11 | Approved item served from DB on second query (`cache_hit=true`) | ⏳ |
+| 7 | No TL amounts; `sets_base` correct | ✅ sanitizer + Zod refine + e2e (flawed fixtures fixed) |
+| 8 | Descriptions ≤ 160 chars (schema-enforced) | ✅ Zod `.max(160)` + DB CHECK + clamp; e2e |
+| 9 | Provider down → fallback keeps working | ✅ router tests + e2e (Gemini 503 → Groq vision; Groq key removed → Gemini enrich) |
+| 10 | Broken JSON → item `needs_review`, request survives | ✅ e2e (one repair, then review cards, run completed) |
+| 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ⏳ |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ⏳ |
 | 14 | DECISIONS.md lists all assumptions | ◐ ongoing |

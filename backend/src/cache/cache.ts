@@ -58,8 +58,12 @@ export class MemoryCache implements Cache {
     return Promise.resolve();
   }
 
-  /** Test helper. */
+  /** Test helpers. */
   keys(): string[] {
     return [...this.store.keys()];
+  }
+
+  clear(): void {
+    this.store.clear();
   }
 }
