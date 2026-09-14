@@ -1,0 +1,5 @@
+# pnpm 11 settings for this single-package project.
+allowBuilds:
+  esbuild: true
+  # Optional native accelerator for msgpackr (BullMQ); pure-JS fallback is fine.
+  msgpackr-extract: false

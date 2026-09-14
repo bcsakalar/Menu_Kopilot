@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+exports
+test
+scripts
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
+eslint.config.js
+vitest*.config.ts
+drizzle.config.ts

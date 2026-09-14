@@ -1,0 +1,17 @@
+# SITE_ADDRESS=api.example.com → automatic HTTPS (Let's Encrypt). Default ":80" = plain HTTP for local use.
+{$SITE_ADDRESS::80} {
+	request_body {
+		max_size 45MB
+	}
+
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+	}
+
+	# flush_interval -1 → no buffering, so SSE cards reach the phone as soon as they are produced.
+	reverse_proxy api:3000 {
+		flush_interval -1
+	}
+}
