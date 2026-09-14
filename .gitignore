@@ -1,0 +1,30 @@
+# Node / backend
+node_modules/
+.pnpm-store/
+backend/dist/
+backend/coverage/
+backend/exports/
+backend/test/.tmp/
+*.log
+*.tsbuildinfo
+
+# Env & secrets (never commit provider keys or signing material)
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+key.properties
+
+# Flutter / Dart (mobile/.gitignore from `flutter create` covers the rest)
+mobile/.dart_tool/
+mobile/build/
+mobile/coverage/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
