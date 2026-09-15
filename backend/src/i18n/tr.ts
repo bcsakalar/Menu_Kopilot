@@ -14,6 +14,8 @@ export const TASK_LABELS: Readonly<Record<TaskKey, string>> = {
   'text.gap_suggest': 'Eksik ürün önerisi',
   'deep.analyze': 'Derin analiz',
   embed: 'Anlamsal arama (embedding)',
+  'audio.transcribe': 'Sesli not (konuşmayı yazıya çevirme)',
+  'research.web': 'Restoranı internette araştırma',
 };
 
 /** "a" · "a ve b" · "a, b ve c" */

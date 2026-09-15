@@ -29,6 +29,7 @@ const routeParamsSchema = z
     reasoningEffort: z.string().optional(),
     temperature: z.number().optional(),
     dim: z.number().int().positive().optional(),
+    enabledTools: z.array(z.string()).optional(),
   })
   .catch({});
 
@@ -42,6 +43,7 @@ function cleanParams(raw: unknown): RouteParams {
   if (parsed.reasoningEffort !== undefined) out.reasoningEffort = parsed.reasoningEffort;
   if (parsed.temperature !== undefined) out.temperature = parsed.temperature;
   if (parsed.dim !== undefined) out.dim = parsed.dim;
+  if (parsed.enabledTools !== undefined) out.enabledTools = parsed.enabledTools;
   return out;
 }
 

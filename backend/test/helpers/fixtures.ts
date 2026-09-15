@@ -8,11 +8,19 @@ import { type FakeReply, type FakeResponder, okJson } from './fake-provider.js';
 
 const FIXTURES = fileURLToPath(new URL('../fixtures/', import.meta.url));
 
+export interface ResearchFixture {
+  restaurant: string;
+  sources: { title: string; url: string }[];
+  response: unknown;
+}
+
 export interface Fixtures {
   images: Map<string, ImageInput>;
   extractBySha: Map<string, unknown>;
   panelBySha: Map<string, unknown>;
   enrichItems: Record<string, unknown>;
+  /** Keyed by normalizeTr(restaurant name). */
+  research: Map<string, ResearchFixture>;
 }
 
 function readJson(path: string): unknown {
@@ -42,7 +50,14 @@ export function loadFixtures(): Fixtures {
     }
   }
   const enrichItems = readJson(join(FIXTURES, 'llm', 'enrich-items.json')) as Record<string, unknown>;
-  return { images, extractBySha, panelBySha, enrichItems };
+  const research = new Map<string, ResearchFixture>();
+  const researchDir = join(FIXTURES, 'llm', 'research');
+  for (const file of readdirSync(researchDir)) {
+    if (!file.endsWith('.json')) continue;
+    const fixture = readJson(join(researchDir, file)) as ResearchFixture;
+    research.set(normalizeTr(fixture.restaurant), fixture);
+  }
+  return { images, extractBySha, panelBySha, enrichItems, research };
 }
 
 export function fixtureImage(fx: Fixtures, file: string): ImageInput {
@@ -121,8 +136,17 @@ export function fixtureResponder(fx: Fixtures, options: FixtureResponderOptions 
         }
         return okJson({ items });
       }
+      case 'research.web': {
+        const name = /^Restoran: (.+)$/mu.exec(opts.user)?.[1] ?? '';
+        const recorded = fx.research.get(normalizeTr(name));
+        if (!recorded) {
+          return okJson({ found: false, summary: '', cuisine: null, items: [], sources: [], confidence: 0.1 });
+        }
+        return { ...okJson(recorded.response), sources: recorded.sources };
+      }
       case 'text.gap_suggest':
       case 'embed':
+      case 'audio.transcribe':
         return okJson({ items: [] });
     }
   };

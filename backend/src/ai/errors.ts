@@ -1,4 +1,5 @@
 import type { ProviderName } from '../config/models.js';
+import { AppError } from '../lib/errors.js';
 
 export type ProviderErrorKind =
   | 'rate_limited'
@@ -56,6 +57,32 @@ export function kindForStatus(status: number): ProviderErrorKind {
   if (status === 408 || status === 504) return 'timeout';
   if (status >= 500) return 'unavailable';
   return 'bad_request';
+}
+
+/**
+ * HTTP error for endpoints that are nothing but one AI call (voice note, research): there is no DB-only answer to
+ * fall back to, so the reason is reported. `action` completes "… şu an yapılamıyor".
+ */
+export function providerFailure(error: ProviderError, action: string): AppError {
+  switch (error.kind) {
+    case 'local_only':
+      return new AppError('LOCAL_ONLY_MODE', `Yerel mod açık: ${action} için dış servis kullanılmıyor`);
+    case 'quota_exceeded':
+      return new AppError('QUOTA_EXCEEDED', 'Günlük AI kotası doldu; yarın tekrar dene');
+    case 'bad_request':
+    case 'unsupported':
+    case 'content_blocked':
+      return new AppError('VALIDATION_ERROR', `${action} yapılamadı: istek sağlayıcı tarafından reddedildi`, { kind: error.kind });
+    case 'rate_limited':
+    case 'unavailable':
+    case 'timeout':
+    case 'auth':
+    case 'not_configured':
+    case 'invalid_output':
+    case 'budget_exceeded':
+    case 'aborted':
+      return new AppError('PROVIDER_UNAVAILABLE', `${action} şu an yapılamıyor; biraz sonra tekrar dene`, { kind: error.kind });
+  }
 }
 
 /** Errors that say nothing about the provider's health and should not trip the circuit breaker. */

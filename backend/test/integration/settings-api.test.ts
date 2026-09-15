@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { MODELS } from '../../src/config/models.js';
+import { MODELS, TASK_KEYS } from '../../src/config/models.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
 
 interface TaskDto {
@@ -25,7 +25,11 @@ describe('settings & prompts API', () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/settings/providers', headers: bearer(token) });
     expect(res.statusCode).toBe(200);
     const body = res.json<{ tasks: TaskDto[]; providers: { name: string; configured: boolean }[] }>();
-    expect(body.tasks).toHaveLength(7);
+    expect(body.tasks).toHaveLength(TASK_KEYS.length);
+    expect(body.tasks.find((t) => t.taskKey === 'audio.transcribe')?.chain.map((c) => c.id)).toEqual([
+      MODELS.groqWhisperTurbo,
+      MODELS.groqWhisper,
+    ]);
     const vision = body.tasks.find((t) => t.taskKey === 'vision.menu_extract');
     expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.geminiFlash, MODELS.groqQwen38, MODELS.groqQwen36]);
     expect(vision?.eligibleModels.map((m) => m.id)).not.toContain(MODELS.groqGptOss120b);

@@ -4,13 +4,15 @@ import type { ParsedName } from './schemas.js';
 
 /**
  * Free text → product names without any LLM ("adana kebap, lahmacun, künefe var" → 3 names).
- * Splits on lines, commas, semicolons, slashes, "+" and the conjunctions "ve"/"ile"; strips filler words.
+ * Splits on lines, commas, semicolons, slashes, "+", sentence ends (dictated voice notes) and the conjunctions
+ * "ve"/"ile"; strips filler words ("… da yapıyorlar", "bir de …").
  */
 
-const SPLIT = /\r?\n|[,;/+•·]|\s+ve\s+|\s+ile\s+|\s+&\s+/giu;
+const SPLIT = /\r?\n|[,;/+•·]|(?<=\p{L})[.!?]\s+|\s+ve\s+|\s+ile\s+|\s+&\s+/giu;
 const TRAILING_FILLER =
-  /\s+(?:da|de)?\s*(?:var(?:dır)?|mevcut|satıyoruz|satılıyor|yapıyoruz|yapılıyor|olacak|lazım|istiyorum|eklenecek)\s*[.!]*$/iu;
-const LEADING_FILLER = /^(?:bir de|ayrıca|menüde|menüye|menümüzde|ve|ile|ek olarak|bunlara ek olarak|bir|birde)\s+/iu;
+  /\s+(?:da|de)?\s*(?:var(?:dır|mış)?|mevcut|satıyoruz|satıyorlar|satılıyor|yapıyoruz|yapıyorlar|yapılıyor|bulunuyor|veriyorlar|olacak|lazım|istiyorum|eklenecek)\s*[.!]*$/iu;
+const LEADING_FILLER =
+  /^(?:bir de|ayrıca|menüde|menüye|menümüzde|menülerinde|bizde|onlarda|ve|ile|ek olarak|bunlara ek olarak|bir|birde)\s+/iu;
 
 export const MAX_PROMPT_ITEMS = 60;
 

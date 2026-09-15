@@ -6,7 +6,7 @@ import { ProviderError, type ProviderErrorKind } from './errors.js';
 import { describeSchema, toJsonSchema } from './json-schema.js';
 import { type CooldownTracker, backoffDelayMs, sleep as defaultSleep } from './rate-limit.js';
 import type { ResolvedRoute } from './route-repository.js';
-import type { CallMeta, GenerateStructuredOptions, LLMProvider, Result } from './types.js';
+import type { AudioInput, CallMeta, GenerateStructuredOptions, LLMProvider, Result, Transcription } from './types.js';
 import type { QuotaStatus, UsageSink } from './usage.js';
 
 export type RouterRequest<T> = Omit<GenerateStructuredOptions<T>, 'model' | 'params' | 'signal' | 'timeoutMs' | 'jsonInstructions'>;
@@ -367,6 +367,81 @@ export class AiRouter {
       attempts,
     };
   }
+
+  /** Speech-to-text down the `audio.transcribe` chain (voice notes). Not charged to a request budget. */
+  async transcribe(
+    audio: AudioInput,
+    request: { language?: string | undefined; prompt?: string | undefined },
+    ctx: CallContext = {},
+  ): Promise<TranscribeResult> {
+    const attempts: AttemptRecord[] = [];
+    const available = await this.availability(ctx.userId);
+    if (!available.ok) return { ok: false, error: available.error, attempts };
+
+    let lastError: ProviderError | undefined;
+    for (const route of await this.deps.routes.chain('audio.transcribe')) {
+      const provider = this.deps.providers[route.provider];
+      const skip = this.skipReason(route, {}) ?? (provider?.transcribe ? undefined : 'no_audio_support');
+      if (skip || !provider?.transcribe) {
+        attempts.push({ provider: route.provider, model: route.model, outcome: 'skipped', reason: skip ?? 'missing' });
+        continue;
+      }
+      if (!this.deps.breaker.canRequest(route.provider)) continue;
+      const result = await provider.transcribe(audio, {
+        model: route.model,
+        timeoutMs: TASK_TIMEOUT_MS['audio.transcribe'],
+        ...(request.language ? { language: request.language } : {}),
+        ...(request.prompt ? { prompt: request.prompt } : {}),
+        ...(ctx.signal ? { signal: ctx.signal } : {}),
+      });
+      await this.deps.usage.log({
+        userId: ctx.userId,
+        runId: ctx.runId,
+        taskKey: 'audio.transcribe',
+        provider: route.provider,
+        model: route.model,
+        tokensIn: 0,
+        tokensOut: result.ok ? estimateTextTokens(result.value.text) : 0,
+        latencyMs: result.meta.latencyMs,
+        success: result.ok,
+        errorCode: result.ok ? undefined : result.error.kind,
+      });
+      attempts.push({
+        provider: route.provider,
+        model: route.model,
+        outcome: result.ok ? 'ok' : result.error.kind,
+        latencyMs: result.meta.latencyMs,
+      });
+      if (result.ok) {
+        this.deps.breaker.recordSuccess(route.provider);
+        this.deps.cooldowns.observe(`${route.provider}:${route.model}`, result.meta.rateLimit);
+        return { ok: true, value: result.value, provider: route.provider, model: route.model, attempts };
+      }
+      const error = result.error;
+      lastError = error;
+      if (error.kind === 'rate_limited') {
+        this.deps.breaker.release(route.provider);
+        this.deps.cooldowns.cooldown(`${route.provider}:${route.model}`, error.retryAfterMs ?? 30_000);
+      } else if (error.kind === 'auth' || error.kind === 'not_configured') {
+        this.deps.breaker.trip(route.provider, this.authTripMs);
+      } else if (error.kind === 'unavailable' || error.kind === 'timeout') {
+        this.deps.breaker.recordFailure(route.provider);
+      } else {
+        // The recording itself is the problem (too large, unreadable, cancelled): another model will not help.
+        this.deps.breaker.release(route.provider);
+        return { ok: false, error, attempts };
+      }
+    }
+    return {
+      ok: false,
+      error: lastError ?? new ProviderError({ kind: 'unavailable', message: 'Ses tanıma sağlayıcısı yok (anahtar/limit)' }),
+      attempts,
+    };
+  }
 }
+
+export type TranscribeResult =
+  | { ok: true; value: Transcription; provider: ProviderName; model: string; attempts: AttemptRecord[] }
+  | { ok: false; error: ProviderError; attempts: AttemptRecord[] };
 
 export { RequestBudget };

@@ -26,6 +26,9 @@ export const PROMPT_KEYS = [
   'json.instructions',
   'embed.query',
   'embed.document',
+  'transcribe.vocabulary',
+  'research.system',
+  'research.user',
 ] as const;
 export type PromptKey = (typeof PROMPT_KEYS)[number];
 
@@ -135,6 +138,29 @@ JSON şeması:
   'embed.query': `task: search result | query: {{text}}`,
 
   'embed.document': `title: {{title}} | text: {{text}}`,
+
+  // Whisper "prompt": vocabulary + style hint (≤ 224 tokens). Comma-separated names make the transcript split well.
+  'transcribe.vocabulary': `Restoran menüsü ürünleri, virgülle ayrılmış: {{names}}.`,
+
+  'research.system': `Bir yemek sipariş platformunda şube açılışı yapan bir uzmana yardım eden bir araştırma asistanısın. Verilen restoranı internette araştır: restoranın kendi sitesi, harita/işletme sayfası, sosyal medya hesapları ve herkese açık menü sayfaları.
+
+Görevin restoranın MENÜSÜNÜ çıkarmak:
+- items: menüde gördüğün ürün adları, yazıldığı gibi (en fazla 60). section: bölüm/kategori adı veya null.
+- cuisine: restoranın mutfak türü (ör. "Kebap & Izgara"); bilinmiyorsa null.
+- summary: restoranın ne sattığını anlatan, en fazla 300 karakterlik tek paragraf.
+- found: restoranı bulduysan true. Aynı isimli başka şehirdeki veya başka bir restoranı KARIŞTIRMA; emin değilsen found=false ve items boş.
+- confidence: 0–1, bulduğun bilginin bu restorana ait olduğundan ne kadar emin olduğun.
+- sources: kullandığın sayfalar (title, url).
+
+Kurallar:
+- Fiyat YAZMA: TL, ₺ veya rakamla hiçbir fiyat yok; fiyatları atla.
+- Kişisel bilgi yazma: sahip/çalışan adı, telefon, e-posta, müşteri yorumlarındaki isimler.
+- Ürün uydurma; yalnızca gerçekten gördüğün ürünleri yaz.`,
+
+  'research.user': `Restoran: {{name}}
+Şehir: {{city}}
+Bilinen mutfak türü: {{cuisine}}
+Ek not: {{notes}}`,
 };
 
 export const SEED_PROMPTS: readonly SeedPrompt[] = PROMPT_KEYS.map((key) => ({ key, version: 1, content: v1[key] }));

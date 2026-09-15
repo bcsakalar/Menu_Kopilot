@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { GeminiProvider } from '../../src/ai/providers/gemini.provider.js';
 import { GroqProvider } from '../../src/ai/providers/groq.provider.js';
-import type { ImageInput } from '../../src/ai/types.js';
+import type { AudioInput, ImageInput } from '../../src/ai/types.js';
 import { parseEnv } from '../../src/config/env.js';
 import { MODELS } from '../../src/config/models.js';
 
@@ -116,4 +116,49 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
     if (!result.ok) throw result.error;
     expect(result.value.items.length).toBeGreaterThan(5);
   });
+
+  it.each([MODELS.groqWhisperTurbo, MODELS.groqWhisper])('%s accepts a recording (model ID + multipart check)', async (model) => {
+    const result = await provider.transcribe(toneWav(), { model, language: 'tr', prompt: 'Adana Kebap, Lahmacun', timeoutMs: 60_000 });
+    if (!result.ok) throw result.error;
+    // A pure tone has no words: only the call itself is verified here.
+    expect(typeof result.value.text).toBe('string');
+  });
+
+  it.each([MODELS.groqCompound, MODELS.groqCompoundMini])('%s searches the web and answers in JSON mode', async (model) => {
+    const result = await provider.generateStructured({
+      task: 'research.web',
+      schema: z.object({ found: z.boolean(), items: z.array(z.object({ name: z.string() })) }),
+      system: 'Restoranın menüsünü internette ara. Yalnızca {"found": boolean, "items": [{"name": string}]} biçiminde JSON döndür.',
+      user: 'Restoran: Hacı Abdullah Lokantası\nŞehir: İstanbul',
+      model,
+      params: { enabledTools: ['web_search'], maxOutputTokens: 2048 },
+      timeoutMs: 90_000,
+    });
+    if (!result.ok) throw result.error;
+    expect(result.meta.sources?.length ?? 0).toBeGreaterThan(0);
+  });
 });
+
+/** 1 s, 16 kHz mono PCM WAV with a 440 Hz tone (Whisper downsamples to 16 kHz mono anyway). */
+function toneWav(): AudioInput {
+  const rate = 16_000;
+  const samples = rate;
+  const data = Buffer.alloc(44 + samples * 2);
+  data.write('RIFF', 0, 'latin1');
+  data.writeUInt32LE(36 + samples * 2, 4);
+  data.write('WAVE', 8, 'latin1');
+  data.write('fmt ', 12, 'latin1');
+  data.writeUInt32LE(16, 16);
+  data.writeUInt16LE(1, 20);
+  data.writeUInt16LE(1, 22);
+  data.writeUInt32LE(rate, 24);
+  data.writeUInt32LE(rate * 2, 28);
+  data.writeUInt16LE(2, 32);
+  data.writeUInt16LE(16, 34);
+  data.write('data', 36, 'latin1');
+  data.writeUInt32LE(samples * 2, 40);
+  for (let i = 0; i < samples; i += 1) {
+    data.writeInt16LE(Math.round(Math.sin((2 * Math.PI * 440 * i) / rate) * 8000), 44 + i * 2);
+  }
+  return { data, mimeType: 'audio/wav', sha256: createHash('sha256').update(data).digest('hex'), fileName: 'tone.wav' };
+}

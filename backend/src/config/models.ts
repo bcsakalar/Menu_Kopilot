@@ -15,6 +15,8 @@ export const TASK_KEYS = [
   'text.gap_suggest',
   'deep.analyze',
   'embed',
+  'audio.transcribe',
+  'research.web',
 ] as const;
 export type TaskKey = (typeof TASK_KEYS)[number];
 
@@ -32,7 +34,9 @@ export const MODELS = {
   groqQwen38: 'qwen/qwen3.8-27b',
   groqQwen36: 'qwen/qwen3.6-27b',
   groqWhisperTurbo: 'whisper-large-v3-turbo',
+  groqWhisper: 'whisper-large-v3',
   groqCompound: 'groq/compound',
+  groqCompoundMini: 'groq/compound-mini',
 } as const;
 
 /**
@@ -50,7 +54,8 @@ export interface ModelSpec {
   id: string;
   provider: ProviderName;
   label: string;
-  kind: 'chat' | 'embedding' | 'audio';
+  /** compound = Groq agentic system with server-side web search (only for research). */
+  kind: 'chat' | 'embedding' | 'audio' | 'compound';
   vision: boolean;
   maxImages: number;
   /** Max total request size when images are inlined. */
@@ -187,11 +192,51 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     kind: 'audio',
     vision: false,
     maxImages: 0,
-    maxRequestBytes: 100 * MB,
+    // Free tier upload limit (dev tier: 100 MB).
+    maxRequestBytes: 25 * MB,
     imageTokens: null,
     structured: 'none',
     preview: false,
     maxOutputTokens: 0,
+  },
+  [MODELS.groqWhisper]: {
+    id: MODELS.groqWhisper,
+    provider: 'groq',
+    label: 'Whisper Large v3 (Groq)',
+    kind: 'audio',
+    vision: false,
+    maxImages: 0,
+    maxRequestBytes: 25 * MB,
+    imageTokens: null,
+    structured: 'none',
+    preview: false,
+    maxOutputTokens: 0,
+  },
+  [MODELS.groqCompound]: {
+    id: MODELS.groqCompound,
+    provider: 'groq',
+    label: 'Compound (Groq, web araması)',
+    kind: 'compound',
+    vision: false,
+    maxImages: 0,
+    maxRequestBytes: 20 * MB,
+    imageTokens: null,
+    structured: 'json_object',
+    preview: false,
+    maxOutputTokens: 8192,
+  },
+  [MODELS.groqCompoundMini]: {
+    id: MODELS.groqCompoundMini,
+    provider: 'groq',
+    label: 'Compound Mini (Groq, tek arama, hızlı)',
+    kind: 'compound',
+    vision: false,
+    maxImages: 0,
+    maxRequestBytes: 20 * MB,
+    imageTokens: null,
+    structured: 'json_object',
+    preview: false,
+    maxOutputTokens: 8192,
   },
 };
 
@@ -209,6 +254,8 @@ export interface RouteParams {
   temperature?: number;
   /** Embeddings only. */
   dim?: number;
+  /** Groq compound only: built-in tools the system may use (`compound_custom.tools.enabled_tools`). */
+  enabledTools?: string[];
 }
 
 export interface RouteEntry {
@@ -242,6 +289,16 @@ export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = 
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'medium', maxOutputTokens: 16_000 } },
   ],
   embed: [{ provider: 'gemini', model: MODELS.geminiEmbedding, params: { dim: 768 } }],
+  // Voice notes (Faz 7): turbo is faster and cheaper; v3 is the fallback.
+  'audio.transcribe': [
+    { provider: 'groq', model: MODELS.groqWhisperTurbo, params: {} },
+    { provider: 'groq', model: MODELS.groqWhisper, params: {} },
+  ],
+  // Restaurant research (Faz 7): web search + reading pages only (no code execution / Wolfram).
+  'research.web': [
+    { provider: 'groq', model: MODELS.groqCompound, params: { maxOutputTokens: 4096, enabledTools: ['web_search', 'visit_website'] } },
+    { provider: 'groq', model: MODELS.groqCompoundMini, params: { maxOutputTokens: 4096, enabledTools: ['web_search'] } },
+  ],
 };
 
 export const EMBEDDING = { model: MODELS.geminiEmbedding, dim: 768 } as const;
@@ -255,12 +312,17 @@ export const TASK_TIMEOUT_MS: Readonly<Record<TaskKey, number>> = {
   'text.gap_suggest': 20_000,
   'deep.analyze': 120_000,
   embed: 15_000,
+  'audio.transcribe': 30_000,
+  // Web search + reading pages takes a while; the phone shows a progress state.
+  'research.web': 90_000,
 };
 
 /** Models a user may pick per task in the settings screen (capability-filtered). */
 export function eligibleModels(task: TaskKey): ModelSpec[] {
   const specs = Object.values(MODEL_CATALOG);
   if (task === 'embed') return specs.filter((s) => s.kind === 'embedding');
+  if (task === 'audio.transcribe') return specs.filter((s) => s.kind === 'audio');
+  if (task === 'research.web') return specs.filter((s) => s.kind === 'compound');
   if (task.startsWith('vision.')) return specs.filter((s) => s.kind === 'chat' && s.vision);
   return specs.filter((s) => s.kind === 'chat');
 }

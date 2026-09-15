@@ -10,6 +10,9 @@ validation paths are exercised.
 - `enrich-items.json` — Stage C items keyed by `normalizeTr(name)`; names not listed get a low-confidence
   "unknown" item (→ `needs_review`).
 - `panel/<image>.json` — Mod 2 panel extraction output.
+- `research/<name>.json` — Faz 7 compound answer for a restaurant (`restaurant`, the tool `sources`, the model's
+  `response`); it deliberately contains a phone number, an e-mail, a price and a `javascript:` link so the scrubbing
+  is tested.
 
 To replace them with real recordings, put keys in `../.env` and run the live smoke tests (`pnpm test:smoke`);
 compare their output with these files and update as needed.

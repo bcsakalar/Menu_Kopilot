@@ -34,6 +34,11 @@ export interface GenerateStructuredOptions<T> {
   timeoutMs?: number;
 }
 
+export interface WebSource {
+  title: string;
+  url: string;
+}
+
 export interface CallMeta {
   provider: ProviderName;
   model: string;
@@ -41,6 +46,8 @@ export interface CallMeta {
   tokensIn: number;
   tokensOut: number;
   rateLimit?: RateLimitSnapshot;
+  /** Pages found by server-side web search (Groq compound `executed_tools`). */
+  sources?: WebSource[];
 }
 
 export type Result<T> =
@@ -61,12 +68,40 @@ export interface EmbedOptions {
   timeoutMs?: number;
 }
 
+export type AudioMimeType = 'audio/mp4' | 'audio/mpeg' | 'audio/ogg' | 'audio/wav' | 'audio/webm' | 'audio/flac';
+
+export interface AudioInput {
+  data: Buffer;
+  mimeType: AudioMimeType;
+  sha256: string;
+  /** File name with an extension the provider recognizes (e.g. `note.m4a`). */
+  fileName: string;
+}
+
+export interface TranscribeOptions {
+  model: string;
+  /** ISO-639-1, e.g. "tr". */
+  language?: string;
+  /** Vocabulary / style hint (Whisper: ≤ 224 tokens). */
+  prompt?: string;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+export interface Transcription {
+  text: string;
+  language?: string;
+  durationSec?: number;
+}
+
 /** Provider-agnostic LLM interface (Gemini, Groq today; an Ollama adapter can implement the same). */
 export interface LLMProvider {
   name: ProviderName;
   generateStructured<T>(opts: GenerateStructuredOptions<T>): Promise<Result<T>>;
   /** Throws ProviderError on failure. */
   embed(texts: string[], opts?: EmbedOptions): Promise<number[][]>;
+  /** Speech-to-text; only providers with audio models implement it. */
+  transcribe?(audio: AudioInput, opts: TranscribeOptions): Promise<Result<Transcription>>;
   capabilities: ProviderCapabilities;
   /** False when the API key is missing — the router skips the provider. */
   isConfigured(): boolean;
