@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import '../../data/models/branch.dart';
 import '../../data/models/common.dart';
+import '../../data/models/gap.dart';
 import '../../data/models/json.dart';
 import '../../data/models/suggestion.dart';
 import '../../data/models/template_payload.dart';
@@ -300,6 +302,96 @@ class ApiClient {
   Future<SuggestionCard> skip(String itemId) => _guard(() async {
         final response = await _dio.post<Json>('/suggestion-items/$itemId/skip');
         return SuggestionCard.fromJson(response.data ?? const {});
+      });
+
+  // ---- branches ---------------------------------------------------------------------------------------------
+
+  Future<List<Branch>> branches() => _guard(() async {
+        final response = await _dio.get<Json>('/branches');
+        return (response.data ?? const {}).objects('data').map(Branch.fromJson).toList();
+      });
+
+  Future<Branch> branch(String id) => _guard(() async {
+        final response = await _dio.get<Json>('/branches/$id');
+        return Branch.fromJson(response.data ?? const {});
+      });
+
+  Future<Branch> createBranch({
+    required String name,
+    required String cuisineId,
+    String? city,
+    String? notes,
+    int? targetItemCount,
+  }) =>
+      _guard(() async {
+        final response = await _dio.post<Json>(
+          '/branches',
+          data: {
+            'name': name,
+            'cuisineId': cuisineId,
+            'city': ?city,
+            'notes': ?notes,
+            'targetItemCount': ?targetItemCount,
+          },
+        );
+        return Branch.fromJson(response.data ?? const {});
+      });
+
+  /// Only the given keys are changed; pass `targetItemCount: null` inside [changes] to reset the target.
+  Future<Branch> updateBranch(String id, Json changes) => _guard(() async {
+        final response = await _dio.patch<Json>('/branches/$id', data: changes);
+        return Branch.fromJson(response.data ?? const {});
+      });
+
+  Future<void> deleteBranch(String id) => _guard(() async {
+        await _dio.delete<Object?>('/branches/$id');
+      });
+
+  // ---- gap analysis (Mod 2) ---------------------------------------------------------------------------------
+
+  Stream<GapEvent> gapStream({
+    required String branchId,
+    required List<UploadImage> images,
+    String? extraNotes,
+    CancelToken? cancelToken,
+  }) async* {
+    final form = FormData.fromMap({
+      'branchId': branchId,
+      if (extraNotes != null && extraNotes.trim().isNotEmpty) 'extraNotes': extraNotes.trim(),
+      'images': [
+        for (final image in images)
+          await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
+      ],
+    });
+    try {
+      await for (final message in streamMultipart('/gap-analysis', form, cancelToken: cancelToken)) {
+        final event = GapEvent.fromSse(message.event, message.data);
+        if (event != null) yield event;
+      }
+    } on DioException catch (e) {
+      throw await _toApiException(e);
+    }
+  }
+
+  Future<GapResult> gapResult(String runId) => _guard(() async {
+        final response = await _dio.get<Json>('/gap-analysis/$runId');
+        return GapResult.fromJson(response.data ?? const {});
+      });
+
+  /// Latest analysis of a branch, or null when it has none yet.
+  Future<GapResult?> latestGap(String branchId) => _guard(() async {
+        try {
+          final response = await _dio.get<Json>('/branches/$branchId/gap/latest');
+          return GapResult.fromJson(response.data ?? const {});
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 404) return null;
+          rethrow;
+        }
+      });
+
+  Future<bool> cancelGap(String runId) => _guard(() async {
+        final response = await _dio.post<Json>('/gap-analysis/$runId/cancel');
+        return (response.data ?? const {}).boolean('cancelled');
       });
 
   // ---- generic helpers for the other feature modules ---------------------------------------------------------

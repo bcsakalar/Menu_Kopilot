@@ -47,3 +47,46 @@ Cancel with `POST /api/v1/suggest/:runId/cancel`.
 
 Prices never appear in cards. `priceMode` is `free | surcharge | sets_base` (`sets_base` = selecting the option sets
 the product's base price, e.g. "Boy: Orta").
+
+---
+
+# Gap analysis (Mod 2)
+
+`POST /api/v1/gap-analysis` (multipart: `branchId`, `extraNotes?`, `images` 1–5 panel screenshots) streams with the
+same framing. Re-attach: `GET /api/v1/gap-analysis/:runId/events`; result: `GET /api/v1/gap-analysis/:runId`;
+latest of a branch: `GET /api/v1/branches/:id/gap/latest`; cancel: `POST /api/v1/gap-analysis/:runId/cancel`.
+
+The order is fixed so the phone can show the most useful parts first during a call:
+`run → progress* → counts → questions → items → recommendations(db) → [recommendations(ai) → questions_append] → done`.
+
+| event | payload | notes |
+|---|---|---|
+| `run` | `{ runId, branchId }` | always first |
+| `progress` | `{ stage: extract\|analyze\|recommend, message, done?, total? }` | status line |
+| `counts` | `{ counts: { current, target, missing, fromScreenshots, cuisineMin, targetOverridden } }` | big "x / hedef"; `current` = union of the stored branch menu and the screenshots |
+| `questions` | `{ items: Question[] }` | "Çağrıda sor" checklist, ≤ 15 |
+| `items` | `{ items: GapItem[] }` | one per unique product read from the screenshots |
+| `recommendations` | `{ source: db\|ai, items: Recommendation[] }` | `db` always sent (may be empty); `ai` only when the DB could not fill the list |
+| `questions_append` | `{ items: Question[] }` | "var mı?" lines for AI recommendations |
+| `warning` | `{ code, message }` | `provider_fallback`, `extract_failed`, `ai_unavailable`, `no_items`, `ai_recommendations_failed` |
+| `done` | `{ status, stats: { llmCalls, latencyMs, screenshots, extracted, unique, cacheHit } }` | `status`: completed \| partial \| failed \| cancelled |
+| `error` | `{ code, message }` | terminal |
+
+```jsonc
+// GapItem
+{ "name": "Adana Kebap", "normalized": "adana kebap",
+  "flags": { "description": "present", "options": "present", "removables": "absent" },   // present | absent | unknown
+  "completeness": 0.75, "status": "ok | incomplete",
+  "missing": [{ "field": "removables", "state": "absent" }],   // badges; fields the template lacks are not expected
+  "matchedTemplateId": "uuid | null", "templateName": "Adana Kebap", "origin": "seed | db | null",
+  "sectionText": "Kebaplar", "seenIn": 1 }
+// Question — key is stable across runs (ticks are stored per key on the phone)
+{ "key": "fields:lahmacun:dor", "text": "Lahmacun: açıklamayı, seçenekleri ve çıkarılabilir malzemeleri sor",
+  "kind": "missing_item | missing_field | cuisine", "itemName": "Lahmacun",
+  "hints": ["Boy: Fındık (Küçük) / Normal / Büyük · ayrıca Acı Seviyesi, Hamur, Yanında"] }
+// Recommendation
+{ "name": "Beyti Sarma", "reason": "Kebap & Izgara menülerinde sık görülür", "importance": 70,
+  "source": "db | ai", "templateId": "uuid | null" }
+```
+
+Completeness weights: description .40, options .35, removable ingredients .25; `unknown` counts half; `ok` ≥ 0.85.

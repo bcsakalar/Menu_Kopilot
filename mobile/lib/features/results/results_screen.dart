@@ -10,11 +10,14 @@ import 'suggestion_card.dart';
 
 /// Streaming results: cards drop in one by one (DB cards first), with placeholders for names already read.
 class ResultsScreen extends ConsumerStatefulWidget {
-  const ResultsScreen({super.key, this.request, this.runId, this.branchId});
+  const ResultsScreen({super.key, this.request, this.runId, this.branchId, this.slot = runSlotSuggest});
 
   final RunRequest? request;
   final String? runId;
   final String? branchId;
+
+  /// Which tab's controller drives this screen (see [runSlotSuggest] / [runSlotGap]).
+  final String slot;
 
   @override
   ConsumerState<ResultsScreen> createState() => _ResultsScreenState();
@@ -27,7 +30,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = ref.read(runControllerProvider.notifier);
+      final controller = ref.read(runControllerProvider(widget.slot).notifier);
       final request = widget.request;
       final runId = widget.runId;
       if (request != null) {
@@ -54,14 +57,14 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final edited = await Navigator.of(context).push<TemplatePayload>(
       MaterialPageRoute(builder: (_) => CardEditorScreen(initial: card.payload)),
     );
-    if (edited != null) ref.read(runControllerProvider.notifier).updatePayload(card.id, edited);
+    if (edited != null) ref.read(runControllerProvider(widget.slot).notifier).updatePayload(card.id, edited);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final state = ref.watch(runControllerProvider);
-    final controller = ref.read(runControllerProvider.notifier);
+    final state = ref.watch(runControllerProvider(widget.slot));
+    final controller = ref.read(runControllerProvider(widget.slot).notifier);
     final streaming = state.phase == RunPhase.streaming;
 
     return Scaffold(

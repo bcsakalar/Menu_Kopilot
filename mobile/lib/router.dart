@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/providers.dart';
+import 'data/models/branch.dart';
 import 'features/auth/login_screen.dart';
 import 'features/camera/camera_capture_screen.dart';
+import 'features/gap/gap_controller.dart';
+import 'features/gap/gap_result_screen.dart';
+import 'features/gap/gap_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/results/results_screen.dart';
 import 'features/results/run_controller.dart';
@@ -62,7 +66,39 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(routes: [GoRoute(path: '/gap', builder: (_, _) => const ComingSoonScreen(title: 'Menü Tamamlama'))]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/gap',
+                builder: (_, _) => const GapScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'result',
+                    builder: (_, state) {
+                      final extra = state.extra;
+                      return GapResultScreen(
+                        request: extra is GapRequest ? extra : null,
+                        branch: extra is Branch ? extra : null,
+                        runId: state.uri.queryParameters['runId'],
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'card',
+                    builder: (_, state) {
+                      final extra = state.extra;
+                      return ResultsScreen(
+                        request: extra is RunRequest ? extra : null,
+                        runId: state.uri.queryParameters['runId'],
+                        branchId: state.uri.queryParameters['branchId'],
+                        slot: runSlotGap,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
           StatefulShellBranch(routes: [GoRoute(path: '/branches', builder: (_, _) => const ComingSoonScreen(title: 'Şubeler'))]),
           StatefulShellBranch(routes: [GoRoute(path: '/templates', builder: (_, _) => const ComingSoonScreen(title: 'Şablonlar'))]),
           StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen())]),

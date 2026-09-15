@@ -136,4 +136,7 @@ class AppDatabase extends _$AppDatabase {
       into(checklistTicks).insertOnConflictUpdate(
         ChecklistTicksCompanion.insert(analysisId: analysisId, questionKey: questionKey, checked: Value(checked)),
       );
+
+  Future<void> clearChecked(String analysisId) =>
+      (delete(checklistTicks)..where((t) => t.analysisId.equals(analysisId))).go();
 }

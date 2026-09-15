@@ -353,6 +353,153 @@ class AppLocalizationsTr extends AppLocalizations {
   String get discard => 'Vazgeç';
 
   @override
+  String cuisineSubtitle(int target, int templates) {
+    return 'Hedef $target ürün · $templates şablon';
+  }
+
+  @override
+  String get gapTitle => 'Menü Tamamlama';
+
+  @override
+  String get branch => 'Şube';
+
+  @override
+  String get selectBranch => 'Şube seç';
+
+  @override
+  String get newBranch => 'Yeni şube';
+
+  @override
+  String get editBranch => 'Şubeyi düzenle';
+
+  @override
+  String get branchName => 'Şube adı';
+
+  @override
+  String get city => 'Şehir';
+
+  @override
+  String get notes => 'Notlar';
+
+  @override
+  String get targetOverride => 'Hedef ürün sayısı (boş = otomatik)';
+
+  @override
+  String targetOverrideHelp(int count) {
+    return 'Otomatik hedef: $count ürün';
+  }
+
+  @override
+  String get invalidNumber => '1 ile 500 arasında bir sayı gir';
+
+  @override
+  String get noBranches => 'Henüz şube yok. Önce bir şube oluştur.';
+
+  @override
+  String get screenshots => 'Panel ekran görüntüleri';
+
+  @override
+  String get screenshotsHint =>
+      'platform panelindeki ürün listesinin ekran görüntülerini ekle; kaydırarak alınmış, üst üste binen görüntüler sorun değil.';
+
+  @override
+  String get extraNotes => 'Not (isteğe bağlı)';
+
+  @override
+  String get extraNotesHint => 'ör. restoran tatlı da yapıyor';
+
+  @override
+  String get analyzeButton => 'Eksikleri bul';
+
+  @override
+  String get needScreenshot => 'Şube seç ve en az bir ekran görüntüsü ekle';
+
+  @override
+  String lastAnalysis(String date) {
+    return 'Son analiz: $date';
+  }
+
+  @override
+  String get openLastAnalysis => 'Aç';
+
+  @override
+  String get noAnalysisYet => 'Bu şube için henüz analiz yok';
+
+  @override
+  String countsLabel(int current, int target) {
+    return '$current / $target ürün';
+  }
+
+  @override
+  String missingCount(int count) {
+    return '$count ürün eksik';
+  }
+
+  @override
+  String get targetReached => 'Hedef tamam';
+
+  @override
+  String get manualTarget => 'elle girilen hedef';
+
+  @override
+  String get analyzing => 'Analiz ediliyor…';
+
+  @override
+  String get analysisFromCache => 'Tamamen önbellekten (AI çağrısı yok)';
+
+  @override
+  String analysisSummary(int screenshots, int unique, int calls) {
+    return '$screenshots görüntü · $unique ürün · $calls AI çağrısı';
+  }
+
+  @override
+  String callChecklist(int done, int total) {
+    return 'Çağrıda sor ($done/$total)';
+  }
+
+  @override
+  String get gapEmptyChecklist => 'Sorulacak bir şey kalmadı';
+
+  @override
+  String get clearTicks => 'İşaretleri temizle';
+
+  @override
+  String incompleteItems(int count) {
+    return 'Eksik bilgisi olan ürünler ($count)';
+  }
+
+  @override
+  String recommendedItems(int count) {
+    return 'Önerilen ürünler ($count)';
+  }
+
+  @override
+  String completeItems(int count) {
+    return 'Tamam olanlar ($count)';
+  }
+
+  @override
+  String get missingDescription => 'Açıklama yok';
+
+  @override
+  String get missingOptions => 'Opsiyon yok';
+
+  @override
+  String get missingRemovables => 'Malzeme yok';
+
+  @override
+  String get unknownDescription => 'Açıklama ?';
+
+  @override
+  String get unknownOptions => 'Opsiyon ?';
+
+  @override
+  String get unknownRemovables => 'Malzeme ?';
+
+  @override
+  String get prepareCard => 'Kart hazırla';
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override

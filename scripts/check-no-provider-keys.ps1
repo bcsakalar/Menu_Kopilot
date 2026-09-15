@@ -1,6 +1,6 @@
 # Fails when anything that looks like an AI provider key or a direct provider endpoint appears in the mobile app.
 # Provider keys must live ONLY on the backend (the APK can be decompiled).
-# Usage (repo root):  powershell -File scripts/check-no-provider-keys.ps1
+# Usage (repo root):  powershell -File scripts/check-no-provider-keys.ps1   (also runs under pwsh in CI)
 param(
   [string]$Root = (Join-Path $PSScriptRoot '..\mobile')
 )
@@ -14,9 +14,20 @@ $patterns = @(
   'generativelanguage\.googleapis\.com',
   'api\.groq\.com'
 )
-$excluded = '\\(build|\.dart_tool|\.gradle|Pods|\.symlinks|ephemeral)\\'
+# Build outputs are skipped without descending into them (their paths can exceed the Windows path limit).
+$excludedDirs = @('build', '.dart_tool', '.gradle', 'Pods', '.symlinks', 'ephemeral', '.idea', '.cxx')
 
-$files = Get-ChildItem -Path $Root -Recurse -File | Where-Object { $_.FullName -notmatch $excluded }
+function Get-SourceFiles([string]$Path) {
+  foreach ($item in Get-ChildItem -LiteralPath $Path -Force) {
+    if ($item.PSIsContainer) {
+      if ($excludedDirs -notcontains $item.Name) { Get-SourceFiles $item.FullName }
+    } else {
+      $item
+    }
+  }
+}
+
+$files = @(Get-SourceFiles (Resolve-Path $Root).Path)
 $hits = foreach ($pattern in $patterns) {
   $files | Select-String -Pattern $pattern -List | ForEach-Object { "$($_.Path):$($_.LineNumber): matches '$pattern'" }
 }

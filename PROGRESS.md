@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 4 done.
+Last update: 2026-09-15 — Faz 5 done.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -18,19 +18,39 @@ Last update: 2026-09-15 — Faz 4 done.
       prompt templates repo, usage_log, smoke tests
 - [x] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
 - [x] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
-- [ ] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
+- [x] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
 - [ ] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 4 complete. Next: Faz 5 — Mod 2 gap analysis. Backend `src/modules/gap/` (panel extraction via
-`VisionExtractor` namespace `p`, dedupe exact/prefix/trigram, completeness with template-aware expectations, counts
-vs `effectiveTarget`, DB recommendations then `text.gap_suggest`, deterministic question list in `src/i18n/tr.ts`,
-SSE order run → counts → questions → items → recommendations(db) → recommendations(ai) → done, persistence to
-snapshots + branch_menu_items), branches CRUD API, fixtures `test/fixtures/llm/panel/panel-{1,2}.json`
-(12 unique items, 3 duplicates, one truncated "Karışık Pi…"), e2e. Flutter `features/gap/` (branch pick/create,
-screenshots, one-screen result: big x/target progress, "Çağrıda sor" checklist with Drift ticks + wakelock,
-incomplete items with badges, recommendations → Mod 1 single-item run with branchId).
+Faz 5 complete. Next: Faz 6, in this order:
+1. Backend: `GET /branches/:id/menu` (items grouped by status), `DELETE /branches/:id/menu/:itemId`,
+   `GET /branches/:id/export?format=csv|json` (accepted payloads, no prices, CSV = UTF-8 BOM + `;`);
+   `modules/templates/` API (`GET /templates?q=&cuisineId=&source=&approved=&sort=usage|name|updated&limit&cursor`,
+   `GET/PATCH/DELETE /templates/:id`, `POST /templates`; edits re-embed); `GET /usage/summary?range=today|month`
+   (calls, per model, tokens, cache-hit and DB-hit ratio, errors) + e2e tests.
+2. Flutter: Şubeler tab (list, create/edit via `features/branches/branch_form.dart`, delete, detail = menu + target
+   override + export via share_plus), Şablonlar tab (search/filter/sort, edit with `CardEditorScreen`, delete,
+   offline via `CachedTemplates`), Ayarlar (cuisines + min counts, task-based model dropdown from
+   `/settings/providers`, quota, theme, server URL) and a Kullanım screen.
+3. Release: `mobile/scripts/create-keystore.ps1`, `flutter build apk --release`, `.github/workflows/{ci,release}.yml`,
+   README complete (setup, env, keys, 1 GB VPS deploy with the win-to-linux-deploy skill, APK signing, privacy +
+   LOCAL_ONLY_MODE, AI disclaimer, SSE contract), acceptance table here. Commits per the plan.
+
+### Faz 5 inventory
+- Backend `src/modules/gap/`: `schemas.ts` (panel item tri-state flags, DTOs, events), `dedupe.ts`,
+  `completeness.ts`, `questions.ts`, `recommend.ts` (MenuIndex, DB + AI recommendations), `pipeline.ts`,
+  `store.ts`, `service.ts`, `routes.ts`; `src/modules/branches/{schemas,service,routes}.ts` (CRUD) and
+  `branch-menu.ts` (`upsertScreenshotItem`, `replaceRecommendations`); Turkish texts in `src/i18n/tr.ts` (`GAP_TEXT`).
+- API: `POST /api/v1/gap-analysis` (SSE | `?async=1` | sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`,
+  `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest`, `GET/POST /branches`, `GET/PATCH/DELETE /branches/:id`.
+  SSE contract in `docs/SSE_EVENTS.md`.
+- Fixtures `test/fixtures/llm/panel/panel-{1,2}.json`; tests `test/unit/gap-helpers.test.ts`, `test/e2e/gap.e2e.test.ts`
+  → backend 243 tests passing.
+- Mobile: `data/models/{gap,branch}.dart`, `core/utils/wakelock.dart`, `features/gap/{gap_controller,gap_screen,
+  gap_result_screen}.dart`, `features/branches/{branch_providers,branch_form}.dart`, routes `/gap`, `/gap/result`,
+  `/gap/card`; run controller is now a family per tab slot. Tests `test/unit/gap_test.dart`,
+  `test/widget/gap_result_screen_test.dart` → 27 passing, `flutter analyze` clean.
 
 ### Faz 4 inventory (mobile/)
 - `lib/core/`: `providers.dart` (db, tokens, server URL, API client, auth, connectivity, cuisines, recent cuisines),
@@ -93,8 +113,8 @@ incomplete items with badges, recommendations → Mod 1 single-item run with bra
 | 2 | No provider key in Flutter (grep) | ✅ `scripts/check-no-provider-keys.ps1` (keys + provider endpoints) |
 | 3 | 40 seed items → `/suggest` with zero LLM calls | ✅ e2e (`llmCalls=0`, usage_log unchanged, cache_hit) |
 | 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
-| 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ⏳ |
-| 6 | Same item in two screenshots counted once | ⏳ |
+| 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ◐ e2e: 2 screenshots → 12 unique, 12/14, badges, ≤ 15 questions, counts before recommendations, 2 LLM calls; real p95 needs keys |
+| 6 | Same item in two screenshots counted once | ✅ unit + e2e (3 overlapping rows + clipped "Karışık Pi…" merged; `seenIn` = 2) |
 | 7 | No TL amounts; `sets_base` correct | ✅ sanitizer + Zod refine + e2e (flawed fixtures fixed) |
 | 8 | Descriptions ≤ 160 chars (schema-enforced) | ✅ Zod `.max(160)` + DB CHECK + clamp; e2e |
 | 9 | Provider down → fallback keeps working | ✅ router tests + e2e (Gemini 503 → Groq vision; Groq key removed → Gemini enrich) |

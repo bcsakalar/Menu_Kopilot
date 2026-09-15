@@ -730,6 +730,258 @@ abstract class AppLocalizations {
   /// **'Vazgeç'**
   String get discard;
 
+  /// No description provided for @cuisineSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef {target} ürün · {templates} şablon'**
+  String cuisineSubtitle(int target, int templates);
+
+  /// No description provided for @gapTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menü Tamamlama'**
+  String get gapTitle;
+
+  /// No description provided for @branch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube'**
+  String get branch;
+
+  /// No description provided for @selectBranch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube seç'**
+  String get selectBranch;
+
+  /// No description provided for @newBranch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şube'**
+  String get newBranch;
+
+  /// No description provided for @editBranch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şubeyi düzenle'**
+  String get editBranch;
+
+  /// No description provided for @branchName.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube adı'**
+  String get branchName;
+
+  /// No description provided for @city.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şehir'**
+  String get city;
+
+  /// No description provided for @notes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Notlar'**
+  String get notes;
+
+  /// No description provided for @targetOverride.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef ürün sayısı (boş = otomatik)'**
+  String get targetOverride;
+
+  /// No description provided for @targetOverrideHelp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Otomatik hedef: {count} ürün'**
+  String targetOverrideHelp(int count);
+
+  /// No description provided for @invalidNumber.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 ile 500 arasında bir sayı gir'**
+  String get invalidNumber;
+
+  /// No description provided for @noBranches.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz şube yok. Önce bir şube oluştur.'**
+  String get noBranches;
+
+  /// No description provided for @screenshots.
+  ///
+  /// In tr, this message translates to:
+  /// **'Panel ekran görüntüleri'**
+  String get screenshots;
+
+  /// No description provided for @screenshotsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'platform panelindeki ürün listesinin ekran görüntülerini ekle; kaydırarak alınmış, üst üste binen görüntüler sorun değil.'**
+  String get screenshotsHint;
+
+  /// No description provided for @extraNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not (isteğe bağlı)'**
+  String get extraNotes;
+
+  /// No description provided for @extraNotesHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'ör. restoran tatlı da yapıyor'**
+  String get extraNotesHint;
+
+  /// No description provided for @analyzeButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eksikleri bul'**
+  String get analyzeButton;
+
+  /// No description provided for @needScreenshot.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube seç ve en az bir ekran görüntüsü ekle'**
+  String get needScreenshot;
+
+  /// No description provided for @lastAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son analiz: {date}'**
+  String lastAnalysis(String date);
+
+  /// No description provided for @openLastAnalysis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aç'**
+  String get openLastAnalysis;
+
+  /// No description provided for @noAnalysisYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu şube için henüz analiz yok'**
+  String get noAnalysisYet;
+
+  /// No description provided for @countsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'{current} / {target} ürün'**
+  String countsLabel(int current, int target);
+
+  /// No description provided for @missingCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ürün eksik'**
+  String missingCount(int count);
+
+  /// No description provided for @targetReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef tamam'**
+  String get targetReached;
+
+  /// No description provided for @manualTarget.
+  ///
+  /// In tr, this message translates to:
+  /// **'elle girilen hedef'**
+  String get manualTarget;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz ediliyor…'**
+  String get analyzing;
+
+  /// No description provided for @analysisFromCache.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamen önbellekten (AI çağrısı yok)'**
+  String get analysisFromCache;
+
+  /// No description provided for @analysisSummary.
+  ///
+  /// In tr, this message translates to:
+  /// **'{screenshots} görüntü · {unique} ürün · {calls} AI çağrısı'**
+  String analysisSummary(int screenshots, int unique, int calls);
+
+  /// No description provided for @callChecklist.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çağrıda sor ({done}/{total})'**
+  String callChecklist(int done, int total);
+
+  /// No description provided for @gapEmptyChecklist.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorulacak bir şey kalmadı'**
+  String get gapEmptyChecklist;
+
+  /// No description provided for @clearTicks.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşaretleri temizle'**
+  String get clearTicks;
+
+  /// No description provided for @incompleteItems.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eksik bilgisi olan ürünler ({count})'**
+  String incompleteItems(int count);
+
+  /// No description provided for @recommendedItems.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerilen ürünler ({count})'**
+  String recommendedItems(int count);
+
+  /// No description provided for @completeItems.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam olanlar ({count})'**
+  String completeItems(int count);
+
+  /// No description provided for @missingDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama yok'**
+  String get missingDescription;
+
+  /// No description provided for @missingOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyon yok'**
+  String get missingOptions;
+
+  /// No description provided for @missingRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'Malzeme yok'**
+  String get missingRemovables;
+
+  /// No description provided for @unknownDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama ?'**
+  String get unknownDescription;
+
+  /// No description provided for @unknownOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyon ?'**
+  String get unknownOptions;
+
+  /// No description provided for @unknownRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'Malzeme ?'**
+  String get unknownRemovables;
+
+  /// No description provided for @prepareCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart hazırla'**
+  String get prepareCard;
+
   /// No description provided for @settingsTitle.
   ///
   /// In tr, this message translates to:

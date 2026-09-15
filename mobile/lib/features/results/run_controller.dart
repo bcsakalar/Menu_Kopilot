@@ -94,7 +94,15 @@ class RunViewState {
 
 String _normalizeName(String value) => value.trim().toLowerCase();
 
+/// Controller slots: each bottom-navigation tab that can show suggestion results has its own controller, so a card
+/// opened from the gap checklist does not replace the run shown in the "Öneri" tab.
+const String runSlotSuggest = 'suggest';
+const String runSlotGap = 'gap';
+
 class RunController extends Notifier<RunViewState> {
+  RunController(this.slot);
+
+  final String slot;
   CancelToken? _cancelToken;
 
   @override
@@ -348,4 +356,4 @@ class RunController extends Notifier<RunViewState> {
   }
 }
 
-final runControllerProvider = NotifierProvider.autoDispose<RunController, RunViewState>(RunController.new);
+final runControllerProvider = NotifierProvider.autoDispose.family<RunController, RunViewState, String>(RunController.new);

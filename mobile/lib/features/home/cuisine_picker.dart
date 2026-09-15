@@ -84,7 +84,7 @@ class _CuisineTile extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.restaurant),
       title: Text(cuisine.name),
-      subtitle: Text('Hedef ${cuisine.targetItemCount} ürün · ${cuisine.templateCount} şablon'),
+      subtitle: Text(context.l10n.cuisineSubtitle(cuisine.targetItemCount, cuisine.templateCount)),
       onTap: () => Navigator.pop(context, cuisine),
     );
   }

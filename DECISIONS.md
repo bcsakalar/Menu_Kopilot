@@ -216,3 +216,51 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   signing from `android/key.properties` or `ANDROID_KEYSTORE_*` env vars, else the debug key. (F4)
 - **D-087** — The Tamamla / Şubeler / Şablonlar tabs exist from Faz 4 as placeholders so navigation is final; they are
   implemented in Faz 5–6. (F4)
+- **D-088** — Risk noted: `flutter build apk` warns that some plugins still apply the Kotlin Gradle Plugin the old
+  way; a future Flutter/AGP release may turn this into an error. Mitigation: `flutter pub upgrade` of the plugins
+  before upgrading Flutter; nothing to change in our code today. (F4)
+
+## Faz 5 — Mod 2 gap analysis
+
+- **D-089** — Panel extraction reads one screenshot per call (like Mod 1), cached per image hash + prompt versions
+  (`mk:p:*`), with 3 screenshots in flight (Mod 1 uses 2). *Why:* the result is needed live during a call (p95 < 8 s);
+  typical use is 2–3 screenshots → one round trip. Each item gets tri-state flags `present | absent | unknown` for
+  description / options / removable ingredients; "unknown" = not visible on the screenshot, never guessed. (F5)
+- **D-090** — Dedupe across screenshots: same normalized name → a clipped name that is a prefix of a longer one
+  (marked with "…"/"..", or at most 3 characters shorter, min. 5 characters) → trigram ≥ 0.9. Flags merge by
+  information (present > absent > unknown); the complete spelling wins over a clipped one. Rows below confidence 0.3
+  are dropped. (F5)
+- **D-091** — Completeness = description .40 + options .35 + removables .25, `unknown` = half, `ok` at ≥ 0.85. Fields
+  the matched template does not have are not expected (e.g. Ayran has no removable ingredients) and the weights are
+  re-normalized; unmatched items expect all three. (F5)
+- **D-092** — Template matching in Mod 2 is exact → alias → trigram only (no vector search, no canonicalize call).
+  *Why:* matching only tunes expectations and hides already-present items from the recommendations; zero extra tokens
+  and latency beat the small recall gain during a call. (F5)
+- **D-093** — Counts: `current` = union of the stored branch menu (ok/incomplete rows, e.g. cards accepted in Mod 1)
+  and the screenshot items, deduplicated by normalized name or matched template; `target` = branch override or
+  max(10, cuisine minimum). Items removed from the panel stay on the stored menu until deleted in the branch screen
+  (Faz 6). (F5)
+- **D-094** — Recommendations: wanted = clamp(missing + 2, 3, 10). Approved templates of the same cuisine first, then
+  parent/child/sibling cuisines, ordered by importance and usage, with a deterministic one-line reason (no LLM).
+  `text.gap_suggest` is called only for the remainder; answers are cleaned (no prices), matched back to templates,
+  dropped when already on the menu / already recommended (alias-aware), and cached per menu + prompt version. (F5)
+- **D-095** — "Çağrıda sor" checklist is deterministic and capped at 15: missing items needed for the target (≤ 6,
+  unfilled slots reserved for AI recommendations → `questions_append`), then one line per item with missing fields
+  (least complete first; hints = base option group and removable ingredients of the matched template), then ≤ 2
+  cuisine-wide questions from option groups recurring in ≥ 30 % of the cuisine's templates, then spare
+  recommendations. Keys are stable across runs; the phone stores ticks per branch so they survive re-analysis. (F5)
+- **D-096** — Persistence: every completed/partial analysis writes a `branch_menu_snapshots` row (the full result, so
+  `GET /gap-analysis/:runId` and `/branches/:id/gap/latest` need no recomputation) and upserts screenshot items into
+  `branch_menu_items` without losing an accepted Mod 1 payload; previous recommendations (status `missing`) are
+  replaced. A run whose screenshots all failed is not persisted (the previous analysis stays "latest"). (F5)
+- **D-097** — LOCAL_ONLY_MODE / quota exhausted in Mod 2: cached screenshots are still read (cache first), the rest is
+  answered from the DB; no provider is ever called. (F5)
+- **D-098** — Branch CRUD landed in Faz 5 (the gap flow needs a branch); every query is scoped by the signed-in user.
+  Faz 6 adds the branch menu, export and the branch screens. (F5)
+- **D-099** — Mobile: a recommendation or an incomplete item opens a single-item Mod 1 run linked to the branch
+  (`/gap/card`), so accepting the card puts it on the branch menu. Suggestion results got one controller per tab
+  (Riverpod family keyed by slot) so a card opened from the checklist does not replace the run shown in the Öneri tab.
+  Gap analyses are not queued offline (useless after the call); the last result per branch is cached for offline
+  reading. The result screen keeps the display on (wakelock) while open. (F5)
+- **D-100** — `scripts/check-no-provider-keys.ps1` walks the tree itself and skips build folders without descending
+  (Gradle transform paths exceed the Windows path limit). (F5)

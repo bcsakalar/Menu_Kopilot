@@ -90,9 +90,9 @@ void main() {
           ItemEvent(card('c2', 'Humus', CardOrigin.ai, 1)),
           const DoneEvent('completed', RunStats(dbHits: 1, aiItems: 1, llmCalls: 1)),
         ]);
-    final sub = container.listen(runControllerProvider, (_, _) {});
-    await container.read(runControllerProvider.notifier).start(request);
-    final state = container.read(runControllerProvider);
+    final sub = container.listen(runControllerProvider(runSlotSuggest), (_, _) {});
+    await container.read(runControllerProvider(runSlotSuggest).notifier).start(request);
+    final state = container.read(runControllerProvider(runSlotSuggest));
     expect(state.phase, RunPhase.done);
     expect(state.cards.map((c) => c.payload.name), ['Adana', 'Humus']);
     expect(state.placeholders, isEmpty);
@@ -105,9 +105,9 @@ void main() {
 
   test('queues the request offline when the server is unreachable before the run starts', () async {
     api.stream = () => Stream<SuggestEvent>.error(const ApiException('NETWORK', 'offline'));
-    final sub = container.listen(runControllerProvider, (_, _) {});
-    await container.read(runControllerProvider.notifier).start(request);
-    expect(container.read(runControllerProvider).phase, RunPhase.queued);
+    final sub = container.listen(runControllerProvider(runSlotSuggest), (_, _) {});
+    await container.read(runControllerProvider(runSlotSuggest).notifier).start(request);
+    expect(container.read(runControllerProvider(runSlotSuggest)).phase, RunPhase.queued);
     expect(await db.queuedRequests(), hasLength(1));
 
     final sent = await PendingQueue(db).flush(api);
@@ -124,17 +124,17 @@ void main() {
           ItemEvent(card('c1', 'Humus', CardOrigin.ai, 0)),
           const DoneEvent('completed', null),
         ]);
-    final sub = container.listen(runControllerProvider, (_, _) {});
-    final controller = container.read(runControllerProvider.notifier);
+    final sub = container.listen(runControllerProvider(runSlotSuggest), (_, _) {});
+    final controller = container.read(runControllerProvider(runSlotSuggest).notifier);
     await controller.start(request);
 
-    final current = container.read(runControllerProvider).cards.single;
+    final current = container.read(runControllerProvider(runSlotSuggest)).cards.single;
     controller.updatePayload('c1', current.payload.copyWith(description: 'Nohut, tahin ve limonla ezilir.'));
-    expect(container.read(runControllerProvider).cards.single.edited, isTrue);
+    expect(container.read(runControllerProvider(runSlotSuggest)).cards.single.edited, isTrue);
 
     api.acceptError = const ApiException('NETWORK', 'offline');
     expect(await controller.accept('c1'), isNull);
-    final queuedCard = container.read(runControllerProvider).cards.single;
+    final queuedCard = container.read(runControllerProvider(runSlotSuggest)).cards.single;
     expect(queuedCard.status, CardStatus.accepted);
     expect(queuedCard.queued, isTrue);
     final pending = await db.queuedRequests();
@@ -159,8 +159,8 @@ void main() {
           )),
           const DoneEvent('completed', null),
         ]);
-    final sub = container.listen(runControllerProvider, (_, _) {});
-    final controller = container.read(runControllerProvider.notifier);
+    final sub = container.listen(runControllerProvider(runSlotSuggest), (_, _) {});
+    final controller = container.read(runControllerProvider(runSlotSuggest).notifier);
     await controller.start(request);
     expect(await controller.accept('c9'), 'acceptNeedsContent');
     expect(api.acceptedIds, isEmpty);

@@ -70,6 +70,87 @@ export async function upsertBranchItem(db: Executor, branchId: string, item: Bra
     .onConflictDoUpdate({ target: [branchMenuItems.branchId, branchMenuItems.normalizedName], set: values });
 }
 
+/**
+ * A product read from a panel screenshot. The panel is the truth for status/flags, but an accepted card payload
+ * (Mod 1) is kept, and a previous recommendation ("missing") turns into a screenshot item.
+ */
+export async function upsertScreenshotItem(
+  db: Executor,
+  branchId: string,
+  item: Omit<BranchItemInput, 'source' | 'payload' | 'reason'> & { status: 'ok' | 'incomplete' },
+): Promise<void> {
+  const now = new Date();
+  await db
+    .insert(branchMenuItems)
+    .values({
+      branchId,
+      rawName: item.rawName,
+      normalizedName: item.normalizedName,
+      matchedItemId: item.matchedItemId,
+      status: item.status,
+      source: 'screenshot',
+      hasDescription: item.hasDescription,
+      hasOptions: item.hasOptions,
+      hasRemovables: item.hasRemovables,
+      completenessScore: item.completenessScore,
+      flags: item.flags ?? null,
+      snapshotId: item.snapshotId ?? null,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: [branchMenuItems.branchId, branchMenuItems.normalizedName],
+      set: {
+        rawName: item.rawName,
+        matchedItemId: sql`coalesce(excluded.matched_item_id, ${branchMenuItems.matchedItemId})`,
+        status: item.status,
+        source: sql`case when ${branchMenuItems.source} = 'recommendation' then 'screenshot'::branch_item_source else ${branchMenuItems.source} end`,
+        hasDescription: item.hasDescription,
+        hasOptions: item.hasOptions,
+        hasRemovables: item.hasRemovables,
+        completenessScore: item.completenessScore,
+        flags: item.flags ?? null,
+        reason: null,
+        snapshotId: item.snapshotId ?? null,
+        updatedAt: now,
+      },
+    });
+}
+
+/** Replaces the branch's previous recommendations with new ones (never touches items on the menu). */
+export async function replaceRecommendations(
+  db: Executor,
+  branchId: string,
+  items: readonly { name: string; normalizedName: string; templateId: string | null; reason: string }[],
+  snapshotId: string | null,
+): Promise<void> {
+  await db
+    .delete(branchMenuItems)
+    .where(
+      and(
+        eq(branchMenuItems.branchId, branchId),
+        eq(branchMenuItems.status, 'missing'),
+        eq(branchMenuItems.source, 'recommendation'),
+      ),
+    );
+  if (items.length === 0) return;
+  await db
+    .insert(branchMenuItems)
+    .values(
+      items.map((item) => ({
+        branchId,
+        rawName: item.name,
+        normalizedName: item.normalizedName,
+        matchedItemId: item.templateId,
+        status: 'missing' as const,
+        source: 'recommendation' as const,
+        completenessScore: 0,
+        reason: item.reason,
+        snapshotId,
+      })),
+    )
+    .onConflictDoNothing({ target: [branchMenuItems.branchId, branchMenuItems.normalizedName] });
+}
+
 /** current_item_count = items on the menu (ok + incomplete). */
 export async function recomputeBranchCount(db: Executor, branchId: string): Promise<number> {
   const [row] = await db

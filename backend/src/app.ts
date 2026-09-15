@@ -23,9 +23,16 @@ import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
+import { branchRoutes } from './modules/branches/routes.js';
+import { BranchService } from './modules/branches/service.js';
 import { cuisineRoutes } from './modules/cuisines/routes.js';
 import { CuisineService } from './modules/cuisines/service.js';
 import { VisionExtractor } from './modules/extraction/vision-extractor.js';
+import { GapPipeline } from './modules/gap/pipeline.js';
+import { gapRoutes } from './modules/gap/routes.js';
+import type { GapEvent } from './modules/gap/schemas.js';
+import { GapService } from './modules/gap/service.js';
+import { GapStore } from './modules/gap/store.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { promptRoutes } from './modules/prompts/routes.js';
 import { RetrievalService } from './modules/retrieval/retrieval.service.js';
@@ -61,6 +68,7 @@ export interface AppServices {
   queue: JobQueue;
   embedding: EmbeddingService;
   suggest: SuggestService;
+  gap: GapService;
 }
 
 declare module 'fastify' {
@@ -205,7 +213,25 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     budget: config.budget,
     log: app.log,
   });
-  app.decorate('services', { ai, queue, embedding, suggest: suggestService });
+  const gapStore = new GapStore(db);
+  const gapService = new GapService({
+    db,
+    store: gapStore,
+    pipeline: new GapPipeline({
+      db,
+      router: ai.router,
+      prompts: ai.prompts,
+      retrieval,
+      extractor,
+      store: gapStore,
+      cache: deps.cache,
+      cacheTtlSeconds: config.cacheTtlSeconds,
+      budget: config.budget,
+    }),
+    registry: new RunRegistry<GapEvent>(),
+    log: app.log,
+  });
+  app.decorate('services', { ai, queue, embedding, suggest: suggestService, gap: gapService });
 
   await app.register(
     async (api) => {
@@ -217,6 +243,8 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await secured.register(promptRoutes, { prompts: ai.prompts });
         await secured.register(suggestRoutes, { service: suggestService, uploads: config.uploads });
         await secured.register(cuisineRoutes, { service: new CuisineService(db) });
+        await secured.register(branchRoutes, { service: new BranchService(db) });
+        await secured.register(gapRoutes, { service: gapService, uploads: config.uploads });
       });
     },
     { prefix: '/api/v1' },

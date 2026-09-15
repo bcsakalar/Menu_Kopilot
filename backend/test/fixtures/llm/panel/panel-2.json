@@ -1,0 +1,12 @@
+{
+  "items": [
+    { "rawName": "Kıymalı Pide", "description": "present", "options": "present", "removables": "present", "sectionText": "Pide & Lahmacun", "confidence": 0.95 },
+    { "rawName": "Karışık Pide", "description": "absent", "options": "present", "removables": "absent", "sectionText": "Pide & Lahmacun", "confidence": 0.94 },
+    { "rawName": "Ayran", "description": "present", "options": "absent", "removables": "absent", "sectionText": "İçecekler", "confidence": 0.95 },
+    { "rawName": "Künefe", "description": "absent", "options": "absent", "removables": "absent", "sectionText": "Tatlılar", "confidence": 0.96 },
+    { "rawName": "Mercimek Çorbası", "description": "present", "options": "absent", "removables": "absent", "sectionText": "Çorbalar", "confidence": 0.95 },
+    { "rawName": "İçli Köfte", "description": "absent", "options": "absent", "removables": "absent", "sectionText": "Ara Sıcaklar", "confidence": 0.93 },
+    { "rawName": "Şalgam", "description": "present", "options": "present", "removables": "absent", "sectionText": "İçecekler", "confidence": 0.94 },
+    { "rawName": "Çoban Salata", "description": "absent", "options": "absent", "removables": "present", "sectionText": "Salatalar", "confidence": 0.92 }
+  ]
+}
