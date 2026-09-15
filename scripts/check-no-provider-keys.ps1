@@ -2,7 +2,8 @@
 # Provider keys must live ONLY on the backend (the APK can be decompiled).
 # Usage (repo root):  powershell -File scripts/check-no-provider-keys.ps1   (also runs under pwsh in CI)
 param(
-  [string]$Root = (Join-Path $PSScriptRoot '..\mobile')
+  # Built with Join-Path twice so the separator is right on Windows and on Linux (CI runs this under pwsh).
+  [string]$Root = (Join-Path (Join-Path $PSScriptRoot '..') 'mobile')
 )
 
 $ErrorActionPreference = 'Stop'

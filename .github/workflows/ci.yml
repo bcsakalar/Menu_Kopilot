@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint, typecheck, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      # Hermetic: PGlite (+ pgvector, pg_trgm) and fake providers — no services, no API keys.
+      - run: pnpm test
+      - run: pnpm build
+
+  mobile:
+    name: Mobile (analyze, test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  key-guard:
+    name: No provider keys in the mobile app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Scan with the repo script
+        shell: pwsh
+        run: ./scripts/check-no-provider-keys.ps1
+      - name: Grep guard
+        run: |
+          if grep -rEn --exclude-dir=build --exclude-dir=.dart_tool \
+            'GEMINI_API_KEY|GROQ_API_KEY|AIza[0-9A-Za-z_-]{20,}|gsk_[0-9A-Za-z]{20,}|generativelanguage\.googleapis\.com|api\.groq\.com' mobile; then
+            echo "::error::Provider key or endpoint found in mobile/ — keys belong on the backend only."
+            exit 1
+          fi
