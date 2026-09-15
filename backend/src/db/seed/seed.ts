@@ -27,7 +27,8 @@ export interface SeedReport {
 /**
  * Idempotent seed. Never overwrites user data:
  * - cuisines are inserted when their slug is missing (user-edited min counts survive),
- * - templates are replaced only while still `source='seed'` (user-approved edits survive),
+ * - templates are replaced only while still `source='seed'` (user-approved edits survive); seeds the user deleted
+ *   (archived: approved=false, source='seed') are not re-inserted,
  * - prompts/provider configs are inserted when missing.
  */
 export async function seedDatabase(db: Database, options: SeedOptions = {}): Promise<SeedReport> {
@@ -90,8 +91,26 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
       const payload = payloads[index];
       if (!payload) throw new Error('seed payload index out of range');
       const cuisineId = requireCuisine(seedTemplate.cuisine);
-      const existing = await findApprovedByName(tx, cuisineId, normalizeTr(payload.name));
-      if (!existing) {
+      const normalized = normalizeTr(payload.name);
+      const existing = await findApprovedByName(tx, cuisineId, normalized);
+      // A seed the user deleted is kept archived (approved=false) and must not come back.
+      const [archived] = existing
+        ? []
+        : await tx
+            .select({ id: menuItems.id })
+            .from(menuItems)
+            .where(
+              and(
+                eq(menuItems.cuisineId, cuisineId),
+                eq(menuItems.normalizedName, normalized),
+                eq(menuItems.approved, false),
+                eq(menuItems.source, 'seed'),
+              ),
+            )
+            .limit(1);
+      if (archived) {
+        report.templatesSkipped += 1;
+      } else if (!existing) {
         await insertTemplate(tx, {
           cuisineId,
           payload,

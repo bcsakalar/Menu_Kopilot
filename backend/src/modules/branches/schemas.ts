@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { templatePayloadSchema } from '../../domain/template.js';
 
 export const branchStatusSchema = z.enum(['draft', 'in_progress', 'ready', 'opened']);
 
@@ -38,6 +39,35 @@ export const createBranchSchema = z.object({
   status: branchStatusSchema.optional(),
 });
 export type CreateBranchInput = z.infer<typeof createBranchSchema>;
+
+export const menuItemStatusSchema = z.enum(['ok', 'incomplete', 'missing']);
+
+export const branchMenuItemDtoSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  normalizedName: z.string(),
+  /** ok / incomplete = on the menu, missing = recommended. */
+  status: menuItemStatusSchema,
+  source: z.enum(['screenshot', 'suggestion', 'recommendation', 'manual']),
+  completeness: z.number(),
+  /** Fields not filled on the panel (absent or not visible). */
+  missingFields: z.array(z.enum(['description', 'options', 'removables'])),
+  reason: z.string().nullable(),
+  matchedTemplateId: z.uuid().nullable(),
+  /** Accepted card (Mod 1) frozen for this branch. */
+  payload: templatePayloadSchema.nullable(),
+  /** Matched template content when no card was accepted yet. */
+  templatePayload: templatePayloadSchema.nullable(),
+  updatedAt: z.string(),
+});
+export type BranchMenuItemDto = z.infer<typeof branchMenuItemDtoSchema>;
+
+export const branchMenuDtoSchema = z.object({ branch: branchDtoSchema, items: z.array(branchMenuItemDtoSchema) });
+export type BranchMenuDto = z.infer<typeof branchMenuDtoSchema>;
+
+export const updateMenuItemSchema = z.object({ status: menuItemStatusSchema });
+
+export const exportQuerySchema = z.object({ format: z.enum(['csv', 'json']).default('csv') });
 
 export const updateBranchSchema = z.object({
   name: name.optional(),

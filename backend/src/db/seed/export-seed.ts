@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { loadConfig } from '../../config/env.js';
 import { type TemplateCsvEntry, templatesToCsv } from '../../modules/export/template-csv.js';
 import { getTemplates } from '../../modules/templates/template-store.js';
@@ -37,7 +37,7 @@ async function fromDb(): Promise<TemplateCsvEntry[]> {
       .select({ id: menuItems.id, cuisineName: cuisines.name })
       .from(menuItems)
       .innerJoin(cuisines, eq(menuItems.cuisineId, cuisines.id))
-      .where(eq(menuItems.source, 'seed'))
+      .where(and(eq(menuItems.source, 'seed'), eq(menuItems.approved, true)))
       .orderBy(cuisines.name, menuItems.canonicalName);
     const records = await getTemplates(
       handle.db,

@@ -4,7 +4,7 @@ import type { ImageInput } from '../../ai/types.js';
 import type { Database } from '../../db/client.js';
 import { menuItems, suggestionItems } from '../../db/schema/index.js';
 import { type TemplatePayload, templatePayloadSchema } from '../../domain/template.js';
-import { AppError, notFound } from '../../lib/errors.js';
+import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { JobQueue } from '../../jobs/queue.js';
 import { recomputeBranchCount, requireBranch, upsertBranchItem } from '../branches/branch-menu.js';
@@ -19,10 +19,6 @@ import { parseStoredCard, type SuggestionStore } from './store.js';
 export interface StartedRun {
   runId: string;
   done: Promise<PipelineResult | undefined>;
-}
-
-function isUniqueViolation(err: unknown): boolean {
-  return typeof err === 'object' && err !== null && 'code' in err && (err as { code?: unknown }).code === '23505';
 }
 
 /** Orchestrates runs (start / continue / cancel / snapshot) and card decisions (accept / skip). No HTTP types here. */

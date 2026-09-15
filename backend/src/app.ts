@@ -45,6 +45,10 @@ import { RunRegistry } from './modules/suggest/run-registry.js';
 import type { SuggestEvent } from './modules/suggest/schemas.js';
 import { SuggestService } from './modules/suggest/service.js';
 import { SuggestionStore } from './modules/suggest/store.js';
+import { templateRoutes } from './modules/templates/routes.js';
+import { TemplateService } from './modules/templates/service.js';
+import { usageRoutes } from './modules/usage/routes.js';
+import { UsageService } from './modules/usage/service.js';
 import { authPlugin } from './plugins/auth.js';
 
 export const APP_VERSION = '0.1.0';
@@ -245,6 +249,10 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await secured.register(cuisineRoutes, { service: new CuisineService(db) });
         await secured.register(branchRoutes, { service: new BranchService(db) });
         await secured.register(gapRoutes, { service: gapService, uploads: config.uploads });
+        await secured.register(templateRoutes, { service: new TemplateService(db, queue) });
+        await secured.register(usageRoutes, {
+          service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),
+        });
       });
     },
     { prefix: '/api/v1' },

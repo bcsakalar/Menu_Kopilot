@@ -58,3 +58,13 @@ export interface ErrorEnvelope {
 }
 
 export const notFound = (what: string) => new AppError('NOT_FOUND', `${what} bulunamadı`);
+
+/** Postgres unique violation (23505), also when wrapped by the query builder (`cause` chain). */
+export function isUniqueViolation(err: unknown): boolean {
+  let current: unknown = err;
+  for (let depth = 0; depth < 5 && typeof current === 'object' && current !== null; depth += 1) {
+    if ('code' in current && (current as { code?: unknown }).code === '23505') return true;
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
