@@ -264,3 +264,46 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   reading. The result screen keeps the display on (wakelock) while open. (F5)
 - **D-100** — `scripts/check-no-provider-keys.ps1` walks the tree itself and skips build folders without descending
   (Gradle transform paths exceed the Windows path limit). (F5)
+
+## Faz 6 — branches, template pool, settings, usage, release
+
+- **D-101** — Branch menu API: the stored menu (screenshot items, accepted cards, recommendations) grouped by status.
+  `missingFields` come from the latest screenshot flags; fields the matched template does not have are stored as
+  `n/a` and never reported. "Var" on the phone turns a recommendation into a menu item (`incomplete`, source
+  `manual`). Export: CSV for Turkish Excel (BOM + `;`, Turkish headers, one row per product, content from the accepted
+  card or else the matched template, never prices) and JSON; the file name comes from the branch name. (F6)
+- **D-102** — CSV cells starting with `= + - @`, tab or CR get a leading apostrophe (CSV/formula injection), for every
+  export including the seed review CSV. (F6)
+- **D-103** — Template pool: any user edit makes the template `source='user'` (re-seeding never touches it).
+  Deleting a seed template archives it (`approved=false`, `source='seed'`) and the seed skips archived seeds, so the
+  `SEED_ON_START` of the next container start does not bring it back; restoring = `PATCH {approved:true}`. An
+  unapproved AI draft with the same name gives way to a user-created or archived template (unique constraint).
+  `sort=name` orders by the ASCII-folded name so Ç/İ/Ş names sort the same under any DB collation. The phone loads the
+  approved pool (≤ 500) once, filters locally (instant, Turkish-insensitive search on names and aliases) and keeps a
+  Drift copy for offline reading. (F6)
+- **D-104** — Usage summary is per signed-in user: provider attempts from `usage_log` per model / task / error code,
+  cache-hit ratio of runs, DB-hit ratio of cards and today's quota. No money estimate (no price table) — tokens are
+  shown instead (plan decision 18). (F6)
+- **D-105** — Settings: theme stored in the local key/value table and applied at startup; the per-task dropdown only
+  offers the server's `eligibleModels` and sets the primary model (the rest of the chain stays as fallback); cuisine
+  minimum counts and notes are editable, system cuisine names stay fixed. (F6)
+- **D-106** — Navigation: "Kart hazırla" from a branch opens the Mod 1 card inside the Şubeler tab (third run
+  controller slot); "Menü analizi" from a branch switches to the Tamamla tab with the branch preselected (one gap
+  controller, no duplicated state). (F6)
+- **D-107** — Release signing: `mobile/scripts/create-keystore.ps1` (run by the user) creates a PKCS12 upload key
+  (RSA 4096, one password handed to keytool through an environment variable) and `android/key.properties` with an
+  absolute forward-slash path; both are git-ignored. Local release builds without it use the debug key; the CI
+  release job fails when the signing secrets are missing instead of publishing a debug-signed "release". Default
+  output is a universal APK (~65 MB); `--split-per-abi` is documented. I did not generate the user's keystore. (F6)
+- **D-108** — CI actions (latest majors checked with `gh api` on 2026-09-15): checkout v7, setup-node v7 (Node 22),
+  pnpm/action-setup v6 with `version: 11` (package.json uses `devEngines`, not `packageManager`),
+  subosito/flutter-action v2 (stable), setup-java v6 (Temurin 17), upload-artifact v7, docker login v4 / buildx v4 /
+  metadata v6 / build-push v7. The API image is built for linux/amd64 only (DigitalOcean droplet). (F6)
+- **D-109** — Production deploy = `deploy/docker-compose.prod.yml` (GHCR image, no build on the droplet,
+  Postgres/Redis not published, json-file log rotation, secrets in `/etc/menu-kopilot/env` outside the deploy
+  directory with mode 600) + `scripts/deploy.ps1` (uploads compose file and Caddyfile with LF, pull, up, waits for
+  `/health/ready`). Docker's `restart: unless-stopped` + per-service memory limits take the role of a systemd unit.
+  Nothing was pushed, published or deployed (D-002). (F6)
+- **D-110** — The README privacy paragraph quotes the provider pages as checked on 2026-09-15 (Gemini API Additional
+  Terms, last updated 2026-04-28: unpaid content used for product improvement + human review, "do not submit
+  sensitive…"; Groq: no retention by default, up to 30 days for reliability/abuse logs unless Zero Data Retention). (F6)

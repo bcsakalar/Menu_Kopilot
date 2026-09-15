@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 5 done.
+Last update: 2026-09-15 — Faz 6 done (all planned phases complete; Faz 7 optional, not started).
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -19,24 +19,28 @@ Last update: 2026-09-15 — Faz 5 done.
 - [x] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
 - [x] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
 - [x] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
-- [ ] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
+- [x] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 5 complete. Faz 6 in progress — steps 1 (backend, 255 tests) and 2 (Flutter screens, 37 tests) are done and
-committed; next is step 3 (release + CI + README). Faz 6 steps:
-1. Backend: `GET /branches/:id/menu` (items grouped by status), `DELETE /branches/:id/menu/:itemId`,
-   `GET /branches/:id/export?format=csv|json` (accepted payloads, no prices, CSV = UTF-8 BOM + `;`);
-   `modules/templates/` API (`GET /templates?q=&cuisineId=&source=&approved=&sort=usage|name|updated&limit&cursor`,
-   `GET/PATCH/DELETE /templates/:id`, `POST /templates`; edits re-embed); `GET /usage/summary?range=today|month`
-   (calls, per model, tokens, cache-hit and DB-hit ratio, errors) + e2e tests.
-2. Flutter: Şubeler tab (list, create/edit via `features/branches/branch_form.dart`, delete, detail = menu + target
-   override + export via share_plus), Şablonlar tab (search/filter/sort, edit with `CardEditorScreen`, delete,
-   offline via `CachedTemplates`), Ayarlar (cuisines + min counts, task-based model dropdown from
-   `/settings/providers`, quota, theme, server URL) and a Kullanım screen.
-3. Release: `mobile/scripts/create-keystore.ps1`, `flutter build apk --release`, `.github/workflows/{ci,release}.yml`,
-   README complete (setup, env, keys, 1 GB VPS deploy with the win-to-linux-deploy skill, APK signing, privacy +
-   LOCAL_ONLY_MODE, AI disclaimer, SSE contract), acceptance table here. Commits per the plan.
+Faz 0–6 complete and committed. What is left is only verifiable by the user (see **Pending verification** below) or
+optional: Faz 7 (Whisper voice note → prompt, `groq/compound` research mode) — not started; if picked up, add
+`audio.transcribe` to `TASK_KEYS`/routes (Groq `whisper-large-v3-turbo`), a `POST /transcribe` endpoint and a mic
+button on the home screen (iOS mic permission text already in Info.plist).
+
+### Faz 6 inventory
+- Backend: `modules/branches/service.ts` (+ menu, status change, delete item, export), `modules/export/branch-export.ts`,
+  `modules/templates/{schemas,service,routes}.ts` (pool API; seed delete = archive), `modules/usage/*`
+  (`GET /usage/summary`), `lib/csv.ts` (formula-injection guard), `lib/errors.ts` (`isUniqueViolation` through `cause`),
+  seed skips archived seeds. Tests `test/e2e/{templates,branch-menu}.e2e.test.ts`, `test/unit/csv.test.ts` → 255 passing.
+- Mobile: `features/branches/{branches_screen,branch_detail_screen}.dart`, `features/templates/{template_pool,
+  templates_screen}.dart`, `features/settings/{settings_screen,cuisine_settings_screen,model_settings_screen}.dart`,
+  `features/usage/usage_screen.dart`, `core/utils/file_sharer.dart`, `data/models/{settings,template_item}.dart`,
+  persisted theme (`app.dart`, `main.dart`). Tests `test/unit/pool_and_settings_test.dart`,
+  `test/widget/branch_detail_screen_test.dart` → 37 passing, `flutter analyze` clean, `flutter build apk --release` OK
+  (debug-signed without `key.properties`, 64.5 MB universal APK).
+- Release/ops: `mobile/scripts/create-keystore.ps1`, `.github/workflows/{ci,release}.yml`, `deploy/docker-compose.prod.yml`,
+  `scripts/deploy.ps1`, `scripts/check-no-provider-keys.ps1` (cross-platform path), README complete.
 
 ### Faz 5 inventory
 - Backend `src/modules/gap/`: `schemas.ts` (panel item tri-state flags, DTOs, events), `dedupe.ts`,
@@ -121,13 +125,19 @@ committed; next is step 3 (release + CI + README). Faz 6 steps:
 | 9 | Provider down → fallback keeps working | ✅ router tests + e2e (Gemini 503 → Groq vision; Groq key removed → Gemini enrich) |
 | 10 | Broken JSON → item `needs_review`, request survives | ✅ e2e (one repair, then review cards, run completed) |
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
-| 12 | Release APK builds and runs on a real device | ⏳ |
-| 13 | README: setup, VPS deploy, key acquisition, APK build | ⏳ |
-| 14 | DECISIONS.md lists all assumptions | ◐ ongoing |
+| 12 | Release APK builds and runs on a real device | ◐ `flutter build apk --release` succeeds locally (debug key without `key.properties`); signed build + device run pending |
+| 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-110 |
 
 ## Pending verification by the user
-- Fix Docker Desktop (D-056), then from the repo root: `docker compose up -d --build` and open
-  `http://localhost:3000/health/ready` (expects `{"status":"ready"}`) and `http://localhost:3000/docs`.
+- Fix Docker Desktop (D-056; the daemon was still unreachable on 2026-09-15), then from the repo root:
+  `docker compose up -d --build` and open `http://localhost:3000/health/ready` (expects `{"status":"ready"}`) and
+  `http://localhost:3000/docs`.
 - Review `backend/exports/seed-templates.csv` (regenerate with `pnpm db:export-seed --from=files`).
 - Put `GEMINI_API_KEY` / `GROQ_API_KEY` in `.env`, then `cd backend; pnpm test:smoke` (verifies model IDs incl.
-  `gemini-embedding-2`, strict schemas, vision).
+  `gemini-embedding-2`, strict schemas, vision); then time a real menu photo (first card < 6 s) and a 2–3 screenshot
+  gap analysis (< 8 s).
+- Release signing: `powershell -File mobile/scripts/create-keystore.ps1`, `flutter build apk --release`, install on the
+  phone and walk through login → Öneri → Tamamla → Şubeler → export.
+- GitHub: create the repository, push, add the release secrets (see README → CI / release), push a `v1.0.0` tag.
+- Droplet: one-time preparation + `scripts/deploy.ps1` as in README → Deploying to a 1 GB VPS.
