@@ -12,6 +12,7 @@ import 'features/gap/gap_controller.dart';
 import 'features/gap/gap_result_screen.dart';
 import 'features/gap/gap_screen.dart';
 import 'features/home/home_screen.dart';
+import 'features/research/research_screen.dart';
 import 'features/results/results_screen.dart';
 import 'features/results/run_controller.dart';
 import 'features/settings/cuisine_settings_screen.dart';
@@ -127,6 +128,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: ':id',
                     builder: (_, state) => BranchDetailScreen(branchId: state.pathParameters['id'] ?? ''),
+                    routes: [
+                      GoRoute(
+                        path: 'research',
+                        builder: (_, state) => ResearchScreen(branchId: state.pathParameters['id'] ?? ''),
+                      ),
+                    ],
                   ),
                 ],
               ),

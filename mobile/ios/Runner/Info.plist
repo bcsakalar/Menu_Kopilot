@@ -13,7 +13,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Galeriden menü fotoğrafı veya panel ekran görüntüsü seçmek için kullanılır.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Kamera eklentisi için gereklidir; ses kaydı yapılmaz.</string>
+	<string>Sesli not için mikrofon kullanılır: söylediğin ürün adları yazıya çevrilir, kayıt saklanmaz.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

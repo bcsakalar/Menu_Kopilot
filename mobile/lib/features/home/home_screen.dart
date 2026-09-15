@@ -12,6 +12,7 @@ import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
 import '../offline/background.dart';
 import '../results/run_controller.dart';
+import '../voice/voice_note_button.dart';
 import 'cuisine_picker.dart';
 import 'home_controller.dart';
 
@@ -127,7 +128,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   decoration: InputDecoration(labelText: l10n.promptLabel, hintText: l10n.promptHint, alignLabelWithHint: true),
                   onChanged: notifier.setPrompt,
                 ),
-                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: VoiceNoteButton(
+                    cuisineId: draft.cuisineId,
+                    onText: (transcription) {
+                      final addition = transcription.items.isNotEmpty ? transcription.items.join('\n') : transcription.text;
+                      final current = _prompt.text.trimRight();
+                      _prompt.text = current.isEmpty ? addition : '$current\n$addition';
+                      notifier.setPrompt(_prompt.text);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 4,

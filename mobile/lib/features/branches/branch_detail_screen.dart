@@ -155,6 +155,12 @@ class _BranchDetailScreenState extends ConsumerState<BranchDetailScreen> {
         title: Text(branch?.name ?? l10n.navBranches),
         actions: [
           if (branch != null) ...[
+            IconButton(
+              key: const Key('research-branch'),
+              tooltip: l10n.researchTitle,
+              icon: const Icon(Icons.travel_explore),
+              onPressed: () => context.push('/branches/${branch.id}/research'),
+            ),
             IconButton(key: const Key('export-branch'), tooltip: l10n.export, icon: const Icon(Icons.ios_share), onPressed: _busy ? null : () => _export(branch)),
             PopupMenuButton<String>(
               onSelected: (value) async {

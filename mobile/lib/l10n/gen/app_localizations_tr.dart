@@ -758,6 +758,89 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get voiceNote => 'Sesli not';
+
+  @override
+  String voiceRecording(String time) {
+    return 'Bitir ($time)';
+  }
+
+  @override
+  String get voiceSending => 'Yazıya çevriliyor…';
+
+  @override
+  String get voiceEmpty => 'Kayıtta konuşma anlaşılamadı';
+
+  @override
+  String get voiceNeedsNetwork => 'Sesli not için internet bağlantısı gerekli';
+
+  @override
+  String get micPermission => 'Sesli not için mikrofon izni gerekli';
+
+  @override
+  String get researchTitle => 'İnternette araştır';
+
+  @override
+  String get researchHint =>
+      'Restoranın herkese açık sayfaları (web sitesi, harita kaydı, sosyal medya) taranır. Bulunan ürünleri restoranla teyit et; fiyat ve iletişim bilgisi alınmaz.';
+
+  @override
+  String get researchStart => 'Restoranı internette araştır';
+
+  @override
+  String get researchRunning =>
+      'Web\'de aranıyor… (yarım dakika kadar sürebilir)';
+
+  @override
+  String get researchAgain => 'Yeniden araştır';
+
+  @override
+  String researchFound(int count) {
+    return 'İnternette $count ürün bulundu';
+  }
+
+  @override
+  String get researchNotFound => 'Restoran internette bulunamadı';
+
+  @override
+  String researchConfidence(int value) {
+    return 'güven %$value';
+  }
+
+  @override
+  String researchCachedAt(String date) {
+    return 'kayıtlı sonuç: $date';
+  }
+
+  @override
+  String researchNotOnMenu(int count) {
+    return 'Menüde olmayanlar ($count)';
+  }
+
+  @override
+  String researchOnMenu(int count) {
+    return 'Menüde olanlar ($count)';
+  }
+
+  @override
+  String researchItems(int count) {
+    return 'Bulunan ürünler ($count)';
+  }
+
+  @override
+  String researchPrepareAll(int count) {
+    return '$count ürün için kart hazırla';
+  }
+
+  @override
+  String researchTemplate(String name) {
+    return 'şablon: $name';
+  }
+
+  @override
+  String get researchSources => 'Kaynaklar';
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override

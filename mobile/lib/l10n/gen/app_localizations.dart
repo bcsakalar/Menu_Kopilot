@@ -1432,6 +1432,132 @@ abstract class AppLocalizations {
   /// **'{calls} çağrı · {failed} hata · {tokens} token'**
   String modelUsageLine(int calls, int failed, int tokens);
 
+  /// No description provided for @voiceNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sesli not'**
+  String get voiceNote;
+
+  /// No description provided for @voiceRecording.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitir ({time})'**
+  String voiceRecording(String time);
+
+  /// No description provided for @voiceSending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yazıya çevriliyor…'**
+  String get voiceSending;
+
+  /// No description provided for @voiceEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtta konuşma anlaşılamadı'**
+  String get voiceEmpty;
+
+  /// No description provided for @voiceNeedsNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sesli not için internet bağlantısı gerekli'**
+  String get voiceNeedsNetwork;
+
+  /// No description provided for @micPermission.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sesli not için mikrofon izni gerekli'**
+  String get micPermission;
+
+  /// No description provided for @researchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İnternette araştır'**
+  String get researchTitle;
+
+  /// No description provided for @researchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Restoranın herkese açık sayfaları (web sitesi, harita kaydı, sosyal medya) taranır. Bulunan ürünleri restoranla teyit et; fiyat ve iletişim bilgisi alınmaz.'**
+  String get researchHint;
+
+  /// No description provided for @researchStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Restoranı internette araştır'**
+  String get researchStart;
+
+  /// No description provided for @researchRunning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Web\'de aranıyor… (yarım dakika kadar sürebilir)'**
+  String get researchRunning;
+
+  /// No description provided for @researchAgain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden araştır'**
+  String get researchAgain;
+
+  /// No description provided for @researchFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'İnternette {count} ürün bulundu'**
+  String researchFound(int count);
+
+  /// No description provided for @researchNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Restoran internette bulunamadı'**
+  String get researchNotFound;
+
+  /// No description provided for @researchConfidence.
+  ///
+  /// In tr, this message translates to:
+  /// **'güven %{value}'**
+  String researchConfidence(int value);
+
+  /// No description provided for @researchCachedAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'kayıtlı sonuç: {date}'**
+  String researchCachedAt(String date);
+
+  /// No description provided for @researchNotOnMenu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüde olmayanlar ({count})'**
+  String researchNotOnMenu(int count);
+
+  /// No description provided for @researchOnMenu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüde olanlar ({count})'**
+  String researchOnMenu(int count);
+
+  /// No description provided for @researchItems.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulunan ürünler ({count})'**
+  String researchItems(int count);
+
+  /// No description provided for @researchPrepareAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ürün için kart hazırla'**
+  String researchPrepareAll(int count);
+
+  /// No description provided for @researchTemplate.
+  ///
+  /// In tr, this message translates to:
+  /// **'şablon: {name}'**
+  String researchTemplate(String name);
+
+  /// No description provided for @researchSources.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynaklar'**
+  String get researchSources;
+
   /// No description provided for @settingsTitle.
   ///
   /// In tr, this message translates to:

@@ -11,6 +11,7 @@ import '../../data/models/settings.dart';
 import '../../data/models/suggestion.dart';
 import '../../data/models/template_item.dart';
 import '../../data/models/template_payload.dart';
+import '../../data/models/voice_research.dart';
 import '../storage/token_store.dart';
 import 'api_exception.dart';
 import 'sse.dart';
@@ -455,6 +456,33 @@ class ApiClient {
   Future<UsageSummary> usageSummary(String range) => _guard(() async {
         final response = await _dio.get<Json>('/usage/summary', queryParameters: {'range': range});
         return UsageSummary.fromJson(response.data ?? const {});
+      });
+
+  // ---- voice notes & research (Faz 7) -----------------------------------------------------------------------
+
+  /// Sends a recorded voice note; the server turns it into text + product names (the file is not stored).
+  Future<Transcription> transcribe(String path, {String language = 'tr', String? cuisineId}) => _guard(() async {
+        final response = await _dio.post<Json>(
+          '/transcribe',
+          data: FormData.fromMap({
+            'language': language,
+            'cuisineId': ?cuisineId,
+            'audio': await MultipartFile.fromFile(path, filename: 'note.m4a', contentType: DioMediaType('audio', 'mp4')),
+          }),
+          options: Options(receiveTimeout: const Duration(seconds: 60)),
+        );
+        return Transcription.fromJson(response.data ?? const {});
+      });
+
+  /// Searches the web for the branch's restaurant (slow: web search + reading pages).
+  Future<ResearchResult> research({String? branchId, String? restaurantName, String? city, bool refresh = false}) =>
+      _guard(() async {
+        final response = await _dio.post<Json>(
+          '/research',
+          data: {'branchId': ?branchId, 'restaurantName': ?restaurantName, 'city': ?city, 'refresh': refresh},
+          options: Options(receiveTimeout: const Duration(seconds: 120)),
+        );
+        return ResearchResult.fromJson(response.data ?? const {});
       });
 
   // ---- gap analysis (Mod 2) ---------------------------------------------------------------------------------

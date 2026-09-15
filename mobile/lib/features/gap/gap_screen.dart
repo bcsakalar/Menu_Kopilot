@@ -10,6 +10,7 @@ import '../../core/widgets/common.dart';
 import '../../data/models/branch.dart';
 import '../branches/branch_form.dart';
 import '../branches/branch_providers.dart';
+import '../voice/voice_note_button.dart';
 import 'gap_controller.dart';
 
 /// "Menü Tamamlama" (Mod 2): pick the branch, add platform panel screenshots → gap analysis with a call checklist.
@@ -146,6 +147,17 @@ class _GapScreenState extends ConsumerState<GapScreen> {
                     maxLines: 4,
                     decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
                     onChanged: notifier.setNotes,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: VoiceNoteButton(
+                      cuisineId: branch?.cuisineId,
+                      onText: (transcription) {
+                        final current = _notes.text.trimRight();
+                        _notes.text = current.isEmpty ? transcription.text : '$current ${transcription.text}';
+                        notifier.setNotes(_notes.text);
+                      },
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
