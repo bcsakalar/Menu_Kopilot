@@ -13,10 +13,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('tr');
   final database = AppDatabase();
+  final theme = themeModeFromWire(await database.readKv(themeModeKey));
   unawaited(registerBackgroundSync().catchError((Object e) => debugPrint('background sync unavailable: $e')));
   runApp(
     ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        themeModeProvider.overrideWith(() => ThemeModeController(theme)),
+      ],
       child: const MenuKopilotApp(),
     ),
   );

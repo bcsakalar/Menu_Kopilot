@@ -23,7 +23,8 @@ Last update: 2026-09-15 — Faz 5 done.
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 5 complete. Next: Faz 6, in this order:
+Faz 5 complete. Faz 6 in progress — steps 1 (backend, 255 tests) and 2 (Flutter screens, 37 tests) are done and
+committed; next is step 3 (release + CI + README). Faz 6 steps:
 1. Backend: `GET /branches/:id/menu` (items grouped by status), `DELETE /branches/:id/menu/:itemId`,
    `GET /branches/:id/export?format=csv|json` (accepted payloads, no prices, CSV = UTF-8 BOM + `;`);
    `modules/templates/` API (`GET /templates?q=&cuisineId=&source=&approved=&sort=usage|name|updated&limit&cursor`,

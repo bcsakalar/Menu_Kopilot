@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/providers.dart';
 import 'core/theme.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'router.dart';
@@ -30,12 +31,24 @@ class MenuKopilotApp extends ConsumerWidget {
   }
 }
 
-/// Theme preference (light / dark / system); persisted by the settings screen.
+const String themeModeKey = 'ui.theme';
+
+ThemeMode themeModeFromWire(String? value) =>
+    ThemeMode.values.firstWhere((m) => m.name == value, orElse: () => ThemeMode.system);
+
+/// Theme preference (light / dark / system); persisted in the local database. main() passes the stored value.
 final themeModeProvider = NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 
 class ThemeModeController extends Notifier<ThemeMode> {
-  @override
-  ThemeMode build() => ThemeMode.system;
+  ThemeModeController([this._initial = ThemeMode.system]);
 
-  void set(ThemeMode mode) => state = mode;
+  final ThemeMode _initial;
+
+  @override
+  ThemeMode build() => _initial;
+
+  Future<void> set(ThemeMode mode) async {
+    state = mode;
+    await ref.read(appDatabaseProvider).writeKv(themeModeKey, mode.name);
+  }
 }

@@ -7,7 +7,9 @@ import '../../data/models/branch.dart';
 import '../../data/models/common.dart';
 import '../../data/models/gap.dart';
 import '../../data/models/json.dart';
+import '../../data/models/settings.dart';
 import '../../data/models/suggestion.dart';
+import '../../data/models/template_item.dart';
 import '../../data/models/template_payload.dart';
 import '../storage/token_store.dart';
 import 'api_exception.dart';
@@ -345,6 +347,114 @@ class ApiClient {
 
   Future<void> deleteBranch(String id) => _guard(() async {
         await _dio.delete<Object?>('/branches/$id');
+      });
+
+  Future<BranchMenu> branchMenu(String branchId) => _guard(() async {
+        final response = await _dio.get<Json>('/branches/$branchId/menu');
+        return BranchMenu.fromJson(response.data ?? const {});
+      });
+
+  Future<BranchMenu> updateMenuItem(String branchId, String itemId, MenuItemStatus status) => _guard(() async {
+        final response = await _dio.patch<Json>('/branches/$branchId/menu/$itemId', data: {'status': status.name});
+        return BranchMenu.fromJson(response.data ?? const {});
+      });
+
+  Future<void> deleteMenuItem(String branchId, String itemId) => _guard(() async {
+        await _dio.delete<Object?>('/branches/$branchId/menu/$itemId');
+      });
+
+  /// Branch menu export; the file name comes from the server's Content-Disposition.
+  Future<({String fileName, String body})> exportBranch(String branchId, {String format = 'csv'}) => _guard(() async {
+        final response = await _dio.get<String>(
+          '/branches/$branchId/export',
+          queryParameters: {'format': format},
+          options: Options(responseType: ResponseType.plain),
+        );
+        final disposition = response.headers.value('content-disposition') ?? '';
+        final match = RegExp('filename="([^"]+)"').firstMatch(disposition);
+        return (fileName: match?.group(1) ?? 'menu.$format', body: response.data ?? '');
+      });
+
+  // ---- template pool ----------------------------------------------------------------------------------------
+
+  Future<({List<TemplateItem> items, int total})> templates({
+    String? query,
+    String? cuisineId,
+    String? source,
+    String approved = 'true',
+    String sort = 'usage',
+    int limit = 500,
+    int offset = 0,
+  }) =>
+      _guard(() async {
+        final response = await _dio.get<Json>(
+          '/templates',
+          queryParameters: {
+            'q': ?query,
+            'cuisineId': ?cuisineId,
+            'source': ?source,
+            'approved': approved,
+            'sort': sort,
+            'limit': limit,
+            'offset': offset,
+          },
+        );
+        final data = response.data ?? const {};
+        return (
+          items: data.objects('data').map(TemplateItem.fromJson).toList(),
+          total: (data.object('meta') ?? const {}).integer('total'),
+        );
+      });
+
+  Future<TemplateItem> updateTemplate(String id, Json changes) => _guard(() async {
+        final response = await _dio.patch<Json>('/templates/$id', data: changes);
+        return TemplateItem.fromJson(response.data ?? const {});
+      });
+
+  /// Returns true when a seed template was archived instead of deleted.
+  Future<bool> deleteTemplate(String id) => _guard(() async {
+        final response = await _dio.delete<Json>('/templates/$id');
+        return (response.data ?? const {}).boolean('archived');
+      });
+
+  // ---- settings, cuisines, usage ----------------------------------------------------------------------------
+
+  Future<ProviderSettings> providerSettings() => _guard(() async {
+        final response = await _dio.get<Json>('/settings/providers');
+        return ProviderSettings.fromJson(response.data ?? const {});
+      });
+
+  Future<ProviderSettings> setPrimaryModel(String taskKey, String model) => _guard(() async {
+        final response = await _dio.put<Json>('/settings/providers/$taskKey', data: {'model': model});
+        return ProviderSettings.fromJson(response.data ?? const {});
+      });
+
+  Future<QuotaInfo> quota() => _guard(() async {
+        final response = await _dio.get<Json>('/settings/quota');
+        return QuotaInfo.fromJson(response.data ?? const {});
+      });
+
+  Future<Cuisine> createCuisine({required String name, required int minItemCount, String? parentId, String? notes}) =>
+      _guard(() async {
+        final response = await _dio.post<Json>(
+          '/cuisines',
+          data: {'name': name, 'minItemCount': minItemCount, 'parentId': ?parentId, 'notes': ?notes},
+        );
+        return Cuisine.fromJson(response.data ?? const {});
+      });
+
+  Future<Cuisine> updateCuisine(String id, Json changes) => _guard(() async {
+        final response = await _dio.patch<Json>('/cuisines/$id', data: changes);
+        return Cuisine.fromJson(response.data ?? const {});
+      });
+
+  Future<void> deleteCuisine(String id) => _guard(() async {
+        await _dio.delete<Object?>('/cuisines/$id');
+      });
+
+  Future<UsageSummary> usageSummary(String range) => _guard(() async {
+        final response = await _dio.get<Json>('/usage/summary', queryParameters: {'range': range});
+        return UsageSummary.fromJson(response.data ?? const {});
       });
 
   // ---- gap analysis (Mod 2) ---------------------------------------------------------------------------------

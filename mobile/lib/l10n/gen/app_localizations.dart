@@ -982,6 +982,456 @@ abstract class AppLocalizations {
   /// **'Kart hazırla'**
   String get prepareCard;
 
+  /// No description provided for @branchStatusDraft.
+  ///
+  /// In tr, this message translates to:
+  /// **'Taslak'**
+  String get branchStatusDraft;
+
+  /// No description provided for @branchStatusInProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get branchStatusInProgress;
+
+  /// No description provided for @branchStatusReady.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hazır'**
+  String get branchStatusReady;
+
+  /// No description provided for @branchStatusOpened.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıldı'**
+  String get branchStatusOpened;
+
+  /// No description provided for @deleteBranch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şubeyi sil'**
+  String get deleteBranch;
+
+  /// No description provided for @deleteBranchConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" şubesi ve menüsü silinsin mi?'**
+  String deleteBranchConfirm(String name);
+
+  /// No description provided for @deleteMenuItemConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" şube menüsünden silinsin mi?'**
+  String deleteMenuItemConfirm(String name);
+
+  /// No description provided for @menu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menü'**
+  String get menu;
+
+  /// No description provided for @export.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dışa aktar'**
+  String get export;
+
+  /// No description provided for @exportCsv.
+  ///
+  /// In tr, this message translates to:
+  /// **'Excel (CSV)'**
+  String get exportCsv;
+
+  /// No description provided for @exportCsvHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkçe Excel\'de doğrudan açılır'**
+  String get exportCsvHint;
+
+  /// No description provided for @exportJson.
+  ///
+  /// In tr, this message translates to:
+  /// **'JSON'**
+  String get exportJson;
+
+  /// No description provided for @menuOnMenu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüde ({count})'**
+  String menuOnMenu(int count);
+
+  /// No description provided for @menuIncomplete.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eksik bilgi ({count})'**
+  String menuIncomplete(int count);
+
+  /// No description provided for @menuRecommended.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerilen ({count})'**
+  String menuRecommended(int count);
+
+  /// No description provided for @markComplete.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get markComplete;
+
+  /// No description provided for @markAvailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Var'**
+  String get markAvailable;
+
+  /// No description provided for @cardAccepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart onaylı'**
+  String get cardAccepted;
+
+  /// No description provided for @targetAutomatic.
+  ///
+  /// In tr, this message translates to:
+  /// **'otomatik hedef (mutfak minimumu)'**
+  String get targetAutomatic;
+
+  /// No description provided for @searchTemplates.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şablon ara (ad veya takma ad)'**
+  String get searchTemplates;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sırala'**
+  String get sortBy;
+
+  /// No description provided for @sortUsage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıma göre'**
+  String get sortUsage;
+
+  /// No description provided for @sortName.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ada göre'**
+  String get sortName;
+
+  /// No description provided for @sortUpdated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son değişene göre'**
+  String get sortUpdated;
+
+  /// No description provided for @allSources.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get allSources;
+
+  /// No description provided for @sourceUser.
+  ///
+  /// In tr, this message translates to:
+  /// **'Onaylı (kullanıcı)'**
+  String get sourceUser;
+
+  /// No description provided for @noTemplates.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şablon bulunamadı'**
+  String get noTemplates;
+
+  /// No description provided for @templateCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} şablon'**
+  String templateCount(int count);
+
+  /// No description provided for @usedTimes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kez kullanıldı'**
+  String usedTimes(int count);
+
+  /// No description provided for @aliases.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takma adlar'**
+  String get aliases;
+
+  /// No description provided for @templateSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şablon kaydedildi'**
+  String get templateSaved;
+
+  /// No description provided for @deleteTemplateConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" şablonu silinsin mi?'**
+  String deleteTemplateConfirm(String name);
+
+  /// No description provided for @deleteSeedTemplateConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)'**
+  String deleteSeedTemplateConfirm(String name);
+
+  /// No description provided for @menuSettings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menü'**
+  String get menuSettings;
+
+  /// No description provided for @cuisinesAndMinimums.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mutfak türleri ve minimum ürün sayıları'**
+  String get cuisinesAndMinimums;
+
+  /// No description provided for @cuisinesAndMinimumsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube hedefleri buradan hesaplanır'**
+  String get cuisinesAndMinimumsHint;
+
+  /// No description provided for @newCuisine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni mutfak türü'**
+  String get newCuisine;
+
+  /// No description provided for @cuisineName.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mutfak adı'**
+  String get cuisineName;
+
+  /// No description provided for @minItemCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Minimum ürün sayısı'**
+  String get minItemCount;
+
+  /// No description provided for @minimumsHelp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerçek platform minimumlarını buraya gir. Şube hedefi = en az 10 veya bu sayı (hangisi büyükse); şubede elle hedef girilebilir.'**
+  String get minimumsHelp;
+
+  /// No description provided for @minimumLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Minimum {min} · hedef {target} ürün'**
+  String minimumLine(int min, int target);
+
+  /// No description provided for @aiSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay zekâ'**
+  String get aiSection;
+
+  /// No description provided for @aiModels.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev bazlı modeller'**
+  String get aiModels;
+
+  /// No description provided for @aiModelsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her iş için birincil model; diğerleri yedek'**
+  String get aiModelsHint;
+
+  /// No description provided for @aiModelsHelp.
+  ///
+  /// In tr, this message translates to:
+  /// **'API anahtarları yalnızca sunucuda durur. Buradan her görev için birincil modeli seçersin; zincirin kalanı otomatik yedek olarak kullanılır.'**
+  String get aiModelsHelp;
+
+  /// No description provided for @providerReady.
+  ///
+  /// In tr, this message translates to:
+  /// **'hazır'**
+  String get providerReady;
+
+  /// No description provided for @providerNoKey.
+  ///
+  /// In tr, this message translates to:
+  /// **'anahtar yok'**
+  String get providerNoKey;
+
+  /// No description provided for @preview.
+  ///
+  /// In tr, this message translates to:
+  /// **'önizleme'**
+  String get preview;
+
+  /// No description provided for @fallbackChain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yedek: {chain}'**
+  String fallbackChain(String chain);
+
+  /// No description provided for @quotaToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünkü kota'**
+  String get quotaToday;
+
+  /// No description provided for @quotaLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'{calls}/{dailyCalls} çağrı · {tokens}/{dailyTokens} token'**
+  String quotaLine(int calls, int dailyCalls, int tokens, int dailyTokens);
+
+  /// No description provided for @localOnlyOn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor'**
+  String get localOnlyOn;
+
+  /// No description provided for @quotaExceeded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük kota doldu'**
+  String get quotaExceeded;
+
+  /// No description provided for @appearance.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm'**
+  String get appearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koyu'**
+  String get themeDark;
+
+  /// No description provided for @serverStatus.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu durumu: {status}'**
+  String serverStatus(String status);
+
+  /// No description provided for @usageTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanım'**
+  String get usageTitle;
+
+  /// No description provided for @rangeToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get rangeToday;
+
+  /// No description provided for @rangeMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ay'**
+  String get rangeMonth;
+
+  /// No description provided for @aiCalls.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI çağrısı'**
+  String get aiCalls;
+
+  /// No description provided for @failedCalls.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatalı'**
+  String get failedCalls;
+
+  /// No description provided for @tokens.
+  ///
+  /// In tr, this message translates to:
+  /// **'Token'**
+  String get tokens;
+
+  /// No description provided for @avgLatency.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ort. süre'**
+  String get avgLatency;
+
+  /// No description provided for @runsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstek'**
+  String get runsLabel;
+
+  /// No description provided for @cacheHitRatio.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI\'sız cevap'**
+  String get cacheHitRatio;
+
+  /// No description provided for @cardsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart'**
+  String get cardsLabel;
+
+  /// No description provided for @dbHitRatio.
+  ///
+  /// In tr, this message translates to:
+  /// **'DB\'den kart'**
+  String get dbHitRatio;
+
+  /// No description provided for @cardsBreakdown.
+  ///
+  /// In tr, this message translates to:
+  /// **'{db} DB/hazır şablon · {ai} AI · {review} inceleme'**
+  String cardsBreakdown(int db, int ai, int review);
+
+  /// No description provided for @byModel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Modele göre'**
+  String get byModel;
+
+  /// No description provided for @byTask.
+  ///
+  /// In tr, this message translates to:
+  /// **'Göreve göre'**
+  String get byTask;
+
+  /// No description provided for @errorsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatalar'**
+  String get errorsLabel;
+
+  /// No description provided for @noUsage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu aralıkta AI çağrısı yok'**
+  String get noUsage;
+
+  /// No description provided for @modelUsageLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'{calls} çağrı · {failed} hata · {tokens} token'**
+  String modelUsageLine(int calls, int failed, int tokens);
+
   /// No description provided for @settingsTitle.
   ///
   /// In tr, this message translates to:

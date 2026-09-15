@@ -29,21 +29,6 @@ class AppShell extends StatelessWidget {
   }
 }
 
-/// Temporary screen for tabs delivered in later phases.
-class ComingSoonScreen extends StatelessWidget {
-  const ComingSoonScreen({required this.title, super.key});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: EmptyState(icon: Icons.construction_outlined, message: title),
-    );
-  }
-}
-
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 

@@ -500,6 +500,264 @@ class AppLocalizationsTr extends AppLocalizations {
   String get prepareCard => 'Kart hazırla';
 
   @override
+  String get branchStatusDraft => 'Taslak';
+
+  @override
+  String get branchStatusInProgress => 'Devam ediyor';
+
+  @override
+  String get branchStatusReady => 'Hazır';
+
+  @override
+  String get branchStatusOpened => 'Açıldı';
+
+  @override
+  String get deleteBranch => 'Şubeyi sil';
+
+  @override
+  String deleteBranchConfirm(String name) {
+    return '\"$name\" şubesi ve menüsü silinsin mi?';
+  }
+
+  @override
+  String deleteMenuItemConfirm(String name) {
+    return '\"$name\" şube menüsünden silinsin mi?';
+  }
+
+  @override
+  String get menu => 'Menü';
+
+  @override
+  String get export => 'Dışa aktar';
+
+  @override
+  String get exportCsv => 'Excel (CSV)';
+
+  @override
+  String get exportCsvHint => 'Türkçe Excel\'de doğrudan açılır';
+
+  @override
+  String get exportJson => 'JSON';
+
+  @override
+  String menuOnMenu(int count) {
+    return 'Menüde ($count)';
+  }
+
+  @override
+  String menuIncomplete(int count) {
+    return 'Eksik bilgi ($count)';
+  }
+
+  @override
+  String menuRecommended(int count) {
+    return 'Önerilen ($count)';
+  }
+
+  @override
+  String get markComplete => 'Tamam';
+
+  @override
+  String get markAvailable => 'Var';
+
+  @override
+  String get cardAccepted => 'Kart onaylı';
+
+  @override
+  String get targetAutomatic => 'otomatik hedef (mutfak minimumu)';
+
+  @override
+  String get searchTemplates => 'Şablon ara (ad veya takma ad)';
+
+  @override
+  String get sortBy => 'Sırala';
+
+  @override
+  String get sortUsage => 'Kullanıma göre';
+
+  @override
+  String get sortName => 'Ada göre';
+
+  @override
+  String get sortUpdated => 'Son değişene göre';
+
+  @override
+  String get allSources => 'Tümü';
+
+  @override
+  String get sourceUser => 'Onaylı (kullanıcı)';
+
+  @override
+  String get noTemplates => 'Şablon bulunamadı';
+
+  @override
+  String templateCount(int count) {
+    return '$count şablon';
+  }
+
+  @override
+  String usedTimes(int count) {
+    return '$count kez kullanıldı';
+  }
+
+  @override
+  String get aliases => 'Takma adlar';
+
+  @override
+  String get templateSaved => 'Şablon kaydedildi';
+
+  @override
+  String deleteTemplateConfirm(String name) {
+    return '\"$name\" şablonu silinsin mi?';
+  }
+
+  @override
+  String deleteSeedTemplateConfirm(String name) {
+    return '\"$name\" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)';
+  }
+
+  @override
+  String get menuSettings => 'Menü';
+
+  @override
+  String get cuisinesAndMinimums => 'Mutfak türleri ve minimum ürün sayıları';
+
+  @override
+  String get cuisinesAndMinimumsHint => 'Şube hedefleri buradan hesaplanır';
+
+  @override
+  String get newCuisine => 'Yeni mutfak türü';
+
+  @override
+  String get cuisineName => 'Mutfak adı';
+
+  @override
+  String get minItemCount => 'Minimum ürün sayısı';
+
+  @override
+  String get minimumsHelp =>
+      'Gerçek platform minimumlarını buraya gir. Şube hedefi = en az 10 veya bu sayı (hangisi büyükse); şubede elle hedef girilebilir.';
+
+  @override
+  String minimumLine(int min, int target) {
+    return 'Minimum $min · hedef $target ürün';
+  }
+
+  @override
+  String get aiSection => 'Yapay zekâ';
+
+  @override
+  String get aiModels => 'Görev bazlı modeller';
+
+  @override
+  String get aiModelsHint => 'Her iş için birincil model; diğerleri yedek';
+
+  @override
+  String get aiModelsHelp =>
+      'API anahtarları yalnızca sunucuda durur. Buradan her görev için birincil modeli seçersin; zincirin kalanı otomatik yedek olarak kullanılır.';
+
+  @override
+  String get providerReady => 'hazır';
+
+  @override
+  String get providerNoKey => 'anahtar yok';
+
+  @override
+  String get preview => 'önizleme';
+
+  @override
+  String fallbackChain(String chain) {
+    return 'Yedek: $chain';
+  }
+
+  @override
+  String get quotaToday => 'Bugünkü kota';
+
+  @override
+  String quotaLine(int calls, int dailyCalls, int tokens, int dailyTokens) {
+    return '$calls/$dailyCalls çağrı · $tokens/$dailyTokens token';
+  }
+
+  @override
+  String get localOnlyOn =>
+      'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor';
+
+  @override
+  String get quotaExceeded => 'Günlük kota doldu';
+
+  @override
+  String get appearance => 'Görünüm';
+
+  @override
+  String get themeSystem => 'Sistem';
+
+  @override
+  String get themeLight => 'Açık';
+
+  @override
+  String get themeDark => 'Koyu';
+
+  @override
+  String serverStatus(String status) {
+    return 'Sunucu durumu: $status';
+  }
+
+  @override
+  String get usageTitle => 'Kullanım';
+
+  @override
+  String get rangeToday => 'Bugün';
+
+  @override
+  String get rangeMonth => 'Bu ay';
+
+  @override
+  String get aiCalls => 'AI çağrısı';
+
+  @override
+  String get failedCalls => 'Hatalı';
+
+  @override
+  String get tokens => 'Token';
+
+  @override
+  String get avgLatency => 'Ort. süre';
+
+  @override
+  String get runsLabel => 'İstek';
+
+  @override
+  String get cacheHitRatio => 'AI\'sız cevap';
+
+  @override
+  String get cardsLabel => 'Kart';
+
+  @override
+  String get dbHitRatio => 'DB\'den kart';
+
+  @override
+  String cardsBreakdown(int db, int ai, int review) {
+    return '$db DB/hazır şablon · $ai AI · $review inceleme';
+  }
+
+  @override
+  String get byModel => 'Modele göre';
+
+  @override
+  String get byTask => 'Göreve göre';
+
+  @override
+  String get errorsLabel => 'Hatalar';
+
+  @override
+  String get noUsage => 'Bu aralıkta AI çağrısı yok';
+
+  @override
+  String modelUsageLine(int calls, int failed, int tokens) {
+    return '$calls çağrı · $failed hata · $tokens token';
+  }
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override

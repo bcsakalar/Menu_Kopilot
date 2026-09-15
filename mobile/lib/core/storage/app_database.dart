@@ -139,4 +139,19 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> clearChecked(String analysisId) =>
       (delete(checklistTicks)..where((t) => t.analysisId.equals(analysisId))).go();
+
+  // ---- template pool cache ----------------------------------------------------------------------------------
+
+  Future<List<CachedTemplate>> cachedTemplateRows() =>
+      (select(cachedTemplates)..orderBy([(t) => OrderingTerm.desc(t.usageCount), (t) => OrderingTerm.asc(t.searchKey)])).get();
+
+  /// Replaces the whole cached pool (the server copy is the truth).
+  Future<void> replaceCachedTemplates(List<CachedTemplatesCompanion> rows) => transaction(() async {
+        await delete(cachedTemplates).go();
+        await batch((b) => b.insertAll(cachedTemplates, rows));
+      });
+
+  Future<void> upsertCachedTemplate(CachedTemplatesCompanion row) => into(cachedTemplates).insertOnConflictUpdate(row);
+
+  Future<void> deleteCachedTemplate(String id) => (delete(cachedTemplates)..where((t) => t.id.equals(id))).go();
 }

@@ -98,6 +98,7 @@ String _normalizeName(String value) => value.trim().toLowerCase();
 /// opened from the gap checklist does not replace the run shown in the "Öneri" tab.
 const String runSlotSuggest = 'suggest';
 const String runSlotGap = 'gap';
+const String runSlotBranches = 'branches';
 
 class RunController extends Notifier<RunViewState> {
   RunController(this.slot);
