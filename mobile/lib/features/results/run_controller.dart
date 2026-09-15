@@ -12,7 +12,9 @@ import '../../core/storage/app_database.dart';
 import '../../core/utils/image_compressor.dart';
 import '../../data/models/suggestion.dart';
 import '../../data/models/template_payload.dart';
+import '../branches/branch_providers.dart';
 import '../offline/background.dart';
+import '../templates/template_pool.dart';
 
 /// Everything the results screen needs to start a run (images stay on the device for "Devam et").
 class RunRequest {
@@ -328,7 +330,11 @@ class RunController extends Notifier<RunViewState> {
     if (!payload.hasContent) return 'acceptNeedsContent';
     try {
       final result = await _api.accept(cardId, payload: card.edited ? payload : null, branchId: branchId);
+      if (!ref.mounted) return null;
       _replace(result.card);
+      // The approved card is now a template (pool) and possibly a branch menu item.
+      ref.invalidate(templatePoolProvider);
+      if (branchId != null || state.request?.data.branchId != null) ref.invalidate(branchesProvider);
       return null;
     } on ApiException catch (e) {
       if (e.isNetwork) {

@@ -96,8 +96,10 @@ class TemplatePoolController extends AsyncNotifier<TemplatePool> {
   @override
   Future<TemplatePool> build() async {
     final db = ref.read(appDatabaseProvider);
+    // Watching the client reloads the pool when the server address changes.
+    final api = ref.watch(apiClientProvider);
     try {
-      final page = await ref.read(apiClientProvider).templates(limit: 500);
+      final page = await api.templates(limit: 500);
       await db.replaceCachedTemplates(page.items.map(_row).toList());
       return TemplatePool(items: page.items);
     } on ApiException catch (e) {
