@@ -32,7 +32,8 @@ button on the home screen (iOS mic permission text already in Info.plist).
 - Backend: `modules/branches/service.ts` (+ menu, status change, delete item, export), `modules/export/branch-export.ts`,
   `modules/templates/{schemas,service,routes}.ts` (pool API; seed delete = archive), `modules/usage/*`
   (`GET /usage/summary`), `lib/csv.ts` (formula-injection guard), `lib/errors.ts` (`isUniqueViolation` through `cause`),
-  seed skips archived seeds. Tests `test/e2e/{templates,branch-menu}.e2e.test.ts`, `test/unit/csv.test.ts` → 255 passing.
+  seed skips archived seeds; `gap/menu-merge.ts` + `attachAcceptedCard` (a card and its panel row = one product,
+  D-111). Tests `test/e2e/{templates,branch-menu}.e2e.test.ts`, `test/unit/csv.test.ts` → 261 passing.
 - Mobile: `features/branches/{branches_screen,branch_detail_screen}.dart`, `features/templates/{template_pool,
   templates_screen}.dart`, `features/settings/{settings_screen,cuisine_settings_screen,model_settings_screen}.dart`,
   `features/usage/usage_screen.dart`, `core/utils/file_sharer.dart`, `data/models/{settings,template_item}.dart`,
@@ -127,7 +128,7 @@ button on the home screen (iOS mic permission text already in Info.plist).
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ◐ `flutter build apk --release` succeeds locally (debug key without `key.properties`); signed build + device run pending |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-110 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-111 |
 
 ## Pending verification by the user
 - Fix Docker Desktop (D-056; the daemon was still unreachable on 2026-09-15), then from the repo root:

@@ -15,6 +15,20 @@ export function trigrams(value: string): Set<string> {
   return set;
 }
 
+/** Index of the candidate most similar to `value` (first one on ties); -1 for an empty list. */
+export function mostSimilarIndex(value: string, candidates: readonly string[]): number {
+  let best = -1;
+  let bestScore = -1;
+  candidates.forEach((candidate, index) => {
+    const score = trigramSimilarity(candidate, value);
+    if (score > bestScore) {
+      best = index;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+
 export function trigramSimilarity(a: string, b: string): number {
   const ta = trigrams(a);
   const tb = trigrams(b);

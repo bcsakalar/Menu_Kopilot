@@ -16,6 +16,7 @@ import type { RetrievalService } from '../retrieval/retrieval.service.js';
 import { getTemplates } from '../templates/template-store.js';
 import { assessCompleteness, expectationsFor } from './completeness.js';
 import { dedupePanelItems } from './dedupe.js';
+import { mergeWithStoredMenu } from './menu-merge.js';
 import { buildQuestions, cuisineQuestions, missingItemQuestion, type QuestionItemInput } from './questions.js';
 import {
   MenuIndex,
@@ -209,21 +210,16 @@ export class GapPipeline {
     }
 
     // ---- 3. counts ----------------------------------------------------------------------------------------------
+    const merge = mergeWithStoredMenu(existing, items);
+    const current = merge.current;
+    // Everything on the menu (any name, any matched template) is excluded from the recommendations.
     const menu = new MenuIndex();
     const menuNames: string[] = [];
-    let current = 0;
-    for (const row of existing) {
-      if (row.status === 'missing') continue;
-      if (menu.add(row.normalizedName, row.matchedItemId)) {
-        current += 1;
-        menuNames.push(row.rawName);
-      }
-    }
-    for (const item of items) {
-      if (menu.add(item.normalized, item.matchedTemplateId)) {
-        current += 1;
-        menuNames.push(item.name);
-      }
+    for (const product of [
+      ...existing.filter((r) => r.status !== 'missing').map((r) => ({ name: r.rawName, normalized: r.normalizedName, templateId: r.matchedItemId })),
+      ...items.map((i) => ({ name: i.name, normalized: i.normalized, templateId: i.matchedTemplateId })),
+    ]) {
+      if (menu.add(product.normalized, product.templateId)) menuNames.push(product.name);
     }
     const target = run.branch.targetItemCount ?? Math.max(MIN_BRANCH_ITEMS, run.cuisine.minItemCount);
     const counts: CountsDto = {
@@ -332,6 +328,7 @@ export class GapPipeline {
         stored,
         items,
         recommendations,
+        renames: merge.renames,
       });
     }
     return {

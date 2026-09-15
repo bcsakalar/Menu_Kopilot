@@ -1,8 +1,9 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type { Executor } from '../../db/client.js';
 import { branchMenuItems, branches, cuisines } from '../../db/schema/index.js';
 import type { TemplatePayload } from '../../domain/template.js';
 import { notFound } from '../../lib/errors.js';
+import { mostSimilarIndex } from '../../lib/trigram.js';
 
 /** Branch menu helpers shared by Mod 1 (accepted cards) and Mod 2 (panel screenshots / recommendations). */
 
@@ -68,6 +69,67 @@ export async function upsertBranchItem(db: Executor, branchId: string, item: Bra
     .insert(branchMenuItems)
     .values(values)
     .onConflictDoUpdate({ target: [branchMenuItems.branchId, branchMenuItems.normalizedName], set: values });
+}
+
+/**
+ * A card accepted in Mod 1 for the branch. When the menu has no row with the card's name but panel rows matched to
+ * the same template exist ("Adana Dürüm" ↔ card "Adana Kebap"), the card is attached to the most similar panel row
+ * that has no card yet instead of adding a second product; otherwise it is upserted by name.
+ */
+export async function attachAcceptedCard(
+  db: Executor,
+  branchId: string,
+  card: { name: string; normalizedName: string; templateId: string; payload: TemplatePayload },
+): Promise<void> {
+  const [sameName] = await db
+    .select({ id: branchMenuItems.id })
+    .from(branchMenuItems)
+    .where(and(eq(branchMenuItems.branchId, branchId), eq(branchMenuItems.normalizedName, card.normalizedName)))
+    .limit(1);
+  if (!sameName) {
+    const panelRows = await db
+      .select({ id: branchMenuItems.id, normalizedName: branchMenuItems.normalizedName })
+      .from(branchMenuItems)
+      .where(
+        and(
+          eq(branchMenuItems.branchId, branchId),
+          eq(branchMenuItems.matchedItemId, card.templateId),
+          eq(branchMenuItems.source, 'screenshot'),
+          inArray(branchMenuItems.status, ['ok', 'incomplete']),
+          isNull(branchMenuItems.payload),
+        ),
+      );
+    const row = panelRows[mostSimilarIndex(card.normalizedName, panelRows.map((r) => r.normalizedName))];
+    if (row) {
+      await db
+        .update(branchMenuItems)
+        .set({
+          status: 'ok',
+          payload: card.payload,
+          hasDescription: card.payload.description.length > 0,
+          hasOptions: card.payload.optionGroups.length > 0,
+          hasRemovables: card.payload.removableIngredients.length > 0,
+          completenessScore: 1,
+          // The card covers the content; the next screenshot analysis refreshes the panel flags.
+          flags: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(branchMenuItems.id, row.id));
+      return;
+    }
+  }
+  await upsertBranchItem(db, branchId, {
+    rawName: card.name,
+    normalizedName: card.normalizedName,
+    matchedItemId: card.templateId,
+    status: 'ok',
+    source: 'suggestion',
+    hasDescription: card.payload.description.length > 0,
+    hasOptions: card.payload.optionGroups.length > 0,
+    hasRemovables: card.payload.removableIngredients.length > 0,
+    completenessScore: 1,
+    payload: card.payload,
+  });
 }
 
 /**

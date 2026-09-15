@@ -7,7 +7,7 @@ import { type TemplatePayload, templatePayloadSchema } from '../../domain/templa
 import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { JobQueue } from '../../jobs/queue.js';
-import { recomputeBranchCount, requireBranch, upsertBranchItem } from '../branches/branch-menu.js';
+import { attachAcceptedCard, recomputeBranchCount, requireBranch } from '../branches/branch-menu.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import { addAliases, findApprovedByName, getTemplate, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { PipelineResult, SuggestPipeline } from './pipeline.js';
@@ -239,16 +239,10 @@ export class SuggestService {
           .set({ accepted: true, editedPayload: edited ? (payload) : null, matchedItemId: targetId })
           .where(eq(suggestionItems.id, itemId));
         if (branchId) {
-          await upsertBranchItem(tx, branchId, {
-            rawName: payload.name,
+          await attachAcceptedCard(tx, branchId, {
+            name: payload.name,
             normalizedName: normalizeTr(payload.name),
-            matchedItemId: targetId,
-            status: 'ok',
-            source: 'suggestion',
-            hasDescription: payload.description.length > 0,
-            hasOptions: payload.optionGroups.length > 0,
-            hasRemovables: payload.removableIngredients.length > 0,
-            completenessScore: 1,
+            templateId: targetId,
             payload,
           });
           await recomputeBranchCount(tx, branchId);

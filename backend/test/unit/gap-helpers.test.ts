@@ -13,6 +13,7 @@ import {
   itemQuestion,
   missingItemQuestion,
 } from '../../src/modules/gap/questions.js';
+import { type StoredMenuRow, mergeWithStoredMenu } from '../../src/modules/gap/menu-merge.js';
 import { MenuIndex, wantedRecommendations } from '../../src/modules/gap/recommend.js';
 import {
   type GapItemDto,
@@ -237,6 +238,48 @@ describe('call checklist', () => {
     });
     expect(plan.reservedForAi).toBe(0);
     expect(plan.questions.map((q) => q.kind)).toEqual(['missing_field', 'missing_item', 'missing_item', 'missing_item']);
+  });
+});
+
+describe('mergeWithStoredMenu', () => {
+  const row = (id: string, name: string, source: StoredMenuRow['source'], templateId: string | null, status: StoredMenuRow['status'] = 'ok'): StoredMenuRow => ({
+    id,
+    rawName: name,
+    normalizedName: normalizeTr(name),
+    matchedItemId: templateId,
+    status,
+    source,
+  });
+  const product = (name: string, templateId: string | null) => ({ name, normalized: normalizeTr(name), matchedTemplateId: templateId });
+
+  it('counts a re-read product once and keeps stored products that are not on the screenshots', () => {
+    const merge = mergeWithStoredMenu(
+      [row('r1', 'Lahmacun', 'screenshot', 't-lah'), row('r2', 'Künefe', 'screenshot', 't-kun'), row('r3', 'Ayran', 'recommendation', 't-ay', 'missing')],
+      [product('Lahmacun', 't-lah'), product('Ayran', 't-ay')],
+    );
+    expect(merge).toEqual({ renames: [], current: 3 });
+  });
+
+  it('links a card accepted under another name to the panel product (1:1 by template)', () => {
+    const merge = mergeWithStoredMenu([row('c1', 'Adana Kebap', 'suggestion', 't-adana')], [product('Adana Dürüm', 't-adana')]);
+    expect(merge).toEqual({ renames: [{ rowId: 'c1', rawName: 'Adana Dürüm', normalizedName: 'adana durum' }], current: 1 });
+  });
+
+  it('keeps different panel products apart even when they share a template; the card joins the closest one', () => {
+    const merge = mergeWithStoredMenu(
+      [row('c1', 'Adana Porsiyonu', 'suggestion', 't-adana')],
+      [product('Adana Dürüm', 't-adana'), product('Adana Porsiyon', 't-adana')],
+    );
+    expect(merge).toEqual({ renames: [{ rowId: 'c1', rawName: 'Adana Porsiyon', normalizedName: 'adana porsiyon' }], current: 2 });
+  });
+
+  it('counts extra cards of the same template separately', () => {
+    const merge = mergeWithStoredMenu(
+      [row('c1', 'Adana Kebap', 'suggestion', 't-adana'), row('c2', 'Acılı Adana', 'manual', 't-adana')],
+      [product('Adana Dürüm', 't-adana')],
+    );
+    expect(merge.renames).toHaveLength(1);
+    expect(merge.current).toBe(2);
   });
 });
 

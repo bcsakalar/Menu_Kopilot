@@ -3,17 +3,11 @@ import type { Database } from '../../db/client.js';
 import { branchMenuItems, branchMenuSnapshots, suggestionRuns } from '../../db/schema/index.js';
 import { recomputeBranchCount, replaceRecommendations, upsertScreenshotItem } from '../branches/branch-menu.js';
 import { GAP_FIELDS } from './completeness.js';
+import type { MenuMerge, StoredMenuRow } from './menu-merge.js';
 import type { RecommendationCandidate } from './recommend.js';
 import { type GapItemDto, type GapResultDto, type GapStats, type StoredGap, storedGapSchema } from './schemas.js';
 
 type RunRow = typeof suggestionRuns.$inferSelect;
-
-export interface BranchMenuRow {
-  rawName: string;
-  normalizedName: string;
-  matchedItemId: string | null;
-  status: 'ok' | 'incomplete' | 'missing';
-}
 
 /** Persistence of gap runs: suggestion_runs (mode = gap), snapshots and the branch menu. */
 export class GapStore {
@@ -82,13 +76,15 @@ export class GapStore {
     return row;
   }
 
-  async loadBranchItems(branchId: string): Promise<BranchMenuRow[]> {
+  async loadBranchItems(branchId: string): Promise<StoredMenuRow[]> {
     return this.db
       .select({
+        id: branchMenuItems.id,
         rawName: branchMenuItems.rawName,
         normalizedName: branchMenuItems.normalizedName,
         matchedItemId: branchMenuItems.matchedItemId,
         status: branchMenuItems.status,
+        source: branchMenuItems.source,
       })
       .from(branchMenuItems)
       .where(eq(branchMenuItems.branchId, branchId));
@@ -102,8 +98,16 @@ export class GapStore {
     stored: StoredGap;
     items: readonly GapItemDto[];
     recommendations: readonly RecommendationCandidate[];
+    renames: MenuMerge['renames'];
   }): Promise<string> {
     return this.db.transaction(async (tx) => {
+      // A card accepted under another name becomes the row of the panel product (see menu-merge.ts).
+      for (const rename of input.renames) {
+        await tx
+          .update(branchMenuItems)
+          .set({ rawName: rename.rawName, normalizedName: rename.normalizedName, updatedAt: new Date() })
+          .where(and(eq(branchMenuItems.id, rename.rowId), eq(branchMenuItems.branchId, input.branchId)));
+      }
       const [snapshot] = await tx
         .insert(branchMenuSnapshots)
         .values({

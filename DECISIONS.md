@@ -237,7 +237,7 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   *Why:* matching only tunes expectations and hides already-present items from the recommendations; zero extra tokens
   and latency beat the small recall gain during a call. (F5)
 - **D-093** — Counts: `current` = union of the stored branch menu (ok/incomplete rows, e.g. cards accepted in Mod 1)
-  and the screenshot items, deduplicated by normalized name or matched template; `target` = branch override or
+  and the screenshot items, deduplicated by normalized name (template links refined in D-111); `target` = branch override or
   max(10, cuisine minimum). Items removed from the panel stay on the stored menu until deleted in the branch screen
   (Faz 6). (F5)
 - **D-094** — Recommendations: wanted = clamp(missing + 2, 3, 10). Approved templates of the same cuisine first, then
@@ -307,3 +307,9 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
 - **D-110** — The README privacy paragraph quotes the provider pages as checked on 2026-09-15 (Gemini API Additional
   Terms, last updated 2026-04-28: unpaid content used for product improvement + human review, "do not submit
   sensitive…"; Groq: no retention by default, up to 30 days for reliability/abuse logs unless Zero Data Retention). (F6)
+- **D-111** — Product identity on the branch menu: the same normalized name is one product; different panel names
+  are different products even when they match the same template (platform lists "Adana Dürüm" and "Adana Porsiyon"
+  separately, both count toward the target); a Mod 1 card and a panel row under another name linked by the template
+  are one product — the card row is renamed to the panel name during gap analysis, or the card is attached to the
+  most similar panel row without a card when accepted later (`gap/menu-merge.ts`, `attachAcceptedCard`). This keeps
+  `x / target` and `current_item_count` equal. (F6 review)

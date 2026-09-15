@@ -5,13 +5,14 @@ import { containsPriceAmount } from '../../src/lib/price-guard.js';
 import type { BranchDto, BranchMenuDto } from '../../src/modules/branches/schemas.js';
 import type { GapResultDto } from '../../src/modules/gap/schemas.js';
 import type { UsageSummary } from '../../src/modules/usage/schemas.js';
-import { FakeProvider, hashEmbedding } from '../helpers/fake-provider.js';
+import { FakeProvider, hashEmbedding, okJson } from '../helpers/fake-provider.js';
 import { type Fixtures, fixtureImage, fixtureResponder, loadFixtures, multipartBody } from '../helpers/fixtures.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
 
 describe('branch menu, export and usage summary', () => {
   let fx: Fixtures;
   let ctx: TestContext;
+  let gemini: FakeProvider;
   let token: string;
   let branch: BranchDto;
   let gap: GapResultDto;
@@ -24,7 +25,7 @@ describe('branch menu, export and usage summary', () => {
 
   beforeAll(async () => {
     fx = loadFixtures();
-    const gemini = new FakeProvider('gemini', fixtureResponder(fx), (texts, opts) => texts.map((t) => hashEmbedding(t, opts.dim)));
+    gemini = new FakeProvider('gemini', fixtureResponder(fx), (texts, opts) => texts.map((t) => hashEmbedding(t, opts.dim)));
     const groq = new FakeProvider('groq', fixtureResponder(fx));
     ctx = await createTestApp({ providers: { gemini, groq } });
     token = (await loginAs(ctx)).accessToken;
@@ -134,5 +135,96 @@ describe('branch menu, export and usage summary', () => {
 
     const month = await ctx.app.inject({ method: 'GET', url: '/api/v1/usage/summary?range=month', headers: bearer(token) });
     expect(month.json<UsageSummary>().totals.calls).toBe(2);
+  });
+
+  describe('a card accepted under another name than the panel shows is one product', () => {
+    const panelRow = (rawName: string) => ({
+      rawName,
+      description: 'absent',
+      options: 'present',
+      removables: 'absent',
+      sectionText: null,
+      confidence: 0.9,
+    });
+
+    const createBranch = async (name: string) => {
+      const res = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/v1/branches',
+        headers: bearer(token),
+        payload: { name, cuisineId: branch.cuisineId },
+      });
+      return res.json<BranchDto>();
+    };
+
+    const acceptCard = async (branchId: string, name: string) => {
+      const run = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/v1/suggest',
+        headers: bearer(token),
+        payload: { cuisineId: branch.cuisineId, promptText: name, branchId },
+      });
+      const card = run.json<{ cards: { id: string }[] }>().cards[0];
+      const res = await ctx.app.inject({
+        method: 'POST',
+        url: `/api/v1/suggestion-items/${card?.id ?? ''}/accept`,
+        headers: bearer(token),
+        payload: {},
+      });
+      expect(res.statusCode).toBe(200);
+    };
+
+    /** Gap analysis of a custom panel ("menu-pideci.jpg" stands in as the screenshot). */
+    const analyze = async (branchId: string, rows: string[]) => {
+      const image = fixtureImage(fx, 'menu-pideci.jpg');
+      ctx.cache.clear();
+      gemini.setResponder((opts, call) =>
+        opts.task === 'vision.panel_extract' ? okJson({ items: rows.map(panelRow) }) : fixtureResponder(fx)(opts, call),
+      );
+      try {
+        const body = multipartBody({ branchId }, [{ name: 'images', filename: 'panel.jpg', contentType: image.mimeType, data: image.data }]);
+        const res = await ctx.app.inject({
+          method: 'POST',
+          url: '/api/v1/gap-analysis',
+          headers: { ...bearer(token), ...body.headers },
+          payload: body.payload,
+        });
+        return res.json<GapResultDto>();
+      } finally {
+        gemini.setResponder(fixtureResponder(fx));
+      }
+    };
+
+    const onMenu = async (branchId: string) => {
+      const res = await ctx.app.inject({ method: 'GET', url: `/api/v1/branches/${branchId}/menu`, headers: bearer(token) });
+      const data = res.json<BranchMenuDto>();
+      return { count: data.branch.currentItemCount, items: data.items.filter((i) => i.status !== 'missing') };
+    };
+
+    it('card first, then the panel shows it as "Adana Dürüm"', async () => {
+      const b = await createBranch('Kart Önce Şubesi');
+      await acceptCard(b.id, 'Adana Kebap');
+      expect((await onMenu(b.id)).count).toBe(1);
+
+      const result = await analyze(b.id, ['Adana Dürüm', 'Lahmacun']);
+      expect(result.counts?.current).toBe(2);
+      const menu = await onMenu(b.id);
+      expect(menu.count).toBe(2);
+      expect(menu.items.map((i) => i.name).sort()).toEqual(['Adana Dürüm', 'Lahmacun']);
+      expect(menu.items.find((i) => i.name === 'Adana Dürüm')?.payload?.name).toBe('Adana Kebap');
+    });
+
+    it('panel first, then the card is attached to the panel row', async () => {
+      const b = await createBranch('Panel Önce Şubesi');
+      await analyze(b.id, ['Adana Dürüm']);
+      expect((await onMenu(b.id)).count).toBe(1);
+
+      await acceptCard(b.id, 'Adana Kebap');
+      const menu = await onMenu(b.id);
+      expect(menu.count).toBe(1);
+      expect(menu.items).toHaveLength(1);
+      expect(menu.items[0]).toMatchObject({ name: 'Adana Dürüm', status: 'ok' });
+      expect(menu.items[0]?.payload?.name).toBe('Adana Kebap');
+    });
   });
 });
