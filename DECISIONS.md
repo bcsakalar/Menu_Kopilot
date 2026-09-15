@@ -313,3 +313,38 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   are one product — the card row is renamed to the panel name during gap analysis, or the card is attached to the
   most similar panel row without a card when accepted later (`gap/menu-merge.ts`, `attachAcceptedCard`). This keeps
   `x / target` and `current_item_count` equal. (F6 review)
+
+## Faz 7 — voice notes and web research (optional phase, done after "devam et")
+
+- **D-112** — New task keys `audio.transcribe` (Groq `whisper-large-v3-turbo` → `whisper-large-v3`) and `research.web`
+  (`groq/compound` with `web_search` + `visit_website` → `groq/compound-mini` with `web_search`). Both chains are
+  Groq-only: no Gemini fallback (Gemini would need a different API shape for audio / search grounding). Settings list
+  only audio models for voice and only compound systems for research (`kind` `audio` / `compound`), so compound can
+  never become the model of a normal text task. (F7)
+- **D-113** — Transcription is a separate router method (`AiRouter.transcribe`) with the same availability, breaker,
+  cooldown and usage logging as generate; it is not charged to a request budget, and a rejected recording
+  (bad_request / unsupported) is not retried on the next model. Usage rows log 0 input tokens (audio is billed per
+  second) and the transcript's estimated tokens as output. (F7)
+- **D-114** — `POST /transcribe` accepts one file ≤ the upload limit, recognized by magic bytes (m4a/mp4 audio, mp3,
+  ogg, wav, webm, flac; HEIC-branded ftyp and AAC-ADTS rejected). The Whisper prompt is a DB template
+  (`transcribe.vocabulary`) filled with up to 40 approved template names (the selected cuisine first) so dish names
+  are spelled right and separated by commas. Price amounts are stripped from transcripts; results are cached per
+  audio hash + prompt. The phone records AAC mono 16 kHz at 48 kbps (Whisper downsamples to 16 kHz mono anyway),
+  stops at 90 s and deletes the file after upload. (F7)
+- **D-115** — Dictation parsing: sentence ends (`letter + . ! ?`) now split items, and spoken fillers ("… da
+  yapıyorlar", "satıyorlar", "varmış", "bizde …") are dropped. Typed prompts keep their behaviour. (F7)
+- **D-116** — `POST /research` uses JSON Object Mode (compound has no strict schema) with the schema in the prompt and a
+  lenient Zod envelope; one repair on invalid output; a separate request budget (2 calls / 250k input tokens) because
+  web pages inflate the prompt. Output is scrubbed: prices, phone numbers and e-mail addresses removed
+  (`lib/contact-guard.ts`), items de-duplicated and capped at 60, sources = real search results first
+  (`executed_tools`), then the model's citations, http(s) only, ≤ 8. Items are matched to templates without vectors
+  and, for a branch, marked on/off its menu. Cached 7 days per restaurant + city + cuisine + notes + prompt version;
+  `refresh: true` searches again. (F7)
+- **D-117** — Compound calls do not send `temperature` / reasoning parameters (not documented for compound); the
+  `country` search setting is not used because its value format is undocumented — city and country go into the
+  query text instead. To be confirmed by `pnpm test:smoke` with a real key. (F7)
+- **D-118** — Mobile: the voice note button sits under the Mod 1 prompt (names appended as lines) and the gap notes
+  (text appended); research lives in the Şubeler tab (`/branches/:id/research`) with "Kart hazırla" per missing item,
+  one Mod 1 run for all missing items, sources opened in the browser (url_launcher, copy as fallback) and the last
+  result kept on the phone. New plugins `record` and `url_launcher` (latest, pinned by `pubspec.lock`); Android
+  `RECORD_AUDIO` + an https VIEW query; the iOS microphone text now describes voice notes. (F7)

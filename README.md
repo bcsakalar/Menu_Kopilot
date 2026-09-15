@@ -9,6 +9,9 @@ A personal field assistant for a delivery platform branch-opening specialist. It
 - **Mod 2 · Menü Tamamlama (the main value):** screenshots of the restaurant's existing platform panel menu → a single
   screen for the live phone call: `12 / 14 ürün`, a "Çağrıda sor" checklist, items with missing fields
   (description / options / removable ingredients) and the products the menu most likely lacks.
+- **Extras:** *Sesli not* — dictate product names or call notes instead of typing (Groq Whisper); *İnternette
+  araştır* — what a branch's restaurant sells according to its public web pages, compared with the branch menu
+  (Groq compound web search). Both are optional and off in `LOCAL_ONLY_MODE`.
 
 > **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
 > restaurant; the app shows this warning on every result screen. The tool never talks to any delivery platform system:
@@ -103,6 +106,11 @@ reliability and abuse investigations unless **Zero Data Retention** is enabled i
 ([Groq: Your Data](https://console.groq.com/docs/your-data), checked 2026-09-15). Recommendations: use a paid Gemini
 key (or keep Gemini for text-only tasks), enable Groq ZDR, never photograph documents with personal data, and switch
 on `LOCAL_ONLY_MODE` when external processing is not acceptable. Policies change — re-check the linked pages.
+
+Voice notes are sent to Groq for transcription and are not stored by this backend (only a hash for the cache); the
+phone deletes the recording after upload. *İnternette araştır* sends the restaurant name, city and cuisine to Groq,
+whose compound system searches the public web (Tavily); the answer is reduced to menu item names and a short summary —
+prices, phone numbers and e-mail addresses are removed before anything is stored or shown.
 
 ## Local setup
 
@@ -212,6 +220,7 @@ have the shape `{ "error": { "code", "message", "details?", "requestId" } }`. In
 | Mod 2 | `POST /gap-analysis` (multipart: `branchId`, `extraNotes?`, `images[]` 1–5; SSE / async / sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`, `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest` |
 | Branches | `GET/POST /branches`, `GET/PATCH/DELETE /branches/:id`, `GET /branches/:id/menu`, `PATCH/DELETE /branches/:id/menu/:itemId`, `GET /branches/:id/export?format=csv\|json` |
 | Template pool | `GET /templates?q=&cuisineId=&source=&approved=&sort=usage\|name\|updated`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
+| Voice / research | `POST /transcribe` (multipart: `audio` m4a/mp3/ogg/wav/webm/flac, `language?`, `cuisineId?` → text + product names), `POST /research` (`branchId` or `restaurantName` + `city?` → items, summary, sources; cached 7 days, `refresh: true` to search again) |
 | Settings | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary?range=today\|month`, `GET/POST /prompts`, `POST /prompts/:id/activate` (admin) |
 | Health | `GET /health`, `GET /health/ready` (database + Redis) |
 
@@ -332,13 +341,14 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 ## Tests
 
-- Backend: `cd backend; pnpm test` — ~255 tests: Turkish normalization, price guard, env, seed data, JSON-schema
+- Backend: `cd backend; pnpm test` — ~280 tests: Turkish normalization, price guard, env, seed data, JSON-schema
   conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
   → up, and end-to-end runs of both pipelines against recorded fixtures (40 seed items with zero LLM calls, broken
   JSON → review cards, provider down → fallback, accepted card served from the DB, 12 unique items from overlapping
-  screenshots, LOCAL_ONLY_MODE). Fixtures are hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
+  screenshots, LOCAL_ONLY_MODE, voice notes and web research with contact/price scrubbing). Fixtures are
+  hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
 - Mobile: `cd mobile; flutter analyze; flutter test` — SSE parser, models, controllers (offline queue, gap stream,
-  template pool cache) and widget tests (cards, checklist, branch menu).
+  template pool cache) and widget tests (cards, checklist, branch menu, voice note button, research screen).
 - Acceptance criteria and what still needs a real device / real keys: [`PROGRESS.md`](PROGRESS.md).
 
 ## Troubleshooting
@@ -349,6 +359,8 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
   answering from the database and caches. **Ayarlar → Kullanım** shows calls, errors and cache/DB hit ratios.
 - **Photos are not read** — no provider key configured (Ayarlar → Görev bazlı modeller shows provider status), or
   both providers are down (circuit breaker opens for 60 s after 3 failures).
+- **Sesli not / İnternette araştır do nothing** — both need `GROQ_API_KEY` (Whisper and compound exist only on Groq)
+  and are refused in `LOCAL_ONLY_MODE`; voice notes also need the microphone permission on the phone.
 - **Release build warns about the Kotlin Gradle Plugin** (`flutter_image_compress_common`, `workmanager_android`) —
   upstream plugin issue, the build still succeeds; upgrade the plugins before upgrading Flutter (DECISIONS D-088).
 - **Docker Desktop fails to start on Windows** — see DECISIONS D-056 (stale `sailor-ingest.sock`); the backend tests do

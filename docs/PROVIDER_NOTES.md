@@ -86,6 +86,32 @@ Preview models "may be discontinued without notice" → vision fallback chain mu
   cool down the model until reset when `remaining-tokens` < estimated request tokens, exponential backoff
   with full jitter otherwise.
 
+### 1.7 Speech-to-text (Faz 7 — checked 2026-09-15)
+Source: https://console.groq.com/docs/speech-to-text
+- `POST /openai/v1/audio/transcriptions` (multipart). Fields: `file` (or `url`), `model`, optional `language`
+  (ISO-639-1, e.g. `tr`), `prompt` (≤ 224 tokens — we pass template names as vocabulary), `response_format`
+  (`json` | `verbose_json` | `text`; we use `verbose_json` for `language` + `duration`), `temperature` (0–1),
+  `timestamp_granularities[]`.
+- Formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm. Size: **25 MB free tier**, 100 MB dev tier.
+  Minimum billed length 10 s. Audio is downsampled to 16 kHz mono server-side → the app records mono 16 kHz AAC.
+- `whisper-large-v3-turbo` (faster, cheaper, no translation) → primary; `whisper-large-v3` → fallback.
+
+### 1.8 Compound systems (Faz 7 — checked 2026-09-15)
+Sources: https://console.groq.com/docs/compound, …/compound/built-in-tools, …/compound/systems/compound,
+https://console.groq.com/docs/web-search
+- `groq/compound` (several tool calls per request) and `groq/compound-mini` (one tool call, ~3× lower latency)
+  via the normal chat completions endpoint. Context 131,072, max output 8,192. Capabilities list includes
+  **JSON Object Mode** (no strict json_schema) → the router embeds the schema in the prompt and Zod validates.
+- Built-in tools: `web_search`, `visit_website`, `code_interpreter`, `wolfram_alpha`; all enabled by default.
+  We restrict with `compound_custom: { tools: { enabled_tools: [...] } }` (research: `web_search` + `visit_website`).
+- Response: `choices[0].message.executed_tools[]`, web search results under `search_results` (title, url, content,
+  score) → surfaced as `CallMeta.sources`. Search is powered by Tavily. `search_settings`
+  (`include_domains` / `exclude_domains` / `country`) exists; the `country` value format is not documented → unused.
+- Not documented: `temperature`, `reasoning_effort` → not sent for compound models. Rate limits follow the
+  underlying models. Versioning header `Groq-Model-Version` (not used — latest).
+- Unverified until `pnpm test:smoke` runs with a key: JSON mode behaviour and the exact `executed_tools` shape
+  (parsed leniently: array or `{ results: [...] }`).
+
 ---
 
 ## 2. Gemini
@@ -193,4 +219,4 @@ Other listed IDs (not used): `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5
 | (not mentioned) | Gemini 3 has no `temperature` in `generation_config` | use `thinking_level` / `max_output_tokens` only |
 | (not mentioned) | multiple texts in one `contents` → one aggregated vector | one `Content` per text |
 | (not mentioned) | Groq strict mode rejects `minLength/maxLength/pattern/format` | sanitize schema per provider; Zod enforces limits |
-| Whisper in "Faz 6" (section 0) vs "Faz 7" (section 6) | — | Faz 7 (optional); `audio.transcribe` task key reserved |
+| Whisper in "Faz 6" (section 0) vs "Faz 7" (section 6) | — | built in Faz 7: `audio.transcribe` (turbo → v3), `research.web` (compound → compound-mini) |

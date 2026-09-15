@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 6 done (all planned phases complete; Faz 7 optional, not started).
+Last update: 2026-09-15 — Faz 7 (optional) done; all phases complete.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -20,13 +20,24 @@ Last update: 2026-09-15 — Faz 6 done (all planned phases complete; Faz 7 optio
 - [x] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
 - [x] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
 - [x] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
-- [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
+- [x] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 0–6 complete and committed. What is left is only verifiable by the user (see **Pending verification** below) or
-optional: Faz 7 (Whisper voice note → prompt, `groq/compound` research mode) — not started; if picked up, add
-`audio.transcribe` to `TASK_KEYS`/routes (Groq `whisper-large-v3-turbo`), a `POST /transcribe` endpoint and a mic
-button on the home screen (iOS mic permission text already in Info.plist).
+Faz 0–7 complete and committed. What is left is only verifiable by the user (see **Pending verification** below).
+Ideas not built (not in the spec): research results as extra "var mı?" lines in the gap checklist; a Gemini
+fallback for voice notes.
+
+### Faz 7 inventory
+- Backend: `config/models.ts` (tasks `audio.transcribe`, `research.web`; whisper v3, compound, compound-mini),
+  `ai/providers/groq.provider.ts` (`transcribe`, compound tools + `executed_tools` sources), `ai/router.ts`
+  (`transcribe`), `ai/errors.ts` (`providerFailure`), `lib/{audio,contact-guard,uploads}.ts`, `modules/voice/*`
+  (`POST /transcribe`), `modules/research/*` (`POST /research`), prompts `transcribe.vocabulary`, `research.system`,
+  `research.user`, dictation-aware `suggest/prompt-parse.ts`. Tests `test/unit/voice-research.test.ts`,
+  `test/e2e/voice-research.e2e.test.ts`, smoke tests for Whisper + compound → 279 passing.
+- Mobile: `features/voice/{voice_recorder,voice_note_button}.dart` (home prompt + gap notes),
+  `features/research/{research_controller,research_screen}.dart` (`/branches/:id/research`),
+  `data/models/voice_research.dart`, API `transcribe` / `research`, packages `record`, `url_launcher`.
+  Tests `test/widget/voice_research_test.dart` → 41 passing.
 
 ### Faz 6 inventory
 - Backend: `modules/branches/service.ts` (+ menu, status change, delete item, export), `modules/export/branch-export.ts`,
@@ -128,7 +139,7 @@ button on the home screen (iOS mic permission text already in Info.plist).
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ◐ `flutter build apk --release` succeeds locally (debug key without `key.properties`); signed build + device run pending |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-111 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-118 |
 
 ## Pending verification by the user
 - Fix Docker Desktop (D-056; the daemon was still unreachable on 2026-09-15), then from the repo root:
@@ -136,8 +147,9 @@ button on the home screen (iOS mic permission text already in Info.plist).
   `http://localhost:3000/docs`.
 - Review `backend/exports/seed-templates.csv` (regenerate with `pnpm db:export-seed --from=files`).
 - Put `GEMINI_API_KEY` / `GROQ_API_KEY` in `.env`, then `cd backend; pnpm test:smoke` (verifies model IDs incl.
-  `gemini-embedding-2`, strict schemas, vision); then time a real menu photo (first card < 6 s) and a 2–3 screenshot
-  gap analysis (< 8 s).
+  `gemini-embedding-2`, strict schemas, vision, Whisper and compound JSON mode + sources); then time a real menu photo
+  (first card < 6 s) and a 2–3 screenshot gap analysis (< 8 s).
+- On the phone: dictate a voice note (mic permission prompt) and run "İnternette araştır" for a real restaurant.
 - Release signing: `powershell -File mobile/scripts/create-keystore.ps1`, `flutter build apk --release`, install on the
   phone and walk through login → Öneri → Tamamla → Şubeler → export.
 - GitHub: create the repository, push, add the release secrets (see README → CI / release), push a `v1.0.0` tag.
