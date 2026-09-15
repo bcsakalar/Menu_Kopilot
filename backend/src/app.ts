@@ -23,6 +23,8 @@ import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
+import { cuisineRoutes } from './modules/cuisines/routes.js';
+import { CuisineService } from './modules/cuisines/service.js';
 import { VisionExtractor } from './modules/extraction/vision-extractor.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { promptRoutes } from './modules/prompts/routes.js';
@@ -214,6 +216,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await secured.register(settingsRoutes, { service: settingsService });
         await secured.register(promptRoutes, { prompts: ai.prompts });
         await secured.register(suggestRoutes, { service: suggestService, uploads: config.uploads });
+        await secured.register(cuisineRoutes, { service: new CuisineService(db) });
       });
     },
     { prefix: '/api/v1' },

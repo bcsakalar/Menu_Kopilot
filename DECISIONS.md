@@ -186,3 +186,33 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   `scripts/generate-fixture-images.ps1` (System.Drawing, Windows) from `test/fixtures/images/menus.json`; LLM
   responses are hand-authored "recorded" fixtures (see `test/fixtures/llm/README.md`); `pnpm fixtures:record`
   re-records them with real keys into `*.recorded.json` for comparison. (F3)
+- **D-079** — Cuisines got their full CRUD API early (`/api/v1/cuisines`) because the app's home screen needs the list;
+  system cuisines keep their names but their minimum counts/notes are editable, user cuisines can be deleted when
+  unused. Correlated sub-queries with Drizzle column interpolation lose table qualifiers, so counts use a grouped
+  query instead. (F3/F4)
+
+## Faz 4
+
+- **D-080** — Flutter state: Riverpod 3 without code generation (manual `Notifier`/`AsyncNotifier` providers); models
+  use hand-written `fromJson/toJson`; `build_runner` only for Drift. Generated files (`app_database.g.dart`,
+  `lib/l10n/gen/*`) are committed so analysis/builds never depend on a generator step. (F4)
+- **D-081** — Networking: Dio with a queued auth interceptor (one refresh on 401, request retried once, session
+  cleared if refresh fails) and GET-only retries on network/5xx errors. `POST /suggest` is never retried
+  automatically — offline requests go to the queue instead (no duplicate runs). Base URL is entered at login
+  (default via `--dart-define=API_BASE_URL`). (F4)
+- **D-082** — Offline: Drift tables `kv_entries`, `recent_runs` (last 30 snapshots readable offline), `pending_requests`
+  (suggest/accept/skip; photos copied to the documents folder), `checklist_ticks`, `cached_templates`. The queue is
+  flushed when connectivity returns and, on Android, by WorkManager every 15 min with a network constraint (works with
+  the app closed). iOS flushes only while the app is open (native BG task registration left out). (F4)
+- **D-083** — Leaving the results screen only stops listening; the server run continues. A history entry is written at
+  `run` time, so reopening it loads the snapshot and polls while the run is still going. (F4)
+- **D-084** — Photo compression: both `minWidth` and `minHeight` get the target short side so the long edge lands on
+  1600 px in any orientation; JPEG quality 80 → 70 → 60 until ≤ 1.5 MB; EXIF (incl. GPS) stripped; dedupe by
+  sha256. (F4)
+- **D-085** — Editing: tapping a text field on a card opens a one-field sheet ("inline"); the full editor handles option
+  groups and lists. Choosing `sets_base` for one option turns the whole group into the base-price group (single,
+  required); the client normalizes before sending and the server validates again. (F4)
+- **D-086** — Android: minSdk 24; cleartext HTTP only in debug builds (local backend); release uses HTTPS. Release
+  signing from `android/key.properties` or `ANDROID_KEYSTORE_*` env vars, else the debug key. (F4)
+- **D-087** — The Tamamla / Şubeler / Şablonlar tabs exist from Faz 4 as placeholders so navigation is final; they are
+  implemented in Faz 5–6. (F4)

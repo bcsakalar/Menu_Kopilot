@@ -1,0 +1,336 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+
+import '../../data/models/common.dart';
+import '../../data/models/json.dart';
+import '../../data/models/suggestion.dart';
+import '../../data/models/template_payload.dart';
+import '../storage/token_store.dart';
+import 'api_exception.dart';
+import 'sse.dart';
+
+class UploadImage {
+  const UploadImage({required this.path, required this.sha256});
+  final String path;
+  final String sha256;
+}
+
+class SuggestRequestData {
+  const SuggestRequestData({
+    required this.cuisineId,
+    this.promptText = '',
+    this.branchId,
+    this.deepMode = false,
+    this.images = const [],
+  });
+
+  final String cuisineId;
+  final String promptText;
+  final String? branchId;
+  final bool deepMode;
+  final List<UploadImage> images;
+
+  Json toJson() => {
+        'cuisineId': cuisineId,
+        'promptText': promptText,
+        'branchId': branchId,
+        'deepMode': deepMode,
+        'images': images.map((i) => {'path': i.path, 'sha256': i.sha256}).toList(),
+      };
+
+  static SuggestRequestData fromJson(Json json) => SuggestRequestData(
+        cuisineId: json.str('cuisineId'),
+        promptText: json.str('promptText'),
+        branchId: json.strOrNull('branchId'),
+        deepMode: json.boolean('deepMode'),
+        images: json.objects('images').map((i) => UploadImage(path: i.str('path'), sha256: i.str('sha256'))).toList(),
+      );
+}
+
+/// Typed access to the Menü Kopilot API. Tokens are attached automatically and refreshed once on 401;
+/// idempotent GETs are retried on network errors. Provider keys never exist on the device.
+class ApiClient {
+  ApiClient({
+    required String baseUrl,
+    required this.tokens,
+    this.onSessionExpired,
+    HttpClientAdapter? adapter,
+  }) {
+    final options = BaseOptions(
+      baseUrl: _normalizeBase(baseUrl),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 60),
+      sendTimeout: const Duration(seconds: 60),
+      responseType: ResponseType.json,
+    );
+    _dio = Dio(options);
+    _refreshDio = Dio(options);
+    if (adapter != null) {
+      _dio.httpClientAdapter = adapter;
+      _refreshDio.httpClientAdapter = adapter;
+    }
+    _dio.interceptors.add(QueuedInterceptorsWrapper(onRequest: _attachToken, onError: _handleAuthError));
+    _dio.interceptors.add(InterceptorsWrapper(onError: _retryIdempotent));
+  }
+
+  final TokenStore tokens;
+  final void Function()? onSessionExpired;
+  late final Dio _dio;
+  late final Dio _refreshDio;
+
+  static String _normalizeBase(String base) {
+    final trimmed = base.trim().replaceAll(RegExp(r'/+$'), '');
+    return trimmed.endsWith('/api/v1') ? trimmed : '$trimmed/api/v1';
+  }
+
+  Future<void> _attachToken(RequestOptions options, RequestInterceptorHandler handler) async {
+    if (!options.path.startsWith('/auth/login') && !options.path.startsWith('/auth/refresh')) {
+      final session = await tokens.read();
+      if (session != null) options.headers['authorization'] = 'Bearer ${session.accessToken}';
+    }
+    handler.next(options);
+  }
+
+  Future<void> _handleAuthError(DioException error, ErrorInterceptorHandler handler) async {
+    final path = error.requestOptions.path;
+    final retried = error.requestOptions.extra['auth_retry'] == true;
+    if (error.response?.statusCode != 401 || retried || path.startsWith('/auth/')) {
+      handler.next(error);
+      return;
+    }
+    final session = await tokens.read();
+    if (session == null) {
+      handler.next(error);
+      return;
+    }
+    try {
+      final response = await _refreshDio.post<Json>('/auth/refresh', data: {'refreshToken': session.refreshToken});
+      final refreshed = AuthSession.fromJson(response.data ?? const {});
+      await tokens.write(refreshed);
+      final request = error.requestOptions
+        ..extra['auth_retry'] = true
+        ..headers['authorization'] = 'Bearer ${refreshed.accessToken}';
+      handler.resolve(await _dio.fetch<Object?>(request));
+    } on DioException {
+      await tokens.clear();
+      onSessionExpired?.call();
+      handler.next(error);
+    }
+  }
+
+  Future<void> _retryIdempotent(DioException error, ErrorInterceptorHandler handler) async {
+    final request = error.requestOptions;
+    final attempt = (request.extra['retry_attempt'] as int?) ?? 0;
+    final network = error.type == DioExceptionType.connectionError || error.type == DioExceptionType.connectionTimeout;
+    final server = (error.response?.statusCode ?? 0) >= 500;
+    if (request.method != 'GET' || attempt >= 2 || !(network || server)) {
+      handler.next(error);
+      return;
+    }
+    await Future<void>.delayed(Duration(milliseconds: 500 * (attempt + 1) * (attempt + 1)));
+    request.extra['retry_attempt'] = attempt + 1;
+    try {
+      handler.resolve(await _dio.fetch<Object?>(request));
+    } on DioException catch (e) {
+      handler.next(e);
+    }
+  }
+
+  Future<T> _guard<T>(Future<T> Function() body) async {
+    try {
+      return await body();
+    } on DioException catch (e) {
+      throw await _toApiException(e);
+    }
+  }
+
+  Future<ApiException> _toApiException(DioException error) async {
+    final data = error.response?.data;
+    if (data is ResponseBody) {
+      // Streamed request that failed before SSE started: read the JSON error envelope.
+      try {
+        final text = await utf8.decoder.bind(data.stream.cast<List<int>>()).join();
+        final decoded = asJson(jsonDecode(text));
+        final envelope = decoded.object('error');
+        if (envelope != null) {
+          return ApiException(envelope.str('code'), envelope.str('message'), status: error.response?.statusCode);
+        }
+      } on Object {
+        // fall through
+      }
+    }
+    return ApiException.fromDio(error);
+  }
+
+  // ---- auth -------------------------------------------------------------------------------------------------
+
+  Future<AuthSession> login(String email, String password, String deviceName) => _guard(() async {
+        final response = await _dio.post<Json>(
+          '/auth/login',
+          data: {'email': email, 'password': password, 'deviceName': deviceName},
+        );
+        return AuthSession.fromJson(response.data ?? const {});
+      });
+
+  Future<void> logout() => _guard(() async {
+        await _dio.post<Object?>('/auth/logout');
+      });
+
+  Future<AuthUser> me() => _guard(() async {
+        final response = await _dio.get<Json>('/auth/me');
+        return AuthUser.fromJson(response.data ?? const {});
+      });
+
+  /// Readiness of the server (database + redis); used by the settings screen to test the URL.
+  Future<Json> health() => _guard(() async {
+        final root = _dio.options.baseUrl.replaceAll(RegExp(r'/api/v1$'), '');
+        final response = await _refreshDio.get<Json>('$root/health/ready');
+        return response.data ?? const {};
+      });
+
+  // ---- cuisines ---------------------------------------------------------------------------------------------
+
+  Future<List<Cuisine>> cuisines() => _guard(() async {
+        final response = await _dio.get<Json>('/cuisines');
+        return (response.data ?? const {}).objects('data').map(Cuisine.fromJson).toList();
+      });
+
+  // ---- suggestions ------------------------------------------------------------------------------------------
+
+  Future<FormData> _form(SuggestRequestData request) async => FormData.fromMap({
+        'cuisineId': request.cuisineId,
+        if (request.promptText.trim().isNotEmpty) 'promptText': request.promptText,
+        if (request.branchId != null) 'branchId': request.branchId,
+        'deepMode': request.deepMode.toString(),
+        'images': [
+          for (final image in request.images)
+            await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
+        ],
+      });
+
+  Stream<SuggestEvent> _sse(Future<Response<ResponseBody>> Function() open) async* {
+    final Response<ResponseBody> response;
+    try {
+      response = await open();
+    } on DioException catch (e) {
+      throw await _toApiException(e);
+    }
+    final body = response.data;
+    if (body == null) return;
+    final parser = SseParser();
+    try {
+      await for (final chunk in utf8.decoder.bind(body.stream.cast<List<int>>())) {
+        for (final message in parser.add(chunk)) {
+          final event = SuggestEvent.fromSse(message.event, message.data);
+          if (event != null) yield event;
+        }
+      }
+    } on DioException catch (e) {
+      throw await _toApiException(e);
+    }
+  }
+
+  Options get _sseOptions => Options(
+        responseType: ResponseType.stream,
+        headers: {'accept': 'text/event-stream'},
+        receiveTimeout: const Duration(seconds: 90),
+      );
+
+  Stream<SuggestEvent> suggestStream(SuggestRequestData request, {CancelToken? cancelToken}) => _sse(
+        () async => _dio.post<ResponseBody>(
+          '/suggest',
+          data: await _form(request),
+          options: _sseOptions,
+          cancelToken: cancelToken,
+        ),
+      );
+
+  Future<String> suggestAsync(SuggestRequestData request) => _guard(() async {
+        final response = await _dio.post<Json>('/suggest', queryParameters: {'async': '1'}, data: await _form(request));
+        return (response.data ?? const {}).str('runId');
+      });
+
+  Stream<SuggestEvent> continueStream(String runId, List<UploadImage> images, {CancelToken? cancelToken}) => _sse(
+        () async => _dio.post<ResponseBody>(
+          '/suggest/$runId/continue',
+          data: FormData.fromMap({
+            'images': [
+              for (final image in images)
+                await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
+            ],
+          }),
+          options: _sseOptions,
+          cancelToken: cancelToken,
+        ),
+      );
+
+  Stream<SuggestEvent> runEvents(String runId, {CancelToken? cancelToken}) => _sse(
+        () => _dio.get<ResponseBody>('/suggest/$runId/events', options: _sseOptions, cancelToken: cancelToken),
+      );
+
+  Future<RunSnapshot> run(String runId) => _guard(() async {
+        final response = await _dio.get<Json>('/suggest/$runId');
+        return RunSnapshot.fromJson(response.data ?? const {});
+      });
+
+  Future<bool> cancelRun(String runId) => _guard(() async {
+        final response = await _dio.post<Json>('/suggest/$runId/cancel');
+        return (response.data ?? const {}).boolean('cancelled');
+      });
+
+  Future<({SuggestionCard card, String templateId})> accept(
+    String itemId, {
+    TemplatePayload? payload,
+    String? branchId,
+  }) =>
+      _guard(() async {
+        final response = await _dio.post<Json>(
+          '/suggestion-items/$itemId/accept',
+          data: {
+            'payload': ?payload?.toJson(),
+            'branchId': ?branchId,
+          },
+        );
+        final data = response.data ?? const {};
+        return (card: SuggestionCard.fromJson(data.object('card') ?? const {}), templateId: data.str('templateId'));
+      });
+
+  Future<SuggestionCard> skip(String itemId) => _guard(() async {
+        final response = await _dio.post<Json>('/suggestion-items/$itemId/skip');
+        return SuggestionCard.fromJson(response.data ?? const {});
+      });
+
+  // ---- generic helpers for the other feature modules ---------------------------------------------------------
+
+  Future<Json> getJson(String path, {Map<String, Object?>? query}) => _guard(() async {
+        final response = await _dio.get<Json>(path, queryParameters: query);
+        return response.data ?? const {};
+      });
+
+  Future<Json> sendJson(String method, String path, {Object? body}) => _guard(() async {
+        final response = await _dio.request<Json>(path, data: body, options: Options(method: method));
+        return response.data ?? const {};
+      });
+
+  Future<String> getText(String path, {Map<String, Object?>? query}) => _guard(() async {
+        final response = await _dio.get<String>(path, queryParameters: query, options: Options(responseType: ResponseType.plain));
+        return response.data ?? '';
+      });
+
+  Stream<SseMessage> streamMultipart(String path, FormData data, {CancelToken? cancelToken}) async* {
+    final Response<ResponseBody> response;
+    try {
+      response = await _dio.post<ResponseBody>(path, data: data, options: _sseOptions, cancelToken: cancelToken);
+    } on DioException catch (e) {
+      throw await _toApiException(e);
+    }
+    final body = response.data;
+    if (body == null) return;
+    final parser = SseParser();
+    await for (final chunk in utf8.decoder.bind(body.stream.cast<List<int>>())) {
+      yield* Stream.fromIterable(parser.add(chunk));
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 3 done.
+Last update: 2026-09-15 — Faz 4 done.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -17,16 +17,31 @@ Last update: 2026-09-15 — Faz 3 done.
 - [x] **Faz 2** — AI layer: provider interface, Gemini + Groq adapters, router, retry/circuit breaker,
       prompt templates repo, usage_log, smoke tests
 - [x] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
-- [ ] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
+- [x] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
 - [ ] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
 - [ ] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
 - [ ] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 
 ## Where I am
-Faz 3 complete. Next: Faz 4 — Flutter app in `mobile/` (flutter create, packages via `flutter pub add`, l10n
-`app_tr.arb`, theme, go_router with auth redirect, Dio + auth/retry interceptors, SSE client/parser, Drift offline
-cache + pending request queue, login, home (cuisine picker, prompt, camera multi-shot + gallery, compression),
-results screen (streaming cards, badges, copy, inline edit, accept/skip, cancel, "Devam et")).
+Faz 4 complete. Next: Faz 5 — Mod 2 gap analysis. Backend `src/modules/gap/` (panel extraction via
+`VisionExtractor` namespace `p`, dedupe exact/prefix/trigram, completeness with template-aware expectations, counts
+vs `effectiveTarget`, DB recommendations then `text.gap_suggest`, deterministic question list in `src/i18n/tr.ts`,
+SSE order run → counts → questions → items → recommendations(db) → recommendations(ai) → done, persistence to
+snapshots + branch_menu_items), branches CRUD API, fixtures `test/fixtures/llm/panel/panel-{1,2}.json`
+(12 unique items, 3 duplicates, one truncated "Karışık Pi…"), e2e. Flutter `features/gap/` (branch pick/create,
+screenshots, one-screen result: big x/target progress, "Çağrıda sor" checklist with Drift ticks + wakelock,
+incomplete items with badges, recommendations → Mod 1 single-item run with branchId).
+
+### Faz 4 inventory (mobile/)
+- `lib/core/`: `providers.dart` (db, tokens, server URL, API client, auth, connectivity, cuisines, recent cuisines),
+  `network/{api_client,api_exception,sse}.dart`, `storage/{app_database(.g),token_store}.dart`,
+  `utils/{image_compressor,copy_format}.dart`, `widgets/common.dart`, `theme.dart`.
+- `lib/data/models/{json,template_payload,suggestion,common}.dart`.
+- `lib/features/`: `auth/login_screen.dart`, `home/{home_screen,home_controller,cuisine_picker}.dart`,
+  `camera/camera_capture_screen.dart`, `results/{results_screen,run_controller,suggestion_card,card_editor_screen}.dart`,
+  `offline/{pending_queue,background}.dart`, `settings/settings_screen.dart` (minimal), `shell/app_shell.dart`.
+- `lib/router.dart`, `lib/app.dart`, `lib/main.dart`, `lib/l10n/app_tr.arb` (+ `gen/`).
+- Tests: 19 passing (`test/unit/*`, `test/widget/*`); `flutter analyze` clean; `scripts/check-no-provider-keys.ps1` OK.
 
 ### Faz 3 inventory (backend/src)
 - `modules/suggest/`: `schemas.ts` (LLM schemas, CardDto, RunDto, events), `prompt-parse.ts`, `sanitize.ts`,
@@ -75,7 +90,7 @@ results screen (streaming cards, badges, copy, inline edit, accept/skip, cancel,
 | # | Criterion | Status |
 |---|---|---|
 | 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ⏳ files done, `.env.example` sync tested; run blocked by Docker Desktop (D-056) |
-| 2 | No provider key in Flutter (grep) | ⏳ |
+| 2 | No provider key in Flutter (grep) | ✅ `scripts/check-no-provider-keys.ps1` (keys + provider endpoints) |
 | 3 | 40 seed items → `/suggest` with zero LLM calls | ✅ e2e (`llmCalls=0`, usage_log unchanged, cache_hit) |
 | 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
 | 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ⏳ |
