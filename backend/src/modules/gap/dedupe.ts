@@ -1,4 +1,4 @@
-import { cleanItemName } from '../../lib/clean-name.js';
+import { cleanItemName, titleCaseTr } from '../../lib/clean-name.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import { trigramSimilarity } from '../../lib/trigram.js';
 import type { Flags, PanelItem, TriState } from './schemas.js';
@@ -21,6 +21,8 @@ export interface MenuEntry {
   seenIn: number;
   confidence: number;
   truncated: boolean;
+  /** Only typed/dictated by the user, never seen on a screenshot. */
+  typed: boolean;
 }
 
 const RANK: Readonly<Record<TriState, number>> = { present: 2, absent: 1, unknown: 0 };
@@ -69,6 +71,7 @@ export function dedupePanelItems(screenshots: readonly (readonly PanelItem[])[])
           seenIn: 1,
           confidence: item.confidence,
           truncated,
+          typed: false,
         };
         entries.push(entry);
         seenHere.add(entry);
@@ -93,6 +96,29 @@ export function dedupePanelItems(screenshots: readonly (readonly PanelItem[])[])
         match.truncated = false;
       }
     }
+  }
+  return entries;
+}
+
+/**
+ * Products the user typed or dictated join the screenshot entries. A name already read from a screenshot (same
+ * matching rules) is not counted twice; a new one enters with unknown fields, since typing says nothing about the
+ * texts on the panel.
+ */
+export function addTypedEntries(entries: MenuEntry[], typed: readonly { rawName: string; normalized: string }[]): MenuEntry[] {
+  for (const item of typed) {
+    if (findMatch(entries, item.normalized, false)) continue;
+    entries.push({
+      // "adana kebap" typed in a hurry is shown as "Adana Kebap"; a name typed with capitals stays as written.
+      name: item.rawName === item.rawName.toLocaleLowerCase('tr-TR') ? titleCaseTr(item.rawName) : item.rawName,
+      normalized: item.normalized,
+      flags: { description: 'unknown', options: 'unknown', removables: 'unknown' },
+      sectionText: null,
+      seenIn: 0,
+      confidence: 1,
+      truncated: false,
+      typed: true,
+    });
   }
   return entries;
 }

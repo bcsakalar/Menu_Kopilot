@@ -1,7 +1,7 @@
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { branchMenuItems, branchMenuSnapshots, suggestionRuns } from '../../db/schema/index.js';
-import { recomputeBranchCount, replaceRecommendations, upsertScreenshotItem } from '../branches/branch-menu.js';
+import { insertTypedItem, recomputeBranchCount, replaceRecommendations, upsertScreenshotItem } from '../branches/branch-menu.js';
 import { GAP_FIELDS } from './completeness.js';
 import type { MenuMerge, StoredMenuRow } from './menu-merge.js';
 import type { RecommendationCandidate } from './recommend.js';
@@ -94,6 +94,7 @@ export class GapStore {
   async persist(input: {
     runId: string;
     branchId: string;
+    source: 'screenshot' | 'manual';
     imageHashes: string[];
     stored: StoredGap;
     items: readonly GapItemDto[];
@@ -113,13 +114,23 @@ export class GapStore {
         .values({
           branchId: input.branchId,
           runId: input.runId,
-          source: 'screenshot',
+          source: input.source,
           imageHashes: input.imageHashes,
           parsed: input.stored,
         })
         .returning({ id: branchMenuSnapshots.id });
       if (!snapshot) throw new Error('snapshot insert failed');
       for (const item of input.items) {
+        if (item.typed) {
+          await insertTypedItem(tx, input.branchId, {
+            rawName: item.name,
+            normalizedName: item.normalized,
+            matchedItemId: item.matchedTemplateId,
+            completenessScore: item.completeness,
+            snapshotId: snapshot.id,
+          });
+          continue;
+        }
         const missing = new Set(item.missing.map((m) => m.field));
         // 'n/a' = the matched template does not have this field, so it is not expected on the panel either.
         const flags = Object.fromEntries(

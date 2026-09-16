@@ -3,6 +3,7 @@ import type { Database } from '../../db/client.js';
 import { AppError, notFound } from '../../lib/errors.js';
 import { requireBranch } from '../branches/branch-menu.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
+import { parsePromptItems } from '../suggest/prompt-parse.js';
 import type { RunRegistry } from '../suggest/run-registry.js';
 import type { GapPipeline, GapPipelineResult } from './pipeline.js';
 import type { GapEvent, GapResultDto, GapStats } from './schemas.js';
@@ -13,7 +14,7 @@ export interface StartedGapRun {
   done: Promise<GapPipelineResult | undefined>;
 }
 
-const EMPTY_STATS: GapStats = { llmCalls: 0, latencyMs: 0, screenshots: 0, extracted: 0, unique: 0, cacheHit: false };
+const EMPTY_STATS: GapStats = { llmCalls: 0, latencyMs: 0, screenshots: 0, extracted: 0, unique: 0, cacheHit: false, typed: 0 };
 
 /** Orchestrates gap-analysis runs (start / snapshot / latest / cancel). No HTTP types here. */
 export class GapService {
@@ -29,10 +30,13 @@ export class GapService {
 
   async start(
     userId: string,
-    fields: { branchId: string; extraNotes?: string | undefined },
+    fields: { branchId: string; extraNotes?: string | undefined; menuText?: string | undefined },
     images: ImageInput[],
   ): Promise<StartedGapRun> {
-    if (images.length === 0) throw new AppError('VALIDATION_ERROR', 'En az bir panel ekran görüntüsü ekle');
+    const typedItems = parsePromptItems(fields.menuText);
+    if (images.length === 0 && typedItems.length === 0) {
+      throw new AppError('VALIDATION_ERROR', 'Panel ekran görüntüsü ekle ya da menüdeki ürünleri yaz');
+    }
     const branch = await requireBranch(this.deps.db, fields.branchId, userId);
     const graph = await CuisineGraph.load(this.deps.db);
     const cuisine = graph.get(branch.cuisineId);
@@ -56,6 +60,7 @@ export class GapService {
         cuisine,
         graph,
         images,
+        typedItems,
         extraNotes: notes,
         signal: controller.signal,
         emit: (event) => registry.emit(runId, event),

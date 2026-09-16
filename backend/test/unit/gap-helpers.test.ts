@@ -57,6 +57,7 @@ function gapItem(name: string, overrides: Partial<GapItemDto> = {}): GapItemDto 
       { field: 'options', state: 'absent' },
       { field: 'removables', state: 'absent' },
     ],
+    typed: false,
     matchedTemplateId: null,
     templateName: null,
     origin: null,

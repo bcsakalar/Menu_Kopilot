@@ -13,9 +13,10 @@ import { MIN_BRANCH_ITEMS } from '../branches/branch-menu.js';
 import type { VisionExtractor } from '../extraction/vision-extractor.js';
 import type { CuisineGraph, CuisineNode } from '../retrieval/cuisine-graph.js';
 import type { RetrievalService } from '../retrieval/retrieval.service.js';
+import type { ParsedName } from '../suggest/schemas.js';
 import { getTemplates } from '../templates/template-store.js';
 import { assessCompleteness, expectationsFor } from './completeness.js';
-import { dedupePanelItems } from './dedupe.js';
+import { addTypedEntries, dedupePanelItems } from './dedupe.js';
 import { mergeWithStoredMenu } from './menu-merge.js';
 import { buildQuestions, cuisineQuestions, missingItemQuestion, type QuestionItemInput } from './questions.js';
 import {
@@ -68,6 +69,8 @@ export interface GapRunInput {
   cuisine: CuisineNode;
   graph: CuisineGraph;
   images: ImageInput[];
+  /** Products typed or dictated by the user (already parsed, no LLM). */
+  typedItems: readonly ParsedName[];
   extraNotes: string | undefined;
   signal: AbortSignal;
   emit: (event: GapEvent) => void;
@@ -131,7 +134,9 @@ export class GapPipeline {
     // ---- 1. extraction ------------------------------------------------------------------------------------------
     const perImage: PanelItem[][] = run.images.map(() => []);
     let done = 0;
-    run.emit({ type: 'progress', stage: 'extract', message: GAP_TEXT.progressExtract, done, total: run.images.length });
+    if (run.images.length > 0) {
+      run.emit({ type: 'progress', stage: 'extract', message: GAP_TEXT.progressExtract, done, total: run.images.length });
+    }
     await mapWithConcurrency(run.images, PANEL_CONCURRENCY, async (image, index) => {
       if (run.signal.aborted) return;
       const result = await deps.extractor.extract(
@@ -166,7 +171,7 @@ export class GapPipeline {
     });
     if (aiOff) run.emit({ type: 'warning', code: 'ai_unavailable', message: GAP_TEXT.aiUnavailable });
 
-    const entries = dedupePanelItems(perImage);
+    const entries = addTypedEntries(dedupePanelItems(perImage), run.typedItems);
     if (entries.length === 0 && failedImages < run.images.length) {
       run.emit({ type: 'warning', code: 'no_items', message: GAP_TEXT.noItems });
     }
@@ -198,15 +203,17 @@ export class GapPipeline {
         flags: entry.flags,
         completeness: assessed.score,
         status: assessed.status,
-        missing: assessed.missing,
+        // Typed products say nothing about their panel texts: no "missing field" badges or questions for them.
+        missing: entry.typed ? [] : assessed.missing,
         matchedTemplateId: template?.id ?? null,
         templateName: template?.canonicalName ?? null,
         origin: template ? (template.source === 'seed' ? 'seed' : 'db') : null,
         sectionText: entry.sectionText,
         seenIn: entry.seenIn,
+        typed: entry.typed,
       };
       items.push(item);
-      questionInputs.push({ item, template: template?.payload, importance: template?.importance ?? 0 });
+      if (!entry.typed) questionInputs.push({ item, template: template?.payload, importance: template?.importance ?? 0 });
     }
 
     // ---- 3. counts ----------------------------------------------------------------------------------------------
@@ -302,7 +309,7 @@ export class GapPipeline {
     }
 
     // ---- 6. persist ---------------------------------------------------------------------------------------------
-    const allFailed = run.images.length > 0 && failedImages === run.images.length;
+    const allFailed = run.images.length > 0 && failedImages === run.images.length && run.typedItems.length === 0;
     const status: GapResultDto['status'] = run.signal.aborted
       ? 'cancelled'
       : allFailed
@@ -317,6 +324,7 @@ export class GapPipeline {
       extracted,
       unique: entries.length,
       cacheHit: budget.calls === 0 && failedImages === 0,
+      typed: run.typedItems.length,
     };
     const recommendations = [...dbRecs, ...aiRecs];
     if (status === 'completed' || status === 'partial') {
@@ -324,6 +332,7 @@ export class GapPipeline {
       await deps.store.persist({
         runId: run.runId,
         branchId: run.branch.id,
+        source: run.images.length > 0 ? 'screenshot' : 'manual',
         imageHashes: run.images.map((i) => i.sha256),
         stored,
         items,

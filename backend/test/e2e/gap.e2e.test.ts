@@ -92,9 +92,15 @@ function payloadOf<T>(events: readonly SseMessage[], event: string): T[] {
   return events.filter((e) => e.event === event).map((e) => e.data as T);
 }
 
-async function gapStream(h: Harness, fx: Fixtures, branchId: string, files: readonly string[] = PANELS): Promise<GapStream> {
+async function gapStream(
+  h: Harness,
+  fx: Fixtures,
+  branchId: string,
+  files: readonly string[] = PANELS,
+  fields: Record<string, string> = {},
+): Promise<GapStream> {
   const body = multipartBody(
-    { branchId },
+    { branchId, ...fields },
     files.map((file) => {
       const image = fixtureImage(fx, file);
       return { name: 'images', filename: file, contentType: image.mimeType, data: image.data };
@@ -419,6 +425,100 @@ describe('/gap-analysis end-to-end (recorded panel fixtures)', () => {
       headers: bearer(h.token),
     });
     expect(unknownRun.statusCode).toBe(404);
+  });
+});
+
+describe('/gap-analysis with typed or dictated products', () => {
+  let fx: Fixtures;
+  let h: Harness;
+
+  beforeAll(async () => {
+    fx = loadFixtures();
+    h = await harness(fx);
+  });
+
+  afterAll(async () => {
+    await h.ctx.close();
+  });
+
+  it('works without screenshots and without any AI key: counts, DB recommendations, call list', async () => {
+    h.gemini.configured = false;
+    h.groq.configured = false;
+    try {
+      const branch = await createBranch(h, 'kebap-izgara', 'Telefonla Şube');
+      const run = await gapStream(h, fx, branch.id, [], { menuText: 'adana kebap, Lahmacun ve ayran var. Bir de zıkkım dürüm' });
+      expect(run.done.status).toBe('completed');
+      expect(run.done.stats).toMatchObject({ llmCalls: 0, screenshots: 0, typed: 4, unique: 4 });
+      expect(run.counts).toMatchObject({ current: 4, target: 10, missing: 6 });
+      expect(run.items.map((i) => i.name)).toEqual(['Adana Kebap', 'Lahmacun', 'Ayran', 'Zıkkım Dürüm']);
+      expect(run.items.every((i) => i.typed && i.missing.length === 0)).toBe(true);
+      expect(run.items.filter((i) => i.matchedTemplateId).map((i) => i.templateName)).toEqual(['Adana Kebap', 'Lahmacun', 'Ayran']);
+      expect(run.questions.some((q) => q.kind === 'missing_field')).toBe(false);
+      const recommended = run.recommendations.db.map((r) => normalizeTr(r.name));
+      expect(recommended.length).toBeGreaterThan(0);
+      for (const onMenu of ['Adana Kebap', 'Lahmacun', 'Ayran']) expect(recommended).not.toContain(normalizeTr(onMenu));
+      expect(h.gemini.calls.length + h.groq.calls.length).toBe(0);
+
+      expect((await getBranch(h, branch.id)).currentItemCount).toBe(4);
+      const rows = await h.ctx.db.db.select().from(branchMenuItems).where(eq(branchMenuItems.branchId, branch.id));
+      expect(rows.filter((r) => r.status !== 'missing').every((r) => r.source === 'manual' && r.status === 'incomplete')).toBe(true);
+    } finally {
+      h.gemini.configured = true;
+      h.groq.configured = true;
+    }
+  });
+
+  it('never overwrites what a card says; a recommended product the user now names moves onto the menu', async () => {
+    const branch = await createBranch(h, 'kebap-izgara', 'Karma Şube');
+    await h.ctx.db.db.insert(branchMenuItems).values({
+      branchId: branch.id,
+      rawName: 'Beyti Sarma',
+      normalizedName: normalizeTr('Beyti Sarma'),
+      status: 'ok',
+      source: 'suggestion',
+      hasDescription: true,
+      hasOptions: true,
+      hasRemovables: true,
+      completenessScore: 1,
+    });
+    const first = await gapStream(h, fx, branch.id, [], { menuText: 'Adana Kebap' });
+    expect(first.counts.current).toBe(2);
+    const recommended = first.recommendations.db.find((r) => normalizeTr(r.name) !== normalizeTr('Beyti Sarma'));
+    if (!recommended) throw new Error('expected a DB recommendation');
+
+    const second = await gapStream(h, fx, branch.id, [], { menuText: `Beyti Sarma, ${recommended.name}` });
+    expect(second.counts.current).toBe(3);
+    const rows = await h.ctx.db.db.select().from(branchMenuItems).where(eq(branchMenuItems.branchId, branch.id));
+    const beyti = rows.find((r) => r.normalizedName === normalizeTr('Beyti Sarma'));
+    expect(beyti).toMatchObject({ status: 'ok', source: 'suggestion', completenessScore: 1 });
+    const moved = rows.find((r) => r.normalizedName === normalizeTr(recommended.name));
+    expect(moved).toMatchObject({ status: 'incomplete', source: 'manual' });
+    expect((await getBranch(h, branch.id)).currentItemCount).toBe(3);
+  });
+
+  it('does not count a typed product twice when a screenshot already shows it', async () => {
+    const shots = await gapStream(h, fx, (await createBranch(h, 'kebap-izgara', 'Sadece Görüntü')).id, ['panel-1.png']);
+    const seen = shots.items[0];
+    if (!seen) throw new Error('panel fixture has no items');
+    const mixed = await gapStream(h, fx, (await createBranch(h, 'kebap-izgara', 'Görüntü + Liste')).id, ['panel-1.png'], {
+      menuText: `${seen.name.toLocaleLowerCase('tr-TR')}, Zıkkım Dürüm`,
+    });
+    expect(mixed.items).toHaveLength(shots.items.length + 1);
+    expect(mixed.items.filter((i) => i.typed).map((i) => i.name)).toEqual(['Zıkkım Dürüm']);
+    expect(mixed.done.stats).toMatchObject({ screenshots: 1, typed: 2 });
+  });
+
+  it('needs screenshots or at least one product name', async () => {
+    const branch = await createBranch(h, 'kebap-izgara', 'Boş İstek');
+    const body = multipartBody({ branchId: branch.id, menuText: ' , ; ' }, []);
+    const res = await h.ctx.app.inject({
+      method: 'POST',
+      url: '/api/v1/gap-analysis',
+      headers: { ...bearer(h.token), ...body.headers },
+      payload: body.payload,
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json<{ error: { message: string } }>().error.message).toContain('ürünleri yaz');
   });
 });
 

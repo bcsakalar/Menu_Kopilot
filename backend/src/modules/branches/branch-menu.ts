@@ -178,6 +178,49 @@ export async function upsertScreenshotItem(
     });
 }
 
+/**
+ * A product the user typed or dictated for the gap analysis. It is added when new; a row a screenshot or an accepted
+ * card already describes stays as it is, and a recommended row the user now says is on the menu moves onto the menu.
+ */
+export async function insertTypedItem(
+  db: Executor,
+  branchId: string,
+  item: { rawName: string; normalizedName: string; matchedItemId: string | null; completenessScore: number; snapshotId: string },
+): Promise<void> {
+  const now = new Date();
+  await db
+    .insert(branchMenuItems)
+    .values({
+      branchId,
+      rawName: item.rawName,
+      normalizedName: item.normalizedName,
+      matchedItemId: item.matchedItemId,
+      status: 'incomplete',
+      source: 'manual',
+      hasDescription: false,
+      hasOptions: false,
+      hasRemovables: false,
+      completenessScore: item.completenessScore,
+      flags: { description: 'unknown', options: 'unknown', removables: 'unknown' },
+      snapshotId: item.snapshotId,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: [branchMenuItems.branchId, branchMenuItems.normalizedName],
+      set: {
+        status: 'incomplete',
+        source: 'manual',
+        matchedItemId: sql`coalesce(excluded.matched_item_id, ${branchMenuItems.matchedItemId})`,
+        completenessScore: item.completenessScore,
+        flags: { description: 'unknown', options: 'unknown', removables: 'unknown' },
+        reason: null,
+        snapshotId: item.snapshotId,
+        updatedAt: now,
+      },
+      setWhere: eq(branchMenuItems.status, 'missing'),
+    });
+}
+
 /** Replaces the branch's previous recommendations with new ones (never touches items on the menu). */
 export async function replaceRecommendations(
   db: Executor,

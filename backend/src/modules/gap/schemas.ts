@@ -44,6 +44,8 @@ export const gapItemDtoSchema = z.object({
   origin: z.enum(['seed', 'db']).nullable(),
   sectionText: z.string().nullable(),
   seenIn: z.number().int(),
+  /** Typed or dictated by the user, not read from a screenshot: its panel fields are unknown. */
+  typed: z.boolean().default(false),
 });
 export type GapItemDto = z.infer<typeof gapItemDtoSchema>;
 
@@ -84,6 +86,8 @@ export const gapStatsSchema = z.object({
   extracted: z.number().int(),
   unique: z.number().int(),
   cacheHit: z.boolean(),
+  /** Products typed or dictated by the user. */
+  typed: z.number().int().default(0),
 });
 export type GapStats = z.infer<typeof gapStatsSchema>;
 
@@ -127,4 +131,6 @@ export type GapEvent =
 export const gapFieldsSchema = z.object({
   branchId: z.uuid(),
   extraNotes: z.string().max(1000).optional(),
+  /** Products on the menu, typed or dictated ("adana, urfa, ayran") — works without screenshots and without AI. */
+  menuText: z.string().max(4000).optional(),
 });
