@@ -484,6 +484,18 @@ abstract class AppLocalizations {
   /// **'Bu istek için bütçe doldu: {count} ürün bekliyor'**
   String budgetExhausted(int count);
 
+  /// No description provided for @pendingItemsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ürün bekliyor'**
+  String pendingItemsCount(int count);
+
+  /// No description provided for @pendingPhotosCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} fotoğraf bekliyor'**
+  String pendingPhotosCount(int count);
+
   /// No description provided for @doneSummary.
   ///
   /// In tr, this message translates to:

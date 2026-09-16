@@ -9,6 +9,7 @@ import '../../data/models/template_payload.dart';
 Future<String?> showFieldEditor(BuildContext context, {required String title, required String initial, int? maxLength}) {
   return showModalBottomSheet<String>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     builder: (context) => _FieldEditSheet(title: title, initial: initial, maxLength: maxLength),
   );

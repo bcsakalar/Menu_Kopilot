@@ -129,17 +129,34 @@ class _StatusBar extends StatelessWidget {
         l10n.doneSummary(stats.dbHits, stats.aiItems, stats.reviewItems, stats.llmCalls),
       _ => l10n.cardsReady(state.cards.length),
     };
+    final theme = Theme.of(context);
+    final waiting = [
+      if (state.pendingItems > 0) l10n.pendingItemsCount(state.pendingItems),
+      if (state.pendingImageHashes.isNotEmpty) l10n.pendingPhotosCount(state.pendingImageHashes.length),
+    ].join(' · ');
+    final reason = state.pendingMessage;
     return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      color: theme.colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: Text(text, maxLines: 2, overflow: TextOverflow.ellipsis)),
+            Text(text, maxLines: 2, overflow: TextOverflow.ellipsis),
             if (state.canContinue) ...[
-              Text(l10n.budgetExhausted(state.pendingItems), style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(width: 8),
-              FilledButton.tonal(onPressed: onContinue, child: Text(l10n.continueButton)),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      reason == null ? l10n.budgetExhausted(state.pendingItems) : '$reason · $waiting',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.tonal(onPressed: onContinue, child: Text(l10n.continueButton)),
+                ],
+              ),
             ],
           ],
         ),

@@ -100,6 +100,7 @@ class _BranchDetailScreenState extends ConsumerState<BranchDetailScreen> {
     final l10n = context.l10n;
     final format = await showModalBottomSheet<String>(
       context: context,
+      useRootNavigator: true,
       showDragHandle: true,
       builder: (context) => SafeArea(
         child: Column(

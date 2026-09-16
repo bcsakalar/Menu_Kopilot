@@ -37,6 +37,7 @@ class RunViewState {
     this.warnings = const [],
     this.pendingItems = 0,
     this.pendingImageHashes = const [],
+    this.pendingMessage,
     this.stats,
     this.error,
     this.request,
@@ -52,6 +53,9 @@ class RunViewState {
   final List<String> warnings;
   final int pendingItems;
   final List<String> pendingImageHashes;
+
+  /// Why work is pending, as the server phrased it (budget used up / providers unreachable).
+  final String? pendingMessage;
   final RunStats? stats;
   final String? error;
   final RunRequest? request;
@@ -71,6 +75,7 @@ class RunViewState {
     List<String>? warnings,
     int? pendingItems,
     List<String>? pendingImageHashes,
+    String? pendingMessage,
     RunStats? stats,
     String? error,
     RunRequest? request,
@@ -86,6 +91,7 @@ class RunViewState {
         warnings: warnings ?? this.warnings,
         pendingItems: pendingItems ?? this.pendingItems,
         pendingImageHashes: pendingImageHashes ?? this.pendingImageHashes,
+        pendingMessage: pendingMessage ?? this.pendingMessage,
         stats: stats ?? this.stats,
         error: error ?? this.error,
         request: request ?? this.request,
@@ -192,8 +198,12 @@ class RunController extends Notifier<RunViewState> {
         state = state.copyWith(cards: cards, placeholders: placeholders);
       case WarningEvent(:final message):
         state = state.copyWith(warnings: [...state.warnings, message]);
-      case BudgetExhaustedEvent(:final pendingItems, :final pendingImageHashes):
-        state = state.copyWith(pendingItems: pendingItems, pendingImageHashes: pendingImageHashes);
+      case BudgetExhaustedEvent(:final pendingItems, :final pendingImageHashes, :final message):
+        state = state.copyWith(
+          pendingItems: pendingItems,
+          pendingImageHashes: pendingImageHashes,
+          pendingMessage: message.isEmpty ? null : message,
+        );
       case DoneEvent(:final status, :final stats):
         state = state.copyWith(
           phase: status == 'cancelled' ? RunPhase.cancelled : RunPhase.done,

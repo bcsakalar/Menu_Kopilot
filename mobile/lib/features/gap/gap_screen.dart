@@ -65,6 +65,7 @@ class _GapScreenState extends ConsumerState<GapScreen> {
   Future<void> _pickBranch() async {
     final picked = await showModalBottomSheet<Branch>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => const _BranchSheet(),

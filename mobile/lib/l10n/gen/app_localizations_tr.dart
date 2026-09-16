@@ -223,6 +223,16 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String pendingItemsCount(int count) {
+    return '$count ürün bekliyor';
+  }
+
+  @override
+  String pendingPhotosCount(int count) {
+    return '$count fotoğraf bekliyor';
+  }
+
+  @override
   String doneSummary(int db, int ai, int review, int calls) {
     return '$db DB, $ai AI, $review inceleme · $calls AI çağrısı';
   }

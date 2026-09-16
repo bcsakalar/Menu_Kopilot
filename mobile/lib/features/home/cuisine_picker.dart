@@ -8,6 +8,7 @@ import '../../data/models/common.dart';
 /// Bottom sheet listing cuisines with the recently used ones on top.
 Future<Cuisine?> pickCuisine(BuildContext context) => showModalBottomSheet<Cuisine>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => const _CuisineSheet(),
