@@ -42,6 +42,7 @@ class GapItem {
     this.origin,
     this.sectionText,
     this.seenIn = 1,
+    this.typed = false,
   });
 
   factory GapItem.fromJson(Json json) {
@@ -65,6 +66,7 @@ class GapItem {
       origin: json.strOrNull('origin'),
       sectionText: json.strOrNull('sectionText'),
       seenIn: json.integer('seenIn', 1),
+      typed: json.boolean('typed'),
     );
   }
 
@@ -80,6 +82,9 @@ class GapItem {
   final String? sectionText;
   final int seenIn;
 
+  /// Typed or dictated by the user, not read from a screenshot (panel fields unknown).
+  final bool typed;
+
   Json toJson() => {
         'name': name,
         'normalized': normalized,
@@ -92,6 +97,7 @@ class GapItem {
         'origin': origin,
         'sectionText': sectionText,
         'seenIn': seenIn,
+        'typed': typed,
       };
 }
 
@@ -198,7 +204,15 @@ class GapCounts {
 }
 
 class GapStats {
-  const GapStats({this.llmCalls = 0, this.latencyMs = 0, this.screenshots = 0, this.extracted = 0, this.unique = 0, this.cacheHit = false});
+  const GapStats({
+    this.llmCalls = 0,
+    this.latencyMs = 0,
+    this.screenshots = 0,
+    this.extracted = 0,
+    this.unique = 0,
+    this.cacheHit = false,
+    this.typed = 0,
+  });
 
   factory GapStats.fromJson(Json json) => GapStats(
         llmCalls: json.integer('llmCalls'),
@@ -207,6 +221,7 @@ class GapStats {
         extracted: json.integer('extracted'),
         unique: json.integer('unique'),
         cacheHit: json.boolean('cacheHit'),
+        typed: json.integer('typed'),
       );
 
   final int llmCalls;
@@ -215,6 +230,7 @@ class GapStats {
   final int extracted;
   final int unique;
   final bool cacheHit;
+  final int typed;
 
   Json toJson() => {
         'llmCalls': llmCalls,
@@ -223,6 +239,7 @@ class GapStats {
         'extracted': extracted,
         'unique': unique,
         'cacheHit': cacheHit,
+        'typed': typed,
       };
 }
 

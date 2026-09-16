@@ -148,6 +148,16 @@ class _GapResultScreenState extends ConsumerState<GapResultScreen> {
                         onTap: () => _openCard(rec.name),
                       ),
                 ],
+                if (state.typedItems.isNotEmpty)
+                  ExpansionTile(
+                    key: const Key('gap-typed-items'),
+                    title: Text(l10n.typedItems(state.typedItems.length)),
+                    subtitle: Text(l10n.typedItemsHint),
+                    children: [
+                      for (final item in state.typedItems)
+                        _ItemTile(key: ValueKey('typed-${item.normalized}'), item: item, onCard: () => _openCard(item.templateName ?? item.name)),
+                    ],
+                  ),
                 if (state.completeItems.isNotEmpty)
                   ExpansionTile(
                     title: Text(l10n.completeItems(state.completeItems.length)),
@@ -190,6 +200,7 @@ class _CountsHeader extends StatelessWidget {
       GapPhase.streaming || GapPhase.loading => state.message ?? l10n.analyzing,
       GapPhase.cancelled => l10n.stopped,
       _ when stats != null && stats.cacheHit => l10n.analysisFromCache,
+      _ when stats != null && stats.typed > 0 => l10n.analysisSummaryTyped(stats.screenshots, stats.typed, stats.unique, stats.llmCalls),
       _ when stats != null => l10n.analysisSummary(stats.screenshots, stats.unique, stats.llmCalls),
       _ => '',
     };

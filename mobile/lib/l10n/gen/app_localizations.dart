@@ -865,8 +865,43 @@ abstract class AppLocalizations {
   /// No description provided for @needScreenshot.
   ///
   /// In tr, this message translates to:
-  /// **'Şube seç ve en az bir ekran görüntüsü ekle'**
+  /// **'Şube seç; ekran görüntüsü ekle ya da menüdeki ürünleri yaz'**
   String get needScreenshot;
+
+  /// No description provided for @menuTextLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünler (yaz ya da söyle)'**
+  String get menuTextLabel;
+
+  /// No description provided for @menuTextHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'ör. adana, urfa, lahmacun, ayran — ekran görüntüsü olmadan da çalışır'**
+  String get menuTextHint;
+
+  /// No description provided for @typedItems.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yazdığın ürünler ({count})'**
+  String typedItems(int count);
+
+  /// No description provided for @typedItemsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sayıma dahil; açıklama/opsiyon durumları bilinmiyor'**
+  String get typedItemsHint;
+
+  /// No description provided for @analysisSummaryTyped.
+  ///
+  /// In tr, this message translates to:
+  /// **'{screenshots} görüntü · {typed} yazılı · {unique} ürün · {calls} AI çağrısı'**
+  String analysisSummaryTyped(
+    int screenshots,
+    int typed,
+    int unique,
+    int calls,
+  );
 
   /// No description provided for @lastAnalysis.
   ///

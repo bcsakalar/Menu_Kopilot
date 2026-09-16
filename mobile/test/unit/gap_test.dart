@@ -129,6 +129,7 @@ class FakeGapApi extends ApiClient {
     required String branchId,
     required List<UploadImage> images,
     String? extraNotes,
+    String? menuText,
     CancelToken? cancelToken,
   }) {
     branchIds.add(branchId);
@@ -171,6 +172,30 @@ void main() {
       expect((events[7] as GapQuestionsEvent).append, isTrue);
       expect((events[6] as GapRecommendationsEvent).items.single.fromAi, isTrue);
       expect(GapEvent.fromSse('unknown', const {}), isNull);
+    });
+
+    test('typed products are kept apart from screenshot items and survive the offline copy', () {
+      final typed = GapItem.fromJson(const {
+        'name': 'Zıkkım Dürüm',
+        'normalized': 'zikkim durum',
+        'flags': {'description': 'unknown', 'options': 'unknown', 'removables': 'unknown'},
+        'completeness': 0.5,
+        'status': 'incomplete',
+        'missing': <Object?>[],
+        'seenIn': 0,
+        'typed': true,
+      });
+      final items = [...(sampleGapEvents()[4] as GapItemsEvent).items, typed];
+      final state = GapViewState(items: items, stats: GapStats.fromJson(const {'typed': 3, 'unique': 4}));
+      expect(state.typedItems.map((i) => i.name), ['Zıkkım Dürüm']);
+      expect(state.incompleteItems.map((i) => i.name), ['Adana Kebap', 'Tavuk Şiş']);
+      expect(state.completeItems.map((i) => i.name), ['Kıymalı Pide']);
+      expect(GapItem.fromJson(typed.toJson()).typed, isTrue);
+      expect(GapStats.fromJson(state.stats!.toJson()).typed, 3);
+      // Older snapshots have no "typed" field.
+      expect(items.first.typed, isFalse);
+      expect(const GapDraft(menuText: ' adana, urfa ').hasInput, isTrue);
+      expect(const GapDraft(menuText: '  ').hasInput, isFalse);
     });
 
     test('a result survives a JSON round trip (offline copy)', () {

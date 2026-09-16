@@ -429,7 +429,34 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analyzeButton => 'Eksikleri bul';
 
   @override
-  String get needScreenshot => 'Şube seç ve en az bir ekran görüntüsü ekle';
+  String get needScreenshot =>
+      'Şube seç; ekran görüntüsü ekle ya da menüdeki ürünleri yaz';
+
+  @override
+  String get menuTextLabel => 'Menüdeki ürünler (yaz ya da söyle)';
+
+  @override
+  String get menuTextHint =>
+      'ör. adana, urfa, lahmacun, ayran — ekran görüntüsü olmadan da çalışır';
+
+  @override
+  String typedItems(int count) {
+    return 'Yazdığın ürünler ($count)';
+  }
+
+  @override
+  String get typedItemsHint =>
+      'Sayıma dahil; açıklama/opsiyon durumları bilinmiyor';
+
+  @override
+  String analysisSummaryTyped(
+    int screenshots,
+    int typed,
+    int unique,
+    int calls,
+  ) {
+    return '$screenshots görüntü · $typed yazılı · $unique ürün · $calls AI çağrısı';
+  }
 
   @override
   String lastAnalysis(String date) {

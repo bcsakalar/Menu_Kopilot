@@ -493,11 +493,13 @@ class ApiClient {
     required String branchId,
     required List<UploadImage> images,
     String? extraNotes,
+    String? menuText,
     CancelToken? cancelToken,
   }) async* {
     final form = FormData.fromMap({
       'branchId': branchId,
       if (extraNotes != null && extraNotes.trim().isNotEmpty) 'extraNotes': extraNotes.trim(),
+      if (menuText != null && menuText.trim().isNotEmpty) 'menuText': menuText.trim(),
       'images': [
         for (final image in images)
           await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),

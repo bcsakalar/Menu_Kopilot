@@ -24,10 +24,12 @@ class GapScreen extends ConsumerStatefulWidget {
 
 class _GapScreenState extends ConsumerState<GapScreen> {
   late final TextEditingController _notes = TextEditingController(text: ref.read(gapDraftProvider).notes);
+  late final TextEditingController _menuText = TextEditingController(text: ref.read(gapDraftProvider).menuText);
 
   @override
   void dispose() {
     _notes.dispose();
+    _menuText.dispose();
     super.dispose();
   }
 
@@ -75,13 +77,14 @@ class _GapScreenState extends ConsumerState<GapScreen> {
 
   Future<void> _analyze(Branch? branch) async {
     final draft = ref.read(gapDraftProvider);
-    if (branch == null || draft.images.isEmpty || draft.compressing) {
+    if (branch == null || !draft.hasInput || draft.compressing) {
       showMessage(context, context.l10n.needScreenshot);
       return;
     }
-    final request = GapRequest(branch: branch, images: draft.images, notes: draft.notes);
+    final request = GapRequest(branch: branch, images: draft.images, notes: draft.notes, menuText: draft.menuText);
     ref.read(gapDraftProvider.notifier).reset();
     _notes.clear();
+    _menuText.clear();
     await context.push('/gap/result', extra: request);
     ref.invalidate(branchesProvider);
   }
@@ -92,7 +95,7 @@ class _GapScreenState extends ConsumerState<GapScreen> {
     final draft = ref.watch(gapDraftProvider);
     final branch = ref.watch(selectedBranchProvider);
     final notifier = ref.read(gapDraftProvider.notifier);
-    final canAnalyze = branch != null && draft.images.isNotEmpty && !draft.compressing;
+    final canAnalyze = branch != null && draft.hasInput && !draft.compressing;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.gapTitle)),
@@ -151,23 +154,33 @@ class _GapScreenState extends ConsumerState<GapScreen> {
                     ),
                   ],
                   const SizedBox(height: 16),
+                  // During a call: type or dictate what the restaurant already sells — works without screenshots and AI.
                   TextField(
-                    controller: _notes,
-                    minLines: 1,
-                    maxLines: 4,
-                    decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
-                    onChanged: notifier.setNotes,
+                    key: const Key('gap-menu-text'),
+                    controller: _menuText,
+                    minLines: 2,
+                    maxLines: 6,
+                    decoration: InputDecoration(labelText: l10n.menuTextLabel, hintText: l10n.menuTextHint),
+                    onChanged: notifier.setMenuText,
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: VoiceNoteButton(
                       cuisineId: branch?.cuisineId,
                       onText: (transcription) {
-                        final current = _notes.text.trimRight();
-                        _notes.text = current.isEmpty ? transcription.text : '$current ${transcription.text}';
-                        notifier.setNotes(_notes.text);
+                        final current = _menuText.text.trimRight();
+                        _menuText.text = current.isEmpty ? transcription.text : '$current, ${transcription.text}';
+                        notifier.setMenuText(_menuText.text);
                       },
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _notes,
+                    minLines: 1,
+                    maxLines: 4,
+                    decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
+                    onChanged: notifier.setNotes,
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(

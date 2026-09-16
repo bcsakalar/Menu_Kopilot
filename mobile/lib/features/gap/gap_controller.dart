@@ -25,15 +25,21 @@ String checklistId(String branchId) => 'branch:$branchId';
 // ---- inputs of the "Tamamla" tab ------------------------------------------------------------------------------
 
 class GapDraft {
-  const GapDraft({this.images = const [], this.notes = '', this.compressing = false});
+  const GapDraft({this.images = const [], this.notes = '', this.menuText = '', this.compressing = false});
 
   final List<PickedImage> images;
   final String notes;
+
+  /// Products on the menu, typed or dictated — enough on its own (no screenshots, no AI needed).
+  final String menuText;
   final bool compressing;
 
-  GapDraft copyWith({List<PickedImage>? images, String? notes, bool? compressing}) => GapDraft(
+  bool get hasInput => images.isNotEmpty || menuText.trim().isNotEmpty;
+
+  GapDraft copyWith({List<PickedImage>? images, String? notes, String? menuText, bool? compressing}) => GapDraft(
         images: images ?? this.images,
         notes: notes ?? this.notes,
+        menuText: menuText ?? this.menuText,
         compressing: compressing ?? this.compressing,
       );
 }
@@ -71,6 +77,8 @@ class GapDraftController extends Notifier<GapDraft> {
 
   void setNotes(String notes) => state = state.copyWith(notes: notes);
 
+  void setMenuText(String text) => state = state.copyWith(menuText: text);
+
   void reset() => state = const GapDraft();
 }
 
@@ -79,11 +87,12 @@ final gapDraftProvider = NotifierProvider<GapDraftController, GapDraft>(GapDraft
 // ---- analysis run -------------------------------------------------------------------------------------------
 
 class GapRequest {
-  const GapRequest({required this.branch, required this.images, this.notes = ''});
+  const GapRequest({required this.branch, required this.images, this.notes = '', this.menuText = ''});
 
   final Branch branch;
   final List<PickedImage> images;
   final String notes;
+  final String menuText;
 }
 
 enum GapPhase { idle, loading, streaming, done, empty, error, cancelled }
@@ -132,8 +141,11 @@ class GapViewState {
   bool isOnMenu(String name, String? templateId) =>
       onMenuKeys.contains(foldTr(name)) || (templateId != null && onMenuKeys.contains('id:$templateId'));
 
-  List<GapItem> get incompleteItems => items.where((i) => !i.ok).toList();
-  List<GapItem> get completeItems => items.where((i) => i.ok).toList();
+  List<GapItem> get incompleteItems => items.where((i) => !i.ok && !i.typed).toList();
+  List<GapItem> get completeItems => items.where((i) => i.ok && !i.typed).toList();
+
+  /// Products the user typed or dictated (their panel texts are unknown).
+  List<GapItem> get typedItems => items.where((i) => i.typed).toList();
 
   GapViewState copyWith({
     Branch? branch,
@@ -205,6 +217,7 @@ class GapController extends Notifier<GapViewState> {
         branchId: request.branch.id,
         images: request.images.map((i) => UploadImage(path: i.path, sha256: i.sha256)).toList(),
         extraNotes: request.notes,
+        menuText: request.menuText,
         cancelToken: token,
       );
       await for (final event in stream) {
