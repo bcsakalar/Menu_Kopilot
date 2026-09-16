@@ -69,6 +69,8 @@ export function providerFailure(error: ProviderError, action: string): AppError 
       return new AppError('LOCAL_ONLY_MODE', `Yerel mod açık: ${action} için dış servis kullanılmıyor`);
     case 'quota_exceeded':
       return new AppError('QUOTA_EXCEEDED', 'Günlük AI kotası doldu; yarın tekrar dene');
+    case 'not_configured':
+      return new AppError('AI_NOT_CONFIGURED', `AI anahtarı tanımlı değil: ${action} için sunucuya GEMINI_API_KEY veya GROQ_API_KEY eklenmeli`);
     case 'bad_request':
     case 'unsupported':
     case 'content_blocked':
@@ -77,7 +79,6 @@ export function providerFailure(error: ProviderError, action: string): AppError 
     case 'unavailable':
     case 'timeout':
     case 'auth':
-    case 'not_configured':
     case 'invalid_output':
     case 'budget_exceeded':
     case 'aborted':

@@ -195,4 +195,34 @@ describe('voice notes and restaurant research (Faz 7)', () => {
       await local.close();
     }
   });
+
+  it('without a key: voice notes and research say which key is missing (not "try again later")', async () => {
+    const bare = new FakeProvider('groq', fixtureResponder(fx));
+    bare.configured = false;
+    const app = await createTestApp({ providers: { groq: bare } });
+    try {
+      const appToken = (await loginAs(app)).accessToken;
+      const body = multipartBody({}, [{ name: 'audio', filename: 'n.ogg', contentType: 'audio/ogg', data: oggRecording('nokey') }]);
+      const voice = await app.app.inject({
+        method: 'POST',
+        url: '/api/v1/transcribe',
+        headers: { ...bearer(appToken), ...body.headers },
+        payload: body.payload,
+      });
+      expect(voice.statusCode).toBe(409);
+      const error = voice.json<{ error: { code: string; message: string } }>().error;
+      expect(error.code).toBe('AI_NOT_CONFIGURED');
+      expect(error.message).toContain('GROQ_API_KEY');
+      const web = await app.app.inject({
+        method: 'POST',
+        url: '/api/v1/research',
+        headers: bearer(appToken),
+        payload: { restaurantName: 'Karşıyaka Kebapçısı' },
+      });
+      expect(web.json<{ error: { code: string } }>().error.code).toBe('AI_NOT_CONFIGURED');
+      expect(bare.calls.length + bare.transcribeCalls.length).toBe(0);
+    } finally {
+      await app.close();
+    }
+  });
 });

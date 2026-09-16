@@ -13,7 +13,7 @@ import type { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import type { NearMiss, RetrievalHit, RetrievalService } from '../retrieval/retrieval.service.js';
 import { getTemplates, incrementUsage } from '../templates/template-store.js';
 import { CANONICAL_MIN_CONFIDENCE, CANONICAL_TRIGGER_SCORE, canonicalize } from './canonicalize.js';
-import type { EnrichmentService, EnrichOutcome } from './enrichment.js';
+import { type EnrichmentService, type EnrichOutcome, reviewReasonFor } from './enrichment.js';
 import { reviewPlaceholder } from './sanitize.js';
 import {
   type CardDto,
@@ -108,6 +108,7 @@ export function extractionToParsed(items: readonly ExtractionItem[], imageSha: s
 const UNAVAILABLE_MESSAGES: Partial<Record<ProviderErrorKind, string>> = {
   local_only: 'Yerel mod açık: yalnızca veritabanı ve önbellekten cevap veriliyor.',
   quota_exceeded: 'Günlük AI kotası doldu: yalnızca veritabanı ve önbellekten cevap veriliyor.',
+  not_configured: 'AI anahtarı tanımlı değil: yalnızca veritabanı ve önbellekten cevap veriliyor.',
 };
 
 export class SuggestPipeline {
@@ -339,7 +340,7 @@ export class SuggestPipeline {
             kind: 'review',
             payload: reviewPlaceholder(parsed.rawName),
             confidence: null,
-            reviewReason: UNAVAILABLE_MESSAGES[stopReason ?? 'local_only'] ?? 'AI kullanılamıyor: alanları sen doldur.',
+            reviewReason: reviewReasonFor(stopReason),
             fromCache: false,
           });
         }

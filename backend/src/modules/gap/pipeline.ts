@@ -84,7 +84,7 @@ export interface GapPipelineResult {
 
 export const PANEL_CONCURRENCY = 3;
 const CUISINE_TEMPLATE_SAMPLE = 50;
-const AI_OFF: ReadonlySet<ProviderErrorKind> = new Set(['local_only', 'quota_exceeded']);
+const AI_OFF: ReadonlySet<ProviderErrorKind> = new Set(['local_only', 'quota_exceeded', 'not_configured']);
 
 function toDto(rec: RecommendationCandidate): RecommendationDto {
   return { name: rec.name, reason: rec.reason, importance: rec.importance, source: rec.source, templateId: rec.templateId };

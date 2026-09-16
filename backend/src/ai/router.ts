@@ -26,6 +26,15 @@ export interface AttemptRecord {
   latencyMs?: number;
 }
 
+/** The error once a chain is exhausted without a usable answer: "no key for any route" is not a transient outage. */
+function exhaustedError(attempts: readonly AttemptRecord[], lastError: ProviderError | undefined, message: string): ProviderError {
+  if (lastError) return lastError;
+  const unconfigured = attempts.length > 0 && attempts.every((a) => a.outcome === 'skipped' && a.reason === 'not_configured');
+  return unconfigured
+    ? new ProviderError({ kind: 'not_configured', message: 'Bu görev için AI anahtarı tanımlı değil' })
+    : new ProviderError({ kind: 'unavailable', message });
+}
+
 export type RoutedResult<T> =
   | { ok: true; value: T; raw: string; meta: CallMeta; route: ResolvedRoute; attempts: AttemptRecord[] }
   | { ok: false; error: ProviderError; route?: ResolvedRoute; attempts: AttemptRecord[] };
@@ -89,6 +98,12 @@ export class AiRouter {
   async availability(userId: string | undefined): Promise<{ ok: true } | { ok: false; error: ProviderError }> {
     if (this.deps.localOnly) {
       return { ok: false, error: new ProviderError({ kind: 'local_only', message: 'LOCAL_ONLY_MODE açık' }) };
+    }
+    if (!Object.values(this.deps.providers).some((provider) => provider?.isConfigured())) {
+      return {
+        ok: false,
+        error: new ProviderError({ kind: 'not_configured', message: 'AI anahtarı tanımlı değil (GEMINI_API_KEY / GROQ_API_KEY)' }),
+      };
     }
     if (this.deps.quota) {
       const status = await this.deps.quota.status(userId);
@@ -267,9 +282,7 @@ export class AiRouter {
     }
     return {
       ok: false,
-      error:
-        lastError ??
-        new ProviderError({ kind: 'unavailable', message: 'Bu görev için kullanılabilir sağlayıcı yok (anahtar/limit)' }),
+      error: exhaustedError(attempts, lastError, 'Bu görev için kullanılabilir sağlayıcı yok (limit/devre)'),
       ...(lastRoute ? { route: lastRoute } : {}),
       attempts,
     };
@@ -363,7 +376,7 @@ export class AiRouter {
     }
     return {
       ok: false,
-      error: lastError ?? new ProviderError({ kind: 'unavailable', message: 'Embedding sağlayıcısı yok' }),
+      error: exhaustedError(attempts, lastError, 'Embedding sağlayıcısı yok'),
       attempts,
     };
   }
@@ -434,7 +447,7 @@ export class AiRouter {
     }
     return {
       ok: false,
-      error: lastError ?? new ProviderError({ kind: 'unavailable', message: 'Ses tanıma sağlayıcısı yok (anahtar/limit)' }),
+      error: exhaustedError(attempts, lastError, 'Ses tanıma sağlayıcısı yok (limit/devre)'),
       attempts,
     };
   }

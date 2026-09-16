@@ -398,4 +398,27 @@ describe('/suggest budget, continue and local-only mode', () => {
       await h.ctx.close();
     }
   });
+
+  it('without any AI key: DB cards + review cards that say so, no misleading "Devam et"', async () => {
+    const h = await harness(fx);
+    h.gemini.configured = false;
+    h.groq.configured = false;
+    try {
+      const { events, cards } = await suggestStream(
+        h,
+        { cuisineId: await h.cuisineId('kebap-izgara'), promptText: 'Adana, Zıkkım Kebabı' },
+        [{ file: 'menu-kebapci.jpg', fx }],
+      );
+      expect(cards.map((c) => c.origin)).toEqual(['seed', 'review']);
+      expect(cards[1]?.reviewReason).toContain('AI anahtarı tanımlı değil');
+      const codes = events.filter((e) => e.event === 'warning').map((e) => (e.data as { code: string }).code);
+      expect(codes).toEqual(expect.arrayContaining(['not_configured', 'images_skipped']));
+      expect(events.some((e) => e.event === 'budget_exhausted')).toBe(false);
+      expect(h.gemini.calls.length + h.groq.calls.length).toBe(0);
+      const done = events.find((e) => e.event === 'done')?.data as { status: string };
+      expect(done.status).toBe('completed');
+    } finally {
+      await h.ctx.close();
+    }
+  });
 });

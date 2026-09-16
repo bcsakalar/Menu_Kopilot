@@ -46,11 +46,17 @@ const cachedCardSchema = z.object({ payload: templatePayloadSchema, confidence: 
 
 const REVIEW_REASONS: Partial<Record<ProviderErrorKind, string>> = {
   local_only: 'Yerel mod açık: AI kullanılmadı, alanları sen doldur.',
+  not_configured: 'AI anahtarı tanımlı değil: alanları sen doldur.',
   quota_exceeded: 'Günlük AI kotası doldu: alanları sen doldur.',
   invalid_output: 'AI çıktısı doğrulanamadı: alanları sen doldur.',
   content_blocked: 'AI bu ürün için yanıt vermedi: alanları sen doldur.',
 };
 const UNKNOWN_REASON = 'Bunu bilmiyorum, sen doldur.';
+
+/** Review-card note when the LLM could not be used at all for this run. */
+export function reviewReasonFor(kind: ProviderErrorKind | undefined): string {
+  return (kind && REVIEW_REASONS[kind]) ?? 'AI kullanılamıyor: alanları sen doldur.';
+}
 
 export class EnrichmentService {
   constructor(

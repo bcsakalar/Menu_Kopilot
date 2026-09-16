@@ -101,6 +101,22 @@ describe('AiRouter', () => {
     expect(groq.calls).toHaveLength(0);
   });
 
+  it('reports a missing key as not_configured, not as an outage', async () => {
+    gemini.configured = false;
+    groq.configured = false;
+    const router = makeRouter();
+    const availability = await router.availability(undefined);
+    expect(!availability.ok && availability.error.kind).toBe('not_configured');
+    const result = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    expect(!result.ok && result.error.kind).toBe('not_configured');
+
+    // Only the embed chain lacks a key: that task alone says not_configured.
+    groq.configured = true;
+    const embed = await makeRouter().embed(['adana']);
+    expect(!embed.ok && embed.error.kind).toBe('not_configured');
+    expect(gemini.calls.length + groq.calls.length).toBe(0);
+  });
+
   it('retries a short 429 on the same provider and cools down on a long one', async () => {
     let n = 0;
     groq.setResponder(() => (n++ === 0 ? { ok: false, kind: 'rate_limited', retryAfterMs: 1200 } : good));
