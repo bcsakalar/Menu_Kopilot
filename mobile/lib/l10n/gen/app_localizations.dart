@@ -202,6 +202,54 @@ abstract class AppLocalizations {
   /// **'Tamamla'**
   String get navGap;
 
+  /// No description provided for @sharedPhotos.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} fotoğraf paylaşıldı'**
+  String sharedPhotos(int count);
+
+  /// No description provided for @sharedText.
+  ///
+  /// In tr, this message translates to:
+  /// **'Metin paylaşıldı'**
+  String get sharedText;
+
+  /// No description provided for @shareAsMenuPhotos.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menü fotoğrafı → Öneri'**
+  String get shareAsMenuPhotos;
+
+  /// No description provided for @shareAsMenuPhotosHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün kartları hazırlanır'**
+  String get shareAsMenuPhotosHint;
+
+  /// No description provided for @shareAsScreenshots.
+  ///
+  /// In tr, this message translates to:
+  /// **'Panel ekran görüntüsü → Tamamla'**
+  String get shareAsScreenshots;
+
+  /// No description provided for @shareAsScreenshotsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şubenin eksikleri bulunur'**
+  String get shareAsScreenshotsHint;
+
+  /// No description provided for @shareAsProductList.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün listesi → Öneri'**
+  String get shareAsProductList;
+
+  /// No description provided for @shareAsMenuText.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünler → Tamamla'**
+  String get shareAsMenuText;
+
   /// No description provided for @navBranches.
   ///
   /// In tr, this message translates to:

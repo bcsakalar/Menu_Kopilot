@@ -66,6 +66,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get navGap => 'Tamamla';
 
   @override
+  String sharedPhotos(int count) {
+    return '$count fotoğraf paylaşıldı';
+  }
+
+  @override
+  String get sharedText => 'Metin paylaşıldı';
+
+  @override
+  String get shareAsMenuPhotos => 'Menü fotoğrafı → Öneri';
+
+  @override
+  String get shareAsMenuPhotosHint => 'Ürün kartları hazırlanır';
+
+  @override
+  String get shareAsScreenshots => 'Panel ekran görüntüsü → Tamamla';
+
+  @override
+  String get shareAsScreenshotsHint => 'Şubenin eksikleri bulunur';
+
+  @override
+  String get shareAsProductList => 'Ürün listesi → Öneri';
+
+  @override
+  String get shareAsMenuText => 'Menüdeki ürünler → Tamamla';
+
+  @override
   String get navBranches => 'Şubeler';
 
   @override

@@ -97,6 +97,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final queued = ref.watch(queuedCountProvider).value ?? 0;
     ref.watch(queueFlusherProvider);
     final notifier = ref.read(homeDraftProvider.notifier);
+    // Text can also arrive from outside the field (shared from another app).
+    ref.listen(homeDraftProvider.select((d) => d.prompt), (_, next) {
+      if (_prompt.text != next) _prompt.text = next;
+    });
 
     return Scaffold(
       appBar: AppBar(

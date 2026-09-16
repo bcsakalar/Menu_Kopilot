@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/common.dart';
+import '../share/share_listener.dart';
 
 /// Bottom navigation: Öneri · Tamamla · Şubeler · Şablonlar · Ayarlar.
 class AppShell extends StatelessWidget {
@@ -13,7 +14,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      body: shell,
+      body: ShareIntakeListener(child: shell),
       bottomNavigationBar: NavigationBar(
         selectedIndex: shell.currentIndex,
         onDestinationSelected: (index) => shell.goBranch(index, initialLocation: index == shell.currentIndex),

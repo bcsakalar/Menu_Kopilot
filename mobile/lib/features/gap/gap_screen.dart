@@ -95,6 +95,10 @@ class _GapScreenState extends ConsumerState<GapScreen> {
     final draft = ref.watch(gapDraftProvider);
     final branch = ref.watch(selectedBranchProvider);
     final notifier = ref.read(gapDraftProvider.notifier);
+    // The product list can also arrive from outside the field (shared from another app).
+    ref.listen(gapDraftProvider.select((d) => d.menuText), (_, next) {
+      if (_menuText.text != next) _menuText.text = next;
+    });
     final canAnalyze = branch != null && draft.hasInput && !draft.compressing;
 
     return Scaffold(
