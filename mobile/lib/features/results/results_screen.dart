@@ -41,16 +41,13 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     });
   }
 
-  Future<void> _act(String cardId, Future<String?> Function() action) async {
+  Future<void> _act(String cardId, Future<Exception?> Function() action) async {
     setState(() => _busy.add(cardId));
     final error = await action();
     if (!mounted) return;
     setState(() => _busy.remove(cardId));
-    if (error == 'acceptNeedsContent') {
-      showMessage(context, context.l10n.acceptNeedsContent);
-    } else if (error != null) {
-      showMessage(context, error);
-    }
+    if (error == null) return;
+    showMessage(context, error is CardNeedsContent ? context.l10n.acceptNeedsContent : apiErrorText(context.l10n, error));
   }
 
   Future<void> _openEditor(SuggestionCard card) async {

@@ -159,8 +159,10 @@ class ApiClient {
         final text = await utf8.decoder.bind(data.stream.cast<List<int>>()).join();
         final decoded = asJson(jsonDecode(text));
         final envelope = decoded.object('error');
-        if (envelope != null) {
-          return ApiException(envelope.str('code'), envelope.str('message'), status: error.response?.statusCode);
+        final message = envelope?.str('message') ?? '';
+        if (envelope != null && message.isNotEmpty) {
+          return ApiException(envelope.str('code', 'INTERNAL_ERROR'), message,
+              status: error.response?.statusCode, details: envelope['details'], fromServer: true);
         }
       } on Object {
         // fall through

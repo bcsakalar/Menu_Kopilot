@@ -53,23 +53,29 @@ class HomeDraftController extends Notifier<HomeDraft> {
 
   void setDeepMode(bool value) => state = state.copyWith(deepMode: value);
 
-  /// Returns how many photos were skipped because of the 5-photo limit.
-  Future<int> addImages(List<String> paths) async {
+  /// Adds photos up to the limit and reports how many were over it or could not be read.
+  Future<AddImagesResult> addImages(List<String> paths) async {
     final free = maxPhotos - state.images.length;
     final accepted = paths.take(free < 0 ? 0 : free).toList();
-    if (accepted.isEmpty) return paths.length;
+    if (accepted.isEmpty) return (skipped: paths.length, failed: 0);
     state = state.copyWith(compressing: true);
     final compress = ref.read(imageCompressorProvider);
     final images = [...state.images];
+    var failed = 0;
     try {
       for (final path in accepted) {
-        final image = await compress(path);
-        if (images.every((i) => i.sha256 != image.sha256)) images.add(image);
+        try {
+          final image = await compress(path);
+          if (images.every((i) => i.sha256 != image.sha256)) images.add(image);
+        } on Object catch (_) {
+          // One unreadable photo (unsupported format, broken file) must not drop the others.
+          failed += 1;
+        }
       }
     } finally {
       state = state.copyWith(images: images, compressing: false);
     }
-    return paths.length - accepted.length;
+    return (skipped: paths.length - accepted.length, failed: failed);
   }
 
   void removeImage(int index) {

@@ -27,7 +27,7 @@ class _ModelSettingsScreenState extends ConsumerState<ModelSettingsScreen> {
       await ref.read(apiClientProvider).setPrimaryModel(task.taskKey, model);
       ref.invalidate(providerSettingsProvider);
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? context.l10n.networkError : e.message);
+      if (mounted) showMessage(context, apiErrorText(context.l10n, e));
     } finally {
       if (mounted) setState(() => _saving = null);
     }

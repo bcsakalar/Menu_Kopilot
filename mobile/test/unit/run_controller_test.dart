@@ -162,7 +162,7 @@ void main() {
     final sub = container.listen(runControllerProvider(runSlotSuggest), (_, _) {});
     final controller = container.read(runControllerProvider(runSlotSuggest).notifier);
     await controller.start(request);
-    expect(await controller.accept('c9'), 'acceptNeedsContent');
+    expect(await controller.accept('c9'), isA<CardNeedsContent>());
     expect(api.acceptedIds, isEmpty);
     sub.close();
   });

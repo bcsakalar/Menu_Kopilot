@@ -25,7 +25,7 @@ class SettingsScreen extends ConsumerWidget {
       final health = await ref.read(apiClientProvider).health();
       if (context.mounted) showMessage(context, context.l10n.serverStatus('${health['status'] ?? 'ok'}'));
     } on ApiException catch (e) {
-      if (context.mounted) showMessage(context, e.message);
+      if (context.mounted) showMessage(context, apiErrorText(context.l10n, e));
     }
   }
 

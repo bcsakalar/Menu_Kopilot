@@ -82,7 +82,7 @@ class _BranchFormScreenState extends ConsumerState<BranchFormScreen> {
       ref.invalidate(branchesProvider);
       if (mounted) Navigator.of(context).pop(saved);
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? l10n.networkError : e.message);
+      if (mounted) showMessage(context, apiErrorText(l10n, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

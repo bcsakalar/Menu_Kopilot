@@ -2,11 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/models/suggestion.dart';
+import '../network/api_exception.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../theme.dart';
 
 extension L10nX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
+}
+
+/// User-facing text for any failure: the server's own message when it sent one, otherwise an l10n text.
+String apiErrorText(AppLocalizations l10n, Object error) {
+  if (error is ApiException) {
+    if (error.isNetwork) return l10n.networkError;
+    if (error.code == 'CANCELLED') return l10n.cancelled;
+    final server = error.serverMessage;
+    if (server != null) return server;
+  }
+  return l10n.genericError;
 }
 
 Future<void> copyToClipboard(BuildContext context, String text) async {

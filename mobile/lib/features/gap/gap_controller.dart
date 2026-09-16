@@ -40,23 +40,29 @@ class GapDraftController extends Notifier<GapDraft> {
   @override
   GapDraft build() => const GapDraft();
 
-  /// Returns how many screenshots were skipped because of the limit.
-  Future<int> addImages(List<String> paths) async {
+  /// Adds photos up to the limit and reports how many were over it or could not be read.
+  Future<AddImagesResult> addImages(List<String> paths) async {
     final free = maxScreenshots - state.images.length;
     final accepted = paths.take(free < 0 ? 0 : free).toList();
-    if (accepted.isEmpty) return paths.length;
+    if (accepted.isEmpty) return (skipped: paths.length, failed: 0);
     state = state.copyWith(compressing: true);
     final compress = ref.read(imageCompressorProvider);
     final images = [...state.images];
+    var failed = 0;
     try {
       for (final path in accepted) {
-        final image = await compress(path);
-        if (images.every((i) => i.sha256 != image.sha256)) images.add(image);
+        try {
+          final image = await compress(path);
+          if (images.every((i) => i.sha256 != image.sha256)) images.add(image);
+        } on Object catch (_) {
+          // One unreadable photo (unsupported format, broken file) must not drop the others.
+          failed += 1;
+        }
       }
     } finally {
       state = state.copyWith(images: images, compressing: false);
     }
-    return paths.length - accepted.length;
+    return (skipped: paths.length - accepted.length, failed: failed);
   }
 
   void removeImage(int index) => state = state.copyWith(images: [...state.images]..removeAt(index));
@@ -202,7 +208,7 @@ class GapController extends Notifier<GapViewState> {
         await _poll(runId);
         return;
       }
-      state = state.copyWith(phase: GapPhase.error, error: e.isNetwork ? null : e.message);
+      state = state.copyWith(phase: GapPhase.error, error: e.serverMessage);
     }
   }
 
@@ -228,7 +234,7 @@ class GapController extends Notifier<GapViewState> {
       if (cached != null) {
         _apply(cached, offline: true);
       } else {
-        state = state.copyWith(phase: GapPhase.error, error: e.isNetwork ? null : e.message);
+        state = state.copyWith(phase: GapPhase.error, error: e.serverMessage);
       }
     }
   }
@@ -306,7 +312,7 @@ class GapController extends Notifier<GapViewState> {
         }
       } on ApiException catch (e) {
         if (!e.isNetwork) {
-          if (ref.mounted) state = state.copyWith(phase: GapPhase.error, error: e.message);
+          if (ref.mounted) state = state.copyWith(phase: GapPhase.error, error: e.serverMessage);
           return;
         }
       }

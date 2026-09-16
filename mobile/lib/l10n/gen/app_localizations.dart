@@ -388,6 +388,12 @@ abstract class AppLocalizations {
   /// **'Henüz öneri yok'**
   String get noRecentRuns;
 
+  /// No description provided for @photoRunTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraftan öneri'**
+  String get photoRunTitle;
+
   /// No description provided for @queuedOffline.
   ///
   /// In tr, this message translates to:
@@ -1431,6 +1437,78 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'{calls} çağrı · {failed} hata · {tokens} token'**
   String modelUsageLine(int calls, int failed, int tokens);
+
+  /// No description provided for @copyMultiChoice.
+  ///
+  /// In tr, this message translates to:
+  /// **'çoklu seçim, en fazla {max}'**
+  String copyMultiChoice(int max);
+
+  /// No description provided for @copyLabelDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama'**
+  String get copyLabelDescription;
+
+  /// No description provided for @copyLabelPortion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Porsiyon'**
+  String get copyLabelPortion;
+
+  /// No description provided for @copyLabelServing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Servis'**
+  String get copyLabelServing;
+
+  /// No description provided for @copyLabelOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyonlar'**
+  String get copyLabelOptions;
+
+  /// No description provided for @copyLabelRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkarılabilir'**
+  String get copyLabelRemovables;
+
+  /// No description provided for @copyLabelExtras.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekstra'**
+  String get copyLabelExtras;
+
+  /// No description provided for @copyLabelTags.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiketler'**
+  String get copyLabelTags;
+
+  /// No description provided for @copyLabelAllergens.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerjen'**
+  String get copyLabelAllergens;
+
+  /// No description provided for @copyLabelUpsell.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri'**
+  String get copyLabelUpsell;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In tr, this message translates to:
+  /// **'İptal edildi'**
+  String get cancelled;
+
+  /// No description provided for @compressFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf küçültülemedi, başka bir fotoğraf dene'**
+  String get compressFailed;
 
   /// No description provided for @voiceNote.
   ///

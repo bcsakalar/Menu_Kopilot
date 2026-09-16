@@ -283,7 +283,7 @@ class _OptionRowState extends State<_OptionRow> {
           value: widget.option.priceMode,
           underline: const SizedBox.shrink(),
           items: [
-            for (final mode in PriceMode.values) DropdownMenuItem(value: mode, child: Text(priceHint(mode))),
+            for (final mode in PriceMode.values) DropdownMenuItem(value: mode, child: Text(priceHint(l10n, mode))),
           ],
           onChanged: (mode) {
             if (mode != null) widget.onPriceMode(mode);

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/utils/image_compressor.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/branch.dart';
 import '../branches/branch_form.dart';
@@ -38,8 +39,7 @@ class _GapScreenState extends ConsumerState<GapScreen> {
     }
     final files = await ImagePicker().pickMultiImage(limit: remaining, imageQuality: 100);
     if (files.isEmpty) return;
-    final skipped = await ref.read(gapDraftProvider.notifier).addImages(files.map((f) => f.path).toList());
-    if (skipped > 0 && mounted) showMessage(context, context.l10n.maxPhotos(maxScreenshots));
+    _reportAdded(await ref.read(gapDraftProvider.notifier).addImages(files.map((f) => f.path).toList()));
   }
 
   Future<void> _addFromCamera() async {
@@ -50,7 +50,16 @@ class _GapScreenState extends ConsumerState<GapScreen> {
     }
     final paths = await context.push<List<String>>('/camera', extra: remaining);
     if (paths == null || paths.isEmpty) return;
-    await ref.read(gapDraftProvider.notifier).addImages(paths);
+    _reportAdded(await ref.read(gapDraftProvider.notifier).addImages(paths));
+  }
+
+  void _reportAdded(AddImagesResult result) {
+    if (!mounted) return;
+    if (result.failed > 0) {
+      showMessage(context, context.l10n.compressFailed);
+    } else if (result.skipped > 0) {
+      showMessage(context, context.l10n.maxPhotos(maxScreenshots));
+    }
   }
 
   Future<void> _pickBranch() async {

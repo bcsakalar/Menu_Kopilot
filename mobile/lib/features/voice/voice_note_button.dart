@@ -83,7 +83,7 @@ class _VoiceNoteButtonState extends ConsumerState<VoiceNoteButton> {
         widget.onText(transcription);
       }
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? l10n.voiceNeedsNetwork : e.message);
+      if (mounted) showMessage(context, e.isNetwork ? l10n.voiceNeedsNetwork : apiErrorText(l10n, e));
     } finally {
       try {
         // The recording is only needed for this upload.

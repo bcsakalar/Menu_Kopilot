@@ -41,31 +41,77 @@ int compressMinSide(int width, int height, {int maxEdge = maxImageEdge}) {
 
 String sha256Of(Uint8List bytes) => sha256.convert(bytes).toString();
 
+/// Outcome of adding photos to a draft: [skipped] were over the photo limit, [failed] could not be read.
+typedef AddImagesResult = ({int skipped, int failed});
+
+/// A photo that could not be read or converted (unsupported format, broken file).
+class ImageCompressException implements Exception {
+  const ImageCompressException(this.reason);
+
+  final String reason;
+
+  @override
+  String toString() => 'ImageCompressException: $reason';
+}
+
+/// Width and height after EXIF rotation, or null when the format is unknown to the size reader.
+(int, int)? _readSize(ImageInput input) {
+  try {
+    final size = ImageSizeGetter.getSizeResult(input).size;
+    return size.needRotate ? (size.height, size.width) : (size.width, size.height);
+  } on Object catch (_) {
+    return null;
+  }
+}
+
 /// Compresses a picked photo into [outDir] and returns its metadata. EXIF (incl. GPS) is stripped.
 Future<PickedImage> compressForUpload(String sourcePath, Directory outDir) async {
-  final size = ImageSizeGetter.getSizeResult(FileInput(File(sourcePath))).size;
-  final width = size.needRotate ? size.height : size.width;
-  final height = size.needRotate ? size.width : size.height;
-  final minSide = compressMinSide(width, height);
-
-  Uint8List? best;
-  for (final quality in compressQualities) {
-    final bytes = await FlutterImageCompress.compressWithFile(
+  var size = _readSize(FileInput(File(sourcePath)));
+  Uint8List? converted;
+  if (size == null) {
+    // HEIC/HEIF (Samsung "high efficiency" photos, iPhone camera) is not readable by the size reader: convert it
+    // once to a JPEG no smaller than the target, then scale from those bytes.
+    converted = await FlutterImageCompress.compressWithFile(
       sourcePath,
-      minWidth: minSide,
-      minHeight: minSide,
-      quality: quality,
+      minWidth: maxImageEdge,
+      minHeight: maxImageEdge,
+      quality: 95,
       format: CompressFormat.jpeg,
       keepExif: false,
       autoCorrectionAngle: true,
     );
+    size = converted == null ? null : _readSize(MemoryInput(converted));
+  }
+  if (size == null) throw const ImageCompressException('unsupported image format');
+  final (width, height) = size;
+  final minSide = compressMinSide(width, height);
+
+  Uint8List? best;
+  for (final quality in compressQualities) {
+    final source = converted;
+    final bytes = source == null
+        ? await FlutterImageCompress.compressWithFile(
+            sourcePath,
+            minWidth: minSide,
+            minHeight: minSide,
+            quality: quality,
+            format: CompressFormat.jpeg,
+            keepExif: false,
+            autoCorrectionAngle: true,
+          )
+        : await FlutterImageCompress.compressWithList(
+            source,
+            minWidth: minSide,
+            minHeight: minSide,
+            quality: quality,
+            format: CompressFormat.jpeg,
+            keepExif: false,
+          );
     if (bytes == null) continue;
     best = bytes;
     if (bytes.length <= targetImageBytes) break;
   }
-  if (best == null) {
-    throw const FileSystemException('Fotoğraf sıkıştırılamadı');
-  }
+  if (best == null) throw const ImageCompressException('compression failed');
   final hash = sha256Of(best);
   await outDir.create(recursive: true);
   final outPath = p.join(outDir.path, '$hash.jpg');

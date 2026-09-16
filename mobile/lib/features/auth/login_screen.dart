@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
 
@@ -56,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.read(authControllerProvider);
     if (state.hasError) {
       final error = state.error;
-      final message = error is ApiException ? error.message : context.l10n.genericError;
+      final message = error == null ? context.l10n.genericError : apiErrorText(context.l10n, error);
       showMessage(context, context.l10n.loginFailed(message));
     }
   }

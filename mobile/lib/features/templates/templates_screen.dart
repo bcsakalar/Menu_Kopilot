@@ -40,7 +40,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       await ref.read(templatePoolProvider.notifier).save(item, edited);
       if (mounted) showMessage(context, l10n.templateSaved);
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? l10n.networkError : e.message);
+      if (mounted) showMessage(context, apiErrorText(l10n, e));
     }
   }
 
@@ -60,7 +60,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
     try {
       await ref.read(templatePoolProvider.notifier).remove(item);
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? l10n.networkError : e.message);
+      if (mounted) showMessage(context, apiErrorText(l10n, e));
     }
   }
 
@@ -194,7 +194,7 @@ class _TemplateTile extends StatelessWidget {
           for (final group in item.payload.optionGroups)
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
-              child: Text(formatGroup(group), style: theme.textTheme.bodySmall),
+              child: Text(formatGroup(l10n, group), style: theme.textTheme.bodySmall),
             ),
           if (item.aliases.isNotEmpty)
             Padding(
@@ -204,7 +204,7 @@ class _TemplateTile extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              CopyButton(text: formatCard(item.payload), tooltip: l10n.copyAll),
+              CopyButton(text: formatCard(l10n, item.payload), tooltip: l10n.copyAll),
               const Spacer(),
               TextButton.icon(onPressed: onDelete, icon: const Icon(Icons.delete_outline), label: Text(l10n.delete)),
               const SizedBox(width: 8),

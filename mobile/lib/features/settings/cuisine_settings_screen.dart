@@ -31,7 +31,7 @@ class CuisineSettingsScreen extends ConsumerWidget {
       }
       ref.invalidate(cuisinesProvider);
     } on ApiException catch (e) {
-      if (context.mounted) showMessage(context, e.isNetwork ? l10n.networkError : e.message);
+      if (context.mounted) showMessage(context, apiErrorText(l10n, e));
     }
   }
 
@@ -41,7 +41,7 @@ class CuisineSettingsScreen extends ConsumerWidget {
       await ref.read(apiClientProvider).deleteCuisine(cuisine.id);
       ref.invalidate(cuisinesProvider);
     } on ApiException catch (e) {
-      if (context.mounted) showMessage(context, e.isNetwork ? l10n.networkError : e.message);
+      if (context.mounted) showMessage(context, apiErrorText(l10n, e));
     }
   }
 

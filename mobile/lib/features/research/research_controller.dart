@@ -52,7 +52,7 @@ class ResearchController extends Notifier<ResearchState> {
       await ref.read(appDatabaseProvider).writeKv(researchCacheKey(branchId), jsonEncode(result.toJson()));
     } on ApiException catch (e) {
       if (!ref.mounted) return;
-      state = ResearchState(phase: ResearchPhase.error, result: previous, error: e.isNetwork ? null : e.message, fromDevice: previous != null);
+      state = ResearchState(phase: ResearchPhase.error, result: previous, error: e.serverMessage, fromDevice: previous != null);
     }
   }
 }

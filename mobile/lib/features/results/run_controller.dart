@@ -96,6 +96,11 @@ class RunViewState {
 
 String _normalizeName(String value) => value.trim().toLowerCase();
 
+/// Returned by [RunController.accept] when the card has nothing worth saving yet (no description, no options).
+class CardNeedsContent implements Exception {
+  const CardNeedsContent();
+}
+
 /// Controller slots: each bottom-navigation tab that can show suggestion results has its own controller, so a card
 /// opened from the gap checklist does not replace the run shown in the "Öneri" tab.
 const String runSlotSuggest = 'suggest';
@@ -135,7 +140,7 @@ class RunController extends Notifier<RunViewState> {
       if (recent != null && recent.snapshotJson.length > 2) {
         _applySnapshot(RunSnapshot.fromJson(decodeJson(recent.snapshotJson)), recent.cuisineName, offline: true);
       } else {
-        state = state.copyWith(phase: RunPhase.error, error: e.message);
+        state = state.copyWith(phase: RunPhase.error, error: e.serverMessage);
       }
     }
   }
@@ -167,7 +172,7 @@ class RunController extends Notifier<RunViewState> {
         state = state.copyWith(phase: RunPhase.queued);
         return;
       }
-      state = state.copyWith(phase: RunPhase.error, error: e.message);
+      state = state.copyWith(phase: RunPhase.error, error: e.serverMessage);
     }
   }
 
@@ -230,7 +235,7 @@ class RunController extends Notifier<RunViewState> {
         }
       } on ApiException catch (e) {
         if (!e.isNetwork) {
-          state = state.copyWith(phase: RunPhase.error, error: e.message);
+          state = state.copyWith(phase: RunPhase.error, error: e.serverMessage);
           return;
         }
       }
@@ -271,7 +276,8 @@ class RunController extends Notifier<RunViewState> {
         runId: runId,
         cuisineId: Value(state.request?.data.cuisineId),
         cuisineName: Value(state.cuisineName),
-        title: Value(prompt.isNotEmpty ? prompt.split('\n').first : '${state.request?.images.length ?? 0} fotoğraf'),
+        // Photo-only runs have no title; the list shows a localized label instead.
+        title: Value(prompt.isNotEmpty ? prompt.split('\n').first : ''),
         status: snapshot.status,
         cardCount: Value(state.cards.length),
         snapshotJson: jsonEncode(snapshot.toJson()),
@@ -322,12 +328,12 @@ class RunController extends Notifier<RunViewState> {
     unawaited(_persistRecent());
   }
 
-  /// Returns null on success, otherwise a user-facing error message.
-  Future<String?> accept(String cardId, {String? branchId}) async {
+  /// Returns null on success, otherwise [CardNeedsContent] or the server's [ApiException].
+  Future<Exception?> accept(String cardId, {String? branchId}) async {
     final card = _card(cardId);
     if (card == null) return null;
     final payload = card.payload.normalized();
-    if (!payload.hasContent) return 'acceptNeedsContent';
+    if (!payload.hasContent) return const CardNeedsContent();
     try {
       final result = await _api.accept(cardId, payload: card.edited ? payload : null, branchId: branchId);
       if (!ref.mounted) return null;
@@ -342,11 +348,11 @@ class RunController extends Notifier<RunViewState> {
         _replace(card.copyWith(status: CardStatus.accepted, queued: true));
         return null;
       }
-      return e.message;
+      return e;
     }
   }
 
-  Future<String?> skip(String cardId) async {
+  Future<Exception?> skip(String cardId) async {
     final card = _card(cardId);
     if (card == null) return null;
     try {
@@ -358,7 +364,7 @@ class RunController extends Notifier<RunViewState> {
         _replace(card.copyWith(status: CardStatus.skipped, queued: true));
         return null;
       }
-      return e.message;
+      return e;
     }
   }
 }

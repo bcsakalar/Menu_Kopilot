@@ -171,7 +171,7 @@ class SuggestionCardView extends StatelessWidget {
               Row(
                 children: [
                   TextButton.icon(
-                    onPressed: () => copyToClipboard(context, formatCard(p)),
+                    onPressed: () => copyToClipboard(context, formatCard(l10n, p)),
                     icon: const Icon(Icons.copy_all_rounded, size: 18),
                     label: Text(l10n.copyAll),
                   ),
@@ -278,7 +278,7 @@ class _GroupTile extends StatelessWidget {
           children: [
             for (final option in group.options)
               Chip(
-                label: Text('${option.name} · ${priceHint(option.priceMode)}${option.isDefault ? ' · ${l10n.defaultOption}' : ''}'),
+                label: Text('${option.name} · ${priceHint(l10n, option.priceMode)}${option.isDefault ? ' · ${l10n.defaultOption}' : ''}'),
                 backgroundColor: option.priceMode == PriceMode.setsBase
                     ? Theme.of(context).colorScheme.tertiaryContainer
                     : option.priceMode == PriceMode.surcharge

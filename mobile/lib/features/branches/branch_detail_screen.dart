@@ -38,7 +38,7 @@ class _BranchDetailScreenState extends ConsumerState<BranchDetailScreen> {
     try {
       await action();
     } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.isNetwork ? context.l10n.networkError : e.message);
+      if (mounted) showMessage(context, apiErrorText(context.l10n, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -184,7 +184,7 @@ class _BranchDetailScreenState extends ConsumerState<BranchDetailScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => EmptyState(
           icon: Icons.cloud_off,
-          message: e is ApiException && !e.isNetwork ? e.message : l10n.networkError,
+          message: apiErrorText(l10n, e),
           action: FilledButton(onPressed: _refresh, child: Text(l10n.retry)),
         ),
         data: (data) => RefreshIndicator(

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/providers.dart';
+import '../../core/utils/image_compressor.dart';
 import '../../core/widgets/common.dart';
 import '../offline/background.dart';
 import '../results/run_controller.dart';
@@ -41,8 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     final files = await ImagePicker().pickMultiImage(limit: remaining, imageQuality: 100);
     if (files.isEmpty) return;
-    final skipped = await ref.read(homeDraftProvider.notifier).addImages(files.map((f) => f.path).toList());
-    if (skipped > 0 && mounted) showMessage(context, context.l10n.maxPhotos(maxPhotos));
+    _reportAdded(await ref.read(homeDraftProvider.notifier).addImages(files.map((f) => f.path).toList()));
   }
 
   Future<void> _addFromCamera() async {
@@ -53,7 +53,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     final paths = await context.push<List<String>>('/camera', extra: remaining);
     if (paths == null || paths.isEmpty) return;
-    await ref.read(homeDraftProvider.notifier).addImages(paths);
+    _reportAdded(await ref.read(homeDraftProvider.notifier).addImages(paths));
+  }
+
+  void _reportAdded(AddImagesResult result) {
+    if (!mounted) return;
+    if (result.failed > 0) {
+      showMessage(context, context.l10n.compressFailed);
+    } else if (result.skipped > 0) {
+      showMessage(context, context.l10n.maxPhotos(maxPhotos));
+    }
   }
 
   Future<void> _submit() async {
@@ -242,7 +251,7 @@ class _RecentRuns extends ConsumerWidget {
         for (final run in runs.take(10))
           ListTile(
             leading: Icon(run.status == 'completed' ? Icons.check_circle_outline : Icons.timelapse),
-            title: Text(run.title.isEmpty ? run.cuisineName : run.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Text(run.title.isEmpty ? l10n.photoRunTitle : run.title, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text('${run.cuisineName} · ${l10n.cardsReady(run.cardCount)} · ${format.format(run.createdAt)}'),
             onTap: () => context.push('/suggest/results?runId=${run.runId}'),
           ),

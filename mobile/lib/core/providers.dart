@@ -50,7 +50,7 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(serverUrlProvider.notifier).set(serverUrl);
-      final session = await ref.read(apiClientProvider).login(email.trim(), password, '${Platform.operatingSystem} cihazı');
+      final session = await ref.read(apiClientProvider).login(email.trim(), password, 'menu-kopilot-${Platform.operatingSystem}');
       await ref.read(tokenStoreProvider).write(session);
       return session;
     });

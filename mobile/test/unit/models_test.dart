@@ -1,8 +1,10 @@
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:menu_kopilot/core/utils/copy_format.dart';
 import 'package:menu_kopilot/core/utils/image_compressor.dart';
 import 'package:menu_kopilot/data/models/suggestion.dart';
 import 'package:menu_kopilot/data/models/template_payload.dart';
+import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
 const adana = TemplatePayload(
   name: 'Adana Kebap',
@@ -89,7 +91,7 @@ void main() {
 
   group('copy format', () {
     test('renders a readable block with price hints and no amounts', () {
-      final text = formatCard(adana);
+      final text = formatCard(lookupAppLocalizations(const Locale('tr')), adana);
       expect(text, contains('Adana Kebap'));
       expect(text, contains('Porsiyon (tek seçim, zorunlu): Yarım Porsiyon [tabanı belirler], 1 Porsiyon (varsayılan) [tabanı belirler]'));
       expect(text, contains('Yanında (çoklu seçim, en fazla 2, isteğe bağlı)'));

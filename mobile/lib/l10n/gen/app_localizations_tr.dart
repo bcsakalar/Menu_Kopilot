@@ -165,6 +165,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noRecentRuns => 'Henüz öneri yok';
 
   @override
+  String get photoRunTitle => 'Fotoğraftan öneri';
+
+  @override
   String get queuedOffline =>
       'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
 
@@ -756,6 +759,45 @@ class AppLocalizationsTr extends AppLocalizations {
   String modelUsageLine(int calls, int failed, int tokens) {
     return '$calls çağrı · $failed hata · $tokens token';
   }
+
+  @override
+  String copyMultiChoice(int max) {
+    return 'çoklu seçim, en fazla $max';
+  }
+
+  @override
+  String get copyLabelDescription => 'Açıklama';
+
+  @override
+  String get copyLabelPortion => 'Porsiyon';
+
+  @override
+  String get copyLabelServing => 'Servis';
+
+  @override
+  String get copyLabelOptions => 'Opsiyonlar';
+
+  @override
+  String get copyLabelRemovables => 'Çıkarılabilir';
+
+  @override
+  String get copyLabelExtras => 'Ekstra';
+
+  @override
+  String get copyLabelTags => 'Etiketler';
+
+  @override
+  String get copyLabelAllergens => 'Alerjen';
+
+  @override
+  String get copyLabelUpsell => 'Öneri';
+
+  @override
+  String get cancelled => 'İptal edildi';
+
+  @override
+  String get compressFailed =>
+      'Fotoğraf küçültülemedi, başka bir fotoğraf dene';
 
   @override
   String get voiceNote => 'Sesli not';
