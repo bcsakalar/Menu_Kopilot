@@ -64,6 +64,8 @@ class _GapResultScreenState extends ConsumerState<GapResultScreen> {
       data: SuggestRequestData(cuisineId: branch.cuisineId, promptText: name, branchId: branch.id),
     );
     await context.push('/gap/card?branchId=${branch.id}', extra: request);
+    // A card accepted there is now on the branch menu: move the count while the call goes on.
+    if (mounted) await ref.read(gapControllerProvider.notifier).syncBranchMenu();
   }
 
   @override
@@ -100,47 +102,62 @@ class _GapResultScreenState extends ConsumerState<GapResultScreen> {
                 ? null
                 : FilledButton(onPressed: () => controller.load(branch), child: Text(l10n.retry)),
           ),
-        _ => ListView(
-            padding: const EdgeInsets.only(bottom: 32),
-            children: [
-              if (state.offline) MaterialBanner(content: Text(l10n.offlineBanner), actions: const [SizedBox.shrink()]),
-              _CountsHeader(state: state),
-              for (final warning in state.warnings)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                  child: Text('⚠ $warning', style: Theme.of(context).textTheme.bodySmall),
-                ),
-              if (branch != null) _Checklist(branchId: branch.id, questions: state.questions, checked: checked),
-              if (state.incompleteItems.isNotEmpty) ...[
-                _Section(l10n.incompleteItems(state.incompleteItems.length)),
-                for (final item in state.incompleteItems)
-                  _ItemTile(key: ValueKey('item-${item.normalized}'), item: item, onCard: () => _openCard(item.templateName ?? item.name)),
-              ],
-              if (state.recommendations.isNotEmpty) ...[
-                _Section(l10n.recommendedItems(state.recommendations.length)),
-                for (final rec in state.recommendations)
-                  ListTile(
-                    key: ValueKey('rec-${rec.name}'),
-                    leading: Icon(rec.fromAi ? Icons.auto_awesome_outlined : Icons.inventory_2_outlined),
-                    title: Text(rec.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                    subtitle: Text('${rec.fromAi ? l10n.badgeAi : l10n.badgeDb} · ${rec.reason}'),
-                    trailing: IconButton(
-                      tooltip: l10n.prepareCard,
-                      icon: const Icon(Icons.post_add_outlined),
-                      onPressed: () => _openCard(rec.name),
-                    ),
-                    onTap: () => _openCard(rec.name),
+        _ => RefreshIndicator(
+            onRefresh: controller.syncBranchMenu,
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 32),
+              children: [
+                if (state.offline) MaterialBanner(content: Text(l10n.offlineBanner), actions: const [SizedBox.shrink()]),
+                _CountsHeader(state: state),
+                for (final warning in state.warnings)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                    child: Text('⚠ $warning', style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                if (branch != null)
+                  _Checklist(branchId: branch.id, questions: state.questions, checked: checked, onCard: _openCard),
+                if (state.incompleteItems.isNotEmpty) ...[
+                  _Section(l10n.incompleteItems(state.incompleteItems.length)),
+                  for (final item in state.incompleteItems)
+                    _ItemTile(key: ValueKey('item-${item.normalized}'), item: item, onCard: () => _openCard(item.templateName ?? item.name)),
+                ],
+                if (state.recommendations.isNotEmpty) ...[
+                  _Section(l10n.recommendedItems(state.recommendations.length)),
+                  for (final rec in state.recommendations)
+                    if (state.isOnMenu(rec.name, rec.templateId))
+                      ListTile(
+                        key: ValueKey('rec-${rec.name}'),
+                        leading: const Icon(Icons.check_circle, color: Color(0xFF15803D)),
+                        title: Text(
+                          rec.name,
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.outline),
+                        ),
+                        subtitle: Text(l10n.addedToMenu),
+                      )
+                    else
+                      ListTile(
+                        key: ValueKey('rec-${rec.name}'),
+                        leading: Icon(rec.fromAi ? Icons.auto_awesome_outlined : Icons.inventory_2_outlined),
+                        title: Text(rec.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                        subtitle: Text('${rec.fromAi ? l10n.badgeAi : l10n.badgeDb} · ${rec.reason}'),
+                        trailing: IconButton(
+                          tooltip: l10n.prepareCard,
+                          icon: const Icon(Icons.post_add_outlined),
+                          onPressed: () => _openCard(rec.name),
+                        ),
+                        onTap: () => _openCard(rec.name),
+                      ),
+                ],
+                if (state.completeItems.isNotEmpty)
+                  ExpansionTile(
+                    title: Text(l10n.completeItems(state.completeItems.length)),
+                    children: [
+                      for (final item in state.completeItems)
+                        _ItemTile(key: ValueKey('ok-${item.normalized}'), item: item, onCard: () => _openCard(item.templateName ?? item.name)),
+                    ],
                   ),
               ],
-              if (state.completeItems.isNotEmpty)
-                ExpansionTile(
-                  title: Text(l10n.completeItems(state.completeItems.length)),
-                  children: [
-                    for (final item in state.completeItems)
-                      _ItemTile(key: ValueKey('ok-${item.normalized}'), item: item, onCard: () => _openCard(item.templateName ?? item.name)),
-                  ],
-                ),
-            ],
+            ),
           ),
       },
     );
@@ -218,11 +235,12 @@ String _checklistText(List<Question> questions) =>
     questions.map((q) => ['- ${q.text}', for (final hint in q.hints) '  $hint'].join('\n')).join('\n');
 
 class _Checklist extends ConsumerWidget {
-  const _Checklist({required this.branchId, required this.questions, required this.checked});
+  const _Checklist({required this.branchId, required this.questions, required this.checked, required this.onCard});
 
   final String branchId;
   final List<Question> questions;
   final Set<String> checked;
+  final ValueChanged<String> onCard;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -242,6 +260,7 @@ class _Checklist extends ConsumerWidget {
             question: q,
             checked: checked.contains(q.key),
             onChanged: (value) => ref.read(appDatabaseProvider).setChecked(checklistId(branchId), q.key, value),
+            onCard: onCard,
           ),
       ],
     );
@@ -249,25 +268,34 @@ class _Checklist extends ConsumerWidget {
 }
 
 class _QuestionTile extends StatelessWidget {
-  const _QuestionTile({required this.question, required this.checked, required this.onChanged, super.key});
+  const _QuestionTile({required this.question, required this.checked, required this.onChanged, required this.onCard, super.key});
 
   final Question question;
   final bool checked;
   final ValueChanged<bool> onChanged;
+  final ValueChanged<String> onCard;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = checked ? theme.colorScheme.outline : null;
+    final itemName = question.itemName;
     return CheckboxListTile(
       value: checked,
       onChanged: (v) => onChanged(v ?? false),
       controlAffinity: ListTileControlAffinity.leading,
-      secondary: Icon(switch (question.kind) {
-        QuestionKind.missingItem => Icons.add_circle_outline,
-        QuestionKind.missingField => Icons.edit_note,
-        QuestionKind.cuisine => Icons.restaurant_menu,
-      }),
+      // "X var mı?" → the restaurant has it: prepare its card right away. Other questions only show their kind.
+      secondary: question.kind == QuestionKind.missingItem && itemName != null
+          ? IconButton(
+              key: ValueKey('q-card-${question.key}'),
+              tooltip: context.l10n.prepareCard,
+              icon: const Icon(Icons.post_add_outlined),
+              onPressed: () => onCard(itemName),
+            )
+          : Icon(
+              question.kind == QuestionKind.missingField ? Icons.edit_note : Icons.restaurant_menu,
+              color: theme.colorScheme.outline,
+            ),
       title: Text(
         question.text,
         style: TextStyle(

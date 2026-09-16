@@ -185,6 +185,7 @@
   "unknownOptions": "Opsiyon ?",
   "unknownRemovables": "Malzeme ?",
   "prepareCard": "Kart hazırla",
+  "addedToMenu": "Şube menüsüne eklendi",
 
   "branchStatusDraft": "Taslak",
   "branchStatusInProgress": "Devam ediyor",

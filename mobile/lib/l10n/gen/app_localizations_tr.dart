@@ -517,6 +517,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get prepareCard => 'Kart hazırla';
 
   @override
+  String get addedToMenu => 'Şube menüsüne eklendi';
+
+  @override
   String get branchStatusDraft => 'Taslak';
 
   @override

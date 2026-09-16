@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../core/utils/image_compressor.dart';
 import '../../data/models/branch.dart';
 import '../../data/models/gap.dart';
 import '../home/home_controller.dart' show imageCompressorProvider;
+import '../templates/template_pool.dart' show foldTr;
 
 const int maxScreenshots = 5;
 
@@ -102,6 +104,7 @@ class GapViewState {
     this.error,
     this.createdAt,
     this.offline = false,
+    this.onMenuKeys = const {},
   });
 
   final Branch? branch;
@@ -123,6 +126,12 @@ class GapViewState {
   /// Loaded from the local copy (no connection).
   final bool offline;
 
+  /// Products on the branch menu right now (folded names and `id:<templateId>`), refreshed during the call.
+  final Set<String> onMenuKeys;
+
+  bool isOnMenu(String name, String? templateId) =>
+      onMenuKeys.contains(foldTr(name)) || (templateId != null && onMenuKeys.contains('id:$templateId'));
+
   List<GapItem> get incompleteItems => items.where((i) => !i.ok).toList();
   List<GapItem> get completeItems => items.where((i) => i.ok).toList();
 
@@ -141,6 +150,7 @@ class GapViewState {
     String? error,
     DateTime? createdAt,
     bool? offline,
+    Set<String>? onMenuKeys,
   }) =>
       GapViewState(
         branch: branch ?? this.branch,
@@ -157,6 +167,7 @@ class GapViewState {
         error: error ?? this.error,
         createdAt: createdAt ?? this.createdAt,
         offline: offline ?? this.offline,
+        onMenuKeys: onMenuKeys ?? this.onMenuKeys,
       );
 
   GapResult toResult() => GapResult(
@@ -227,6 +238,8 @@ class GapController extends Notifier<GapViewState> {
         await _poll(result.runId);
       } else {
         await _cache();
+        // Cards may have been accepted for this branch since the analysis ran.
+        await syncBranchMenu();
       }
     } on ApiException catch (e) {
       if (!ref.mounted) return;
@@ -236,6 +249,48 @@ class GapController extends Notifier<GapViewState> {
       } else {
         state = state.copyWith(phase: GapPhase.error, error: e.serverMessage);
       }
+    }
+  }
+
+  /// Re-reads the branch menu after a card was accepted during the call: the count moves, products that are now on the
+  /// menu are marked and their "… var mı?" question is ticked. The analysis itself is not re-run.
+  Future<void> syncBranchMenu() async {
+    final branch = state.branch;
+    final counts = state.counts;
+    if (branch == null || counts == null) return;
+    try {
+      final menu = await _api.branchMenu(branch.id);
+      if (!ref.mounted) return;
+      final keys = <String>{
+        for (final item in menu.items)
+          if (item.status != MenuItemStatus.missing) ...[
+            foldTr(item.name),
+            if (item.matchedTemplateId != null) 'id:${item.matchedTemplateId}',
+          ],
+      };
+      final target = menu.branch.effectiveTarget;
+      final current = menu.branch.currentItemCount;
+      state = state.copyWith(
+        onMenuKeys: keys,
+        counts: GapCounts(
+          current: current,
+          target: target,
+          missing: math.max(0, target - current),
+          fromScreenshots: counts.fromScreenshots,
+          cuisineMin: counts.cuisineMin,
+          targetOverridden: counts.targetOverridden,
+        ),
+      );
+      final added = state.questions.where((q) {
+        final name = q.itemName;
+        return q.kind == QuestionKind.missingItem && name != null && keys.contains(foldTr(name));
+      });
+      for (final question in added) {
+        await _db.setChecked(checklistId(branch.id), question.key, true);
+      }
+      await _cache();
+    } on ApiException {
+      // Offline: the numbers catch up the next time the screen is opened.
     }
   }
 

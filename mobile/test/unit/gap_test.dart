@@ -137,6 +137,16 @@ class FakeGapApi extends ApiClient {
 
   @override
   Future<GapResult?> latestGap(String branchId) => latest!();
+
+  /// Branch menu as the server has it now; null → no connection.
+  BranchMenu? menu;
+
+  @override
+  Future<BranchMenu> branchMenu(String branchId) async {
+    final value = menu;
+    if (value == null) throw const ApiException('NETWORK', 'offline');
+    return value;
+  }
 }
 
 void main() {
@@ -247,6 +257,36 @@ void main() {
       final sub = container.listen(gapControllerProvider, (_, _) {});
       await container.read(gapControllerProvider.notifier).load(kebapBranch);
       expect(container.read(gapControllerProvider).phase, GapPhase.empty);
+      sub.close();
+    });
+
+    test('a card accepted during the call moves the count, marks the product and ticks its question', () async {
+      api.stream = () => Stream.fromIterable(sampleGapEvents());
+      final sub = container.listen(gapControllerProvider, (_, _) {});
+      final controller = container.read(gapControllerProvider.notifier);
+      await controller.start(const GapRequest(branch: kebapBranch, images: []));
+      expect(container.read(gapControllerProvider).isOnMenu('Beyti Sarma', 't-beyti'), isFalse);
+
+      // Offline: nothing changes, no error.
+      await controller.syncBranchMenu();
+      expect(container.read(gapControllerProvider).counts?.current, 12);
+
+      api.menu = const BranchMenu(
+        branch: Branch(id: 'b1', name: 'Kadıköy Ocakbaşı', cuisineId: 'k1', cuisineName: 'Kebap & Izgara', effectiveTarget: 14, currentItemCount: 13),
+        items: [
+          BranchMenuItem(id: 'm1', name: 'Beyti Sarma', status: MenuItemStatus.ok, source: 'card', matchedTemplateId: 't-beyti'),
+          BranchMenuItem(id: 'm2', name: 'Kuzu Tandır', status: MenuItemStatus.missing, source: 'recommendation'),
+        ],
+      );
+      await controller.syncBranchMenu();
+      final state = container.read(gapControllerProvider);
+      expect(state.counts?.current, 13);
+      expect(state.counts?.missing, 1);
+      expect(state.isOnMenu('Beyti Sarma', 't-beyti'), isTrue);
+      expect(state.isOnMenu('BEYTİ SARMA', null), isTrue);
+      expect(state.isOnMenu('Kuzu Tandır', null), isFalse, reason: 'still only recommended');
+      final ticked = await db.watchChecked(checklistId('b1')).first;
+      expect(ticked, {'item:beyti sarma'});
       sub.close();
     });
 

@@ -169,37 +169,52 @@ class SuggestionCardView extends StatelessWidget {
                     : () => _editText(context, l10n.upsell, p.upsellSuggestion, (v) => p.copyWith(upsellSuggestion: v)),
               ),
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  TextButton.icon(
-                    onPressed: () => copyToClipboard(context, formatCard(l10n, p)),
-                    icon: const Icon(Icons.copy_all_rounded, size: 18),
-                    label: Text(l10n.copyAll),
-                  ),
-                  const Spacer(),
-                  if (decided)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Chip(
-                        avatar: Icon(card.status == CardStatus.accepted ? Icons.check_circle : Icons.remove_circle_outline, size: 18),
-                        label: Text(
-                          '${card.status == CardStatus.accepted ? l10n.accepted : l10n.skipped}${card.queued ? ' ⏳' : ''}',
+              // Copy on the left, decisions on the right; wraps to two lines on narrow screens / large fonts instead of
+              // pushing "Onayla" out of the card.
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 4,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => copyToClipboard(context, formatCard(l10n, p)),
+                        icon: const Icon(Icons.copy_all_rounded, size: 18),
+                        label: Text(l10n.copyAll),
+                      ),
+                      if (decided)
+                        Chip(
+                          avatar: Icon(card.status == CardStatus.accepted ? Icons.check_circle : Icons.remove_circle_outline, size: 18),
+                          label: Text(
+                            '${card.status == CardStatus.accepted ? l10n.accepted : l10n.skipped}${card.queued ? ' ⏳' : ''}',
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: l10n.skip,
+                              visualDensity: VisualDensity.compact,
+                              onPressed: busy ? null : onSkip,
+                              icon: const Icon(Icons.do_not_disturb_on_outlined),
+                            ),
+                            IconButton(
+                              tooltip: l10n.edit,
+                              visualDensity: VisualDensity.compact,
+                              onPressed: busy ? null : onEdit,
+                              icon: const Icon(Icons.edit_outlined),
+                            ),
+                            const SizedBox(width: 4),
+                            FilledButton(onPressed: busy ? null : onAccept, child: Text(l10n.accept)),
+                          ],
                         ),
-                      ),
-                    )
-                  else ...[
-                    IconButton(tooltip: l10n.skip, onPressed: busy ? null : onSkip, icon: const Icon(Icons.delete_outline)),
-                    IconButton(tooltip: l10n.edit, onPressed: busy ? null : onEdit, icon: const Icon(Icons.edit_outlined)),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilledButton.icon(
-                        onPressed: busy ? null : onAccept,
-                        icon: const Icon(Icons.check, size: 18),
-                        label: Text(l10n.accept),
-                      ),
-                    ),
-                  ],
-                ],
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

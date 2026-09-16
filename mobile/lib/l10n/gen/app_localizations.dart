@@ -1006,6 +1006,12 @@ abstract class AppLocalizations {
   /// **'Kart hazırla'**
   String get prepareCard;
 
+  /// No description provided for @addedToMenu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube menüsüne eklendi'**
+  String get addedToMenu;
+
   /// No description provided for @branchStatusDraft.
   ///
   /// In tr, this message translates to:
