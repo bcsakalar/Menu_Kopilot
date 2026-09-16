@@ -389,6 +389,9 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   multiple) and `text/plain`. A bottom sheet asks where it goes: menu photos → Öneri, panel screenshots → Tamamla,
   text → Öneri prompt or Tamamla product list. The listener lives in the signed-in shell, so a share that opens the app
   waits for login. iOS needs a Share Extension target (Xcode, not possible on Windows) — Android only for now.
+  The plugin is compiled against API 37 and its AAR metadata requires the app to compile against 37 as well, so
+  `compileSdk = maxOf(flutter.compileSdkVersion, 37)` (targetSdk unchanged); `flutter build apk` caught this, analyze
+  and tests do not.
 - **D-129** — Brand: paprika `#C2410C` (the theme seed) with a white menu card + amber sparkle. Android adaptive vector
   icon with a monochrome layer (themed icons), legacy/iOS PNGs rendered by `mobile/scripts/generate-app-icons.ps1`
   (System.Drawing, same geometry), native splash in the brand color (incl. Android 12+ `windowSplashScreen*`), and a
@@ -401,4 +404,6 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   `scripts/deploy.ps1` builds the image on the PC (`linux/amd64`), copies it with Windows' `tar.exe` + scp (no
   registry), strips CR from the server env file, supports `-SkipBuild -Tag` rollbacks. Runbook:
   `docs/DEPLOY_MYSERVER.md`. Nothing was changed on the server by the assistant.
-
+- **D-131** — Embedding jobs do not burn their 8 retries when the failure waits for a configuration change
+  (`not_configured`, `local_only`, `quota_exceeded`, `auth`): the job completes with `retryable: false` and the
+  30-minute sweeper embeds those templates once a key is added. Provider outages still retry with backoff.
