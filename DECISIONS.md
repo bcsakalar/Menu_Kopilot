@@ -348,3 +348,57 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   one Mod 1 run for all missing items, sources opened in the browser (url_launcher, copy as fallback) and the last
   result kept on the phone. New plugins `record` and `url_launcher` (latest, pinned by `pubspec.lock`); Android
   `RECORD_AUDIO` + an https VIEW query; the iOS microphone text now describes voice notes. (F7)
+
+## Canlı test ve teslim (2026-09-16/17)
+
+- **D-119** — pnpm is pinned to the exact installed version (11.27.0) in `devEngines`, the Dockerfile and CI: corepack
+  in the image rejects version ranges, which broke `docker compose up --build`. Upgrades change all three together.
+- **D-120** — `backend/scripts/live-check.ts` (`pnpm live:check`) drives a running server over HTTP (auth rotation,
+  zero-LLM seed suggestions, SSE, branches, CSV bytes incl. BOM, templates, settings; with keys also latency targets
+  and research). It is the acceptance check for a real deployment; it creates and deletes its own test branch.
+  Local Docker: API on `127.0.0.1:3030` because 3000 is taken on this PC (`API_PORT` in `.env`).
+- **D-121** — UI texts: every user-facing string is in `app_tr.arb`, including the copy formatter labels. Only messages
+  that came from the server's error envelope are shown verbatim (`ApiException.fromServer`); network/gateway
+  (502/503/504) errors, cancels and unknown failures use l10n texts via `apiErrorText`. Accept/skip return typed
+  failures instead of magic strings.
+- **D-122** — Photos: HEIC/HEIF (not readable by `image_size_getter`) is converted once to JPEG by
+  `flutter_image_compress`, then scaled; a photo that still fails is counted and reported ("Fotoğraf küçültülemedi"),
+  and no longer drops the rest of the batch.
+- **D-123** — Release builds accept only `https://` server addresses, except `localhost`/`127.0.0.1` (USB testing via
+  `adb reverse`). Reason: `dart:io` does not apply Android's `usesCleartextTraffic`, so the manifest flag alone did not
+  protect the session token.
+- **D-124** — No AI key at all is its own state: `AiRouter.availability()` and exhausted chains whose routes were all
+  skipped for `not_configured` return `not_configured` (before: `unavailable`, which parked unknown products as
+  pending "Devam et" work forever). Suggest answers from the DB and turns unknown products into review cards that say
+  the key is missing; gap analysis warns once; voice notes and research return the new error code
+  `AI_NOT_CONFIGURED` (409) naming the key to add.
+- **D-125** — Found on the phone (Galaxy S23 FE, Android 16) and fixed: the results status bar squeezed its summary to
+  zero width when work was pending (now two rows, with the server's reason); bottom sheets opened under the navigation
+  bar (`useRootNavigator`); the keyboard could not be dismissed (tap outside unfocuses); the card footer pushed
+  "Onayla" out of the card (wrapping footer, "Atla" no longer uses a trash icon); the "X var mı?" rows showed a (+)
+  icon that looked like a button but only ticked the box (now a real "Kart hazırla" button).
+- **D-126** — Gap screen live sync: after a card screen opened from the analysis closes (or on pull to refresh) the
+  app re-reads the branch menu; the count moves, recommendations now on the menu show "Şube menüsüne eklendi" and their
+  "… var mı?" question is ticked. The analysis itself is not re-run (no extra AI calls).
+- **D-127** — Mod 2 without screenshots: `menuText` (typed/dictated) is parsed with the same LLM-free parser as Mod 1
+  prompts. Typed products join after screenshot dedupe (same matching rules), count toward x/target, exclude themselves
+  from recommendations, create no missing-field questions (their panel texts are unknown) and are shown in their own
+  section. Stored as `manual` rows: inserted when new, a `missing` (recommended) row moves onto the menu, anything a
+  screenshot or card already stored is left alone. The voice note on the Tamamla tab now fills this list.
+- **D-128** — Sharing into the app (`receive_sharing_intent`, latest): Android intent filters for `image/*` (single and
+  multiple) and `text/plain`. A bottom sheet asks where it goes: menu photos → Öneri, panel screenshots → Tamamla,
+  text → Öneri prompt or Tamamla product list. The listener lives in the signed-in shell, so a share that opens the app
+  waits for login. iOS needs a Share Extension target (Xcode, not possible on Windows) — Android only for now.
+- **D-129** — Brand: paprika `#C2410C` (the theme seed) with a white menu card + amber sparkle. Android adaptive vector
+  icon with a monochrome layer (themed icons), legacy/iOS PNGs rendered by `mobile/scripts/generate-app-icons.ps1`
+  (System.Drawing, same geometry), native splash in the brand color (incl. Android 12+ `windowSplashScreen*`), and a
+  `BrandMark` CustomPainter for the in-app splash and login. Login collapses a prefilled server address to one line.
+- **D-130** — Production on `myserver` runs next to other apps: the compose file publishes the API on
+  `127.0.0.1:${API_PORT:-3030}` only and Caddy moved behind `--profile caddy` (fresh droplets). nginx site
+  `deploy/nginx/menu-kopilot.conf` follows the server's pattern (Cloudflare origin certificate, shared
+  `ssl-params`/`cloudflare-realip` snippets, `mk_` zone prefix), overwrites `X-Forwarded-For` with the real IP (no
+  client-supplied values reach the login rate limit), disables buffering for SSE and hides `/docs`.
+  `scripts/deploy.ps1` builds the image on the PC (`linux/amd64`), copies it with Windows' `tar.exe` + scp (no
+  registry), strips CR from the server env file, supports `-SkipBuild -Tag` rollbacks. Runbook:
+  `docs/DEPLOY_MYSERVER.md`. Nothing was changed on the server by the assistant.
+

@@ -52,8 +52,9 @@ the product's base price, e.g. "Boy: Orta").
 
 # Gap analysis (Mod 2)
 
-`POST /api/v1/gap-analysis` (multipart: `branchId`, `extraNotes?`, `images` 1–5 panel screenshots) streams with the
-same framing. Re-attach: `GET /api/v1/gap-analysis/:runId/events`; result: `GET /api/v1/gap-analysis/:runId`;
+`POST /api/v1/gap-analysis` (multipart: `branchId`, `menuText?`, `extraNotes?`, `images` ≤ 5 panel screenshots;
+screenshots or `menuText` required) streams with the same framing. `menuText` = products typed or dictated during the
+call ("adana, urfa, lahmacun ve ayran var"), parsed without an LLM — a run with only `menuText` needs no AI key. Re-attach: `GET /api/v1/gap-analysis/:runId/events`; result: `GET /api/v1/gap-analysis/:runId`;
 latest of a branch: `GET /api/v1/branches/:id/gap/latest`; cancel: `POST /api/v1/gap-analysis/:runId/cancel`.
 
 The order is fixed so the phone can show the most useful parts first during a call:
@@ -63,13 +64,13 @@ The order is fixed so the phone can show the most useful parts first during a ca
 |---|---|---|
 | `run` | `{ runId, branchId }` | always first |
 | `progress` | `{ stage: extract\|analyze\|recommend, message, done?, total? }` | status line |
-| `counts` | `{ counts: { current, target, missing, fromScreenshots, cuisineMin, targetOverridden } }` | big "x / hedef"; `current` = union of the stored branch menu and the screenshots |
+| `counts` | `{ counts: { current, target, missing, fromScreenshots, cuisineMin, targetOverridden } }` | big "x / hedef"; `current` = union of the stored branch menu, the screenshots and the typed products |
 | `questions` | `{ items: Question[] }` | "Çağrıda sor" checklist, ≤ 15 |
-| `items` | `{ items: GapItem[] }` | one per unique product read from the screenshots |
+| `items` | `{ items: GapItem[] }` | one per unique product (screenshots first; a typed product already seen on a screenshot is not repeated) |
 | `recommendations` | `{ source: db\|ai, items: Recommendation[] }` | `db` always sent (may be empty); `ai` only when the DB could not fill the list |
 | `questions_append` | `{ items: Question[] }` | "var mı?" lines for AI recommendations |
 | `warning` | `{ code, message }` | `provider_fallback`, `extract_failed`, `ai_unavailable`, `no_items`, `ai_recommendations_failed` |
-| `done` | `{ status, stats: { llmCalls, latencyMs, screenshots, extracted, unique, cacheHit } }` | `status`: completed \| partial \| failed \| cancelled |
+| `done` | `{ status, stats: { llmCalls, latencyMs, screenshots, extracted, unique, cacheHit, typed } }` | `status`: completed \| partial \| failed \| cancelled (`failed` only when every screenshot failed and nothing was typed) |
 | `error` | `{ code, message }` | terminal |
 
 ```jsonc
@@ -79,7 +80,8 @@ The order is fixed so the phone can show the most useful parts first during a ca
   "completeness": 0.75, "status": "ok | incomplete",
   "missing": [{ "field": "removables", "state": "absent" }],   // badges; fields the template lacks are not expected
   "matchedTemplateId": "uuid | null", "templateName": "Adana Kebap", "origin": "seed | db | null",
-  "sectionText": "Kebaplar", "seenIn": 1 }
+  "sectionText": "Kebaplar", "seenIn": 1,
+  "typed": false }   // true = typed/dictated: fields unknown, no badges, no missing-field questions
 // Question — key is stable across runs (ticks are stored per key on the phone)
 { "key": "fields:lahmacun:dor", "text": "Lahmacun: açıklamayı, seçenekleri ve çıkarılabilir malzemeleri sor",
   "kind": "missing_item | missing_field | cuisine", "itemName": "Lahmacun",
@@ -90,3 +92,7 @@ The order is fixed so the phone can show the most useful parts first during a ca
 ```
 
 Completeness weights: description .40, options .35, removable ingredients .25; `unknown` counts half; `ok` ≥ 0.85.
+
+Typed products are stored on the branch menu as `manual` rows only when the product is new (or was only recommended);
+they never overwrite what a screenshot or an accepted card says about a product. The warning `ai_unavailable` also
+covers a server without any AI key (`not_configured`).

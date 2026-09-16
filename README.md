@@ -6,12 +6,15 @@ A personal field assistant for a delivery platform branch-opening specialist. It
   (description ≤ 160 characters, option groups with price logic, removable / extra ingredients, portion, serving
   note, tags, allergens, upsell). Known products are served from the database in milliseconds; the AI only fills
   the unknown ones.
-- **Mod 2 · Menü Tamamlama (the main value):** screenshots of the restaurant's existing platform panel menu → a single
-  screen for the live phone call: `12 / 14 ürün`, a "Çağrıda sor" checklist, items with missing fields
-  (description / options / removable ingredients) and the products the menu most likely lacks.
-- **Extras:** *Sesli not* — dictate product names or call notes instead of typing (Groq Whisper); *İnternette
-  araştır* — what a branch's restaurant sells according to its public web pages, compared with the branch menu
-  (Groq compound web search). Both are optional and off in `LOCAL_ONLY_MODE`.
+- **Mod 2 · Menü Tamamlama (the main value):** screenshots of the restaurant's existing platform panel menu — or simply
+  the products typed/dictated during the call ("adana, urfa, ayran") — → a single screen for the live phone call:
+  `12 / 14 ürün`, a "Çağrıda sor" checklist, items with missing fields (description / options / removable
+  ingredients) and the products the menu most likely lacks. Cards accepted during the call move the count at once.
+  Typed products need neither screenshots nor AI keys.
+- **Extras:** *Paylaş → Menü Kopilot* — a menu photo from WhatsApp, panel screenshots from the gallery or a product
+  list sent as text go straight into Öneri or Tamamla; *Sesli not* — dictate product names instead of typing (Groq
+  Whisper); *İnternette araştır* — what a branch's restaurant sells according to its public web pages, compared with
+  the branch menu (Groq compound web search). Voice and research are optional and off in `LOCAL_ONLY_MODE`.
 
 > **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
 > restaurant; the app shows this warning on every result screen. The tool never talks to any delivery platform system:
@@ -24,6 +27,7 @@ A personal field assistant for a delivery platform branch-opening specialist. It
 | Spec | [`claude-code-prompt-menu-asistani.md`](claude-code-prompt-menu-asistani.md) |
 | Provider research (Gemini, Groq) | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) |
 | Streaming contract (SSE) | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) |
+| Deploying next to other apps on `myserver` (nginx + Cloudflare) | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) |
 | Decisions / progress & acceptance status | [`DECISIONS.md`](DECISIONS.md) · [`PROGRESS.md`](PROGRESS.md) |
 
 ## Contents
@@ -34,7 +38,7 @@ A personal field assistant for a delivery platform branch-opening specialist. It
 5. [Getting the API keys](#getting-the-api-keys)
 6. [Backend commands](#backend-commands)
 7. [API overview](#api-overview)
-8. [Deploying to a 1 GB VPS](#deploying-to-a-1-gb-vps)
+8. [Deploying](#deploying)
 9. [Android APK (build and signing)](#android-apk-build-and-signing)
 10. [CI / release](#ci--release)
 11. [Tests](#tests)
@@ -48,8 +52,8 @@ flowchart LR
     UI[Öneri · Tamamla · Şubeler · Şablonlar · Ayarlar]
     Local[(Drift: history, template pool,<br/>offline queue, checklist ticks)]
   end
-  subgraph VPS["Docker Compose on a 1 GB droplet"]
-    Caddy[Caddy<br/>HTTPS, no buffering] --> API[Fastify API<br/>+ embedding worker]
+  subgraph VPS["Docker Compose on a small droplet"]
+    Caddy[nginx or Caddy<br/>HTTPS, no buffering] --> API[Fastify API<br/>+ embedding worker]
     API --> PG[(PostgreSQL 16<br/>pgvector + pg_trgm)]
     API --> Redis[(Redis 7<br/>cache + BullMQ)]
   end
@@ -76,9 +80,9 @@ Token economy — the database and caches answer first, the LLM is the last reso
 |---|---|
 | `backend/` | Node.js 22 + TypeScript (strict) + Fastify 5, Drizzle ORM, PostgreSQL + pgvector, Redis + BullMQ, Zod |
 | `mobile/` | Flutter (Android first; iOS kept buildable), Riverpod, go_router, Dio, Drift |
-| `deploy/` | `Caddyfile`, production compose file for the droplet |
-| `scripts/` | provider-key guard, deploy script |
-| `docs/` | provider notes, SSE contract |
+| `deploy/` | production compose file, nginx site for a shared server, `Caddyfile` for a fresh droplet |
+| `scripts/` | provider-key guard, deploy script (builds the API image locally, copies it over ssh) |
+| `docs/` | provider notes, SSE contract, myserver runbook |
 
 ## Security and privacy
 
@@ -90,6 +94,9 @@ Token economy — the database and caches answer first, the LLM is the last reso
   development defaults.
 - Photos and screenshots are never stored on the server — only their SHA-256 (for caching). EXIF/GPS is stripped on
   the phone before upload.
+- Release builds of the app talk to remote servers over **HTTPS only** (plain `http://` is accepted for `localhost`,
+  i.e. USB testing with `adb reverse`). The app enforces this itself because `dart:io` ignores Android's
+  `usesCleartextTraffic` flag.
 - **`LOCAL_ONLY_MODE=true`** turns off every external API call: answers come only from the database and the caches
   (a photo read once is still usable from the cache; new photos cannot be read in this mode).
 
@@ -175,6 +182,7 @@ All keys are listed in [`.env.example`](.env.example) (a test keeps it in sync w
 | `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | DB match thresholds |
 | `CACHE_TTL_DAYS` | `30` | Redis cache lifetime |
 | `UPLOAD_MAX_FILES`, `UPLOAD_MAX_FILE_MB` | `5`, `8` | photo upload limits |
+| `API_PORT` | `3000` (production: `3030`) | host port of the API, bound to `127.0.0.1` only (compose) |
 | `SITE_ADDRESS` | `:80` | Caddy site; a hostname (e.g. `api.example.com`) enables automatic HTTPS |
 
 Model IDs and fallback chains are in `backend/src/config/models.ts`; the primary model per task can be changed from
@@ -201,6 +209,7 @@ Run from `backend/` (PowerShell: chain commands with `;`).
 | `pnpm dev` | API with hot reload (reads `../.env`) |
 | `pnpm test` / `pnpm test:watch` | unit + integration + e2e (hermetic: PGlite with pgvector/pg_trgm, fake providers) |
 | `pnpm test:smoke` | live provider checks (needs keys) |
+| `pnpm live:check [--url https://…] [--skip-ai] [--runs 5]` | end-to-end check of a running server over HTTP (auth rotation, zero-LLM seeds, SSE, branches, export, templates, settings; with keys also photo/gap latency and research). Uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` from the environment or `../.env` |
 | `pnpm lint` · `pnpm typecheck` · `pnpm build` | ESLint (no `any`), `tsc --noEmit`, compile to `dist/` |
 | `pnpm db:migrate` · `pnpm db:rollback` | apply / revert the last migration (every migration has a `drizzle/down/*.sql`) |
 | `pnpm db:generate` | new migration from schema changes (add the matching down file) |
@@ -211,13 +220,15 @@ Run from `backend/` (PowerShell: chain commands with `;`).
 ## API overview
 
 Everything is under `/api/v1` and needs `Authorization: Bearer <access token>` except login/refresh. Errors always
-have the shape `{ "error": { "code", "message", "details?", "requestId" } }`. Interactive docs: `/docs`.
+have the shape `{ "error": { "code", "message", "details?", "requestId" } }`. Interactive docs: `/docs` (blocked by
+the production nginx site). Endpoints that are nothing but an AI call answer `AI_NOT_CONFIGURED` (409, names the
+missing key), `LOCAL_ONLY_MODE` (409), `QUOTA_EXCEEDED` (429) or `PROVIDER_UNAVAILABLE` (503).
 
 | Area | Endpoints |
 |---|---|
 | Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me` |
 | Mod 1 | `POST /suggest` (multipart: `cuisineId`, `promptText?`, `branchId?`, `deepMode?`, `images[]` ≤ 5; SSE with `Accept: text/event-stream`, `?async=1` → 202), `GET /suggest/:runId`, `GET /suggest/:runId/events`, `POST /suggest/:runId/cancel`, `POST /suggest/:runId/continue`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
-| Mod 2 | `POST /gap-analysis` (multipart: `branchId`, `extraNotes?`, `images[]` 1–5; SSE / async / sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`, `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest` |
+| Mod 2 | `POST /gap-analysis` (multipart: `branchId`, `menuText?` — products typed or dictated, `extraNotes?`, `images[]` ≤ 5; screenshots or `menuText` required; SSE / async / sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`, `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest` |
 | Branches | `GET/POST /branches`, `GET/PATCH/DELETE /branches/:id`, `GET /branches/:id/menu`, `PATCH/DELETE /branches/:id/menu/:itemId`, `GET /branches/:id/export?format=csv\|json` |
 | Template pool | `GET /templates?q=&cuisineId=&source=&approved=&sort=usage\|name\|updated`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
 | Voice / research | `POST /transcribe` (multipart: `audio` m4a/mp3/ogg/wav/webm/flac, `language?`, `cuisineId?` → text + product names), `POST /research` (`branchId` or `restaurantName` + `city?` → items, summary, sources; cached 7 days, `refresh: true` to search again) |
@@ -228,76 +239,53 @@ Streaming events and payload shapes: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md).
 `run → counts → questions → items → recommendations(db) → recommendations(ai) → done`, so the count and the checklist
 reach the phone before anything else.
 
-## Deploying to a 1 GB VPS
+## Deploying
 
-Target: Ubuntu droplet (ssh alias `myserver`), Docker Compose, Caddy for HTTPS. **Nothing is built on the droplet**
-— `tsc`/`pnpm install` would be OOM-killed on 1 GB. The API image is built by the release workflow (or on your PC)
-and pulled from GHCR. Memory limits in [`deploy/docker-compose.prod.yml`](deploy/docker-compose.prod.yml):
-Postgres 256 MB, API 384 MB, Redis 128 MB, Caddy 64 MB.
+Nothing is built on the server — `pnpm install`/`tsc` would be OOM-killed on a small droplet. `scripts/deploy.ps1`
+builds the API image on the PC (Docker Desktop), copies it over ssh, starts the stack and waits for `/health/ready`.
+Migrations and the idempotent seed run when the API container starts (`SEED_ON_START`). Memory limits in
+[`deploy/docker-compose.prod.yml`](deploy/docker-compose.prod.yml): Postgres 256 MB, API 384 MB, Redis 128 MB.
 
-**1. Build the image off-box.** Push a tag `v1.0.0` → `.github/workflows/release.yml` publishes
-`ghcr.io/<owner>/menu-kopilot-api:1.0.0` and `:latest`. (Manual alternative from Windows:
-`docker build -t ghcr.io/bcsakalar/menu-kopilot-api:latest backend; docker push ghcr.io/bcsakalar/menu-kopilot-api:latest`.)
+**On `myserver` (nginx + Cloudflare, next to other apps)** — step by step in
+[`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md): Cloudflare DNS record, `/etc/menu-kopilot/env`, the nginx site
+from [`deploy/nginx/`](deploy/nginx/), then:
 
-**2. One-time server preparation** (as root on the droplet):
+```powershell
+powershell -File scripts/deploy.ps1                               # build + copy + start
+powershell -File scripts/deploy.ps1 -SkipBuild -Tag <older tag>   # roll back to an image already on the server
+```
+
+The API listens on `127.0.0.1:3030` only; nginx terminates TLS (Cloudflare origin certificate) and proxies with
+buffering off so SSE cards stream.
+
+**On a fresh droplet** (no reverse proxy yet) the same compose file starts Caddy with automatic HTTPS:
 
 ```bash
-# Docker Engine + compose plugin
+# once, as root: Docker, swap, firewall, directories
 curl -fsSL https://get.docker.com | sh
-# swap: turns OOM kills into slowness
 fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile \
   && echo '/swapfile none swap sw 0 0' >> /etc/fstab
-# firewall: ssh + web only (Postgres/Redis are never published)
 ufw allow OpenSSH && ufw allow 80,443/tcp && ufw allow 443/udp && ufw --force enable
 mkdir -p /etc/menu-kopilot /srv/menu-kopilot
-# only if the GHCR package is private: a GitHub token with read:packages
-docker login ghcr.io -u <github-user>
 ```
 
-Point a DNS `A` record (e.g. `api.example.com`) to the droplet; Caddy obtains the certificate on first start.
+Point a DNS `A` record at the droplet, put `SITE_ADDRESS=api.example.com` into `/etc/menu-kopilot/env` (plus the
+values listed in the runbook) and run `powershell -File scripts/deploy.ps1 -WithCaddy`. Release images can also come
+from GHCR (`.github/workflows/release.yml` on a `v*` tag): `-ImageSource ghcr -Tag 1.0.0`.
 
-**3. Secrets file — outside the deploy directory, mode 600.** Prepare `.env.production` locally from
-`.env.example` (`NODE_ENV=production`, `SITE_ADDRESS=api.example.com`, a URL-safe `POSTGRES_PASSWORD` such as
-`openssl rand -hex 24`, `JWT_SECRET`, `ADMIN_*`, provider keys) and send it over ssh stdin (never as a command-line
-argument):
+**Checks after every deploy**
 
-```powershell
-Get-Content .env.production -Raw | ssh myserver "cat > /etc/menu-kopilot/env && chmod 600 /etc/menu-kopilot/env"
-```
-
-**4. Deploy / update** from Windows (uploads the compose file and Caddyfile with LF endings, pulls, restarts, waits
-for `/health/ready`):
-
-```powershell
-powershell -File scripts/deploy.ps1            # :latest
-powershell -File scripts/deploy.ps1 -Tag 1.0.0 # a released version
-```
-
-Equivalent by hand on the server:
-
-```bash
-cd /srv/menu-kopilot
-docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml pull
-docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml up -d
-```
-
-Migrations and the idempotent seed run when the API container starts (`SEED_ON_START`).
-
-**5. Checks after every deploy**
-
-- `curl -fsS https://api.example.com/health/ready` → `{"status":"ready",...}`
-- `docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml ps` — all services `healthy`/`running`
-- `docker stats --no-stream` — total well below 1 GB; `free -m` shows swap
-- `docker compose ... logs --tail 100 api` — no crash loop
-- SSE through the proxy: a gap analysis in the app shows the count within seconds (Caddy `flush_interval -1`)
-- Reboot test once: `reboot`, then the health check again (`restart: unless-stopped`)
+- `curl -fsS https://<host>/health/ready` → `{"status":"ready",...}`
+- `pnpm -C backend live:check --url https://<host>` (see the runbook for passing the admin password safely)
+- `docker stats --no-stream` — the stack stays well below its limits; `free -m` shows swap
+- SSE through the proxy: suggestion cards appear one by one, not all at the end
 
 **Windows → Linux pitfalls (already handled, keep it that way)**
 
 - Line endings: `.gitattributes` forces LF for everything except `*.ps1`/`*.bat`; the deploy script also converts the
-  uploaded files.
-- Case sensitivity: ext4 is case-sensitive; CI runs the whole backend suite on Ubuntu, which catches a wrong-case
-  import before it reaches the server. Keep `git config core.ignorecase false` in this repo.
+  uploaded compose file and strips CR characters from the server's env file.
+- Case sensitivity: ext4 is case-sensitive; CI and the Docker build compile on Linux, which catches a wrong-case
+  import before it reaches the server.
 - Paths: code uses `node:path` / `URL` helpers only, never string-concatenated `\` paths.
 - Permissions: `/etc/menu-kopilot/env` is `600`; the API container runs as a non-root user.
 
@@ -327,7 +315,13 @@ over the existing one.
 
 Install on the phone: copy the APK and allow "install unknown apps" for the file manager, or
 `adb install -r build\app\outputs\flutter-apk\app-release.apk`. Set the default server with
-`--dart-define=API_BASE_URL=https://api.example.com` (release builds only allow HTTPS).
+`--dart-define=API_BASE_URL=https://menu.example.com` (release builds only allow HTTPS; `http://localhost`
+works for USB testing: `adb reverse tcp:3030 tcp:3030` and `--dart-define=API_BASE_URL=http://localhost:3030`).
+
+App icon and splash: the adaptive launcher icon is a vector
+(`android/app/src/main/res/drawable/ic_launcher_foreground.xml`, plus a monochrome variant for Android 13 themed
+icons); `powershell -File mobile/scripts/generate-app-icons.ps1` renders the legacy Android and the iOS PNG icons from
+the same geometry.
 
 iOS: the project stays buildable, but building requires macOS/Xcode (not possible on Windows).
 
@@ -341,14 +335,17 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 ## Tests
 
-- Backend: `cd backend; pnpm test` — ~280 tests: Turkish normalization, price guard, env, seed data, JSON-schema
+- Backend: `cd backend; pnpm test` — ~290 tests: Turkish normalization, price guard, env, seed data, JSON-schema
   conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
   → up, and end-to-end runs of both pipelines against recorded fixtures (40 seed items with zero LLM calls, broken
   JSON → review cards, provider down → fallback, accepted card served from the DB, 12 unique items from overlapping
-  screenshots, LOCAL_ONLY_MODE, voice notes and web research with contact/price scrubbing). Fixtures are
+  screenshots, typed products without screenshots or keys, LOCAL_ONLY_MODE, missing AI keys, voice notes and web
+research with contact/price scrubbing). Fixtures are
   hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
-- Mobile: `cd mobile; flutter analyze; flutter test` — SSE parser, models, controllers (offline queue, gap stream,
-  template pool cache) and widget tests (cards, checklist, branch menu, voice note button, research screen).
+- Mobile: `cd mobile; flutter analyze; flutter test` — ~50 tests: SSE parser, models, error texts, HTTPS rule,
+  controllers (offline queue, gap stream and live branch sync, template pool cache, photo limits) and widget tests
+  (cards, checklist, branch menu, voice note button, research screen, sharing into the app).
+- Live: `cd backend; pnpm live:check` against the running stack (see Backend commands).
 - Acceptance criteria and what still needs a real device / real keys: [`PROGRESS.md`](PROGRESS.md).
 
 ## Troubleshooting
@@ -357,8 +354,13 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
   another proxy disable response buffering for `text/event-stream`.
 - **`quota_exceeded` / `local_only` warnings** — the daily quota is used up or `LOCAL_ONLY_MODE` is on; the app keeps
   answering from the database and caches. **Ayarlar → Kullanım** shows calls, errors and cache/DB hit ratios.
-- **Photos are not read** — no provider key configured (Ayarlar → Görev bazlı modeller shows provider status), or
-  both providers are down (circuit breaker opens for 60 s after 3 failures).
+- **"AI anahtarı tanımlı değil"** — no `GEMINI_API_KEY` / `GROQ_API_KEY` on the server. Typed products, seed/approved
+  templates and the gap checklist keep working; unknown products become review cards. Add a key to the server's env
+  file and redeploy (Ayarlar → Görev bazlı modeller shows provider status).
+- **Photos are not read** — no provider key (above), or both providers are down (circuit breaker opens for 60 s
+  after 3 failures).
+- **The app still talks to the old server** — the address is stored on the phone after the first login; change it in
+  **Ayarlar → Sunucu adresi**.
 - **Sesli not / İnternette araştır do nothing** — both need `GROQ_API_KEY` (Whisper and compound exist only on Groq)
   and are refused in `LOCAL_ONLY_MODE`; voice notes also need the microphone permission on the phone.
 - **Release build warns about the Kotlin Gradle Plugin** (`flutter_image_compress_common`, `workmanager_android`) —

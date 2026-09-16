@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-15 — Faz 7 (optional) done; all phases complete.
+Last update: 2026-09-17 — live end-to-end test on a real phone, fixes, delivery extras and the myserver runbook.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -21,11 +21,30 @@ Last update: 2026-09-15 — Faz 7 (optional) done; all phases complete.
 - [x] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
 - [x] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
 - [x] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
+- [x] **Teslim** — live test (Docker stack + Galaxy S23 FE over USB), fixes, Mod 2 without screenshots, sharing
+      into the app, icon/splash/login design, deploy files + runbook for `myserver`
 
 ## Where I am
-Faz 0–7 complete and committed. What is left is only verifiable by the user (see **Pending verification** below).
-Ideas not built (not in the spec): research results as extra "var mı?" lines in the gap checklist; a Gemini
-fallback for voice notes.
+Everything is committed. The production deploy is prepared but **not executed** (to be done together with the user,
+see `docs/DEPLOY_MYSERVER.md`). What is left needs the user: AI keys, the deploy, and a last pass on the phone with
+the newest APK (see **Pending verification**).
+Ideas not built: research results as extra "var mı?" lines in the gap checklist; a Gemini fallback for voice notes;
+on-device OCR (ML Kit) to read screenshots without AI keys; keeping drafts across process death; an iOS Share
+Extension.
+
+### Delivery inventory (2026-09-16/17)
+- Live test: `docker compose up -d --build` on this PC (API `127.0.0.1:3030`), `pnpm live:check` 13/13 without keys.
+  Release APK on a Galaxy S23 FE (Android 16) over `adb reverse`: login, Öneri (7 DB cards, 0 LLM calls), accept →
+  template became `source=user`, Tamamla with a new branch + 2 panel screenshots (no AI: count, warning, 12-line
+  checklist, 10 DB recommendations, "Kart hazırla" → accept → branch 1/10), Şubeler (detail, CSV share sheet),
+  Şablonlar (Turkish-insensitive search), Ayarlar (providers "anahtar yok", quota, usage). Bugs found → D-125/D-124.
+- Backend: `not_configured` state + `AI_NOT_CONFIGURED` (D-124), `menuText` / typed products in gap analysis (D-127),
+  `scripts/live-check.ts`, pnpm pin (D-119). Tests → 286 passing.
+- Mobile: l10n error texts + typed failures (D-121), HEIC fallback + per-photo failures (D-122), HTTPS rule (D-123),
+  device fixes (D-125), gap live sync (D-126), typed products UI (D-127), share intake (D-128), brand icon/splash/login
+  + photo buttons (D-129). Tests → 52 passing, `flutter analyze` clean.
+- Ops: compose API on loopback + Caddy profile, nginx site + proxy snippet, `scripts/deploy.ps1` (local image over
+  ssh, rollback), `docs/DEPLOY_MYSERVER.md` (D-130).
 
 ### Faz 7 inventory
 - Backend: `config/models.ts` (tasks `audio.transcribe`, `research.web`; whisper v3, compound, compound-mini),
@@ -118,15 +137,19 @@ fallback for voice notes.
   seed idempotency + CSV, auth API) — 141 passing.
 - Root: `docker-compose.yml`, `deploy/Caddyfile`, `.env.example`, `backend/Dockerfile`.
 
-## Environment facts (checked 2026-09-14/15)
-- Windows 11 + PowerShell 5.1; node 24, pnpm 11, git 2.55, Flutter stable 3.47 / Dart 3.13, JDK 17, Android SDK.
-- Docker Desktop crashes on start (stale `sailor-ingest.sock`, see D-056) → compose not verified yet.
-- No Android device attached. `GEMINI_API_KEY` / `GROQ_API_KEY` not set → live smoke tests skip.
+## Environment facts (checked 2026-09-17)
+- Windows 11 + PowerShell 5.1; node 24, pnpm 11.27, git 2.55, Flutter stable 3.47 / Dart 3.13, JDK 17, Android SDK.
+- Docker Desktop worked on 2026-09-16 (stack verified) but crashed again on 2026-09-17 with the stale
+  `sailor-ingest.sock` (D-056) — reboot or delete the socket file before `docker compose up -d`.
+- Phone: Samsung Galaxy S23 FE (SM-S711B), Android 16; not attached on 2026-09-17.
+- `GEMINI_API_KEY` / `GROQ_API_KEY` not set → AI paths answer with "AI anahtarı tanımlı değil"; smoke tests skip.
+- `myserver`: nginx + Cloudflare in front of 6 apps, ports 3002/3006/3012/3013/3020 taken, ~680 MB RAM available +
+  2 GB swap (2026-09-16).
 
 ## Acceptance criteria status
 | # | Criterion | Status |
 |---|---|---|
-| 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ⏳ files done, `.env.example` sync tested; run blocked by Docker Desktop (D-056) |
+| 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ✅ 2026-09-16: stack up, migrations + seed on real Postgres/pgvector, `pnpm live:check` 13/13 |
 | 2 | No provider key in Flutter (grep) | ✅ `scripts/check-no-provider-keys.ps1` (keys + provider endpoints) |
 | 3 | 40 seed items → `/suggest` with zero LLM calls | ✅ e2e (`llmCalls=0`, usage_log unchanged, cache_hit) |
 | 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
@@ -137,20 +160,20 @@ fallback for voice notes.
 | 9 | Provider down → fallback keeps working | ✅ router tests + e2e (Gemini 503 → Groq vision; Groq key removed → Gemini enrich) |
 | 10 | Broken JSON → item `needs_review`, request survives | ✅ e2e (one repair, then review cards, run completed) |
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
-| 12 | Release APK builds and runs on a real device | ◐ `flutter build apk --release` succeeds locally (debug key without `key.properties`); signed build + device run pending |
+| 12 | Release APK builds and runs on a real device | ✅ release APK (debug-signed) exercised on a Galaxy S23 FE / Android 16 (all tabs); the newest build (icon, sharing, typed products) still to be installed; own signing key optional |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-118 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-130 |
 
 ## Pending verification by the user
-- Fix Docker Desktop (D-056; the daemon was still unreachable on 2026-09-15), then from the repo root:
-  `docker compose up -d --build` and open `http://localhost:3000/health/ready` (expects `{"status":"ready"}`) and
-  `http://localhost:3000/docs`.
+- Docker Desktop: reboot (or quit it and delete `%LOCALAPPDATA%\Docker\run\sailor-ingest.sock`), then
+  `docker compose up -d` in the repo root and `cd backend; pnpm live:check`.
+- AI keys: put `GEMINI_API_KEY` / `GROQ_API_KEY` into `.env` (local) or `/etc/menu-kopilot/env` (server), then
+  `cd backend; pnpm test:smoke` and `pnpm live:check` — the latter also times a menu photo (first card < 6 s) and the
+  gap analysis p95 (< 8 s).
+- Deploy together: `docs/DEPLOY_MYSERVER.md` (Cloudflare record `menu`, env file, nginx site, `scripts/deploy.ps1`).
+- Phone: install the newest APK
+  (`flutter build apk --release --split-per-abi --dart-define=API_BASE_URL=https://menu.example.com`), check
+  the icon/splash, share a WhatsApp menu photo into the app, run Tamamla with typed products; with a Groq key dictate a
+  voice note (microphone permission) and run "İnternette araştır".
 - Review `backend/exports/seed-templates.csv` (regenerate with `pnpm db:export-seed --from=files`).
-- Put `GEMINI_API_KEY` / `GROQ_API_KEY` in `.env`, then `cd backend; pnpm test:smoke` (verifies model IDs incl.
-  `gemini-embedding-2`, strict schemas, vision, Whisper and compound JSON mode + sources); then time a real menu photo
-  (first card < 6 s) and a 2–3 screenshot gap analysis (< 8 s).
-- On the phone: dictate a voice note (mic permission prompt) and run "İnternette araştır" for a real restaurant.
-- Release signing: `powershell -File mobile/scripts/create-keystore.ps1`, `flutter build apk --release`, install on the
-  phone and walk through login → Öneri → Tamamla → Şubeler → export.
-- GitHub: create the repository, push, add the release secrets (see README → CI / release), push a `v1.0.0` tag.
-- Droplet: one-time preparation + `scripts/deploy.ps1` as in README → Deploying to a 1 GB VPS.
+- Optional: own signing key (`mobile/scripts/create-keystore.ps1`), GitHub repository + release secrets.
