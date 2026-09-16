@@ -1,11 +1,17 @@
-# Menü Kopilot — production stack for a 1 GB droplet. Nothing is built on the server: the API image comes from
-# GHCR (built by .github/workflows/release.yml). Secrets live in /etc/menu-kopilot/env (chmod 600), outside the
-# deploy directory, so a redeploy cannot overwrite them. Usage (on the server, in /srv/menu-kopilot):
+# Menü Kopilot — production stack for a small droplet. Nothing is built on the server: the API image is built on the
+# PC and loaded over ssh (scripts/deploy.ps1) or pulled from GHCR (.github/workflows/release.yml). Secrets live in
+# /etc/menu-kopilot/env (chmod 600), outside the deploy directory, so a redeploy cannot overwrite them.
 #
-#   docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml pull
+# Two ways to expose the API:
+#   - behind the host's nginx (a server that already runs other sites, e.g. myserver): the API listens on
+#     127.0.0.1:${API_PORT:-3030} only and deploy/nginx/menu-kopilot.conf proxies HTTPS to it (default);
+#   - on a fresh droplet: `--profile caddy` also starts Caddy on 80/443 with automatic certificates.
+#
+# Usage (on the server, in /srv/menu-kopilot):
 #   docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml up -d
+#   docker compose --env-file /etc/menu-kopilot/env -f docker-compose.prod.yml --profile caddy up -d
 #
-# Postgres and Redis are not published on any host port; only Caddy (80/443) is reachable from outside.
+# Postgres and Redis are never published on a host port.
 name: menu-kopilot
 
 x-logging: &logging
@@ -71,6 +77,9 @@ services:
       REDIS_URL: redis://redis:6379
       TRUST_PROXY: 'true'
       ROLE: all
+    # Loopback only: the host's nginx (or Caddy below) is the public entry.
+    ports:
+      - '127.0.0.1:${API_PORT:-3030}:3000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -81,9 +90,13 @@ services:
 
   caddy:
     image: caddy:2-alpine
+    # Only on a server without its own reverse proxy: `--profile caddy`.
+    profiles: ['caddy']
     restart: unless-stopped
     environment:
-      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS (e.g. api.example.com) in /etc/menu-kopilot/env}
+      # Required with this profile (compose interpolates every service, so it cannot be marked required here);
+      # scripts/deploy.ps1 -WithCaddy refuses to start without it.
+      SITE_ADDRESS: ${SITE_ADDRESS:-}
     ports:
       - '80:80'
       - '443:443'
