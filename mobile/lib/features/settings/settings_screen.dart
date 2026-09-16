@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
+import '../../core/utils/server_url.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/settings.dart';
 import '../results/suggestion_card.dart';
@@ -18,7 +19,12 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _editServer(BuildContext context, WidgetRef ref, String current) async {
     final next = await showFieldEditor(context, title: context.l10n.serverUrl, initial: current);
-    if (next == null || next.isEmpty) return;
+    if (next == null || next.isEmpty || !context.mounted) return;
+    final problem = checkServerUrl(next);
+    if (problem != null) {
+      showMessage(context, problem == ServerUrlProblem.insecure ? context.l10n.insecureUrl : context.l10n.invalidUrl);
+      return;
+    }
     await ref.read(serverUrlProvider.notifier).set(next);
     if (!context.mounted) return;
     try {

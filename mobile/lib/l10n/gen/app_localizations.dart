@@ -274,6 +274,12 @@ abstract class AppLocalizations {
   /// **'Geçerli bir adres gir (http/https)'**
   String get invalidUrl;
 
+  /// No description provided for @insecureUrl.
+  ///
+  /// In tr, this message translates to:
+  /// **'Güvenli bağlantı gerekli: adres https:// ile başlamalı'**
+  String get insecureUrl;
+
   /// No description provided for @logout.
   ///
   /// In tr, this message translates to:

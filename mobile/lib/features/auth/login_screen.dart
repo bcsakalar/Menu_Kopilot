@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/utils/server_url.dart';
 import '../../core/widgets/common.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -37,11 +38,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _validateUrl(String? value) {
     final text = value?.trim() ?? '';
     if (text.isEmpty) return context.l10n.fieldRequired;
-    final uri = Uri.tryParse(text);
-    if (uri == null || !(uri.isScheme('http') || uri.isScheme('https')) || uri.host.isEmpty) {
-      return context.l10n.invalidUrl;
-    }
-    return null;
+    return switch (checkServerUrl(text)) {
+      ServerUrlProblem.invalid => context.l10n.invalidUrl,
+      ServerUrlProblem.insecure => context.l10n.insecureUrl,
+      null => null,
+    };
   }
 
   Future<void> _submit() async {

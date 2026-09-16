@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:menu_kopilot/core/network/api_exception.dart';
 import 'package:menu_kopilot/core/utils/image_compressor.dart';
+import 'package:menu_kopilot/core/utils/server_url.dart';
 import 'package:menu_kopilot/core/widgets/common.dart';
 import 'package:menu_kopilot/features/gap/gap_controller.dart';
 import 'package:menu_kopilot/features/home/home_controller.dart';
@@ -55,6 +56,21 @@ void main() {
         'error': {'code': 'VALIDATION_ERROR', 'message': ''},
       }));
       expect(apiErrorText(l10n, empty), l10n.genericError);
+    });
+  });
+
+  group('server address', () {
+    test('release builds only accept https, except the phone loopback used over USB', () {
+      expect(checkServerUrl('https://menu.example.com', release: true), isNull);
+      expect(checkServerUrl('  https://menu.example.com/  ', release: true), isNull);
+      expect(checkServerUrl('http://localhost:3030', release: true), isNull);
+      expect(checkServerUrl('http://127.0.0.1:3030', release: true), isNull);
+      expect(checkServerUrl('http://192.168.1.20:3030', release: true), ServerUrlProblem.insecure);
+      expect(checkServerUrl('http://menu.example.com', release: true), ServerUrlProblem.insecure);
+      expect(checkServerUrl('http://192.168.1.20:3030', release: false), isNull);
+      for (final bad in ['', 'menu.example.com', 'ftp://x.com', 'https://']) {
+        expect(checkServerUrl(bad, release: false), ServerUrlProblem.invalid, reason: bad);
+      }
     });
   });
 

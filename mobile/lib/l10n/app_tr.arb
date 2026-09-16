@@ -34,6 +34,7 @@
   "@loginFailed": { "placeholders": { "message": { "type": "String" } } },
   "fieldRequired": "Bu alan zorunlu",
   "invalidUrl": "Geçerli bir adres gir (http/https)",
+  "insecureUrl": "Güvenli bağlantı gerekli: adres https:// ile başlamalı",
   "logout": "Çıkış yap",
 
   "newSuggestion": "Yeni Öneri",

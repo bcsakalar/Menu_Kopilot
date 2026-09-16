@@ -104,6 +104,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invalidUrl => 'Geçerli bir adres gir (http/https)';
 
   @override
+  String get insecureUrl =>
+      'Güvenli bağlantı gerekli: adres https:// ile başlamalı';
+
+  @override
   String get logout => 'Çıkış yap';
 
   @override
