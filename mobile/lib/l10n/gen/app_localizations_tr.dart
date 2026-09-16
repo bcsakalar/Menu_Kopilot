@@ -13,6 +13,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Menü Kopilot';
 
   @override
+  String get appTagline => 'Şube açılışında menüyü hızla tamamla';
+
+  @override
+  String get changeServer => 'Değiştir';
+
+  @override
   String get disclaimer =>
       'Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.';
 

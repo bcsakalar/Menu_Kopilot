@@ -100,6 +100,18 @@ abstract class AppLocalizations {
   /// **'Menü Kopilot'**
   String get appTitle;
 
+  /// No description provided for @appTagline.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube açılışında menüyü hızla tamamla'**
+  String get appTagline;
+
+  /// No description provided for @changeServer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Değiştir'**
+  String get changeServer;
+
   /// No description provided for @disclaimer.
   ///
   /// In tr, this message translates to:

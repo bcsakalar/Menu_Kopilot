@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand "paprika" = the app theme seed color (lib/core/theme.dart). -->
+    <color name="ic_launcher_background">#C2410C</color>
+</resources>

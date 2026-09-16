@@ -1,6 +1,8 @@
 {
   "@@locale": "tr",
   "appTitle": "Menü Kopilot",
+  "appTagline": "Şube açılışında menüyü hızla tamamla",
+  "changeServer": "Değiştir",
 
   "disclaimer": "Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.",
   "ok": "Tamam",

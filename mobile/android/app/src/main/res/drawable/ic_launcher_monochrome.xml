@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 13+ themed icon: same mark as outlines, tinted by the system. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M37,42 H57 A5,5 0 0 1 62,47 V75 A5,5 0 0 1 57,80 H37 A5,5 0 0 1 32,75 V47 A5,5 0 0 1 37,42 Z"
+        android:strokeWidth="3.5"
+        android:strokeColor="#FFFFFF" />
+    <path
+        android:pathData="M39,53 H55 M39,61.5 H51 M39,70 L43,74 L51,66"
+        android:strokeWidth="4"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,27.5 Q70.2,33.8 76.5,36 Q70.2,38.2 68,44.5 Q65.8,38.2 59.5,36 Q65.8,33.8 68,27.5 Z" />
+</vector>

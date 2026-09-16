@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/utils/image_compressor.dart';
+import '../../core/widgets/photo_source_bar.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/branch.dart';
 import '../branches/branch_form.dart';
@@ -122,24 +123,16 @@ class _GapScreenState extends ConsumerState<GapScreen> {
                   ),
                   if (branch != null) _BranchSummary(branch: branch),
                   const SizedBox(height: 16),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 4,
-                    children: [
-                      Text(l10n.screenshots, style: Theme.of(context).textTheme.titleSmall),
-                      Text(l10n.photosCount(draft.images.length, maxScreenshots), style: Theme.of(context).textTheme.bodySmall),
-                      TextButton.icon(
-                        onPressed: draft.compressing ? null : _addFromGallery,
-                        icon: const Icon(Icons.photo_library_outlined),
-                        label: Text(l10n.pickFromGallery),
-                      ),
-                      TextButton.icon(
-                        onPressed: draft.compressing ? null : _addFromCamera,
-                        icon: const Icon(Icons.photo_camera_outlined),
-                        label: Text(l10n.takePhoto),
-                      ),
-                    ],
+                  PhotoSourceBar(
+                    title: l10n.screenshots,
+                    count: draft.images.length,
+                    max: maxScreenshots,
+                    enabled: !draft.compressing,
+                    galleryFirst: true,
+                    onCamera: _addFromCamera,
+                    onGallery: _addFromGallery,
                   ),
+                  const SizedBox(height: 6),
                   Text(l10n.screenshotsHint, style: Theme.of(context).textTheme.bodySmall),
                   if (draft.compressing) Padding(padding: const EdgeInsets.all(8), child: Text(l10n.compressing)),
                   if (draft.images.isNotEmpty) ...[

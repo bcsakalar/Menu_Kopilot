@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../core/network/api_client.dart';
 import '../../core/providers.dart';
 import '../../core/utils/image_compressor.dart';
+import '../../core/widgets/photo_source_bar.dart';
 import '../../core/widgets/common.dart';
 import '../offline/background.dart';
 import '../results/run_controller.dart';
@@ -153,26 +154,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  children: [
-                    Text(l10n.photos, style: Theme.of(context).textTheme.titleSmall),
-                    Text(l10n.photosCount(draft.images.length, maxPhotos), style: Theme.of(context).textTheme.bodySmall),
-                    TextButton.icon(
-                      onPressed: draft.compressing ? null : _addFromCamera,
-                      icon: const Icon(Icons.photo_camera_outlined),
-                      label: Text(l10n.takePhoto),
-                    ),
-                    TextButton.icon(
-                      onPressed: draft.compressing ? null : _addFromGallery,
-                      icon: const Icon(Icons.photo_library_outlined),
-                      label: Text(l10n.pickFromGallery),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+                PhotoSourceBar(
+                  title: l10n.photos,
+                  count: draft.images.length,
+                  max: maxPhotos,
+                  enabled: !draft.compressing,
+                  onCamera: _addFromCamera,
+                  onGallery: _addFromGallery,
                 ),
                 if (draft.compressing) Padding(padding: const EdgeInsets.all(8), child: Text(l10n.compressing)),
+                if (draft.images.isNotEmpty) const SizedBox(height: 8),
                 if (draft.images.isNotEmpty)
                   SizedBox(
                     height: 96,

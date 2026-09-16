@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../data/models/suggestion.dart';
 
-const Color _seed = Color(0xFFC2410C); // paprika
+/// Brand "paprika": theme seed, launcher icon and splash background.
+const Color brandPaprika = Color(0xFFC2410C);
 
 ThemeData buildTheme(Brightness brightness) {
-  final scheme = ColorScheme.fromSeed(seedColor: _seed, brightness: brightness);
+  final scheme = ColorScheme.fromSeed(seedColor: brandPaprika, brightness: brightness);
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,

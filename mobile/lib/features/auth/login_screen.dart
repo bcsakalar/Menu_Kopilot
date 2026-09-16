@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
 import '../../core/utils/server_url.dart';
+import '../../core/widgets/brand_mark.dart';
 import '../../core/widgets/common.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -19,11 +20,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _password = TextEditingController();
   bool _obscure = true;
 
+  /// The server address is prefilled in release builds; it is only edited on request.
+  bool _editServer = false;
+
   @override
   void initState() {
     super.initState();
     ref.read(serverUrlProvider.future).then((url) {
-      if (mounted && _server.text.isEmpty) _server.text = url;
+      if (!mounted || _server.text.isNotEmpty) return;
+      setState(() {
+        _server.text = url;
+        _editServer = checkServerUrl(url) != null;
+      });
     });
   }
 
@@ -46,6 +54,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    if (!_editServer && checkServerUrl(_server.text) != null) {
+      setState(() => _editServer = true);
+      return;
+    }
     if (!(_formKey.currentState?.validate() ?? false)) return;
     await ref.read(authControllerProvider.notifier).login(
           serverUrl: _server.text,
@@ -65,6 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final loading = ref.watch(authControllerProvider).isLoading;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -78,19 +91,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(Icons.restaurant_menu, size: 56, color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(height: 8),
-                      Text(l10n.appTitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
-                      const SizedBox(height: 4),
-                      Text(l10n.loginTitle, textAlign: TextAlign.center),
-                      const SizedBox(height: 24),
-                      TextFormField(
-                        controller: _server,
-                        keyboardType: TextInputType.url,
-                        decoration: InputDecoration(labelText: l10n.serverUrl, hintText: l10n.serverUrlHint),
-                        validator: _validateUrl,
+                      const Center(child: BrandMark(size: 88)),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.appTitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.appTagline,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 32),
+                      Text(l10n.loginTitle, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 12),
+                      if (_editServer) ...[
+                        TextFormField(
+                          key: const Key('login-server'),
+                          controller: _server,
+                          keyboardType: TextInputType.url,
+                          decoration: InputDecoration(labelText: l10n.serverUrl, hintText: l10n.serverUrlHint),
+                          validator: _validateUrl,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       TextFormField(
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
@@ -115,11 +141,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
                       FilledButton(
+                        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                         onPressed: loading ? null : _submit,
                         child: loading
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
                             : Text(l10n.loginButton),
                       ),
+                      if (!_editServer) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.dns_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                Uri.tryParse(_server.text)?.host ?? _server.text,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              ),
+                            ),
+                            TextButton(
+                              key: const Key('login-change-server'),
+                              onPressed: () => setState(() => _editServer = true),
+                              child: Text(l10n.changeServer),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
