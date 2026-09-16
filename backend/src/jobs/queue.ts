@@ -83,8 +83,9 @@ export function startEmbeddingWorker(
     async (job) => {
       const ids = job.name === SWEEP_JOB ? await embedding.findMissing(100) : job.data.ids;
       const report = await embedding.embedTemplates(ids);
-      if (report.failed > 0 && job.name !== SWEEP_JOB) {
-        // Retry later with backoff (e.g. provider down / rate limited). The sweeper also catches leftovers.
+      if (report.failed > 0 && job.name !== SWEEP_JOB && report.retryable !== false) {
+        // Retry later with backoff (provider down / rate limited). A missing key, local-only mode or a used-up quota
+        // does not burn retries: the sweeper catches those templates once the configuration is fixed.
         throw new Error(report.error ?? 'embedding failed');
       }
       return report;

@@ -1,4 +1,5 @@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import type { ProviderErrorKind } from '../ai/errors.js';
 import type { PromptRepository } from '../ai/prompt-repository.js';
 import type { AiRouter } from '../ai/router.js';
 import { EMBEDDING } from '../config/models.js';
@@ -12,7 +13,12 @@ export interface EmbedReport {
   unchanged: number;
   failed: number;
   error?: string;
+  /** false when retrying soon cannot help: no key, local-only mode, quota used up or a rejected key. */
+  retryable?: boolean;
 }
+
+/** Failures that wait for a configuration change; the sweeper embeds these templates once it is fixed. */
+const WAIT_FOR_CONFIGURATION: ReadonlySet<ProviderErrorKind> = new Set(['not_configured', 'local_only', 'quota_exceeded', 'auth']);
 
 /**
  * Computes document embeddings for APPROVED templates only (drafts never enter the vector index).
@@ -66,6 +72,7 @@ export class EmbeddingService {
     if (!result.ok) {
       report.failed = work.length;
       report.error = `${result.error.kind}: ${result.error.message}`;
+      report.retryable = !WAIT_FOR_CONFIGURATION.has(result.error.kind);
       return report;
     }
     for (const [index, w] of work.entries()) {
