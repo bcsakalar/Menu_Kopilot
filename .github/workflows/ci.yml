@@ -38,13 +38,17 @@ jobs:
       - run: pnpm build
 
   mobile:
-    name: Mobile (analyze, test)
+    name: Mobile (analyze, test, build)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -52,6 +56,8 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      # Gradle-level problems (plugin compileSdk / AAR metadata, manifest merge) only show up in a real build.
+      - run: flutter build apk --debug --target-platform android-arm64
 
   key-guard:
     name: No provider keys in the mobile app
