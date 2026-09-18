@@ -407,3 +407,43 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
 - **D-131** — Embedding jobs do not burn their 8 retries when the failure waits for a configuration change
   (`not_configured`, `local_only`, `quota_exceeded`, `auth`): the job completes with `retryable: false` and the
   30-minute sweeper embeds those templates once a key is added. Provider outages still retry with backoff.
+
+## Tasarım yenilemesi ve ofis teslimi (2026-09-18)
+
+- **D-132** — Docker Desktop's stale `sailor-ingest.sock` (D-056) is an AF_UNIX reparse point that neither
+  `Remove-Item` nor `del` can delete ("The file cannot be accessed by the system"). Working fix, with Docker Desktop
+  fully stopped: rename `%LOCALAPPDATA%\Docker\run` to `run.stale-<timestamp>` (only runtime sockets live there;
+  Docker recreates the folder) and start Docker again — up in 20 s. Reversible; the stale folder can be deleted after
+  a reboot.
+- **D-133** — Design system (user request: no generic "AI" look). Tokens in `core/design/tokens.dart` as a
+  `ThemeExtension` (`context.palette`): anthracite canvas `#0E1116`, surfaces separated by 1 px hairlines instead of
+  shadows or tinted fills, paprika `#C2410C` for primary actions (white label ≥ 5:1), light paprika for text on dark,
+  amber for counts, green/red for state. Every text role is checked for WCAG AA on canvas and cards in a test. The
+  Material 3 `fromSeed` tonal palette is gone (it produced the generic look); `ColorScheme` is built from the tokens and
+  `surfaceTint` is transparent. Default theme is dark; "Sistem"/"Açık" remain in Ayarlar.
+- **D-134** — Typography: Manrope (SIL OFL 1.1) bundled as five static weights (400–800, ~95 KB each) in
+  `mobile/assets/fonts` with its license registered in `LicenseRegistry` — no runtime font fetching, works offline, no
+  request to Google from the app. Counts use tabular figures (`tnum`) so "8 / 12" does not jitter. Turkish glyph
+  coverage was verified against the notdef glyph.
+- **D-135** — Origin badges change color (supersedes the spec's mor/yeşil/mavi/turuncu, at the user's request to drop
+  purple/blue "AI" colors): Hazır şablon = neutral, DB'den = green, AI = amber ("check it"), İnceleme gerek = red. Labels
+  and meaning are unchanged.
+- **D-136** — Components: `AppCard`, `Pill`, `InlineNotice` (replaces `MaterialBanner`s and "⚠" lines), `Eyebrow`,
+  `FieldRow`, `SurfaceGroup` (a `Material`, not a decorated box, so row ripples stay visible — a widget test caught
+  the difference), `CountMeter` (one segment per product up to 24), `Shimmer`/`SkeletonCard`/`SkeletonList` and a
+  `ScanSkeleton` for menu/panel reading, `ActionDock` + `DockButton`. Spinners remain only inside buttons.
+- **D-137** — Input screens (Öneri, Tamamla) put camera, gallery, voice note and the primary action in a floating dock
+  (`bottomNavigationBar` of the tab's scaffold, `extendBody`). Nested scaffolds hide the keyboard inset from their
+  children, so the root `MaterialApp.builder` publishes `KeyboardVisibility`; the dock slides away and ignores taps
+  while the keyboard is open, so it never covers the field being typed in. FABs are gone (branches and cuisines get an
+  app-bar action, the camera a custom shutter); sparkle icons are gone from the navigation and buttons.
+- **D-138** — Product cards fold their details: name, origin, description (3 lines) and a portion/serving line stay
+  visible; option groups, ingredients, tags, allergens and upsell open under "Detaylar" (with counts). The footer is
+  one row — copy on the left, Atla/Düzenle, then "Onayla" at the right edge (thumb reach); `Wrap` fallback removed.
+- **D-139** — Haptics through `HapticFeedback` (no vibrate permission): medium impact on accept, selection click on
+  skip / checklist tick / tab change / photo added, light impact when the first cards of a run arrive and when the
+  branch count moves during a call, heavy impact on failures.
+- **D-140** — Native splash: anthracite background with the mark on a paprika tile (pre-31 layer-list; Android 12+
+  `windowSplashScreenIconBackgroundColor`); the window background behind Flutter is anthracite too, so there is no
+  white flash between splash and first frame.
+
