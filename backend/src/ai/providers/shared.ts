@@ -1,5 +1,5 @@
 import type { ZodError, ZodType } from 'zod';
-import type { ProviderName } from '../../config/models.js';
+import type { ModelSpec, ProviderName, RouteParams } from '../../config/models.js';
 import { ProviderError } from '../errors.js';
 
 export function formatZodIssues(error: ZodError, limit = 25): string[] {
@@ -7,6 +7,15 @@ export function formatZodIssues(error: ZodError, limit = 25): string[] {
     const path = issue.path.length > 0 ? issue.path.join('.') : '(root)';
     return `${path}: ${issue.message}`;
   });
+}
+
+/**
+ * Output token budget of one call: what the caller asks for (or the route default), never above the route's own cap
+ * (e.g. a free-tier per-minute limit, D-141) or the model's maximum.
+ */
+export function outputTokenLimit(requested: number | undefined, params: RouteParams, spec: ModelSpec): number {
+  const routeCap = params.maxOutputTokens ?? spec.maxOutputTokens;
+  return Math.min(requested ?? params.maxOutputTokens ?? 4096, routeCap, spec.maxOutputTokens);
 }
 
 /** Parses model output that should be JSON; tolerates code fences and leading/trailing prose. */

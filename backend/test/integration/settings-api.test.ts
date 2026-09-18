@@ -31,7 +31,7 @@ describe('settings & prompts API', () => {
       MODELS.groqWhisper,
     ]);
     const vision = body.tasks.find((t) => t.taskKey === 'vision.menu_extract');
-    expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.geminiFlash, MODELS.groqQwen38, MODELS.groqQwen36]);
+    expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.geminiFlashLite, MODELS.groqQwen38, MODELS.geminiFlash]);
     expect(vision?.eligibleModels.map((m) => m.id)).not.toContain(MODELS.groqGptOss120b);
     expect(body.providers.every((p) => p.configured)).toBe(true);
   });
@@ -41,13 +41,13 @@ describe('settings & prompts API', () => {
       method: 'PUT',
       url: '/api/v1/settings/providers/vision.menu_extract',
       headers: bearer(token),
-      payload: { model: MODELS.groqQwen36 },
+      payload: { model: MODELS.groqQwen38 },
     });
     expect(res.statusCode).toBe(200);
     const vision = res.json<{ tasks: TaskDto[] }>().tasks.find((t) => t.taskKey === 'vision.menu_extract');
-    expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.groqQwen36, MODELS.geminiFlash, MODELS.groqQwen38]);
+    expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.groqQwen38, MODELS.geminiFlashLite, MODELS.geminiFlash]);
     const chain = await ctx.ai.routes.chain('vision.menu_extract');
-    expect(chain[0]?.model).toBe(MODELS.groqQwen36);
+    expect(chain[0]?.model).toBe(MODELS.groqQwen38);
   });
 
   it('rejects a model that cannot do the task', async () => {

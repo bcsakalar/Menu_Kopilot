@@ -12,6 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { normalizeTr } from '../src/lib/normalize-tr.js';
 
 const { values: args } = parseArgs({
   options: {
@@ -160,10 +161,18 @@ const kebap = cuisines?.find((c) => c['slug'] === 'kebap-izgara');
 const kebapId = str(kebap?.['id']);
 
 // ---- Mod 1 without AI (acceptance #3) ----------------------------------------------------------------------------
-await step('suggest: 40 seed products with ZERO LLM calls', async () => {
-  const templates = await call('GET', '/templates?source=seed&limit=500');
-  const names = (templates.json['data'] as Json[]).map((t) => String(t['name']));
-  assert(names.length >= 40, `seed templates: ${names.length}`);
+await step('suggest: 40 approved templates with ZERO LLM calls', async () => {
+  // Approved, not only source=seed: accepting a seed card turns it into source=user (D-019).
+  const templates = await call('GET', '/templates?limit=500');
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const template of templates.json['data'] as Json[]) {
+    const name = String(template['name']);
+    if (seen.has(normalizeTr(name)) || names.length === 40) continue;
+    seen.add(normalizeTr(name));
+    names.push(name);
+  }
+  assert(names.length === 40, `approved templates: ${names.length}`);
   const run = await call('POST', '/suggest', { cuisineId: kebapId, promptText: names.join('\n') });
   assert(run.status === 200, `HTTP ${run.status} ${run.text.slice(0, 200)}`);
   const cards = run.json['cards'] as Json[];
@@ -278,6 +287,12 @@ if (args['skip-ai'] || configured.size === 0 || localOnly) {
   if (configured.has('groq')) {
     await step('research: web search for a real restaurant', async () => {
       const res = await call('POST', '/research', { restaurantName: 'Hacı Abdullah Lokantası', city: 'İstanbul' });
+      const details = (res.json['error'] as Json | undefined)?.['details'] as Json | undefined;
+      if (res.status === 503 && details?.['status'] === 413) {
+        // Free API tiers: compound's own calls exceed Groq's per-minute token limit (D-142). The app gets a clear error.
+        console.log('      not available on this API plan (Groq 413 per-minute token limit) — clear error returned');
+        return;
+      }
       assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 300)}`);
       console.log(`      found=${String(res.json['found'])} items=${(res.json['items'] as Json[]).length} sources=${(res.json['sources'] as Json[]).length}`);
       assert(!PRICE.test(res.text), 'price amount in research result');

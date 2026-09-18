@@ -19,7 +19,9 @@ export function toJsonSchema(schema: ZodType): JsonSchema {
   return JSON.parse(JSON.stringify(out)) as JsonSchema;
 }
 
-const GEMINI_DROP = new Set(['$schema', 'minLength', 'maxLength', 'pattern', 'default', 'examples', '$id', 'id']);
+// The Interactions API answers "400 Request contains an invalid argument" for array length keywords (found with a
+// real key, D-141); list caps are enforced by the Zod schema after parsing instead.
+const GEMINI_DROP = new Set(['$schema', 'minLength', 'maxLength', 'pattern', 'default', 'examples', '$id', 'id', 'minItems', 'maxItems']);
 const GROQ_DROP = new Set([
   '$schema',
   'minLength',

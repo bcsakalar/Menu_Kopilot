@@ -14,11 +14,11 @@ import type {
   Transcription,
   WebSource,
 } from '../types.js';
-import { validateOutput, withTimeout } from './shared.js';
+import { outputTokenLimit, validateOutput, withTimeout } from './shared.js';
 
 /**
  * Groq via its OpenAI-compatible `/chat/completions` endpoint (native fetch, no SDK):
- * strict json_schema for gpt-oss / qwen3.8, JSON mode + prompt-embedded schema for qwen3.6.
+ * strict json_schema for gpt-oss / qwen3.8, JSON mode + prompt-embedded schema for the compound systems.
  */
 
 const DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
@@ -147,7 +147,7 @@ export class GroqProvider implements LLMProvider {
         { role: 'system', content: system },
         { role: 'user', content: userContent },
       ],
-      max_completion_tokens: Math.min(opts.maxTokens ?? params.maxOutputTokens ?? 4096, spec.maxOutputTokens),
+      max_completion_tokens: outputTokenLimit(opts.maxTokens, params, spec),
       stream: false,
       response_format: strict
         ? { type: 'json_schema', json_schema: { name: opts.schemaName ?? 'output', strict: true, schema: forGroqStrict(jsonSchema) } }
@@ -227,7 +227,12 @@ export class GroqProvider implements LLMProvider {
     } catch {
       parsedError = undefined;
     }
-    const message = parsedError?.error.message ?? `Groq HTTP ${status}`;
+    // 413: the request (or, for compound, the model's own follow-up calls) exceeds the plan's per-minute token limit;
+    // waiting does not help, so it stays a bad_request and the chain moves on (D-142).
+    const message =
+      status === 413
+        ? `Groq planının dakikalık token sınırı bu isteğe yetmiyor (413): ${parsedError?.error.message ?? 'Request Entity Too Large'}`
+        : (parsedError?.error.message ?? `Groq HTTP ${status}`);
     if (status === 400 && parsedError?.error.code === 'json_validate_failed') {
       return new ProviderError({
         kind: 'invalid_output',

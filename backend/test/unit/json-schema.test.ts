@@ -59,14 +59,16 @@ describe('provider JSON schema sanitizers', () => {
     expect(kind?.['enum']).toEqual(['product']);
   });
 
-  it('Gemini: keeps the supported subset and drops string length/pattern keywords', () => {
+  it('Gemini: keeps the supported subset and drops string length/pattern and array length keywords', () => {
     const gemini = forGemini(base);
     const keys = collectKeys(gemini);
     expect(keys.has('maxLength')).toBe(false);
     expect(keys.has('minLength')).toBe(false);
     expect(keys.has('$schema')).toBe(false);
+    // The Interactions API answers 400 "invalid argument" for these (D-141); Zod enforces the caps after parsing.
+    expect(keys.has('maxItems')).toBe(false);
+    expect(keys.has('minItems')).toBe(false);
     expect(keys.has('enum')).toBe(true);
     expect(keys.has('minimum')).toBe(true);
-    expect(keys.has('maxItems')).toBe(true);
   });
 });

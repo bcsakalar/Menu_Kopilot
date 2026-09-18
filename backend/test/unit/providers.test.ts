@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { providerFailure } from '../../src/ai/errors.js';
 import { GeminiProvider, type GeminiTransport, type InteractionResponse } from '../../src/ai/providers/gemini.provider.js';
 import { GroqProvider } from '../../src/ai/providers/groq.provider.js';
 import type { ImageInput } from '../../src/ai/types.js';
@@ -65,7 +66,27 @@ describe('GroqProvider', () => {
     expect(body['max_completion_tokens']).toBe(1000);
   });
 
-  it('uses JSON mode + prompt schema and data-URL images for qwen3.6', async () => {
+  it('uses JSON mode + prompt schema for the compound systems', async () => {
+    const captured: Captured[] = [];
+    const provider = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion(ok), captured) });
+    await provider.generateStructured({
+      task: 'research.web',
+      schema,
+      system: 'sys',
+      user: 'find',
+      model: MODELS.groqCompound,
+      params: { maxOutputTokens: 4096, enabledTools: ['web_search'] },
+      jsonInstructions: 'ONLY JSON: {schema}',
+    });
+    const body = captured[0]?.body ?? {};
+    expect(body['response_format']).toEqual({ type: 'json_object' });
+    expect(body['compound_custom']).toEqual({ tools: { enabled_tools: ['web_search'] } });
+    expect(body['reasoning_format']).toBeUndefined();
+    const messages = body['messages'] as { role: string; content: unknown }[];
+    expect(String(messages[0]?.content)).toContain('ONLY JSON');
+  });
+
+  it('sends images as data URLs and keeps the route token cap below the requested size', async () => {
     const captured: Captured[] = [];
     const provider = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion(ok), captured) });
     await provider.generateStructured({
@@ -74,14 +95,15 @@ describe('GroqProvider', () => {
       system: 'sys',
       user: 'read',
       images: [image],
-      model: MODELS.groqQwen36,
-      jsonInstructions: 'ONLY JSON: {schema}',
+      model: MODELS.groqQwen38,
+      maxTokens: 4096,
+      params: { reasoningEffort: 'none', maxOutputTokens: 1000 },
     });
     const body = captured[0]?.body ?? {};
-    expect(body['response_format']).toEqual({ type: 'json_object' });
+    expect(body['response_format']).toMatchObject({ type: 'json_schema', json_schema: { strict: true } });
     expect(body['reasoning_format']).toBe('hidden');
+    expect(body['max_completion_tokens']).toBe(1000);
     const messages = body['messages'] as { role: string; content: unknown }[];
-    expect(String(messages[0]?.content)).toContain('ONLY JSON');
     const parts = messages[1]?.content as { type: string; image_url?: { url: string } }[];
     expect(parts[0]).toEqual({ type: 'text', text: 'read' });
     expect(parts[1]?.image_url?.url.startsWith('data:image/jpeg;base64,')).toBe(true);
@@ -103,6 +125,23 @@ describe('GroqProvider', () => {
     if (!result.ok) {
       expect(result.error.kind).toBe('rate_limited');
       expect(result.error.retryAfterMs).toBe(7000);
+    }
+  });
+
+  it('maps a free-tier 413 to a bad request that says which limit it hit', async () => {
+    const provider = new GroqProvider({
+      apiKey: 'k',
+      fetch: mockFetch(() => new Response('Request Entity Too Large', { status: 413 })),
+    });
+    const result = await provider.generateStructured({ task: 'research.web', schema, system: 's', user: 'u', model: MODELS.groqCompound });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.kind).toBe('bad_request');
+      expect(result.error.status).toBe(413);
+      expect(result.error.message).toContain('dakikalık token');
+      const app = providerFailure(result.error, 'İnternet araştırması');
+      expect(app.code).toBe('PROVIDER_UNAVAILABLE');
+      expect(app.message).toContain('bu AI planında yapılamıyor');
     }
   });
 

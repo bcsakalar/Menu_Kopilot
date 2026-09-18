@@ -3,9 +3,10 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import type { ProviderError } from '../../src/ai/errors.js';
 import { GeminiProvider } from '../../src/ai/providers/gemini.provider.js';
 import { GroqProvider } from '../../src/ai/providers/groq.provider.js';
-import type { AudioInput, ImageInput } from '../../src/ai/types.js';
+import type { AudioInput, ImageInput, Result } from '../../src/ai/types.js';
 import { parseEnv } from '../../src/config/env.js';
 import { MODELS } from '../../src/config/models.js';
 
@@ -31,10 +32,21 @@ function loadFixtureImage(): ImageInput | undefined {
 }
 const extractSchema = z.object({ items: z.array(z.object({ rawName: z.string(), confidence: z.number() })) });
 
+/**
+ * Plan limits are not code failures: a free-tier quota (429) or Groq's per-minute token limit (413) skips the test
+ * with the provider's reason instead of failing it (D-142).
+ */
+function valueOf<T>(result: Result<T>, skip: (note?: string) => never): T {
+  if (result.ok) return result.value;
+  const error: ProviderError = result.error;
+  if (error.kind === 'rate_limited' || error.status === 413) skip(`plan limit: ${error.message.slice(0, 160)}`);
+  throw error;
+}
+
 describe.skipIf(!geminiKey)('Gemini (live)', () => {
   const provider = new GeminiProvider({ apiKey: geminiKey });
 
-  it.each([MODELS.geminiFlash, MODELS.geminiFlashLite])('%s returns schema-valid JSON via the Interactions API', async (model) => {
+  it.for([MODELS.geminiFlash, MODELS.geminiFlashLite])('%s returns schema-valid JSON via the Interactions API', async (model, { skip }) => {
     const result = await provider.generateStructured({
       task: 'text.normalize_classify',
       schema: dishSchema,
@@ -44,8 +56,7 @@ describe.skipIf(!geminiKey)('Gemini (live)', () => {
       params: { thinkingLevel: 'low', maxOutputTokens: 1024 },
       timeoutMs: 60_000,
     });
-    if (!result.ok) throw result.error;
-    expect(result.value.items.length).toBeGreaterThanOrEqual(2);
+    expect(valueOf(result, skip).items.length).toBeGreaterThanOrEqual(2);
     expect(result.meta.tokensIn).toBeGreaterThan(0);
   });
 
@@ -63,7 +74,7 @@ describe.skipIf(!geminiKey)('Gemini (live)', () => {
     }
   });
 
-  it.skipIf(!existsSync(fixtureImage))('reads a menu photo', async () => {
+  it.skipIf(!existsSync(fixtureImage)).for([MODELS.geminiFlashLite, MODELS.geminiFlash])('%s reads a menu photo', async (model, { skip }) => {
     const image = loadFixtureImage();
     if (!image) return;
     const result = await provider.generateStructured({
@@ -72,18 +83,17 @@ describe.skipIf(!geminiKey)('Gemini (live)', () => {
       system: 'Menüdeki ürün adlarını çıkar.',
       user: 'Ürünleri listele.',
       images: [image],
-      model: MODELS.geminiFlash,
+      model,
       params: { thinkingLevel: 'low', maxOutputTokens: 4096 },
     });
-    if (!result.ok) throw result.error;
-    expect(result.value.items.length).toBeGreaterThan(5);
+    expect(valueOf(result, skip).items.length).toBeGreaterThan(5);
   });
 });
 
 describe.skipIf(!groqKey)('Groq (live)', () => {
   const provider = new GroqProvider({ apiKey: groqKey });
 
-  it.each([MODELS.groqGptOss20b, MODELS.groqGptOss120b])('%s returns strict json_schema output', async (model) => {
+  it.for([MODELS.groqGptOss20b, MODELS.groqGptOss120b])('%s returns strict json_schema output', async (model, { skip }) => {
     const result = await provider.generateStructured({
       task: 'text.item_enrich',
       schema: dishSchema,
@@ -94,12 +104,11 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
       params: { reasoningEffort: 'low', maxOutputTokens: 1024 },
       timeoutMs: 60_000,
     });
-    if (!result.ok) throw result.error;
-    expect(result.value.items.length).toBeGreaterThanOrEqual(2);
+    expect(valueOf(result, skip).items.length).toBeGreaterThanOrEqual(2);
     expect(result.meta.rateLimit?.limitTokens).toBeGreaterThan(0);
   });
 
-  it.skipIf(!existsSync(fixtureImage)).each([MODELS.groqQwen38, MODELS.groqQwen36])('%s reads a menu photo', async (model) => {
+  it.skipIf(!existsSync(fixtureImage)).for([MODELS.groqQwen38])('%s reads a menu photo', async (model, { skip }) => {
     const image = loadFixtureImage();
     if (!image) return;
     const result = await provider.generateStructured({
@@ -110,21 +119,19 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
       user: 'Ürünleri listele.',
       images: [image],
       model,
-      params: { reasoningEffort: 'none', maxOutputTokens: 4096 },
-      jsonInstructions: `Yanıtı yalnızca bu JSON şemasına uyan tek bir JSON nesnesi olarak ver: {"items":[{"rawName":"string","confidence":0.9}]}`,
+      // The free tier caps qwen3.8 at 1000 output tokens per minute (larger requests get a 413).
+      params: { reasoningEffort: 'none', maxOutputTokens: 1000 },
     });
-    if (!result.ok) throw result.error;
-    expect(result.value.items.length).toBeGreaterThan(5);
+    expect(valueOf(result, skip).items.length).toBeGreaterThan(5);
   });
 
-  it.each([MODELS.groqWhisperTurbo, MODELS.groqWhisper])('%s accepts a recording (model ID + multipart check)', async (model) => {
+  it.for([MODELS.groqWhisperTurbo, MODELS.groqWhisper])('%s accepts a recording (model ID + multipart check)', async (model, { skip }) => {
     const result = await provider.transcribe(toneWav(), { model, language: 'tr', prompt: 'Adana Kebap, Lahmacun', timeoutMs: 60_000 });
-    if (!result.ok) throw result.error;
     // A pure tone has no words: only the call itself is verified here.
-    expect(typeof result.value.text).toBe('string');
+    expect(typeof valueOf(result, skip).text).toBe('string');
   });
 
-  it.each([MODELS.groqCompound, MODELS.groqCompoundMini])('%s searches the web and answers in JSON mode', async (model) => {
+  it.for([MODELS.groqCompound, MODELS.groqCompoundMini])('%s searches the web and answers in JSON mode', async (model, { skip }) => {
     const result = await provider.generateStructured({
       task: 'research.web',
       schema: z.object({ found: z.boolean(), items: z.array(z.object({ name: z.string() })) }),
@@ -134,7 +141,7 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
       params: { enabledTools: ['web_search'], maxOutputTokens: 2048 },
       timeoutMs: 90_000,
     });
-    if (!result.ok) throw result.error;
+    valueOf(result, skip);
     expect(result.meta.sources?.length ?? 0).toBeGreaterThan(0);
   });
 });

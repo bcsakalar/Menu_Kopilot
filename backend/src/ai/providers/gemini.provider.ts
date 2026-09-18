@@ -4,7 +4,7 @@ import { ProviderError, type ProviderErrorKind, kindForStatus } from '../errors.
 import { forGemini, type JsonSchema, toJsonSchema } from '../json-schema.js';
 import { headerGetterFrom, parseGoogleRetryDelayMs, parseRateLimitHeaders } from '../rate-limit.js';
 import type { CallMeta, EmbedOptions, GenerateStructuredOptions, LLMProvider, Result } from '../types.js';
-import { validateOutput, withTimeout } from './shared.js';
+import { outputTokenLimit, validateOutput, withTimeout } from './shared.js';
 
 /**
  * Gemini via the Interactions API (default interface since June 2026) with structured output,
@@ -195,7 +195,7 @@ export class GeminiProvider implements LLMProvider {
         ),
       ],
       schema: forGemini(toJsonSchema(opts.providerSchema ?? opts.schema)),
-      maxOutputTokens: Math.min(opts.maxTokens ?? params.maxOutputTokens ?? 4096, spec.maxOutputTokens),
+      maxOutputTokens: outputTokenLimit(opts.maxTokens, params, spec),
       ...(params.thinkingLevel ? { thinkingLevel: params.thinkingLevel } : {}),
     };
 

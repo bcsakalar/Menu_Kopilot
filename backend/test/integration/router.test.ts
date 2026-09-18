@@ -204,12 +204,19 @@ describe('AiRouter', () => {
     gemini.setResponder(() => ({ ok: false, kind: 'unavailable' }));
     const vision = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
     expect(vision.ok && vision.meta.model).toBe(MODELS.groqQwen38);
+    expect(groq.calls.find((c) => c.model === MODELS.groqQwen38)?.jsonInstructions).toBeUndefined();
 
-    groq.setResponder((opts) => (opts.model === MODELS.groqQwen38 ? { ok: false, kind: 'bad_request' } : good));
-    const viaQwen36 = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
-    expect(viaQwen36.ok && viaQwen36.meta.model).toBe(MODELS.groqQwen36);
-    const qwen36Call = groq.calls.find((c) => c.model === MODELS.groqQwen36);
-    expect(qwen36Call?.jsonInstructions).toContain('JSON');
+    const research = await makeRouter().generate({ task: 'research.web', schema, system: 's', user: 'u' });
+    expect(research.ok && research.meta.model).toBe(MODELS.groqCompound);
+    expect(groq.calls.find((c) => c.model === MODELS.groqCompound)?.jsonInstructions).toContain('JSON');
+  });
+
+  it('moves on when Groq rejects a request larger than the free per-minute token limit', async () => {
+    gemini.setResponder((opts) => (opts.model === MODELS.geminiFlashLite ? { ok: false, kind: 'unavailable' } : good));
+    groq.setResponder(() => ({ ok: false, kind: 'bad_request', status: 413 }));
+    const result = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
+    expect(result.ok && result.meta.model).toBe(MODELS.geminiFlash);
+    expect(result.attempts.map((a) => a.model)).toEqual([MODELS.geminiFlashLite, MODELS.geminiFlashLite, MODELS.groqQwen38, MODELS.geminiFlash]);
   });
 
   it('embeds through the embed chain', async () => {

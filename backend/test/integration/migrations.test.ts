@@ -48,7 +48,40 @@ describe('migrations', () => {
     expect(defs.some((d) => d.includes('USING gin') && d.includes('gin_trgm_ops'))).toBe(true);
   });
 
+  it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
+    const chain = (task: string) =>
+      executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
+    expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0002_vision_routes']);
+    // The vision chain as the first seed wrote it.
+    await executeRows(
+      handle.db,
+      sql`insert into provider_configs (task_key, provider, model, params, priority) values
+        ('vision.menu_extract', 'gemini', 'gemini-3.8-flash', '{"thinkingLevel":"low","maxOutputTokens":4096}', 0),
+        ('vision.menu_extract', 'groq', 'qwen/qwen3.8-27b', '{"reasoningEffort":"none","maxOutputTokens":4096}', 1),
+        ('vision.menu_extract', 'groq', 'qwen/qwen3.6-27b', '{"reasoningEffort":"none","maxOutputTokens":4096}', 2)`,
+    );
+    await handle.migrate();
+    const rows = await chain('vision.menu_extract');
+    expect(rows.map((r) => r['model'])).toEqual(['gemini-3.5-flash-lite', 'qwen/qwen3.8-27b', 'gemini-3.8-flash']);
+    expect(rows[1]?.['params']).toEqual({ reasoningEffort: 'none', maxOutputTokens: 1000 });
+    // No routes yet (fresh install): left to the seed.
+    expect(await chain('vision.panel_extract')).toEqual([]);
+
+    expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0002_vision_routes']);
+    expect((await chain('vision.menu_extract')).map((r) => r['model'])).toEqual([
+      'gemini-3.8-flash',
+      'qwen/qwen3.8-27b',
+      'qwen/qwen3.6-27b',
+    ]);
+    await executeRows(handle.db, sql`delete from provider_configs returning id`);
+    await handle.migrate();
+  });
+
   it('rolls back step by step and re-applies (up → down → up)', async () => {
+    const vision = await rollbackMigrations(handle.db, 1);
+    expect(vision.map((r) => r.tag)).toEqual(['0002_vision_routes']);
+    expect(await publicTables(handle)).toHaveLength(17);
+
     const first = await rollbackMigrations(handle.db, 1);
     expect(first.map((r) => r.tag)).toEqual(['0001_init']);
     expect(await publicTables(handle)).toHaveLength(0);

@@ -32,7 +32,6 @@ export const MODELS = {
   groqGptOss120b: 'openai/gpt-oss-120b',
   groqGptOss20b: 'openai/gpt-oss-20b',
   groqQwen38: 'qwen/qwen3.8-27b',
-  groqQwen36: 'qwen/qwen3.6-27b',
   groqWhisperTurbo: 'whisper-large-v3-turbo',
   groqWhisper: 'whisper-large-v3',
   groqCompound: 'groq/compound',
@@ -171,20 +170,6 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     maxOutputTokens: 16_384,
     reasoningControl: 'reasoning_format',
   },
-  [MODELS.groqQwen36]: {
-    id: MODELS.groqQwen36,
-    provider: 'groq',
-    label: 'Qwen 3.6 27B Vision (Groq, preview)',
-    kind: 'chat',
-    vision: true,
-    maxImages: 5,
-    maxRequestBytes: 20 * MB,
-    imageTokens: GROQ_IMAGE_TOKENS,
-    structured: 'json_object',
-    preview: true,
-    maxOutputTokens: 16_384,
-    reasoningControl: 'reasoning_format',
-  },
   [MODELS.groqWhisperTurbo]: {
     id: MODELS.groqWhisperTurbo,
     provider: 'groq',
@@ -249,7 +234,7 @@ export interface RouteParams {
   maxOutputTokens?: number;
   /** Gemini 3: minimal | low | medium | high */
   thinkingLevel?: string;
-  /** Groq: gpt-oss low|medium|high; qwen3.6 none|default; qwen3.8 none|default|low|medium|high */
+  /** Groq: gpt-oss low|medium|high; qwen3.8 none|default|low|medium|high */
   reasoningEffort?: string;
   temperature?: number;
   /** Embeddings only. */
@@ -264,10 +249,13 @@ export interface RouteEntry {
   params: RouteParams;
 }
 
+// Measured with real keys (D-141): Flash-Lite reads a 15-item menu in ~3 s, 3.8 Flash needs 13-20 s and is often
+// overloaded on the free tier, so it is the last resort. Groq's free tier allows qwen3.8 1000 output tokens per
+// minute and rejects any request asking for more.
 const visionChain: RouteEntry[] = [
+  { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 4096 } },
+  { provider: 'groq', model: MODELS.groqQwen38, params: { reasoningEffort: 'none', maxOutputTokens: 1000 } },
   { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 4096 } },
-  { provider: 'groq', model: MODELS.groqQwen38, params: { reasoningEffort: 'none', maxOutputTokens: 4096 } },
-  { provider: 'groq', model: MODELS.groqQwen36, params: { reasoningEffort: 'none', maxOutputTokens: 4096 } },
 ];
 
 const cheapTextChain: RouteEntry[] = [
@@ -278,15 +266,19 @@ const cheapTextChain: RouteEntry[] = [
 export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = {
   'vision.menu_extract': visionChain,
   'vision.panel_extract': visionChain,
+  // Free tiers (D-142): 3.8 Flash allows 20 requests a day, so every chain ends on a model with a larger daily quota.
+  // New entries go last: the start-up seed appends them to existing databases without reordering a user's choice.
   'text.item_enrich': [
     { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 16_000 } },
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 16_000 } },
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 16_000 } },
   ],
   'text.normalize_classify': cheapTextChain,
   'text.gap_suggest': cheapTextChain,
   'deep.analyze': [
     { provider: 'gemini', model: MODELS.geminiPro, params: { thinkingLevel: 'high', maxOutputTokens: 24_000 } },
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'medium', maxOutputTokens: 16_000 } },
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'high', maxOutputTokens: 16_000 } },
   ],
   embed: [{ provider: 'gemini', model: MODELS.geminiEmbedding, params: { dim: 768 } }],
   // Voice notes (Faz 7): turbo is faster and cheaper; v3 is the fallback.

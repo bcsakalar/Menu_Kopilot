@@ -447,3 +447,23 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   `windowSplashScreenIconBackgroundColor`); the window background behind Flutter is anthracite too, so there is no
   white flash between splash and first frame.
 
+- **D-141** — Vision after the first runs with real keys: the Interactions API answers "400 Request contains an invalid
+  argument" when a response schema has `minItems`/`maxItems`, so `forGemini()` drops them (Zod still enforces the
+  caps). Gemini 3.5 Flash-Lite reads the 15-item test menu in ~3 s and a panel screenshot in ~2 s; 3.8 Flash needed
+  13–20 s or answered 503/429. New vision chain: Flash-Lite → qwen3.8 (strict) → 3.8 Flash. `qwen/qwen3.6-27b` is gone
+  from Groq and is removed. Groq's free tier allows qwen3.8 1000 output tokens per minute and rejects a request that
+  asks for more (413), so that route is capped at 1000. `params.maxOutputTokens` of a route is now a ceiling for the
+  call (`outputTokenLimit`), also when a caller asks for more. Migration `0002_vision_routes` (with down) moves
+  existing databases; it only touches databases that were already seeded, a fresh one gets the order from the seed.
+  Live check with real keys: Mod 1 photo → first card 3.8 s, 15 cards; Mod 2, two screenshots → 2.6 s.
+- **D-142** — Free API tiers, measured: Gemini 3.8 Flash allows 20 requests a day; Groq gpt-oss 8K tokens/minute and
+  1K requests/day; Gemini's Google Search tool answers 429 on the free key; Groq compound's own follow-up calls exceed
+  the free per-minute limits (413 "Request Entity Too Large", 429 on the internal llama model). So "internetten
+  araştır" does not work on free tiers with either provider. A 413 from Groq stays `bad_request` (waiting does not
+  help, the chain moves on) with a message that names the limit, and the API answers `PROVIDER_UNAVAILABLE` "… bu AI
+  planında yapılamıyor: istek sağlayıcının dakikalık token sınırını aşıyor" instead of a vague rejection. No Gemini
+  search fallback was added: it could not be verified on this key. Chains that ended on 3.8 Flash get a fallback with
+  a larger daily quota (`text.item_enrich` → Flash-Lite, `deep.analyze` → gpt-oss-120b reasoning high), appended at the
+  end so the start-up seed adds them to existing databases without reordering a user's choice. Smoke tests skip
+  (with the provider's reason) on plan limits instead of failing. Daily office use should run on paid tiers (Groq Dev
+  tier, Gemini Tier 1); the app works on free tiers but falls back more often.

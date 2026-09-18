@@ -30,7 +30,7 @@ Sources: [overview](https://console.groq.com/docs/overview) ·
 |---|---|---|---|---|
 | `openai/gpt-oss-120b` | production | 131,072 | 65,536 | strict structured outputs |
 | `openai/gpt-oss-20b` | production | 131,072 | 65,536 | strict structured outputs |
-| `qwen/qwen3.6-27b` | **preview** | 131,072 | 16,384 | vision (5 images), JSON mode + tool use |
+| `qwen/qwen3.6-27b` | **removed** | — | — | was vision + JSON mode; no longer served (D-141) |
 | `qwen/qwen3.8-27b` | **preview** | 131,042 | 16,384 | vision (3 images), strict structured outputs |
 | `whisper-large-v3-turbo` | production | — | — | speech-to-text, 100 MB file limit |
 | `whisper-large-v3` | production | — | — | speech-to-text |
@@ -39,7 +39,7 @@ Sources: [overview](https://console.groq.com/docs/overview) ·
 Preview models "may be discontinued without notice" → vision fallback chain must survive their removal.
 
 ### 1.3 Vision
-- Vision models: `qwen/qwen3.6-27b` (max **5** images/request), `qwen/qwen3.8-27b` (max **3**).
+- Vision model: `qwen/qwen3.8-27b` (max **3** images/request); `qwen/qwen3.6-27b` was removed by Groq (D-141).
 - Max request size with image **20 MB**; each image counts as **~2048 input tokens**.
 - Local images are sent as data URLs:
   `{ "type": "image_url", "image_url": { "url": "data:image/jpeg;base64,<b64>" } }`.
@@ -53,7 +53,7 @@ Preview models "may be discontinued without notice" → vision fallback chain mu
   `qwen/qwen3.8-27b`.
 - Best-effort (`strict: false`): above + `openai/gpt-oss-safeguard-20b`; invalid output → **HTTP 400**
   ("Generated JSON does not match the expected schema").
-- `{ "type": "json_object" }` works on all models (no schema adherence) → used for `qwen/qwen3.6-27b`,
+- `{ "type": "json_object" }` works on all models (no schema adherence) → used for the compound systems,
   with the JSON schema embedded in the prompt and Zod validation afterwards.
 - Strict-mode schema rules: every property in `required`; `additionalProperties: false` on all objects;
   optional = union with null (`anyOf` / `["string","null"]`); `anyOf` supported; `$ref`/`$defs` supported.
@@ -64,7 +64,7 @@ Preview models "may be discontinued without notice" → vision fallback chain mu
 ### 1.5 Reasoning parameters (affects latency / token use)
 - gpt-oss: `reasoning_effort: "low" | "medium" | "high"`; they do **not** support `reasoning_format`,
   use `include_reasoning: false` to drop reasoning text.
-- qwen3.6-27b: `reasoning_effort: "none" | "default"`; qwen3.8-27b: `"none" | "default" | "low" | "medium" | "high"`.
+- qwen3.8-27b: `"none" | "default" | "low" | "medium" | "high"`.
 - Non-gpt-oss models: `reasoning_format: "parsed" | "raw" | "hidden"`; `raw` + JSON mode → 400.
 
 ### 1.6 Rate limits
@@ -197,8 +197,8 @@ interaction.usage?.total_input_tokens;         // also total_output_tokens, tota
 ### 2.6 Models used (from the models page)
 | Model ID | Status | Use here |
 |---|---|---|
-| `gemini-3.8-flash` | stable | main reasoning + vision extraction |
-| `gemini-3.5-flash-lite` | stable | cheap/fast small tasks (classify, gap suggestions) |
+| `gemini-3.8-flash` | stable | enrichment fallback, last vision fallback (free tier: 20 requests/day) |
+| `gemini-3.5-flash-lite` | stable | primary vision extraction (~3 s per menu photo), classify, gap suggestions |
 | `gemini-3.1-pro-preview` | preview | deep analysis mode only |
 | `gemini-embedding-2` | see 2.4 | embeddings @768 |
 
@@ -212,7 +212,7 @@ Other listed IDs (not used): `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5
 
 | Prompt says | Docs say | Decision |
 |---|---|---|
-| Vision fallback `qwen/qwen3.6-27b` | qwen3.6 = JSON mode only; qwen3.8 has **strict** schemas | Chain: gemini-3.8-flash → qwen3.8-27b (strict) → qwen3.6-27b (json_object) |
+| Vision fallback `qwen/qwen3.6-27b` | qwen3.6 = JSON mode only (later removed); qwen3.8 has **strict** schemas | Chain (D-141): gemini-3.5-flash-lite → qwen3.8-27b (strict, 1000 output tokens) → gemini-3.8-flash |
 | `gemini-embedding-2` | models page: `gemini-embedding-2-preview` | keep `gemini-embedding-2`, verify in smoke test |
 | Interactions structured output | field is `response_format` with `mime_type` + `schema` | as documented |
 | (not mentioned) | Interactions `store` defaults to true (1–55 day retention) | always `store: false` |
@@ -220,3 +220,16 @@ Other listed IDs (not used): `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5
 | (not mentioned) | multiple texts in one `contents` → one aggregated vector | one `Content` per text |
 | (not mentioned) | Groq strict mode rejects `minLength/maxLength/pattern/format` | sanitize schema per provider; Zod enforces limits |
 | Whisper in "Faz 6" (section 0) vs "Faz 7" (section 6) | — | built in Faz 7: `audio.transcribe` (turbo → v3), `research.web` (compound → compound-mini) |
+
+## 4. Measured with real keys (2026-09-18, free tiers)
+
+| What | Result |
+|---|---|
+| Gemini response schema with `minItems`/`maxItems` | 400 "Request contains an invalid argument" → dropped in `forGemini()` |
+| gemini-3.5-flash-lite, 15-item menu photo | 2.8–3.1 s, 15/15 items; panel screenshot ~2 s |
+| gemini-3.8-flash, same photo | 13–20 s, frequent 503/429; free tier **20 requests/day** |
+| qwen/qwen3.8-27b | free tier **1000 output tokens/minute**; `max_completion_tokens` above it → 413 |
+| openai/gpt-oss-120b / 20b | free tier 8K tokens/minute, 1K requests/day; large `max_completion_tokens` accepted |
+| groq/compound, compound-mini + web_search | 413 "Request Entity Too Large" / 429 on the internal model (free tier) |
+| Gemini Interactions + `google_search` tool | 429 immediately on the free key (plain calls work) |
+| Live check (`pnpm live:check`) | 14/14; Mod 1 first card 3.8 s; Mod 2 two screenshots 2.6 s; research → clear plan-limit error |

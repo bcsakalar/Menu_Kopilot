@@ -72,6 +72,13 @@ export function providerFailure(error: ProviderError, action: string): AppError 
     case 'not_configured':
       return new AppError('AI_NOT_CONFIGURED', `AI anahtarı tanımlı değil: ${action} için sunucuya GEMINI_API_KEY veya GROQ_API_KEY eklenmeli`);
     case 'bad_request':
+      if (error.status === 413) {
+        return new AppError('PROVIDER_UNAVAILABLE', `${action} bu AI planında yapılamıyor: istek sağlayıcının dakikalık token sınırını aşıyor`, {
+          kind: error.kind,
+          status: 413,
+        });
+      }
+      return new AppError('VALIDATION_ERROR', `${action} yapılamadı: istek sağlayıcı tarafından reddedildi`, { kind: error.kind });
     case 'unsupported':
     case 'content_blocked':
       return new AppError('VALIDATION_ERROR', `${action} yapılamadı: istek sağlayıcı tarafından reddedildi`, { kind: error.kind });
