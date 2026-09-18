@@ -467,3 +467,16 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   end so the start-up seed adds them to existing databases without reordering a user's choice. Smoke tests skip
   (with the provider's reason) on plan limits instead of failing. Daily office use should run on paid tiers (Groq Dev
   tier, Gemini Tier 1); the app works on free tiers but falls back more often.
+- **D-143** — Found on the phone: a share whose sender did not grant read access (e.g. `am start … --eu
+  EXTRA_STREAM content://media/…`, or a buggy app) made receive_sharing_intent throw a `SecurityException` on the main
+  thread in `onNewIntent`/`onCreate`, killing the app. `MainActivity` now checks every shared stream with
+  `openAssetFileDescriptor` before the plugin sees the intent, drops unreadable ones (with `EXTRA_MIME_TYPES` kept in
+  step), turns a share left with nothing into a plain launch and shows a native toast (`res/values/strings.xml`, the
+  only UI text outside the ARB: Flutter is not running yet). Second finding: with `launchMode="singleTop"` every share
+  from the gallery opened a new copy of the app inside the gallery's task, so two screenshots shared one after the
+  other landed in two separate drafts. `singleTask` (as the plugin's README advises) delivers each share to the running
+  app; verified on the device: panel-1 and panel-2 shared separately → one draft with 2 screenshots.
+- **D-144** — Photo thumbnails: the delete badge's `Semantics` merged into the list item's node (list items are
+  semantics boundaries), so TalkBack announced the whole photo as "Sil" while only the 26 dp corner deleted. The badge
+  is now its own node (`container: true`) with a 40 dp hit area around the unchanged 26 dp circle; a widget test in a
+  horizontal list (as on the screens) fails without the fix.

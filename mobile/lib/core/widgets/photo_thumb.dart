@@ -27,19 +27,28 @@ class PhotoThumb extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 4,
-          right: 4,
+          top: 0,
+          right: 0,
+          // Its own semantics node: without `container` the label spread over the whole thumbnail, whose centre does
+          // not delete. The hit area is 40 dp around the small visible badge.
           child: Semantics(
+            container: true,
             button: true,
             label: context.l10n.delete,
             child: InkWell(
               onTap: onDelete,
               customBorder: const CircleBorder(),
-              child: Container(
-                width: 26,
-                height: 26,
-                decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), shape: BoxShape.circle),
-                child: const Icon(Icons.close_rounded, size: 15, color: Colors.white),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), shape: BoxShape.circle),
+                    child: const Icon(Icons.close_rounded, size: 15, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
