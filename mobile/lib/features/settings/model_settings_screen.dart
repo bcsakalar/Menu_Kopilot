@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/components.dart';
+import '../../core/design/skeleton.dart';
+import '../../core/design/tokens.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
@@ -40,7 +43,7 @@ class _ModelSettingsScreenState extends ConsumerState<ModelSettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.aiModels)),
       body: settings.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(rows: 5),
         error: (_, _) => EmptyState(
           icon: Icons.cloud_off,
           message: l10n.networkError,
@@ -49,7 +52,7 @@ class _ModelSettingsScreenState extends ConsumerState<ModelSettingsScreen> {
         data: (data) => ListView(
           padding: const EdgeInsets.only(bottom: 32),
           children: [
-            if (data.localOnlyMode) MaterialBanner(content: Text(l10n.localOnlyOn), actions: const [SizedBox.shrink()]),
+            if (data.localOnlyMode) InlineNotice(l10n.localOnlyOn, tone: Tone.amber, icon: Icons.lock_outline_rounded),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Wrap(
@@ -60,7 +63,7 @@ class _ModelSettingsScreenState extends ConsumerState<ModelSettingsScreen> {
                       avatar: Icon(
                         provider.configured && provider.circuit == 'closed' ? Icons.check_circle : Icons.error_outline,
                         size: 18,
-                        color: provider.configured && provider.circuit == 'closed' ? Colors.green : Colors.orange,
+                        color: provider.configured && provider.circuit == 'closed' ? context.palette.success : context.palette.amber,
                       ),
                       label: Text('${provider.name} · ${provider.configured ? l10n.providerReady : l10n.providerNoKey}'),
                     ),

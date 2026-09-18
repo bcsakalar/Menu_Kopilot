@@ -181,6 +181,62 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deepMode => 'Derin analiz (daha yavaş, daha ayrıntılı)';
 
   @override
+  String get deepModeTitle => 'Derin analiz';
+
+  @override
+  String get deepModeHint => 'Daha yavaş, daha ayrıntılı kartlar';
+
+  @override
+  String get productsUnit => 'ürün';
+
+  @override
+  String get cardsUnit => 'kart';
+
+  @override
+  String aiCallsCount(int count) {
+    return '$count AI çağrısı';
+  }
+
+  @override
+  String detailGroups(int count) {
+    return '$count grup';
+  }
+
+  @override
+  String detailRemovables(int count) {
+    return '$count çıkarılabilir';
+  }
+
+  @override
+  String detailExtras(int count) {
+    return '$count ekstra';
+  }
+
+  @override
+  String get showDetails => 'Detaylar';
+
+  @override
+  String get hideDetails => 'Gizle';
+
+  @override
+  String get queuedShort => 'sırada';
+
+  @override
+  String get menuTextEyebrow => 'Menüdeki ürünler';
+
+  @override
+  String get newShort => 'Yeni';
+
+  @override
+  String get branchStatus => 'Şube durumu';
+
+  @override
+  String get cameraStarting => 'Kamera açılıyor…';
+
+  @override
+  String get shareWhereTo => 'Nereye eklensin?';
+
+  @override
   String get suggestButton => 'Öner';
 
   @override
@@ -465,7 +521,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Şube seç; ekran görüntüsü ekle ya da menüdeki ürünleri yaz';
 
   @override
-  String get menuTextLabel => 'Menüdeki ürünler (yaz ya da söyle)';
+  String get menuTextLabel => 'Yaz ya da sesli söyle';
 
   @override
   String get menuTextHint =>

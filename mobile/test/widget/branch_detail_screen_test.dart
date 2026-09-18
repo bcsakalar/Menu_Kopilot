@@ -100,7 +100,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Karşıyaka Kebapçısı'), findsOneWidget);
-    expect(find.text('2 / 14 ürün'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const Key('count-current'))).data, '2');
+    expect(find.text(' / 14'), findsOneWidget);
     expect(find.text('Menüde (1)'), findsOneWidget);
     expect(find.text('Eksik bilgi (1)'), findsOneWidget);
     expect(find.text('Önerilen (1)'), findsOneWidget);
@@ -110,7 +111,7 @@ void main() {
     await tester.tap(find.text('Var'));
     await tester.pumpAndSettle();
     expect(api.statusChanges, [('i3', MenuItemStatus.incomplete)]);
-    expect(find.text('3 / 14 ürün'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const Key('count-current'))).data, '3');
     expect(find.text('Eksik bilgi (2)'), findsOneWidget);
   });
 

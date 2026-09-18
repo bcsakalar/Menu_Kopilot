@@ -51,3 +51,19 @@ flutter:
   uses-material-design: true
   # All UI strings live in lib/l10n/app_tr.arb (single l10n file; add app_en.arb later for English).
   generate: true
+  assets:
+    - assets/fonts/OFL.txt
+  # Manrope (SIL Open Font License 1.1, assets/fonts/OFL.txt) is bundled so the app never fetches fonts at runtime.
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-ExtraBold.ttf
+          weight: 800

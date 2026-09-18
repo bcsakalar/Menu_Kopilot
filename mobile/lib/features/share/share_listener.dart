@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/design/tokens.dart';
 import '../../core/utils/image_compressor.dart';
 import '../../core/widgets/common.dart';
 import '../gap/gap_controller.dart';
@@ -60,7 +61,10 @@ class _ShareIntakeListenerState extends ConsumerState<ShareIntakeListener> {
       final target = await showModalBottomSheet<ShareTarget>(
         context: context,
         useRootNavigator: true,
-        showDragHandle: true,
+        // Floating panel: the sheet itself is transparent, the panel draws its own rounded surface.
+        backgroundColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(),
+        showDragHandle: false,
         builder: (_) => ShareTargetSheet(intake: intake),
       );
       if (target != null && mounted) await _apply(intake, target);
@@ -116,64 +120,119 @@ class ShareTargetSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
     final photos = intake.imagePaths.length;
     return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Text(
-              [
-                if (photos > 0) l10n.sharedPhotos(photos),
-                if (intake.text.trim().isNotEmpty) l10n.sharedText,
-              ].join(' · '),
-              style: theme.textTheme.titleMedium,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: Material(
+          color: p.raised,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sheet), side: BorderSide(color: p.border)),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.shareWhereTo, style: text.labelSmall),
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        if (photos > 0) l10n.sharedPhotos(photos),
+                        if (intake.text.trim().isNotEmpty) l10n.sharedText,
+                      ].join(' · '),
+                      style: text.titleLarge,
+                    ),
+                  ],
+                ),
+              ),
+              if (photos > 0) ...[
+                _ShareOption(
+                  key: const Key('share-suggest-photos'),
+                  icon: Icons.playlist_add_rounded,
+                  title: l10n.shareAsMenuPhotos,
+                  subtitle: l10n.shareAsMenuPhotosHint,
+                  onTap: () => Navigator.pop(context, ShareTarget.suggestPhotos),
+                ),
+                _ShareOption(
+                  key: const Key('share-gap-screenshots'),
+                  icon: Icons.fact_check_outlined,
+                  title: l10n.shareAsScreenshots,
+                  subtitle: l10n.shareAsScreenshotsHint,
+                  onTap: () => Navigator.pop(context, ShareTarget.gapScreenshots),
+                ),
+              ],
+              if (intake.text.trim().isNotEmpty) ...[
+                Container(
+                  margin: const EdgeInsets.fromLTRB(20, 6, 20, 6),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: p.surface, borderRadius: BorderRadius.circular(AppRadius.control), border: Border.all(color: p.border)),
+                  child: Text(intake.text.trim(), maxLines: 3, overflow: TextOverflow.ellipsis, style: text.bodySmall),
+                ),
+                _ShareOption(
+                  key: const Key('share-suggest-text'),
+                  icon: Icons.playlist_add_rounded,
+                  title: l10n.shareAsProductList,
+                  onTap: () => Navigator.pop(context, ShareTarget.suggestText),
+                ),
+                _ShareOption(
+                  key: const Key('share-gap-text'),
+                  icon: Icons.fact_check_outlined,
+                  title: l10n.shareAsMenuText,
+                  onTap: () => Navigator.pop(context, ShareTarget.gapText),
+                ),
+              ],
+              const SizedBox(height: 10),
+            ],
           ),
-          if (photos > 0) ...[
-            ListTile(
-              key: const Key('share-suggest-photos'),
-              leading: const Icon(Icons.auto_awesome_outlined),
-              title: Text(l10n.shareAsMenuPhotos),
-              subtitle: Text(l10n.shareAsMenuPhotosHint),
-              onTap: () => Navigator.pop(context, ShareTarget.suggestPhotos),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShareOption extends StatelessWidget {
+  const _ShareOption({required this.icon, required this.title, required this.onTap, super.key, this.subtitle});
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: p.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: p.border)),
+              child: Icon(icon, color: p.accentText),
             ),
-            ListTile(
-              key: const Key('share-gap-screenshots'),
-              leading: const Icon(Icons.fact_check_outlined),
-              title: Text(l10n.shareAsScreenshots),
-              subtitle: Text(l10n.shareAsScreenshotsHint),
-              onTap: () => Navigator.pop(context, ShareTarget.gapScreenshots),
-            ),
-          ],
-          if (intake.text.trim().isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-              child: Text(
-                intake.text.trim(),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: text.titleSmall),
+                  if (subtitle != null) Text(subtitle!, style: text.bodySmall),
+                ],
               ),
             ),
-            ListTile(
-              key: const Key('share-suggest-text'),
-              leading: const Icon(Icons.auto_awesome_outlined),
-              title: Text(l10n.shareAsProductList),
-              onTap: () => Navigator.pop(context, ShareTarget.suggestText),
-            ),
-            ListTile(
-              key: const Key('share-gap-text'),
-              leading: const Icon(Icons.fact_check_outlined),
-              title: Text(l10n.shareAsMenuText),
-              onTap: () => Navigator.pop(context, ShareTarget.gapText),
-            ),
+            Icon(Icons.chevron_right_rounded, color: p.textFaint),
           ],
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
     );
   }

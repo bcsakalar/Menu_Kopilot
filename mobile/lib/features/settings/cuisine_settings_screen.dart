@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/skeleton.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
@@ -50,21 +51,24 @@ class CuisineSettingsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final cuisines = ref.watch(cuisinesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.cuisinesAndMinimums)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _edit(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.newCuisine),
+      appBar: AppBar(
+        title: Text(l10n.cuisinesAndMinimums),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(onPressed: () => _edit(context, ref), icon: const Icon(Icons.add_rounded), label: Text(l10n.newShort)),
+          ),
+        ],
       ),
       body: cuisines.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(rows: 6),
         error: (_, _) => EmptyState(
           icon: Icons.cloud_off,
           message: l10n.networkError,
           action: FilledButton(onPressed: () => ref.invalidate(cuisinesProvider), child: Text(l10n.retry)),
         ),
         data: (list) => ListView(
-          padding: const EdgeInsets.only(bottom: 96),
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
             Padding(padding: const EdgeInsets.all(16), child: Text(l10n.minimumsHelp, style: Theme.of(context).textTheme.bodySmall)),
             for (final cuisine in list)

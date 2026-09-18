@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/models/suggestion.dart';
-import '../network/api_exception.dart';
 import '../../l10n/gen/app_localizations.dart';
-import '../theme.dart';
+import '../design/components.dart';
+import '../design/tokens.dart';
+import '../network/api_exception.dart';
 
 extension L10nX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -44,13 +45,21 @@ class CopyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.copy_rounded, size: 18),
+      icon: const Icon(Icons.copy_rounded, size: 17),
       tooltip: tooltip ?? context.l10n.copy,
       visualDensity: VisualDensity.compact,
       onPressed: text.trim().isEmpty ? null : () => copyToClipboard(context, text),
     );
   }
 }
+
+/// Where a card comes from: Hazır şablon (neutral) · DB'den (green) · AI (amber: check it) · İnceleme gerek (red).
+Tone originTone(CardOrigin origin) => switch (origin) {
+      CardOrigin.seed => Tone.neutral,
+      CardOrigin.db => Tone.success,
+      CardOrigin.ai => Tone.amber,
+      CardOrigin.review => Tone.danger,
+    };
 
 class OriginBadge extends StatelessWidget {
   const OriginBadge({required this.origin, super.key});
@@ -66,16 +75,7 @@ class OriginBadge extends StatelessWidget {
       CardOrigin.ai => l10n.badgeAi,
       CardOrigin.review => l10n.badgeReview,
     };
-    final color = originColor(origin);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.6)),
-      ),
-      child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12)),
-    );
+    return Pill(label, tone: originTone(origin));
   }
 }
 
@@ -84,26 +84,8 @@ class DisclaimerBanner extends StatelessWidget {
   const DisclaimerBanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      color: scheme.secondaryContainer,
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, size: 18, color: scheme.onSecondaryContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              context.l10n.disclaimer,
-              style: TextStyle(color: scheme.onSecondaryContainer, fontSize: 12.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      InlineNotice(context.l10n.disclaimer, icon: Icons.verified_user_outlined, margin: const EdgeInsets.fromLTRB(AppSpace.page, 12, AppSpace.page, 4));
 }
 
 class EmptyState extends StatelessWidget {
@@ -115,16 +97,22 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
-            if (action != null) ...[const SizedBox(height: 16), action!],
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(color: p.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: p.border)),
+              child: Icon(icon, size: 26, color: p.textMuted),
+            ),
+            const SizedBox(height: 14),
+            Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: p.textMuted)),
+            if (action != null) ...[const SizedBox(height: 18), action!],
           ],
         ),
       ),
@@ -132,6 +120,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Section heading used inside cards and lists (eyebrow style).
 class SectionLabel extends StatelessWidget {
   const SectionLabel(this.text, {super.key, this.trailing});
 
@@ -139,20 +128,6 @@ class SectionLabel extends StatelessWidget {
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
-            ),
-          ),
-          ?trailing,
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      Eyebrow(text, trailing: trailing, padding: const EdgeInsets.only(top: 12, bottom: 4));
 }

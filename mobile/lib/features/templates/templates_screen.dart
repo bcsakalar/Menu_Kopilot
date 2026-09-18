@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/components.dart';
+import '../../core/design/skeleton.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/utils/copy_format.dart';
@@ -93,7 +95,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
       ),
       body: Column(
         children: [
-          if (pool.value?.offline ?? false) MaterialBanner(content: Text(l10n.offlineBanner), actions: const [SizedBox.shrink()]),
+          if (pool.value?.offline ?? false) InlineNotice(l10n.offlineBanner, tone: Tone.amber, icon: Icons.cloud_off_rounded),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: TextField(
@@ -128,7 +130,7 @@ class _TemplatesScreenState extends ConsumerState<TemplatesScreen> {
           ),
           Expanded(
             child: pool.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const SkeletonList(),
               error: (e, _) => EmptyState(
                 icon: Icons.cloud_off,
                 message: l10n.networkError,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/skeleton.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/common.dart';
@@ -32,7 +33,7 @@ class _CuisineSheetState extends ConsumerState<_CuisineSheet> {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.75,
       child: cuisines.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(rows: 5),
         error: (e, _) => EmptyState(
           icon: Icons.cloud_off,
           message: l10n.networkError,

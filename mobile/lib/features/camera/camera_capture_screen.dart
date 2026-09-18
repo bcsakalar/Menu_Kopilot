@@ -108,7 +108,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> with WidgetsB
                   ? Text(_error == 'cameraPermission' ? l10n.cameraPermission : l10n.cameraUnavailable,
                       style: const TextStyle(color: Colors.white))
                   : controller == null
-                      ? const CircularProgressIndicator()
+                      ? Text(l10n.cameraStarting, style: const TextStyle(color: Colors.white70))
                       : CameraPreview(controller),
             ),
           ),
@@ -136,13 +136,49 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> with WidgetsB
               ),
             ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 24, top: 8),
-            child: FloatingActionButton.large(
-              onPressed: controller == null || _shots.length >= widget.maxShots ? null : _take,
-              child: _taking ? const CircularProgressIndicator() : const Icon(Icons.camera_alt),
+            padding: const EdgeInsets.only(bottom: 28, top: 10),
+            child: _Shutter(
+              enabled: controller != null && _shots.length < widget.maxShots && !_taking,
+              busy: _taking,
+              label: l10n.takePhoto,
+              onPressed: _take,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Round shutter: a white ring with a solid core that shrinks while the photo is being taken.
+class _Shutter extends StatelessWidget {
+  const _Shutter({required this.enabled, required this.busy, required this.label, required this.onPressed});
+
+  final bool enabled;
+  final bool busy;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: GestureDetector(
+        onTap: enabled ? onPressed : null,
+        child: Container(
+          width: 76,
+          height: 76,
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: enabled ? Colors.white : Colors.white38, width: 4)),
+          alignment: Alignment.center,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            width: busy ? 44 : 60,
+            height: busy ? 44 : 60,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: enabled || busy ? Colors.white : Colors.white24),
+          ),
+        ),
       ),
     );
   }

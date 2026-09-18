@@ -418,6 +418,102 @@ abstract class AppLocalizations {
   /// **'Derin analiz (daha yavaş, daha ayrıntılı)'**
   String get deepMode;
 
+  /// No description provided for @deepModeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Derin analiz'**
+  String get deepModeTitle;
+
+  /// No description provided for @deepModeHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha yavaş, daha ayrıntılı kartlar'**
+  String get deepModeHint;
+
+  /// No description provided for @productsUnit.
+  ///
+  /// In tr, this message translates to:
+  /// **'ürün'**
+  String get productsUnit;
+
+  /// No description provided for @cardsUnit.
+  ///
+  /// In tr, this message translates to:
+  /// **'kart'**
+  String get cardsUnit;
+
+  /// No description provided for @aiCallsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} AI çağrısı'**
+  String aiCallsCount(int count);
+
+  /// No description provided for @detailGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} grup'**
+  String detailGroups(int count);
+
+  /// No description provided for @detailRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} çıkarılabilir'**
+  String detailRemovables(int count);
+
+  /// No description provided for @detailExtras.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ekstra'**
+  String detailExtras(int count);
+
+  /// No description provided for @showDetails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detaylar'**
+  String get showDetails;
+
+  /// No description provided for @hideDetails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizle'**
+  String get hideDetails;
+
+  /// No description provided for @queuedShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'sırada'**
+  String get queuedShort;
+
+  /// No description provided for @menuTextEyebrow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünler'**
+  String get menuTextEyebrow;
+
+  /// No description provided for @newShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni'**
+  String get newShort;
+
+  /// No description provided for @branchStatus.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şube durumu'**
+  String get branchStatus;
+
+  /// No description provided for @cameraStarting.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera açılıyor…'**
+  String get cameraStarting;
+
+  /// No description provided for @shareWhereTo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nereye eklensin?'**
+  String get shareWhereTo;
+
   /// No description provided for @suggestButton.
   ///
   /// In tr, this message translates to:
@@ -931,7 +1027,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuTextLabel.
   ///
   /// In tr, this message translates to:
-  /// **'Menüdeki ürünler (yaz ya da söyle)'**
+  /// **'Yaz ya da sesli söyle'**
   String get menuTextLabel;
 
   /// No description provided for @menuTextHint.

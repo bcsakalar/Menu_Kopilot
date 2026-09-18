@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,7 +62,8 @@ void main() {
     await tester.pumpWidget(host(const GapResultScreen(request: GapRequest(branch: kebapBranch, images: []))));
     await tester.pumpAndSettle();
 
-    expect(find.text('12 / 14 ürün'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const Key('count-current'))).data, '12');
+    expect(find.text(' / 14'), findsOneWidget);
     expect(find.text('2 ürün eksik'), findsOneWidget);
     expect(find.text('Çağrıda sor (0/4)'), findsOneWidget);
     expect(find.text('Beyti Sarma var mı?'), findsOneWidget);
@@ -82,9 +84,15 @@ void main() {
     await tester.pumpWidget(host(const GapResultScreen(request: GapRequest(branch: kebapBranch, images: []))));
     await tester.pumpAndSettle();
 
+    final haptics = <Object?>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') haptics.add(call.arguments);
+      return null;
+    });
     await tester.tap(find.text('Beyti Sarma var mı?'));
     await tester.pumpAndSettle();
     expect(find.text('Çağrıda sor (1/4)'), findsOneWidget);
+    expect(haptics, ['HapticFeedbackType.selectionClick']);
     final saved = await tester.runAsync(() => db.watchChecked(checklistId(kebapBranch.id)).first);
     expect(saved, {'item:beyti sarma'});
 

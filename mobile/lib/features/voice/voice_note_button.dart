@@ -4,8 +4,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/action_dock.dart';
+import '../../core/design/skeleton.dart';
+import '../../core/design/tokens.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
+import '../../core/utils/haptics.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/voice_research.dart';
 import 'voice_recorder.dart';
@@ -13,13 +17,20 @@ import 'voice_recorder.dart';
 enum _VoiceState { idle, recording, sending }
 
 /// "Sesli not": tap to record, tap again to send; the transcript comes back through [onText].
-/// Recording stops by itself after [maxDuration].
+/// Recording stops by itself after [maxDuration]. [compact] renders it as a square dock button.
 class VoiceNoteButton extends ConsumerStatefulWidget {
-  const VoiceNoteButton({required this.onText, super.key, this.cuisineId, this.maxDuration = const Duration(seconds: 90)});
+  const VoiceNoteButton({
+    required this.onText,
+    super.key,
+    this.cuisineId,
+    this.maxDuration = const Duration(seconds: 90),
+    this.compact = false,
+  });
 
   final ValueChanged<Transcription> onText;
   final String? cuisineId;
   final Duration maxDuration;
+  final bool compact;
 
   @override
   ConsumerState<VoiceNoteButton> createState() => _VoiceNoteButtonState();
@@ -46,6 +57,7 @@ class _VoiceNoteButtonState extends ConsumerState<VoiceNoteButton> {
     }
     final path = await ref.read(voiceNotePathProvider)();
     await _recorder.start(path);
+    unawaited(Haptics.select());
     if (!mounted) return;
     setState(() {
       _state = _VoiceState.recording;
@@ -95,8 +107,56 @@ class _VoiceNoteButtonState extends ConsumerState<VoiceNoteButton> {
     }
   }
 
+  String get _elapsed => '${_seconds ~/ 60}:${(_seconds % 60).toString().padLeft(2, '0')}';
+
+  Widget _compact(BuildContext context) {
+    final l10n = context.l10n;
+    final p = context.palette;
+    return switch (_state) {
+      _VoiceState.idle => DockButton(key: const Key('voice-note'), icon: Icons.mic_none_rounded, tooltip: l10n.voiceNote, onPressed: _start),
+      _VoiceState.recording => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Tooltip(
+              message: l10n.voiceRecording(_elapsed),
+              child: Material(
+                color: p.danger.withValues(alpha: 0.14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: p.danger.withValues(alpha: 0.5))),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  key: const Key('voice-stop'),
+                  onTap: _stopAndSend,
+                  child: SizedBox(
+                    height: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.stop_rounded, color: p.danger),
+                          const SizedBox(width: 4),
+                          Text(_elapsed, style: TextStyle(fontWeight: FontWeight.w800, color: p.danger, fontFeatures: tabularFigures)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            DockButton(key: const Key('voice-cancel'), icon: Icons.close_rounded, tooltip: l10n.cancel, onPressed: _cancel),
+          ],
+        ),
+      _VoiceState.sending => Tooltip(
+          message: l10n.voiceSending,
+          child: const Shimmer(child: DockButton(icon: Icons.graphic_eq_rounded, tooltip: '', onPressed: null)),
+        ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.compact) return _compact(context);
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     return switch (_state) {

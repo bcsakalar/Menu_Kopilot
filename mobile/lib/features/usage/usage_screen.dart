@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/design/skeleton.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/settings.dart';
@@ -46,7 +47,7 @@ class UsageScreen extends ConsumerWidget {
           ),
           Expanded(
             child: summary.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const SkeletonList(rows: 3),
               error: (_, _) => EmptyState(
                 icon: Icons.cloud_off,
                 message: l10n.networkError,

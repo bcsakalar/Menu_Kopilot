@@ -48,6 +48,11 @@ void main() {
     expect(find.text('Adana Kebap'), findsOneWidget);
     expect(find.text('Hazır şablon'), findsOneWidget);
     expect(find.text('Açıklama'), findsOneWidget);
+    // Option groups and ingredients sit under "Detaylar" until opened.
+    expect(find.textContaining('Porsiyon · 2'), findsNothing);
+    expect(find.text('Detaylar'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('card-details')));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Porsiyon · 2'), findsOneWidget);
     expect(find.byIcon(Icons.copy_rounded), findsWidgets);
 
@@ -74,8 +79,9 @@ void main() {
       onEdit: () {},
     )));
     expect(find.text('AI'), findsOneWidget);
-    await tester.ensureVisible(find.text('Tümünü kopyala'));
-    await tester.tap(find.text('Tümünü kopyala'));
+    expect(find.byTooltip('Tümünü kopyala'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('card-copy-all')));
+    await tester.tap(find.byKey(const Key('card-copy-all')));
     await tester.pump();
     expect(copied, contains('Porsiyon (tek seçim, zorunlu)'));
     expect(find.text('Kopyalandı'), findsOneWidget);

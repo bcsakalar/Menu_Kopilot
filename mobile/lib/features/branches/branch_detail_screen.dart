@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/design/components.dart';
+import '../../core/design/count_meter.dart';
+import '../../core/design/skeleton.dart';
+import '../../core/design/tokens.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
@@ -12,7 +16,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../results/run_controller.dart';
 import 'branch_form.dart';
 import 'branch_providers.dart';
-import 'branches_screen.dart' show branchStatusLabel;
+import 'branches_screen.dart' show branchStatusLabel, branchStatusTone;
 
 final branchMenuProvider = FutureProvider.autoDispose.family<BranchMenu, String>(
   (ref, branchId) => ref.watch(apiClientProvider).branchMenu(branchId),
@@ -179,10 +183,10 @@ class _BranchDetailScreenState extends ConsumerState<BranchDetailScreen> {
             ),
           ],
         ],
-        bottom: _busy ? const PreferredSize(preferredSize: Size.fromHeight(3), child: LinearProgressIndicator(minHeight: 3)) : null,
+        bottom: _busy ? const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2)) : null,
       ),
       body: menu.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(rows: 3),
         error: (e, _) => EmptyState(
           icon: Icons.cloud_off,
           message: apiErrorText(l10n, e),
@@ -238,48 +242,58 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final progress = branch.effectiveTarget <= 0 ? 1.0 : (branch.currentItemCount / branch.effectiveTarget).clamp(0, 1).toDouble();
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, 18, AppSpace.page, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            [branch.cuisineName, if (branch.city != null && branch.city!.isNotEmpty) branch.city!].join(' · '),
-            style: theme.textTheme.bodyMedium,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  [branch.cuisineName, if (branch.city != null && branch.city!.isNotEmpty) branch.city!].join(' · '),
+                  style: text.bodySmall,
+                ),
+              ),
+              PopupMenuButton<String>(
+                key: const Key('branch-status'),
+                tooltip: l10n.branchStatus,
+                initialValue: branchStatuses.contains(branch.status) ? branch.status : 'in_progress',
+                onSelected: (value) {
+                  if (value != branch.status) onStatus(value);
+                },
+                itemBuilder: (_) => [
+                  for (final status in branchStatuses) PopupMenuItem(value: status, child: Text(branchStatusLabel(l10n, status))),
+                ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Pill(branchStatusLabel(l10n, branch.status), tone: branchStatusTone(branch.status)),
+                    Icon(Icons.expand_more_rounded, size: 18, color: p.textMuted),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(l10n.countsLabel(branch.currentItemCount, branch.effectiveTarget), style: theme.textTheme.headlineMedium),
-          const SizedBox(height: 6),
-          ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: progress, minHeight: 10)),
-          const SizedBox(height: 4),
-          Text(
-            branch.targetItemCount == null ? l10n.targetAutomatic : l10n.manualTarget,
-            style: theme.textTheme.bodySmall,
+          const SizedBox(height: 14),
+          CountMeter(
+            current: branch.currentItemCount,
+            target: branch.effectiveTarget,
+            unit: l10n.productsUnit,
+            caption: branch.targetItemCount == null ? l10n.targetAutomatic : l10n.manualTarget,
           ),
           if (branch.notes != null && branch.notes!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(branch.notes!, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 10),
+            Text(branch.notes!, style: text.bodySmall),
           ],
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              DropdownButton<String>(
-                key: const Key('branch-status'),
-                value: branchStatuses.contains(branch.status) ? branch.status : 'in_progress',
-                items: [
-                  for (final status in branchStatuses) DropdownMenuItem(value: status, child: Text(branchStatusLabel(l10n, status))),
-                ],
-                onChanged: (value) {
-                  if (value != null && value != branch.status) onStatus(value);
-                },
-              ),
-              FilledButton.tonalIcon(onPressed: onAnalyze, icon: const Icon(Icons.fact_check_outlined), label: Text(l10n.gapTitle)),
-            ],
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            onPressed: onAnalyze,
+            icon: const Icon(Icons.fact_check_outlined, size: 20),
+            label: Text(l10n.gapTitle),
           ),
         ],
       ),
@@ -314,42 +328,45 @@ class _MenuSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
     final l10n = context.l10n;
-    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), child: SectionLabel(title)),
-        for (final item in items)
-          ListTile(
-            key: ValueKey('menu-${item.id}'),
-            title: Text(item.name),
-            subtitle: switch (item) {
-              BranchMenuItem(reason: final reason?) when item.status == MenuItemStatus.missing => Text(reason),
-              BranchMenuItem(missingFields: final fields) when fields.isNotEmpty => Wrap(
-                  spacing: 6,
+        Eyebrow(title),
+        SurfaceGroup(
+          children: [
+            for (final item in items)
+              ListTile(
+                key: ValueKey('menu-${item.id}'),
+                title: Text(item.name, style: Theme.of(context).textTheme.titleSmall),
+                subtitle: switch (item) {
+                  BranchMenuItem(reason: final reason?) when item.status == MenuItemStatus.missing => Text(reason),
+                  BranchMenuItem(missingFields: final fields) when fields.isNotEmpty => Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [for (final field in fields) Pill(_fieldLabel(l10n, field), tone: Tone.danger)],
+                      ),
+                    ),
+                  BranchMenuItem(payload: _?) => Text(l10n.cardAccepted),
+                  _ => null,
+                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (final field in fields)
-                      Text(_fieldLabel(l10n, field), style: TextStyle(color: scheme.error, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                    if (onConfirm != null) TextButton(onPressed: () => onConfirm!(item), child: Text(confirmLabel ?? l10n.ok)),
+                    PopupMenuButton<String>(
+                      onSelected: (value) => value == 'card' ? onCard(item) : onDelete(item),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(value: 'card', child: Text(l10n.prepareCard)),
+                        PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                      ],
+                    ),
                   ],
                 ),
-              BranchMenuItem(payload: _?) => Text(l10n.cardAccepted),
-              _ => null,
-            },
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onConfirm != null)
-                  TextButton(onPressed: () => onConfirm!(item), child: Text(confirmLabel ?? l10n.ok)),
-                PopupMenuButton<String>(
-                  onSelected: (value) => value == 'card' ? onCard(item) : onDelete(item),
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: 'card', child: Text(l10n.prepareCard)),
-                    PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+          ],
+        ),
       ],
     );
   }
