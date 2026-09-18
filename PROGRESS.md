@@ -1,6 +1,7 @@
 # PROGRESS
 
-Last update: 2026-09-17 — live end-to-end test on a real phone, fixes, delivery extras and the myserver runbook.
+Last update: 2026-09-19 — anthracite redesign, fixes found with real AI keys, end-to-end run on the phone with keys,
+share fixes, one-command office start and the production env generator.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -23,14 +24,37 @@ Last update: 2026-09-17 — live end-to-end test on a real phone, fixes, deliver
 - [x] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
 - [x] **Teslim** — live test (Docker stack + Galaxy S23 FE over USB), fixes, Mod 2 without screenshots, sharing
       into the app, icon/splash/login design, deploy files + runbook for `myserver`
+- [x] **Redesign + real keys** — anthracite/paprika design system (Manrope, count meters, skeletons, action dock,
+      haptics), vision routing after real-key measurements, device run with keys, share fixes, `scripts/dev-up.ps1`,
+      `scripts/new-prod-env.ps1`
 
 ## Where I am
 Everything is committed. The production deploy is prepared but **not executed** (to be done together with the user,
-see `docs/DEPLOY_MYSERVER.md`). What is left needs the user: AI keys, the deploy, and a last pass on the phone with
-the newest APK (see **Pending verification**).
+see `docs/DEPLOY_MYSERVER.md`: `scripts/new-prod-env.ps1` → copy the env → nginx site → `scripts/deploy.ps1`). What is
+left needs the user: the deploy, a release keystore (`mobile/scripts/create-keystore.ps1`), and — for daily use —
+paid API tiers (free tiers work but "İnternette araştır" cannot run on them, D-142).
 Ideas not built: research results as extra "var mı?" lines in the gap checklist; a Gemini fallback for voice notes;
 on-device OCR (ML Kit) to read screenshots without AI keys; keeping drafts across process death; an iOS Share
 Extension.
+
+### Delivery inventory (2026-09-18/19)
+- Design: tokens + components in `mobile/lib/core/design/` (D-133…D-140), every screen moved over; 61 widget/unit tests,
+  `flutter analyze` clean. Release APK `app-arm64-v8a-release.apk` (22.9 MB, arm64 only, debug-signed, no provider
+  keys or endpoints inside — scanned).
+- Real keys (`pnpm live:check --runs 5`, 14/14): Mod 1 photo → first card 3.8 s (15 cards); Mod 2 two screenshots →
+  2.6 s; research → clear plan-limit error. Smoke 8 passed / 4 skipped on plan limits. Fixes: Gemini schema without
+  `minItems`/`maxItems`, vision chain Flash-Lite → qwen3.8 (1000 tokens) → 3.8 Flash, qwen3.6 removed, migration 0002,
+  route token caps, Groq 413 message, extra fallbacks (D-141, D-142). Backend tests → 292 passing.
+- Phone (Galaxy S23 FE, release APK, keys on): Samsung HEIC shared from Gallery → Öneri → scan skeleton → 15 cards
+  (12 DB, 3 AI, no prices); accept + haptics; text share → Öneri (4 DB cards, 0 AI calls); two panel screenshots shared
+  one by one → one draft → Tamamla 12/10 with 2 typed products, 15-line checklist, DB recommendations → "Kart hazırla" →
+  accept → 13/10 live; keyboard hides the dock; camera (one-time permission) → photo → removed unsent; CSV + JSON
+  export open the share sheet; no crash/ANR in logcat, memory plateaus (PSS 302 → 313 MB over 7 runs, 1 activity).
+  Bugs found and fixed: share crash on unreadable streams + one app copy per share (D-143), thumbnail delete
+  semantics/hit area (D-144).
+- Ops: `scripts/dev-up.ps1` (Docker incl. the `sailor-ingest.sock` recovery, stack, health, `adb reverse`),
+  `scripts/new-prod-env.ps1` (random secrets, keys from `.env`, LF, no output of secrets); image has no secrets and
+  runs as `app`; repo/APK secret scans clean.
 
 ### Delivery inventory (2026-09-16/17)
 - Live test: `docker compose up -d --build` on this PC (API `127.0.0.1:3030`), `pnpm live:check` 13/13 without keys.

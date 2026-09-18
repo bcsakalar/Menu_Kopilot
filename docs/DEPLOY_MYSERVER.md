@@ -25,27 +25,16 @@ Memory limits: Postgres 256 MB, Redis 128 MB, API 384 MB. On 2026-09-16 the serv
 
 ## 2. Secrets file (once)
 
-Create `.env.production` in the repo root (it is git-ignored — never commit it). Use LF line endings.
-
-```dotenv
-NODE_ENV=production
-POSTGRES_USER=menu
-POSTGRES_PASSWORD=<hex, see below>
-POSTGRES_DB=menu_kopilot
-JWT_SECRET=<hex, see below>
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=<at least 12 characters, not the local one>
-ADMIN_NAME=Admin
-GEMINI_API_KEY=
-GROQ_API_KEY=
-API_PORT=3030
-```
-
-Random values in PowerShell (cryptographic RNG; `POSTGRES_PASSWORD` must stay URL-safe, hex is):
+Generate `.env.production` in the repo root (git-ignored — never commit it):
 
 ```powershell
-$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); ($b | ForEach-Object { $_.ToString('x2') }) -join ''
+powershell -ExecutionPolicy Bypass -File scripts\new-prod-env.ps1 -AdminEmail admin@example.com
 ```
+
+It asks for the app's admin password (hidden input, at least 12 characters, not the local one), generates
+`POSTGRES_PASSWORD` (hex: it goes into `DATABASE_URL`) and `JWT_SECRET` with the cryptographic RNG, copies
+`GEMINI_API_KEY` / `GROQ_API_KEY` from the local `.env` without printing them, and writes LF line endings without a
+BOM. Nothing secret is printed. It refuses to replace an existing file unless `-Force`.
 
 Copy it (the deploy script also strips CR characters and re-applies `chmod 600` on every run):
 

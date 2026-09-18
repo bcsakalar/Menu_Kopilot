@@ -480,3 +480,13 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   semantics boundaries), so TalkBack announced the whole photo as "Sil" while only the 26 dp corner deleted. The badge
   is now its own node (`container: true`) with a 40 dp hit area around the unchanged 26 dp circle; a widget test in a
   horizontal list (as on the screens) fails without the fix.
+- **D-145** — Office start and production env as scripts. `scripts/dev-up.ps1`: Docker engine → `docker compose up -d`
+  → `/health/ready` → `adb reverse` for every phone; the port comes from `API_PORT` in `.env` (nothing else is read).
+  The `sailor-ingest.sock` recovery (D-132) stops Docker Desktop, so it runs only with `-FixDockerSocket`, never on its
+  own. The USB bridge dropped once during the device run (PC idle overnight) and the app sat on skeletons — rerunning
+  the script is the documented fix. `scripts/new-prod-env.ps1` writes `.env.production` with RNG secrets (hex, so
+  `POSTGRES_PASSWORD` is URL-safe inside `DATABASE_URL`), asks for the admin password with hidden input (or a
+  `SecureString` parameter), copies the AI keys from `.env`, writes LF without a BOM, never prints a secret and refuses
+  to overwrite. Values with spaces, quotes, `$`, `\`, `#` or backticks are rejected because compose reads the file both
+  for interpolation (`--env-file`) and as the container's `env_file`. The output was checked with the API's own env
+  schema in production mode.

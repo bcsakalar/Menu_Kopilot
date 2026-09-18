@@ -135,6 +135,20 @@ docker compose up -d --build
 #    http://localhost:3000/docs          → Swagger UI (OpenAPI at /openapi.json)
 ```
 
+### One command on the office PC (phone on USB)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1                   # Docker, stack, health check, USB bridge
+powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -Build            # after pulling new backend code
+powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -FixDockerSocket  # Docker Desktop hangs while starting
+```
+
+[`scripts/dev-up.ps1`](scripts/dev-up.ps1) starts Docker Desktop when the engine does not answer, runs
+`docker compose up -d`, waits for `/health/ready` and runs `adb reverse tcp:<API_PORT> tcp:<API_PORT>` for every phone
+on USB, so the app's server address is `http://localhost:<API_PORT>` (3030 here). Release builds accept plain http
+only for `localhost`/`127.0.0.1` — over the USB bridge the traffic never leaves the cable; any other server must be
+https. Run it again after the phone was unplugged or the PC slept: the bridge does not survive that.
+
 Backend development with hot reload (databases from compose):
 
 ```powershell
@@ -246,7 +260,8 @@ builds the API image on the PC (Docker Desktop), copies it over ssh, starts the 
 Migrations and the idempotent seed run when the API container starts (`SEED_ON_START`). Memory limits in
 [`deploy/docker-compose.prod.yml`](deploy/docker-compose.prod.yml): Postgres 256 MB, API 384 MB, Redis 128 MB.
 
-**On `myserver` (nginx + Cloudflare, next to other apps)** — step by step in
+**On `myserver` (nginx + Cloudflare, next to other apps)** — `scripts/new-prod-env.ps1` writes `.env.production`
+(random secrets, keys copied from the local `.env`, LF, nothing printed); the rest step by step in
 [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md): Cloudflare DNS record, `/etc/menu-kopilot/env`, the nginx site
 from [`deploy/nginx/`](deploy/nginx/), then:
 
@@ -363,7 +378,14 @@ research with contact/price scrubbing). Fixtures are
   **Ayarlar → Sunucu adresi**.
 - **Sesli not / İnternette araştır do nothing** — both need `GROQ_API_KEY` (Whisper and compound exist only on Groq)
   and are refused in `LOCAL_ONLY_MODE`; voice notes also need the microphone permission on the phone.
+- **"İnternet araştırması bu AI planında yapılamıyor"** — expected on free API tiers: Groq compound's own follow-up
+  calls exceed the free per-minute token limit (413) and Gemini's search tool answers 429 on a free key (DECISIONS
+  D-142). Everything else works on free tiers; for daily office use prefer Groq's Dev tier and Gemini Tier 1 (3.8
+  Flash allows only 20 requests a day for free, so chains fall back to Flash-Lite / gpt-oss more often).
+- **The app shows skeletons forever on a USB phone** — the `adb reverse` bridge dropped (cable replugged, PC slept):
+  run `scripts/dev-up.ps1` again.
 - **Release build warns about the Kotlin Gradle Plugin** (`flutter_image_compress_common`, `workmanager_android`) —
   upstream plugin issue, the build still succeeds; upgrade the plugins before upgrading Flutter (DECISIONS D-088).
-- **Docker Desktop fails to start on Windows** — see DECISIONS D-056 (stale `sailor-ingest.sock`); the backend tests do
-  not need Docker.
+- **Docker Desktop fails to start on Windows** — a stale `sailor-ingest.sock` in `%LOCALAPPDATA%\Docker\run` cannot be
+  deleted (DECISIONS D-056, D-132): `scripts/dev-up.ps1 -FixDockerSocket` stops Docker Desktop, moves the folder aside
+  and starts it again. The backend tests do not need Docker.
