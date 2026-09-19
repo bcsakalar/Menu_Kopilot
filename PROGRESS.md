@@ -1,7 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-19 — anthracite redesign, fixes found with real AI keys, end-to-end run on the phone with keys,
-share fixes, one-command office start and the production env generator.
+Last update: 2026-09-19 — production on myserver, 27 cuisines / 316 templates, signed release APK.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -29,13 +28,15 @@ share fixes, one-command office start and the production env generator.
       `scripts/new-prod-env.ps1`
 
 ## Where I am
-Everything is committed. The production deploy is prepared but **not executed** (to be done together with the user,
-see `docs/DEPLOY_MYSERVER.md`: `scripts/new-prod-env.ps1` → copy the env → nginx site → `scripts/deploy.ps1`). What is
-left needs the user: the deploy, a release keystore (`mobile/scripts/create-keystore.ps1`), and — for daily use —
-paid API tiers (free tiers work but "İnternette araştır" cannot run on them, D-142).
-Ideas not built: research results as extra "var mı?" lines in the gap checklist; a Gemini fallback for voice notes;
-on-device OCR (ML Kit) to read screenshots without AI keys; keeping drafts across process death; an iOS Share
-Extension.
+**Production is live on myserver** (2026-09-18): `/opt/menu-kopilot` (git clone, read-only deploy key), API image
+`menu-kopilot-api:<sha>` built on the PC, stack healthy behind nginx for `menu.example.com` (security headers,
+rate limits, Cloudflare real IP), secrets in `/etc/menu-kopilot/env`, nightly `pg_dump` to `/opt/yedek`. Production
+data: 27 cuisines aligned with the platform app, 316 seed templates, admin `admin@example.com` (password in the
+desktop note). old-app was retired (stopped + archived; permanent removal steps in `docs/DEPLOY_MYSERVER.md`).
+Signed release APK on the desktop (`MenuKopilot-1.0.0-arm64.apk`, key in `%USERPROFILE%\.android-keys\menu-kopilot\`).
+Left for the user: the Cloudflare DNS record `menu` -> <SUNUCU_IP> (Proxied), uninstalling the old debug build on
+the phone before installing the signed one, deleting the `old-app` DNS record, and paid API tiers for heavy use.
+Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
 
 ### Delivery inventory (2026-09-18/19)
 - Design: tokens + components in `mobile/lib/core/design/` (D-133…D-140), every screen moved over; 61 widget/unit tests,
