@@ -526,3 +526,10 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   by the server's fail2ban `nginx-limit-req` jail. A daily `pg_dump` runs from `/etc/cron.d` into `/opt/yedek` (the
   server's backup folder), 14 days kept. The admin password was generated (20 characters, phone-friendly groups) and
   handed over in a file on the PC's desktop, never printed.
+- **D-149** — Release signing key (supersedes "the assistant does not create the keystore", plan decision 20): the
+  user asked for a signed APK. A PKCS12 RSA-4096 key (`CN=Menu Kopilot, O=bcsakalar, C=TR`, 10 000 days) was
+  generated with a 28-character random password passed to keytool through an environment variable; the password is
+  only in `key.properties` (git-ignored) and in a backup copy next to the `.jks` in
+  `%USERPROFILE%\.android-keys\menu-kopilot\`. The office APK is arm64-only with `API_BASE_URL` set to production;
+  `apksigner` verifies it (v2). A phone with the earlier debug-signed build must uninstall it first. Also: the
+  generated env file quotes `ADMIN_NAME` (a name with a space broke `source` in a shell; compose was fine).

@@ -74,7 +74,8 @@ $lines = @(
   "JWT_SECRET=$(New-Hex 48)"
   "ADMIN_EMAIL=$AdminEmail"
   "ADMIN_PASSWORD=$plainPassword"
-  "ADMIN_NAME=$AdminName"
+  # Quoted: a name with a space must also survive `source` in a shell (compose strips the quotes).
+  "ADMIN_NAME=`"$AdminName`""
   ''
   '# Server side only; the app never sees them. Empty = the app answers from the database and says so.'
   "GEMINI_API_KEY=$gemini"

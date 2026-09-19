@@ -321,11 +321,14 @@ cd mobile
 flutter build apk --debug                       # quick test build
 flutter build apk --release                     # fat APK (all ABIs, ~65 MB)
 flutter build apk --release --split-per-abi     # smaller per-ABI APKs; most phones need app-arm64-v8a-release.apk
+# the office build: arm64 only, production server prefilled, signed with the release key
+flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com
 ```
 
-Release signing: run `powershell -File mobile/scripts/create-keystore.ps1` once. It creates an upload keystore
-(default `%USERPROFILE%\.android-keys\menu-kopilot-upload.jks`) and `mobile/android/key.properties`; both are
-git-ignored. Without `key.properties` a release build is signed with the debug key (fine for your own phone, not for
+Release signing: the production key lives in `%USERPROFILE%\.android-keys\menu-kopilot\` (`menu-kopilot-upload.jks` + a copy of
+`key.properties`, created 2026-09-18, certificate `CN=Menu Kopilot, O=bcsakalar`); `mobile/android/key.properties` points at it and is
+git-ignored. On a new machine copy that folder back and the same `key.properties` into `mobile/android/`. For a brand-new key
+`powershell -File mobile/scripts/create-keystore.ps1` asks for a password and writes both files. Without `key.properties` a release build is signed with the debug key (fine for your own phone, not for
 distribution). **Back up the keystore and its password** — an app signed with a different key cannot be installed
 over the existing one.
 
