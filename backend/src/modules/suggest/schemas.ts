@@ -26,7 +26,7 @@ export const llmOptionSchema = z.object({
 });
 
 export const llmOptionGroupSchema = z.object({
-  name: z.string().describe('Ör. Boy, Porsiyon, Ekmek Tercihi, Acı Seviyesi, İçecek, Sos'),
+  name: z.string().describe('Ör. Boy, Porsiyon, Ekmek Seçimi, Acı Seviyesi, İçecek Seçimi, Sos Seçimi'),
   selection_type: z.enum(['single', 'multi']),
   is_required: z.boolean(),
   min_select: z.number().int(),

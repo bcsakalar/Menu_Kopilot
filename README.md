@@ -65,7 +65,8 @@ flowchart LR
 Token economy — the database and caches answer first, the LLM is the last resort:
 
 1. **Retrieval without AI:** exact name → alias → `pg_trgm` similarity → pgvector (only approved templates). The
-   40 seed templates (`source='seed'`, badge **Hazır şablon**) and every card the user approves (badge **DB'den**)
+   316 seed templates in 27 cuisines aligned with the platform's kitchen categories (`source='seed'`, badge **Hazır şablon**)
+   and every card the user approves (badge **DB'den**)
    come back with zero LLM calls (`cache_hit=true`).
 2. **Caches (Redis, 30 days):** per-image extraction, per-item enrichment, canonical name decisions and gap
    suggestions — the same photo or menu never costs twice.
@@ -156,7 +157,7 @@ docker compose up -d postgres redis
 cd backend
 pnpm install
 pnpm db:migrate
-pnpm db:seed          # 12 cuisines, 40 templates, prompts v1, provider routes, admin user
+pnpm db:seed          # 27 cuisines, 316 templates, prompts v1, provider routes, admin user
 pnpm dev              # http://localhost:3000
 ```
 
@@ -350,9 +351,10 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 ## Tests
 
-- Backend: `cd backend; pnpm test` — ~290 tests: Turkish normalization, price guard, env, seed data, JSON-schema
+- Backend: `cd backend; pnpm test` — ~570 tests: Turkish normalization, price guard, env, seed data, JSON-schema
   conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
-  → up, and end-to-end runs of both pipelines against recorded fixtures (40 seed items with zero LLM calls, broken
+  → up, and end-to-end runs of both pipelines against recorded fixtures (all 316 seed items, cuisine by cuisine, with
+  zero LLM calls, broken
   JSON → review cards, provider down → fallback, accepted card served from the DB, 12 unique items from overlapping
   screenshots, typed products without screenshots or keys, LOCAL_ONLY_MODE, missing AI keys, voice notes and web
 research with contact/price scrubbing). Fixtures are

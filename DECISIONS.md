@@ -490,3 +490,39 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   to overwrite. Values with spaces, quotes, `$`, `\`, `#` or backticks are rejected because compose reads the file both
   for interpolation (`--env-file`) and as the container's `env_file`. The output was checked with the API's own env
   schema in production mode.
+- **D-146** — Production seed data (user request: "research, prepare cuisines and templates in detail"). Cuisines now
+  mirror the kitchen categories of the platform app (checked on the platform site: Burger, Döner, Köfte, Steak, Tavuk, Kebap,
+  Pizza, Tatlı, Mantı & Makarna, Salata & Sağlık, Dondurma, Kahvaltı, Ev Yemekleri, Pide & Lahmacun, Pastane & Fırın,
+  Kahve & İçecek, Tost & Sandviç, Sokak Lezzetleri, Balık & Deniz Ürünleri, Uzak Doğu, Dünya Mutfağı, Börek, Çiğ Köfte,
+  Meze, Çorba, Tantuni): 27 cuisines with parents chosen for recommendations (Köfte/Döner/Pide → Kebap, Çorba/Mantı →
+  Ev Yemekleri, Dondurma → Tatlı, Tantuni → Sokak, Tost → Kahvaltı, Börek → Pastane, Meze → Balık) and notes that list
+  the usual menu sections, the must-have products and what to ask. `min_item_count` stays 10 everywhere: the platform's real
+  minimums are not public (D-019 rule unchanged). Templates grew from 40 to 316 (5–17 per cuisine), all original text
+  (no copied descriptions), no prices, validated by the same Zod schema; popular-order data (Yemeksepeti 2025 summary:
+  döner, burger, pizza, kebap, lahmacun, mercimek çorbası, ayran) set the importance values. The same product may now
+  be seeded in several cuisines (Ayran for kebap, çiğ köfte, ev yemekleri, sokak; Patates Kızartması for döner, burger,
+  tavuk): recommendations only look at the branch's cuisine family, and matching already prefers the own cuisine. Rules
+  enforced by tests: names unique within a cuisine, the same spelling across cuisines, no alias equal to any canonical
+  name; `template()` drops aliases that normalize to the name or to an earlier alias. Option groups use the platform panel
+  wording ("İçecek Seçimi", "Ekmek Seçimi", "Sos Seçimi"; new factories for Menü, Adet, Gramaj, Pilav, Pişirme Şekli,
+  Hamur, Süt, Şurup, Yan Ürün) and the checklist question map knows both old and new names. The seed refreshes a
+  cuisine's notes only while they still hold an earlier seed's text (`LEGACY_NOTES`), so user-edited notes and minimums
+  survive. Tests that relied on "unknown" fixture products (Humus, İçli Köfte, Şalgam, Kazandibi…) now delete those
+  seeds the way a user would; the zero-LLM acceptance test covers all 316 templates cuisine by cuisine.
+- **D-147** — Bug found while reworking those tests: `upsertDraft` reused any unapproved row with the same cuisine and
+  name, which includes a seed the user deleted (archived: approved=false, source='seed'). An AI answer for that name
+  rewrote it as an AI draft, the archive marker was lost and the next seed run inserted the deleted seed again. Only real
+  AI drafts are refreshed now; an archived row is left as it is (accepting the card is what revives it). Covered by
+  the fallback e2e test.
+- **D-148** — Production on myserver (user request): the server runs a git clone in `/opt/menu-kopilot` (the server's
+  convention for apps) pulled with a read-only, repository-scoped deploy key; the image is still built on the PC.
+  `deploy.ps1` refuses to deploy a commit that is not on `origin/main`, pulls with `--ff-only`, and its health wait
+  no longer dies on the expected "connection refused" (PowerShell 5.1 turned redirected stderr into a terminating
+  error). old-app was retired as asked, but stopped and archived instead of deleted (a final dump, containers
+  with `--restart=no`, nginx files and the project folder under `/opt/arsiv/`, its backup cron commented out): the
+  assistant does not permanently delete data; the exact commands for a permanent removal are in the runbook. nginx for
+  `menu.example.com` adds HSTS, nosniff, frame, referrer, permissions and CSP headers (the API sets none) on
+  top of the existing TLS snippet, Cloudflare real-IP, rate limits and the `/docs` block; its `mk.error.log` is covered
+  by the server's fail2ban `nginx-limit-req` jail. A daily `pg_dump` runs from `/etc/cron.d` into `/opt/yedek` (the
+  server's backup folder), 14 days kept. The admin password was generated (20 characters, phone-friendly groups) and
+  handed over in a file on the PC's desktop, never printed.

@@ -37,9 +37,19 @@ const CUISINE_GROUP_QUESTIONS = new Map(
   Object.entries({
     'Acı Seviyesi': 'Acı seviyesi soruluyor mu?',
     'Ekmek Tercihi': 'Ekmek / lavaş tercihi soruluyor mu?',
+    'Ekmek Seçimi': 'Ekmek / lavaş tercihi soruluyor mu?',
     İçecek: 'İçecekli menü seçeneği var mı?',
+    'İçecek Seçimi': 'İçecekli menü seçeneği var mı?',
+    Menü: 'Menü (yan ürün + içecek) seçeneği var mı?',
     Yanında: 'Yanında gelenler seçilebiliyor mu?',
+    'Yan Ürün Seçimi': 'Yan ürün (patates, pilav, salata) eklenebiliyor mu?',
     Sos: 'Sos seçimi var mı?',
+    'Sos Seçimi': 'Sos seçimi var mı?',
+    'Pilav Seçimi': 'Pilav tercihi (pirinç / bulgur) soruluyor mu?',
+    'Pişirme Şekli': 'Pişirme şekli (ızgara / tava / buğulama) seçilebiliyor mu?',
+    'Hamur Seçimi': 'Hamur seçimi (ince / klasik / kalın) var mı?',
+    'Süt Seçimi': 'Süt seçimi (laktozsuz / bitkisel) var mı?',
+    Şurup: 'Şurup eklenebiliyor mu?',
     'Pişirme Derecesi': 'Pişirme derecesi soruluyor mu?',
     Şeker: 'Şeker oranı soruluyor mu?',
     Dondurma: 'Yanına dondurma eklenebiliyor mu?',
@@ -58,7 +68,9 @@ export const GAP_TEXT = {
   optionsHint: (group: string, options: readonly string[], otherGroups: readonly string[]) =>
     `${group}: ${options.join(' / ')}${otherGroups.length > 0 ? ` · ayrıca ${otherGroups.join(', ')}` : ''}`,
   removablesHint: (items: readonly string[]) => `Çıkarılabilir: ${items.join(', ')}`,
-  cuisineGroup: (group: string) => CUISINE_GROUP_QUESTIONS.get(normalizeTr(group)) ?? `${group} seçimi soruluyor mu?`,
+  cuisineGroup: (group: string) =>
+    CUISINE_GROUP_QUESTIONS.get(normalizeTr(group)) ??
+    (normalizeTr(group).endsWith('secimi') ? `${group} soruluyor mu?` : `${group} seçimi soruluyor mu?`),
   reasonSameCuisine: (cuisine: string, importance: number) =>
     importance >= 80
       ? `${cuisine} menülerinde neredeyse her zaman var`

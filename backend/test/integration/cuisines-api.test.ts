@@ -1,4 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { CUISINE_SLUGS } from '../../src/db/seed/cuisines.js';
+import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
 
 interface CuisineDto {
@@ -24,12 +26,14 @@ describe('cuisines API', () => {
     await ctx.close();
   });
 
-  it('lists the 12 system cuisines with template counts and targets', async () => {
+  it('lists every system cuisine with template counts and targets', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/cuisines', headers: bearer(token) });
     const { data } = res.json<{ data: CuisineDto[] }>();
-    expect(data).toHaveLength(12);
+    expect(data).toHaveLength(CUISINE_SLUGS.length);
     const kebap = data.find((c) => c.slug === 'kebap-izgara');
-    expect(kebap).toMatchObject({ isSystem: true, minItemCount: 10, targetItemCount: 10, templateCount: 9 });
+    const kebapTemplates = SEED_TEMPLATES.filter((t) => t.cuisine === 'kebap-izgara').length;
+    expect(kebap).toMatchObject({ isSystem: true, minItemCount: 10, targetItemCount: 10, templateCount: kebapTemplates });
+    expect(data.every((c) => c.templateCount >= 5)).toBe(true);
   });
 
   it('lets the user set the real minimum product count (target = max(10, min))', async () => {

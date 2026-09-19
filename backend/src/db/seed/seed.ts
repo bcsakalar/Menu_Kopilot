@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { DEFAULT_ROUTES, TASK_KEYS } from '../../config/models.js';
 import { templatePayloadSchema } from '../../domain/template.js';
 import { hashPassword } from '../../lib/password.js';
@@ -6,7 +6,7 @@ import { normalizeTr } from '../../lib/normalize-tr.js';
 import { findApprovedByName, insertTemplate, replaceTemplateContent } from '../../modules/templates/template-store.js';
 import type { Database } from '../client.js';
 import { cuisines, menuItems, promptTemplates, providerConfigs, users } from '../schema/index.js';
-import { SEED_CUISINES } from './cuisines.js';
+import { LEGACY_NOTES, SEED_CUISINES } from './cuisines.js';
 import { SEED_PROMPTS } from './prompts.js';
 import { SEED_TEMPLATES } from './templates.js';
 
@@ -17,6 +17,7 @@ export interface SeedOptions {
 export interface SeedReport {
   adminCreated: boolean;
   cuisinesInserted: number;
+  cuisinesUpdated: number;
   templatesInserted: number;
   templatesUpdated: number;
   templatesSkipped: number;
@@ -26,7 +27,8 @@ export interface SeedReport {
 
 /**
  * Idempotent seed. Never overwrites user data:
- * - cuisines are inserted when their slug is missing (user-edited min counts survive),
+ * - cuisines are inserted when their slug is missing (user-edited min counts survive); their notes are refreshed only
+ *   while they still hold a note written by an earlier seed,
  * - templates are replaced only while still `source='seed'` (user-approved edits survive); seeds the user deleted
  *   (archived: approved=false, source='seed') are not re-inserted,
  * - prompts/provider configs are inserted when missing.
@@ -35,6 +37,7 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
   const report: SeedReport = {
     adminCreated: false,
     cuisinesInserted: 0,
+    cuisinesUpdated: 0,
     templatesInserted: 0,
     templatesUpdated: 0,
     templatesSkipped: 0,
@@ -69,6 +72,15 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
         .onConflictDoNothing({ target: cuisines.slug })
         .returning({ id: cuisines.id });
       report.cuisinesInserted += inserted.length;
+    }
+
+    for (const cuisine of SEED_CUISINES) {
+      const refreshed = await tx
+        .update(cuisines)
+        .set({ notes: cuisine.notes, updatedAt: new Date() })
+        .where(and(eq(cuisines.slug, cuisine.slug), inArray(cuisines.notes, [...LEGACY_NOTES])))
+        .returning({ id: cuisines.id });
+      report.cuisinesUpdated += refreshed.length;
     }
 
     const cuisineRows = await tx.select({ id: cuisines.id, slug: cuisines.slug }).from(cuisines);

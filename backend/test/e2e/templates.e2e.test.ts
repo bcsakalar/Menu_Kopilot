@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { cuisines, itemEmbeddings, menuItems } from '../../src/db/schema/index.js';
 import { seedDatabase } from '../../src/db/seed/seed.js';
+import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 import type { TemplatePayload } from '../../src/domain/template.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
 import type { TemplateDto } from '../../src/modules/templates/schemas.js';
@@ -57,13 +58,13 @@ describe('/templates (template pool)', () => {
     await ctx.close();
   });
 
-  it('lists the 40 seed templates, sorted and paginated', async () => {
+  it('lists every seed template, sorted and paginated', async () => {
     const all = await list('limit=500');
-    expect(all.meta.total).toBe(40);
+    expect(all.meta.total).toBe(SEED_TEMPLATES.length);
     expect(all.data.every((t) => t.approved && t.source === 'seed')).toBe(true);
     const page = await list('sort=name&limit=5&offset=5');
     expect(page.data).toHaveLength(5);
-    expect(page.meta).toMatchObject({ total: 40, limit: 5, offset: 5 });
+    expect(page.meta).toMatchObject({ total: SEED_TEMPLATES.length, limit: 5, offset: 5 });
     const names = (await list('sort=name&limit=500')).data.map((t) => normalizeTr(t.name));
     expect(names).toEqual([...names].sort());
     expect(names.indexOf(normalizeTr('İskender Kebap'))).toBeLessThan(names.indexOf(normalizeTr('Kokoreç')));
@@ -74,7 +75,7 @@ describe('/templates (template pool)', () => {
     // "Acılı Kebap" is an alias of Adana Kebap.
     expect((await list(`q=${encodeURIComponent('acılı kebap')}`)).data.map((t) => t.name)).toContain('Adana Kebap');
     const kebap = await list(`cuisineId=${kebapId}&limit=500`);
-    expect(kebap.meta.total).toBe(9);
+    expect(kebap.meta.total).toBe(SEED_TEMPLATES.filter((t) => t.cuisine === 'kebap-izgara').length);
     expect(kebap.data.every((t) => t.cuisineName === 'Kebap & Izgara')).toBe(true);
   });
 

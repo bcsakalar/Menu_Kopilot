@@ -113,7 +113,8 @@ describe('branch menu, export and usage summary', () => {
     const parsed = json.json<{ branch: { name: string; target: number }; items: { name: string; contentFrom: string | null }[] }>();
     expect(parsed.branch).toMatchObject({ name: 'Karşıyaka Kebapçısı', target: 14 });
     expect(parsed.items.find((i) => i.name === 'Adana Kebap')?.contentFrom).toBe('template');
-    expect(parsed.items.find((i) => i.name === 'Şalgam')?.contentFrom).toBeNull();
+    // "Şalgam" on the panel is matched to the seeded Şalgam Suyu through its alias.
+    expect(parsed.items.find((i) => i.name === 'Şalgam')?.contentFrom).toBe('template');
   });
 
   it('summarizes AI usage, cache and DB hit ratios for today', async () => {

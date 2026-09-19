@@ -197,7 +197,7 @@ export const TATLI_DIGER_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'burger',
     importance: 90,
-    aliases: ['Hamburger', 'Burger', 'Klasik Burger', 'Cheeseburger', 'Dana Burger'],
+    aliases: ['Hamburger', 'Burger', 'Klasik Burger', 'Dana Burger', 'Burger Menü'],
     name: 'Klasik Hamburger',
     description:
       'Izgarada pişen dana burger köftesi brioche ekmekte marul, domates, turşu, karamelize soğan ve burger sosuyla servis edilir.',

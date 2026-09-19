@@ -68,7 +68,7 @@ export const HAMUR_EV_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'pide-lahmacun',
     importance: 72,
-    aliases: ['Kaşarlı', 'Peynirli Pide', 'Kaşar Pide', 'Pide Kaşarlı'],
+    aliases: ['Kaşarlı', 'Kaşar Pide', 'Pide Kaşarlı', 'Kaşarlı Pide Porsiyon'],
     name: 'Kaşarlı Pide',
     description: 'Tekne şeklinde açılan hamur bol kaşar peyniriyle doldurulup taş fırında pişirilir, üzerine tereyağı sürülür.',
     servingNote: 'Sıcak servis; dilimlenmiş olarak kutuda gönderilir, peynir soğumadan tüketilmesi önerilir.',

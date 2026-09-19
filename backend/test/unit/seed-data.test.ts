@@ -6,15 +6,22 @@ import { CUISINE_SLUGS, SEED_CUISINES } from '../../src/db/seed/cuisines.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 
 describe('seed data', () => {
-  it('has 12 cuisines and 40 templates', () => {
-    expect(SEED_CUISINES).toHaveLength(12);
-    expect(new Set(SEED_CUISINES.map((c) => c.slug)).size).toBe(12);
-    expect(SEED_TEMPLATES).toHaveLength(40);
+  it('covers every platform kitchen category with a ready template set', () => {
+    expect(SEED_CUISINES).toHaveLength(CUISINE_SLUGS.length);
+    expect(new Set(SEED_CUISINES.map((c) => c.slug)).size).toBe(CUISINE_SLUGS.length);
+    expect(SEED_TEMPLATES.length).toBeGreaterThanOrEqual(280);
+    for (const slug of CUISINE_SLUGS) {
+      expect(SEED_TEMPLATES.filter((t) => t.cuisine === slug).length, slug).toBeGreaterThanOrEqual(5);
+    }
   });
 
-  it('every cuisine parent exists', () => {
+  it('every cuisine parent exists and cuisine notes fit the settings screen', () => {
     for (const c of SEED_CUISINES) {
       if (c.parentSlug) expect(CUISINE_SLUGS).toContain(c.parentSlug);
+      expect(c.parentSlug, c.slug).not.toBe(c.slug);
+      expect(c.notes.length, c.slug).toBeGreaterThanOrEqual(80);
+      expect(c.notes.length, c.slug).toBeLessThanOrEqual(500);
+      expect(containsPriceAmount(c.notes), c.slug).toBe(false);
     }
   });
 
@@ -38,17 +45,31 @@ describe('seed data', () => {
     expect(containsPriceAmount(JSON.stringify(SEED_TEMPLATES))).toBe(false);
   });
 
-  it('canonical names are unique and aliases do not shadow another canonical name', () => {
-    const names = SEED_TEMPLATES.map((t) => normalizeTr(t.payload.name));
-    expect(new Set(names).size).toBe(names.length);
+  it('canonical names are unique within a cuisine and aliases never shadow a canonical name', () => {
+    const keys = SEED_TEMPLATES.map((t) => `${t.cuisine}/${normalizeTr(t.payload.name)}`);
+    const duplicates = keys.filter((k, i) => keys.indexOf(k) !== i);
+    expect(duplicates).toEqual([]);
+    // Exact names are matched before aliases in every cuisine, so an alias equal to any canonical name would never
+    // reach its own template.
+    const names = new Set(SEED_TEMPLATES.map((t) => normalizeTr(t.payload.name)));
     for (const t of SEED_TEMPLATES) {
       const own = normalizeTr(t.payload.name);
-      for (const alias of t.aliases) {
-        const a = normalizeTr(alias);
+      const aliases = t.aliases.map(normalizeTr);
+      expect(new Set(aliases).size, `duplicate alias in ${t.payload.name}`).toBe(aliases.length);
+      for (const [index, a] of aliases.entries()) {
         if (a === own) continue;
-        expect(names.includes(a), `${alias} → ${t.payload.name}`).toBe(false);
+        expect(names.has(a), `${t.aliases[index] ?? a} → ${t.payload.name}`).toBe(false);
       }
     }
+  });
+
+  it('a product seeded in several cuisines keeps the same canonical spelling', () => {
+    const spellings = new Map<string, Set<string>>();
+    for (const t of SEED_TEMPLATES) {
+      const key = normalizeTr(t.payload.name);
+      spellings.set(key, (spellings.get(key) ?? new Set()).add(t.payload.name));
+    }
+    for (const [key, set] of spellings) expect(set.size, key).toBe(1);
   });
 
   it('size/portion groups are the only sets_base groups and are named accordingly', () => {

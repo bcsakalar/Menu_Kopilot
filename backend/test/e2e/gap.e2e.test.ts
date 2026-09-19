@@ -206,7 +206,9 @@ describe('/gap-analysis end-to-end (recorded panel fixtures)', () => {
       { field: 'description', state: 'absent' },
       { field: 'removables', state: 'unknown' },
     ]);
-    expect(byName.get('İçli Köfte')).toMatchObject({ matchedTemplateId: null, origin: null, completeness: 0 });
+    // Seeded in Meze: a product from another cuisine still counts as matched.
+    expect(byName.get('İçli Köfte')).toMatchObject({ origin: 'seed', templateName: 'İçli Köfte' });
+    expect(byName.get('İçli Köfte')?.matchedTemplateId).toEqual(expect.any(String));
     expect(byName.get('Karışık Pide')?.seenIn).toBe(2);
   });
 
@@ -323,28 +325,59 @@ describe('/gap-analysis end-to-end (recorded panel fixtures)', () => {
   });
 
   it('asks text.gap_suggest only for what the DB cannot fill, then caches the answer', async () => {
-    await setCuisineMin(h, 'burger', 14);
-    const burger = await createBranch(h, 'burger', 'Moda Burger');
+    // A user cuisine with a single template: the DB fills one slot and the AI is asked for the rest.
+    const created = await h.ctx.app.inject({
+      method: 'POST',
+      url: '/api/v1/cuisines',
+      headers: bearer(h.token),
+      payload: { name: 'Dürümcü Test', minItemCount: 14 },
+    });
+    expect(created.statusCode).toBe(201);
+    const durumcu = created.json<{ id: string; slug: string }>();
+    const zirhDurum = await h.ctx.app.inject({
+      method: 'POST',
+      url: '/api/v1/templates',
+      headers: bearer(h.token),
+      payload: {
+        cuisineId: durumcu.id,
+        aliases: ['Zırhlı Dürüm'],
+        importance: 80,
+        payload: {
+          name: 'Zırh Dürüm',
+          description: 'Zırhla çekilmiş kuzu eti közde pişirilir; domates, soğan ve maydanozla lavaşa sarılarak servis edilir.',
+          servingNote: 'Sıcak servis; kağıda sarılı gönderilir.',
+          portionInfo: '1 adet',
+          optionGroups: [],
+          removableIngredients: ['Soğan'],
+          extraIngredients: [],
+          tags: ['dürüm'],
+          allergenNotes: ['Gluten (lavaş)'],
+          upsellSuggestion: 'Ayran önerilebilir.',
+        },
+      },
+    });
+    expect(zirhDurum.statusCode).toBe(201);
+    const branch = await createBranch(h, durumcu.slug, 'Moda Dürüm');
     const aiReply: FakeResponder = (opts, call) =>
       opts.task === 'text.gap_suggest'
         ? okJson({
             items: [
-              { name: 'Double Burger', reason: 'Burger menülerinin temel ürünü', importance: 90 },
-              // Alias of the recommended "Klasik Hamburger" → same template, dropped.
-              { name: 'Cheeseburger', reason: 'Peynirli klasik', importance: 96 },
+              { name: 'Kuzu Dürüm', reason: 'Dürümcülerin temel ürünü', importance: 90 },
+              // Alias of the recommended "Zırh Dürüm" → same template, dropped.
+              { name: 'Zırhlı Dürüm', reason: 'Zırh kıymalı', importance: 96 },
               { name: 'Adana Kebap', reason: 'Zaten menüde', importance: 95 },
-              { name: 'Soğan Halkası 45 TL', reason: 'Yan ürün olarak 45 TL', importance: 60 },
-              { name: 'Tavuk Burger', reason: 'Tavuk seçeneği isteyenler için', importance: 85 },
+              { name: 'Sebzeli Dürüm 45 TL', reason: 'Etsiz seçenek, 45 TL', importance: 60 },
+              { name: 'Kaşarlı Sucuklu Dürüm', reason: 'Peynir sevenler için', importance: 85 },
             ],
           })
         : fixtureResponder(fx)(opts, call);
     h.gemini.setResponder(aiReply);
     try {
-      const result = await gapStream(h, fx, burger.id);
-      expect(result.recommendations.db.map((r) => r.name)).toEqual(['Klasik Hamburger']);
-      expect(result.recommendations.ai.map((r) => r.name)).toEqual(['Double Burger', 'Tavuk Burger', 'Soğan Halkası']);
+      const result = await gapStream(h, fx, branch.id);
+      expect(result.recommendations.db.map((r) => r.name)).toEqual(['Zırh Dürüm']);
+      expect(result.recommendations.ai.map((r) => r.name)).toEqual(['Kuzu Dürüm', 'Kaşarlı Sucuklu Dürüm', 'Sebzeli Dürüm']);
       expect(result.recommendations.ai.every((r) => r.source === 'ai' && !containsPriceAmount(`${r.name} ${r.reason}`))).toBe(true);
-      expect(result.appended.map((q) => q.text)).toEqual(['Double Burger var mı?']);
+      expect(result.appended.map((q) => q.text)).toEqual(['Kuzu Dürüm var mı?']);
       const order = result.events.map((e) => e.event);
       expect(order.indexOf('questions_append')).toBeGreaterThan(order.lastIndexOf('recommendations'));
       expect(result.done.stats.llmCalls).toBe(1);
@@ -352,10 +385,10 @@ describe('/gap-analysis end-to-end (recorded panel fixtures)', () => {
 
       const suggestCalls = () => h.gemini.calls.filter((c) => c.task === 'text.gap_suggest').length;
       const before = suggestCalls();
-      const again = await gapStream(h, fx, burger.id);
+      const again = await gapStream(h, fx, branch.id);
       expect(suggestCalls()).toBe(before);
       expect(again.done.stats.llmCalls).toBe(0);
-      expect(again.recommendations.ai.map((r) => r.name)).toEqual(['Double Burger', 'Tavuk Burger', 'Soğan Halkası']);
+      expect(again.recommendations.ai.map((r) => r.name)).toEqual(['Kuzu Dürüm', 'Kaşarlı Sucuklu Dürüm', 'Sebzeli Dürüm']);
     } finally {
       h.gemini.setResponder(fixtureResponder(fx));
     }

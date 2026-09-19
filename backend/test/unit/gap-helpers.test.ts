@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 import type { TemplatePayload } from '../../src/domain/template.js';
-import { joinTr } from '../../src/i18n/tr.js';
+import { GAP_TEXT, joinTr } from '../../src/i18n/tr.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
 import { assessCompleteness, expectationsFor } from '../../src/modules/gap/completeness.js';
 import { dedupePanelItems, mergeFlag } from '../../src/modules/gap/dedupe.js';
@@ -161,6 +161,21 @@ describe('completeness', () => {
       missing: [{ field: 'options', state: 'absent' }],
     });
     expect(assessCompleteness({ description: 'present', options: 'present', removables: 'absent' }, ayran).status).toBe('ok');
+  });
+});
+
+describe('cuisine group questions', () => {
+  it('asks natural questions for the platform-style group names and the older ones', () => {
+    expect(GAP_TEXT.cuisineGroup('Sos Seçimi')).toBe('Sos seçimi var mı?');
+    expect(GAP_TEXT.cuisineGroup('Sos')).toBe('Sos seçimi var mı?');
+    expect(GAP_TEXT.cuisineGroup('İçecek Seçimi')).toBe('İçecekli menü seçeneği var mı?');
+    expect(GAP_TEXT.cuisineGroup('Ekmek Tercihi')).toBe(GAP_TEXT.cuisineGroup('Ekmek Seçimi'));
+    expect(GAP_TEXT.cuisineGroup('Hamur Seçimi')).toBe('Hamur seçimi (ince / klasik / kalın) var mı?');
+  });
+
+  it('does not say "seçimi" twice for an unknown "… Seçimi" group', () => {
+    expect(GAP_TEXT.cuisineGroup('Peynir Seçimi')).toBe('Peynir Seçimi soruluyor mu?');
+    expect(GAP_TEXT.cuisineGroup('Kenar')).toBe('Kenar seçimi soruluyor mu?');
   });
 });
 

@@ -1,4 +1,5 @@
 import type { TemplateOptionGroup, TemplatePayload } from '../../domain/template.js';
+import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { CuisineSlug } from './cuisines.js';
 
 export interface SeedTemplate {
@@ -25,11 +26,25 @@ interface SeedTemplateInput {
   upsell: string;
 }
 
+/**
+ * Aliases that normalize to the product's own name or to an earlier alias add nothing: matching already works on the
+ * normalized form (e.g. "Adana Kebabı" → "adana kebap"). They are dropped here so every stored alias is distinct.
+ */
+function distinctAliases(name: string, aliases: readonly string[]): string[] {
+  const seen = new Set([normalizeTr(name)]);
+  return aliases.filter((alias) => {
+    const key = normalizeTr(alias);
+    if (key.length === 0 || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function template(input: SeedTemplateInput): SeedTemplate {
   return {
     cuisine: input.cuisine,
     importance: input.importance,
-    aliases: input.aliases,
+    aliases: distinctAliases(input.name, input.aliases),
     payload: {
       name: input.name,
       description: input.description,

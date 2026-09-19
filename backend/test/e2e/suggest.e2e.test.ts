@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { branches, cuisines, itemEmbeddings, menuItems, suggestionRuns, usageLog } from '../../src/db/schema/index.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
@@ -41,6 +41,20 @@ async function harness(fx: Fixtures, env: Record<string, string> = {}, canonical
 async function usageCount(h: Harness): Promise<number> {
   const [row] = await h.ctx.db.db.select({ n: sql<number>`count(*)::int` }).from(usageLog);
   return row?.n ?? 0;
+}
+
+/**
+ * The recorded kebapçı menu has three products the first seed release did not know; later releases seeded them.
+ * Deleting them from the pool the way a user would (archived: approved=false, source stays 'seed') keeps the photo
+ * exercising the AI path.
+ */
+const KEBAPCI_UNKNOWN = ['Humus', 'İçli Köfte', 'Şalgam Suyu'] as const;
+
+async function forgetSeeds(h: Harness, names: readonly string[]): Promise<void> {
+  await h.ctx.db.db
+    .update(menuItems)
+    .set({ approved: false })
+    .where(and(eq(menuItems.source, 'seed'), inArray(menuItems.canonicalName, [...names])));
 }
 
 async function suggestJson(h: Harness, fields: Record<string, string>): Promise<RunDto> {
@@ -102,17 +116,17 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
     h.groq.setResponder(fixtureResponder(fx));
   });
 
-  it('answers all 40 seed templates with ZERO LLM calls (acceptance #3)', async () => {
+  it('answers every seed template with ZERO LLM calls, cuisine by cuisine (acceptance #3)', async () => {
     const before = await usageCount(h);
-    const run = await suggestJson(h, {
-      cuisineId: await h.cuisineId('kebap-izgara'),
-      promptText: SEED_TEMPLATES.map((t) => t.payload.name).join('\n'),
-    });
-    expect(run.status).toBe('completed');
-    expect(run.cards).toHaveLength(40);
-    expect(run.cards.every((c) => c.origin === 'seed' && c.matchType === 'exact')).toBe(true);
-    expect(run.llmCalls).toBe(0);
-    expect(run.cacheHit).toBe(true);
+    for (const slug of [...new Set(SEED_TEMPLATES.map((t) => t.cuisine))]) {
+      const names = SEED_TEMPLATES.filter((t) => t.cuisine === slug).map((t) => t.payload.name);
+      const run = await suggestJson(h, { cuisineId: await h.cuisineId(slug), promptText: names.join('\n') });
+      expect(run.status, slug).toBe('completed');
+      expect(run.cards.map((c) => c.payload.name), slug).toEqual(names);
+      expect(run.cards.every((c) => c.origin === 'seed' && c.matchType === 'exact'), slug).toBe(true);
+      expect(run.llmCalls, slug).toBe(0);
+      expect(run.cacheHit, slug).toBe(true);
+    }
     expect(await usageCount(h)).toBe(before);
     expect(h.gemini.calls.length + h.groq.calls.length).toBe(0);
   });
@@ -133,6 +147,7 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
   });
 
   it('streams a 15-item menu photo: DB cards first, then AI cards; no TL, ≤160 chars, sets_base fixed (#4 #7 #8)', async () => {
+    await forgetSeeds(h, KEBAPCI_UNKNOWN);
     const { events, cards, raw } = await suggestStream(h, { cuisineId: await h.cuisineId('kebap-izgara') }, [
       { file: 'menu-kebapci.jpg', fx },
     ]);
@@ -160,7 +175,7 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
     const tasks = [...h.gemini.calls, ...h.groq.calls].map((c) => c.task);
     expect(tasks.sort()).toEqual(['text.item_enrich', 'text.normalize_classify', 'vision.menu_extract']);
     expect(done.stats).toMatchObject({ llmCalls: 3, dbHits: 12, aiItems: 3, cacheHit: false });
-    const drafts = await h.ctx.db.db.select().from(menuItems).where(eq(menuItems.approved, false));
+    const drafts = await h.ctx.db.db.select().from(menuItems).where(and(eq(menuItems.approved, false), eq(menuItems.source, 'ai')));
     expect(drafts.map((d) => d.canonicalName).sort()).toEqual(['Humus', 'Şalgam', 'İçli Köfte'].sort());
 
     // Same photo again: extraction + enrichment caches → zero LLM calls.
@@ -179,9 +194,19 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
     resetResilience(h);
     h.gemini.setResponder(fixtureResponder(fx));
     h.groq.configured = false; // key removed → enrichment falls back to Gemini
+    await forgetSeeds(h, ['Kazandibi', 'Trileçe']);
     const text = await suggestJson(h, { cuisineId: await h.cuisineId('tatli'), promptText: 'Kazandibi, Trileçe' });
     expect(text.cards.map((c) => c.origin)).toEqual(['ai', 'ai']);
     expect(h.gemini.calls.at(-1)?.task).toBe('text.item_enrich');
+    // The AI answer must not turn the deleted seeds into drafts, or the next seed run would bring them back.
+    const archived = await h.ctx.db.db
+      .select({ source: menuItems.source, approved: menuItems.approved })
+      .from(menuItems)
+      .where(inArray(menuItems.canonicalName, ['Kazandibi', 'Trileçe']));
+    expect(archived).toEqual([
+      { source: 'seed', approved: false },
+      { source: 'seed', approved: false },
+    ]);
   });
 
   it('survives broken JSON: one repair, then needs_review (#10)', async () => {
@@ -189,7 +214,7 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
     h.groq.setResponder((opts, call) => (opts.task === 'text.item_enrich' ? broken() : fixtureResponder(fx)(opts, call)));
     h.gemini.setResponder((opts, call) => (opts.task === 'text.item_enrich' ? broken() : fixtureResponder(fx)(opts, call)));
     const before = h.groq.calls.length;
-    const run = await suggestJson(h, { cuisineId: await h.cuisineId('kebap-izgara'), promptText: 'Zıkkım Kebabı, Hünkar Beğendi' });
+    const run = await suggestJson(h, { cuisineId: await h.cuisineId('kebap-izgara'), promptText: 'Zıkkım Kebabı, Kuzu Tandır' });
     expect(run.status).toBe('completed');
     expect(run.cards.map((c) => [c.origin, c.needsReview])).toEqual([
       ['review', true],
@@ -205,10 +230,10 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
   });
 
   it('accepting a card saves an approved template → the next query is a DB hit with cache_hit=true (#11)', async () => {
-    const hunkar = {
-      name: 'Hünkar Beğendi',
-      description: 'Közlenmiş patlıcanlı beşamel beğendi üzerinde tereyağında pişmiş kuzu kuşbaşı; sıcak servis edilir.',
-      serving_note: 'Sıcak servis; beğendi tabanı üzerinde et, kapaklı kapta.',
+    const tandir = {
+      name: 'Kuzu Tandır',
+      description: 'Kuzu eti tandır fırınında kendi suyunda saatlerce pişirilir; pilav ve közlenmiş sebzeyle sıcak servis edilir.',
+      serving_note: 'Sıcak servis; et ve pilav ayrı bölmeli kapta.',
       portion_info: '1 porsiyon ~250 g',
       option_groups: [
         {
@@ -223,16 +248,16 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
           ],
         },
       ],
-      removable_ingredients: ['Kaşar'],
+      removable_ingredients: ['Kekik'],
       extra_ingredients: [],
       tags: ['kırmızı et'],
-      allergen_notes: ['Süt ürünü'],
+      allergen_notes: [],
       upsell_suggestion: 'Yanına ayran önerilebilir.',
       confidence: 0.9,
     };
-    h.groq.setResponder((opts, call) => (opts.task === 'text.item_enrich' ? okJson({ items: [hunkar] }) : fixtureResponder(fx)(opts, call)));
+    h.groq.setResponder((opts, call) => (opts.task === 'text.item_enrich' ? okJson({ items: [tandir] }) : fixtureResponder(fx)(opts, call)));
     const cuisineId = await h.cuisineId('ev-yemekleri');
-    const first = await suggestJson(h, { cuisineId, promptText: 'Hünkar Beğendi' });
+    const first = await suggestJson(h, { cuisineId, promptText: 'Kuzu Tandır' });
     const card = first.cards[0];
     expect(card?.origin).toBe('ai');
 
@@ -255,7 +280,7 @@ describe('/suggest end-to-end (recorded fixtures, fake providers)', () => {
     const [branchRow] = await h.ctx.db.db.select().from(branches).where(eq(branches.id, branch?.id ?? ''));
     expect(branchRow?.currentItemCount).toBe(1);
 
-    const second = await suggestJson(h, { cuisineId, promptText: 'hünkar beğendi' });
+    const second = await suggestJson(h, { cuisineId, promptText: 'kuzu tandır' });
     expect(second.cards[0]).toMatchObject({ origin: 'db', matchedTemplateId: templateId, matchType: 'exact' });
     expect(second.cacheHit).toBe(true);
     expect(second.llmCalls).toBe(0);
@@ -356,6 +381,7 @@ describe('/suggest budget, continue and local-only mode', () => {
   it('stops at the per-request budget and finishes with "Devam et"', async () => {
     const h = await harness(fx, { REQUEST_MAX_LLM_CALLS: '2' });
     try {
+      await forgetSeeds(h, KEBAPCI_UNKNOWN);
       const images = ['menu-kebapci.jpg', 'menu-pideci.jpg', 'menu-tatli-kafe.jpg'].map((file) => ({ file, fx }));
       const first = await suggestStream(h, { cuisineId: await h.cuisineId('kebap-izgara') }, images);
       const exhausted = first.events.find((e) => e.event === 'budget_exhausted')?.data as {

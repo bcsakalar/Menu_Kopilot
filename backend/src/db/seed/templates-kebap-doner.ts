@@ -184,7 +184,7 @@ export const KEBAP_DONER_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'kebap-izgara',
     importance: 90,
-    aliases: ['Köfte', 'Kasap Köfte', 'Izgara Köfte Porsiyon', 'Köfte Ekmek', 'Köfte Porsiyon'],
+    aliases: ['Köfte', 'Izgara Köfte Porsiyon', 'Köfte Porsiyon', 'Izgara Köfte Tabağı'],
     name: 'Izgara Köfte',
     description:
       'Dana kıymadan hazırlanan köfteler ızgarada pişirilir; piyaz, közlenmiş biber-domates ve pilavla servis edilir.',
@@ -343,7 +343,7 @@ export const KEBAP_DONER_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'doner',
     importance: 75,
-    aliases: ['Pilav Üstü Et Döner', 'Pilav Üstü Tavuk Döner', 'Porsiyon Döner', 'Döner Porsiyon', 'Pilavüstü Döner'],
+    aliases: ['Pilav Üstü Et Döner', 'Pilav Üstü Tavuk Döner', 'Pilavüstü Döner', 'Döner Pilav'],
     name: 'Pilav Üstü Döner',
     description:
       'Tereyağlı pirinç pilavı üzerinde yaprak döner; közlenmiş biber, domates ve turşuyla sıcak servis edilir.',
