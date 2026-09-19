@@ -145,16 +145,21 @@ export class SuggestionStore {
     return toCardDto(row);
   }
 
-  /** One unapproved AI draft per (cuisine, name); refreshed on every new AI answer. */
+  /**
+   * One unapproved AI draft per (cuisine, name); refreshed on every new AI answer. The unapproved row may also be a
+   * template the user deleted from the pool (an archived seed keeps approved=false, source='seed'): that one is left
+   * untouched — rewriting it as an AI draft would lose the marker and let the next seed run bring it back. Accepting
+   * the card is what revives it.
+   */
   async upsertDraft(db: Executor, cuisineId: string, payload: TemplatePayload, userId: string): Promise<string> {
     const normalized = normalizeTr(payload.name);
     const [existing] = await db
-      .select({ id: menuItems.id })
+      .select({ id: menuItems.id, source: menuItems.source })
       .from(menuItems)
       .where(and(eq(menuItems.cuisineId, cuisineId), eq(menuItems.normalizedName, normalized), eq(menuItems.approved, false)))
       .limit(1);
     if (existing) {
-      await replaceTemplateContent(db, existing.id, payload, { source: 'ai', needsReview: false });
+      if (existing.source === 'ai') await replaceTemplateContent(db, existing.id, payload, { source: 'ai', needsReview: false });
       return existing.id;
     }
     return insertTemplate(db, { cuisineId, payload, source: 'ai', approved: false, createdBy: userId });
