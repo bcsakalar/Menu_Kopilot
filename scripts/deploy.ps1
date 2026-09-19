@@ -100,10 +100,18 @@ Invoke-Remote "cd $RemoteDir && $compose up -d --remove-orphans"
 
 Write-Output '==> Waiting for /health/ready'
 $ready = $false
-for ($i = 0; $i -lt 40 -and -not $ready; $i++) {
-  Start-Sleep -Seconds 3
-  ssh $SshHost "cd $RemoteDir && $compose exec -T api wget -qO- http://127.0.0.1:3000/health/ready" 2>$null | Out-Null
-  $ready = $LASTEXITCODE -eq 0
+# "Connection refused" on stderr is expected while migrations and the seed run; Windows PowerShell 5.1 would turn it
+# into a terminating error under 'Stop'.
+$previous = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+  for ($i = 0; $i -lt 40 -and -not $ready; $i++) {
+    Start-Sleep -Seconds 3
+    ssh $SshHost "cd $RemoteDir && $compose exec -T api wget -qO- http://127.0.0.1:3000/health/ready" *> $null
+    $ready = $LASTEXITCODE -eq 0
+  }
+} finally {
+  $ErrorActionPreference = $previous
 }
 Invoke-Remote "cd $RemoteDir && $compose ps"
 if (-not $ready) {
