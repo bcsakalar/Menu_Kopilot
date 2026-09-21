@@ -1,8 +1,8 @@
 # PROGRESS
 
-Last update: 2026-09-21 — FAZ 0–3 done: Şubeler removed, one analysis screen (three sections) on a six-agent
-pipeline, categories editable in the app. App 1.1.0+2 compiled and tested here (Flutter 3.47.5, 56/56), signed with a
-new key (D-166). Waiting for GitHub push access from this PC before the production deploy.
+Last update: 2026-09-21 — FAZ 0–3 live on production (`f2e12a2`, live check 15/15): one analysis screen on a
+six-agent pipeline, Şubeler removed, categories editable in the app. App 1.1.0+2 compiled and tested here (Flutter
+3.47.5, 56/56), signed with a new key (D-166); a second account `uzman@example.com` (D-168).
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -35,6 +35,12 @@ new key (D-166). Waiting for GitHub push access from this PC before the producti
       with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
 
 ## Where I am
+**2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
+(migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
+`MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:
+`admin@example.com` (admin), `uzman@example.com` (uzman, password in the Desktop note). Flutter
+3.47.5 / Android SDK / JDK 17 now live in `%USERPROFILE%\dev` and `%LOCALAPPDATA%\Android\Sdk` on this PC.
+
 **2026-09-21 — FAZ 0–3 done in the working tree, uncommitted.** Backend: 538 tests, lint + typecheck clean, the local
 Docker stack runs the new code, `pnpm live:check` 14/15 (the one failure is a menu photo: the Gemini key is denied
 with 403 and Groq's free vision tier caps output at 1000 tokens/minute — D-164). Quality (`pnpm compare`): new

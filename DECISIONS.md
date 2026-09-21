@@ -639,3 +639,11 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   `InlineNotice` puts its action under the text, the secondary card actions wrap while "Ekle" stays right. Also: the
   re-run no longer waits for a haptic before starting (a slow or missing haptic blocked it). `flutter analyze`
   clean, 56/56 tests. (F2)
+- **D-168** — A second account (user request): `node dist/db/seed/add-user.js` (`pnpm user:add`) opens an account
+  with the password read from stdin — never from the command line — and never overwrites an existing e-mail. There
+  is still no sign-up endpoint (D-040). Opened `uzman@example.com`, role `uzman` (everything but prompt
+  versioning); the password was generated on the PC, piped to the server, and handed over in a Desktop note.
+- **D-169** — Production deploy of FAZ 0–3 (2026-09-21, `f2e12a2`) after a fresh pre-migration dump; the
+  post-deploy live check with the new account passed 15/15, the menu photo included — the Gemini key that answers
+  403 (D-164) is only the one in this PC's local `.env`; production's key works.
+

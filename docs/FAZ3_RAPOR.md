@@ -5,6 +5,10 @@ Karar kaydı: `DECISIONS.md` D-150 … D-165 · Teşhis: `docs/FAZ0_TESHIS.md` �
 
 ## 0. Önce bunları oku
 
+> **Güncelleme (aynı gün, §10):** aşağıdaki üç madde o gün kapandı — Flutter bu bilgisayara kuruldu, mobil kod
+> derlendi ve 56/56 test geçti; production güncellendi (canlı kontrol 15/15, menü fotoğrafı dahil — reddedilen
+> Gemini anahtarı yalnızca bu PC'nin yerel `.env`'indeki); imzalı 1.1.0 APK ve ikinci hesap hazır.
+
 1. **Mobil kod bu makinede derlenmedi.** Bu bilgisayarda Flutter/Android SDK yok, telefon USB'de görünmüyor.
    SDK kurmak indirme + lisans kabulü gerektirdiği için yapmadım. Bunun yerine derleyicinin yakalayacağı hataları
    arayan statik denetimler yazdım (import erişilebilirliği, `Sınıf.üye` kontrolü, l10n anahtar/parametre kontrolü);
@@ -300,3 +304,25 @@ ekleyince sayacın değişmesi, (9) "X olarak yeniden analiz et", (10) debug ekr
 
 Commit/deploy: `git add -A; git commit` → `git push` → `powershell -File scripts\deploy.ps1` (migration 0003 açılışta
 çalışır) → `pnpm -C backend live:check --url https://menu.example.com`.
+
+---
+
+## 10. Aynı gün: derleme, imza, yayın
+
+İstek: GitHub'a push, sunucuda `git pull` ile güncel sistemi çalıştırmak, imzalı APK, ikinci kullanıcı hesabı.
+
+| Adım | Sonuç |
+|---|---|
+| Derleme araçları | Kullanıcının izniyle resmî kaynaklardan: Flutter 3.47.5 (Dart 3.13.4), Android komut satırı araçları + SDK 36/37.0 + build-tools 37.0.0 + NDK 28.2, Temurin JDK 17 — hepsi sağlama özetiyle doğrulandı |
+| İlk gerçek derleme | `flutter analyze` 6 sorun buldu (4 tip hatası, 2 kullanılmayan import); widget testleri 3 gerçek düzen hatası buldu (uzun opsiyon hapı kartı taşırıyordu, "yeniden analiz et" butonu bildirimin yanına sığmıyordu, kart butonları 360 dp telefonda taşıyordu) ve yeniden analizin bir titreşimi beklemesi. Hepsi düzeltildi → **analyze temiz, 56/56 test** (D-167) |
+| İmza | Eski anahtar başka bilgisayarda kaldığı için **yeni anahtar** (kullanıcı kararı, D-166): RSA-4096, `CN=Menu Kopilot, O=bcsakalar, C=TR`, SHA-256 `DE:00:43:5B:…:52:14:E6`. Parola yalnızca `key.properties`'te (git dışı) ve yedeğinde; eski `key.properties` `old-key.properties` adıyla saklandı |
+| APK | `MenuKopilot-1.1.0-arm64.apk` (22,8 MB, masaüstünde), `apksigner` v2 doğrulaması yeni sertifikayı gösteriyor, içinde sağlayıcı anahtarı yok, varsayılan sunucu production. Android 17 yeni SDK deposunda `android-37.0` adıyla yayımlandığı için `compileSdk` alt sürümlü DSL'e geçirildi |
+| GitHub | Bu PC'nin anahtarını kullanıcı **bcsakalar** hesabına ekledi (hesaba anahtar eklemek güvenlik ayarı olduğu için kullanıcı yaptı); `57fe3ab..f2e12a2` push edildi |
+| Yedek | Deploy öncesi `/opt/yedek/menu-kopilot-pre-0003-2026-09-21-0922.dump` (18 tablo verisi, geri yüklenebilir) |
+| Deploy | `scripts/deploy.ps1`: sunucu `git pull` → `f2e12a2`, imaj (80 MB) kopyalandı, migration 0003 + seed açılışta çalıştı: 9 kategori, 118 mutfak-kategori beklentisi, 316/316 şablona kategori, 8 yeni prompt; şube tabloları kalktı |
+| İkinci hesap | `uzman@example.com` (rol `uzman`), yeni `add-user` komutuyla; parola bu PC'de üretildi, sunucuya yalnızca stdin'den gitti, yerel bir dosyada (sohbete yazılmadı) |
+| Canlı kontrol (production) | **15/15**: yazılı menü 6,6 sn · mutfak değiştirip yeniden analiz 5,8 sn (Extractor atlandı) · iki panel görüntüsü 8,1 sn (12 ürün, 7 opsiyon, 7 düzeltme) · 15 ürünlü menü fotoğrafı 8,5 sn · kaldırılan uçlar 404 |
+
+Telefonda: **eski uygulamayı önce kaldır** (farklı anahtar), sonra APK'yı kur; giriş ekranında sunucu adresi hazır gelir.
+Uzman hesabıyla ilk açılışta "son analiz" olarak canlı kontrolün test analizleri görünebilir — zararsız.
+
