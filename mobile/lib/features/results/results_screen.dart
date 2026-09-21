@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -103,7 +105,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
   Future<void> _rerun(String cuisineId, String cuisineName) async {
     if (ref.read(analysisControllerProvider).counts?.cuisineId == cuisineId) return;
-    await Haptics.select();
+    // Felt, never waited for: a haptic that is slow or unsupported must not hold up the re-run.
+    unawaited(Haptics.select());
     await ref.read(analysisControllerProvider.notifier).rerun(cuisineId: cuisineId, cuisineName: cuisineName);
   }
 

@@ -624,3 +624,18 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   panel screenshots used five calls, the Classifier the sixth, and the option/recommendation agents were refused —
   the biggest menus got database answers only. Found while writing the report; covered by an e2e test that fails
   without the fix. (F2)
+- **D-166** — New release signing key (user decision, 2026-09-21): the 2026-09-18 key (D-149) is on another PC
+  (`key.properties` pointed at `C:/Users/<user>/...`, which does not exist here) and the user chose a new key over
+  fetching it. PKCS12 RSA-4096, `CN=Menu Kopilot, O=bcsakalar, C=TR`, 10 000 days, 32-character random
+  password passed to keytool through an environment variable, stored only in `key.properties` (git-ignored) and a
+  copy next to the `.jks` in `%USERPROFILE%\.android-keys\menu-kopilot\`. The old `key.properties` (the old
+  key's password) is kept there as `old-key.properties` in case the old `.jks` turns up. Consequence: the
+  phone uninstalls the 1.0.0 build once (local history and offline queue go; server data stays). App version 1.1.0+2.
+- **D-167** — The first real compile of the FAZ 1 mobile code (Flutter 3.47.5 installed on this PC with the user's
+  permission) found what the static checks could not: nullable `fold` results in the debug screen (type errors), two
+  unused imports, and three layout faults the widget tests exposed — a long option pill ("Çift Kişilik · tabanı
+  belirler") overflowing its card, the "X olarak yeniden analiz et" button not fitting next to its notice, and the
+  card's action row overflowing on a 360 dp phone. Fixed: `Pill` shortens its label with "…" in a bounded row,
+  `InlineNotice` puts its action under the text, the secondary card actions wrap while "Ekle" stays right. Also: the
+  re-run no longer waits for a haptic before starting (a slow or missing haptic blocked it). `flutter analyze`
+  clean, 56/56 tests. (F2)

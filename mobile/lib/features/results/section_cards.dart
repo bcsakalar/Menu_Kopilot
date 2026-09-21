@@ -406,10 +406,19 @@ class _Actions extends StatelessWidget {
     final acceptLabel = card.section == CardSection.fix ? l10n.markDone : l10n.addCard;
     return Row(
       children: [
-        if (onEdit != null)
-          TextButton.icon(onPressed: onEdit, icon: const Icon(Icons.edit_outlined, size: 17), label: Text(l10n.edit)),
-        TextButton.icon(onPressed: onSkip, icon: const Icon(Icons.close_rounded, size: 17), label: Text(l10n.reject)),
-        const Spacer(),
+        // The secondary actions take the room that is left and wrap onto a second line on a narrow phone (360 dp),
+        // so "Ekle" always stays where the thumb is.
+        Expanded(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (onEdit != null)
+                TextButton.icon(onPressed: onEdit, icon: const Icon(Icons.edit_outlined, size: 17), label: Text(l10n.edit)),
+              TextButton.icon(onPressed: onSkip, icon: const Icon(Icons.close_rounded, size: 17), label: Text(l10n.reject)),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
         FilledButton.icon(
           onPressed: onAccept,
           icon: const Icon(Icons.check_rounded, size: 18),

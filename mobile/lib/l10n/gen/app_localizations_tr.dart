@@ -19,7 +19,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get changeServer => 'Değiştir';
 
   @override
-  String get disclaimer => 'Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.';
+  String get disclaimer =>
+      'Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.';
 
   @override
   String get cancel => 'İptal';
@@ -52,7 +53,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get loading => 'Yükleniyor…';
 
   @override
-  String get offlineBanner => 'Çevrimdışı: son sonuçlar ve şablonlar gösteriliyor';
+  String get offlineBanner =>
+      'Çevrimdışı: son sonuçlar ve şablonlar gösteriliyor';
 
   @override
   String get genericError => 'Bir şeyler ters gitti';
@@ -114,7 +116,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invalidUrl => 'Geçerli bir adres gir (http/https)';
 
   @override
-  String get insecureUrl => 'Güvenli bağlantı gerekli: adres https:// ile başlamalı';
+  String get insecureUrl =>
+      'Güvenli bağlantı gerekli: adres https:// ile başlamalı';
 
   @override
   String get logout => 'Çıkış yap';
@@ -181,7 +184,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get photoRunTitle => 'Fotoğraftan analiz';
 
   @override
-  String get queuedOffline => 'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
+  String get queuedOffline =>
+      'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
 
   @override
   String pendingQueue(int count) {
@@ -356,10 +360,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get menuTextLabel => 'Menüde neler var?';
 
   @override
-  String get menuTextHint => 'ör. adana, urfa, lahmacun — ekran görüntüsü olmadan da çalışır';
+  String get menuTextHint =>
+      'ör. adana, urfa, lahmacun — ekran görüntüsü olmadan da çalışır';
 
   @override
-  String get noAnalysisYet => 'Henüz analiz yok — menüyü yaz veya ekran görüntüsü ekle';
+  String get noAnalysisYet =>
+      'Henüz analiz yok — menüyü yaz veya ekran görüntüsü ekle';
 
   @override
   String missingCount(int count) {
@@ -419,12 +425,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String deleteTemplateConfirm(String name) {
-    return '"$name" şablonu silinsin mi?';
+    return '\"$name\" şablonu silinsin mi?';
   }
 
   @override
   String deleteSeedTemplateConfirm(String name) {
-    return '"$name" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)';
+    return '\"$name\" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)';
   }
 
   @override
@@ -434,17 +440,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cuisinesAndMinimums => 'Mutfak türleri ve minimum ürün sayıları';
 
   @override
-  String get cuisinesAndMinimumsHint => 'Açılış hedefi ve beklenen kategoriler buradan hesaplanır';
+  String get cuisinesAndMinimumsHint =>
+      'Açılış hedefi ve beklenen kategoriler buradan hesaplanır';
 
   @override
   String get categoriesTitle => 'Kategoriler ve anahtar kelimeler';
 
   @override
-  String get categoriesHint => 'Bir ürünün hangi kategoriye düştüğünü adındaki kelimeler belirler';
+  String get categoriesHint =>
+      'Bir ürünün hangi kategoriye düştüğünü adındaki kelimeler belirler';
 
   @override
   String get categoriesHelp =>
-      'Ürün adında bu kelimelerden biri geçerse ürün o kategoriye sayılır ("şalgam" → İçecek); büyük/küçük harf ve Türkçe karakter fark etmez. Birden çok kelime tek ifade olarak eşleşir ("sıcak çikolata"). Değişiklik bir sonraki analizde geçerli olur.';
+      'Ürün adında bu kelimelerden biri geçerse ürün o kategoriye sayılır (\"şalgam\" → İçecek); büyük/küçük harf ve Türkçe karakter fark etmez. Birden çok kelime tek ifade olarak eşleşir (\"sıcak çikolata\"). Değişiklik bir sonraki analizde geçerli olur.';
 
   @override
   String get keywordsLabel => 'Anahtar kelimeler (virgülle ayır)';
@@ -523,7 +531,8 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get localOnlyOn => 'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor';
+  String get localOnlyOn =>
+      'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor';
 
   @override
   String get quotaExceeded => 'Günlük kota doldu';
@@ -636,7 +645,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cancelled => 'İptal edildi';
 
   @override
-  String get compressFailed => 'Fotoğraf küçültülemedi, başka bir fotoğraf dene';
+  String get compressFailed =>
+      'Fotoğraf küçültülemedi, başka bir fotoğraf dene';
 
   @override
   String get voiceNote => 'Sesli not';
@@ -730,7 +740,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sectionOptions => 'OPSİYON & MALZEME';
 
   @override
-  String get sectionOptionsHint => 'Menüde olan ürünler için seçenek ve malzeme';
+  String get sectionOptionsHint =>
+      'Menüde olan ürünler için seçenek ve malzeme';
 
   @override
   String get sectionFixes => 'EKSİK / DÜZELTME';

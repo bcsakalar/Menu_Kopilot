@@ -76,9 +76,15 @@ class Pill extends StatelessWidget {
           else
             Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11.5, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 0.1, color: tone == Tone.neutral ? p.text : color),
+          // A long label ("Çift Kişilik · tabanı belirler") shortens with "…" where the row is bounded (a Wrap on
+          // a narrow phone) instead of overflowing; in an unbounded row (a horizontal list) it keeps its width.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 11.5, height: 1.2, fontWeight: FontWeight.w700, letterSpacing: 0.1, color: tone == Tone.neutral ? p.text : color),
+            ),
           ),
         ],
       ),
@@ -116,14 +122,22 @@ class InlineNotice extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.control),
           border: Border.all(color: tone == Tone.neutral ? p.border : color.withValues(alpha: 0.25)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon, size: 17, color: color),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: tone == Tone.neutral ? p.textMuted : p.text)),
+            Row(
+              children: [
+                Icon(icon, size: 17, color: color),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: tone == Tone.neutral ? p.textMuted : p.text)),
+                ),
+              ],
             ),
-            if (action != null) ...[const SizedBox(width: 8), action!],
+            // Under the text, not beside it: an action label ("Kebap & Izgara olarak yeniden analiz et") is often
+            // longer than the room a phone leaves next to the message.
+            if (action != null) Align(alignment: AlignmentDirectional.centerEnd, child: action),
           ],
         ),
       ),

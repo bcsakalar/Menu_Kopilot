@@ -15,7 +15,6 @@ import 'package:menu_kopilot/core/storage/token_store.dart';
 import 'package:menu_kopilot/data/models/analysis.dart';
 import 'package:menu_kopilot/data/models/json.dart';
 import 'package:menu_kopilot/data/models/template_payload.dart';
-import 'package:menu_kopilot/features/results/analysis_controller.dart';
 import 'package:menu_kopilot/features/results/results_screen.dart';
 import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
@@ -210,6 +209,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// The result list (not the horizontal chip/pill strips). The test font draws every glyph as a full square, so
+  /// the page is far taller than on a phone: later sections have to be scrolled to before they exist.
+  Finder resultList() => find.descendant(of: find.byType(CustomScrollView), matching: find.byType(Scrollable)).first;
+  Future<void> scrollTo(WidgetTester tester, Finder finder) => tester.scrollUntilVisible(finder, 250, scrollable: resultList());
+
+  /// The horizontal filter strip; its later chips are built only once it is scrolled.
+  Finder chipStrip() => find.ancestor(of: find.byType(FilterChip).first, matching: find.byType(Scrollable)).first;
+
   group('ResultsScreen', () {
     testWidgets('shows the count against the target, the cuisine and the open categories', (tester) async {
       await open(tester);
@@ -227,18 +234,22 @@ void main() {
     testWidgets('splits the cards into three titled, counted sections', (tester) async {
       await open(tester);
       expect(find.textContaining('YENİ ÜRÜNLER · 1'), findsOneWidget);
+      await scrollTo(tester, find.textContaining('OPSİYON & MALZEME · 1'));
       expect(find.textContaining('OPSİYON & MALZEME · 1'), findsOneWidget);
+      await scrollTo(tester, find.textContaining('EKSİK / DÜZELTME · 1'));
       expect(find.textContaining('EKSİK / DÜZELTME · 1'), findsOneWidget);
     });
 
     testWidgets('puts the target product first on an option card, and the rename on a fix card', (tester) async {
       await open(tester);
       // Section B: which product it belongs to, then the group and its choices.
+      await scrollTo(tester, find.text('Boy'));
       expect(find.text('Kıymalı Pide'), findsWidgets);
       expect(find.text('Boy'), findsOneWidget);
       // The panel's "fiyat farkı" in words: this choice sets the base price.
       expect(find.text('Tek Kişilik · tabanı belirler'), findsOneWidget);
       // Section C: old name struck through, suggested name next to it.
+      await scrollTo(tester, find.byKey(const ValueKey('card-fix')));
       expect(find.text('Karışık Pd'), findsWidgets);
       expect(find.text('Karışık Pide'), findsWidgets);
     });
@@ -252,11 +263,15 @@ void main() {
 
     testWidgets('filters down to one section and back', (tester) async {
       await open(tester);
+      await tester.scrollUntilVisible(find.byKey(const Key('filter-option')), 120, scrollable: chipStrip());
       await tester.tap(find.byKey(const Key('filter-option')));
       await tester.pumpAndSettle();
       expect(find.textContaining('OPSİYON & MALZEME · 1'), findsOneWidget);
       expect(find.textContaining('YENİ ÜRÜNLER'), findsNothing);
 
+      // Back to the start of the strip, where 'Tümü' sits.
+      await tester.drag(chipStrip(), const Offset(800, 0));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('filter-all')));
       await tester.pumpAndSettle();
       expect(find.textContaining('YENİ ÜRÜNLER · 1'), findsOneWidget);
@@ -284,6 +299,7 @@ void main() {
 
     testWidgets('selects a whole section from its header', (tester) async {
       await open(tester);
+      await scrollTo(tester, find.byKey(const ValueKey('select-all-option')));
       await tester.tap(find.byKey(const ValueKey('select-all-option')));
       await tester.pumpAndSettle();
       expect(find.text('1 kart seçili'), findsOneWidget);
@@ -293,6 +309,7 @@ void main() {
       api.payload = result(disagrees: true);
       await open(tester);
       expect(find.textContaining('Kebap & Izgara gibi görünüyor'), findsOneWidget);
+      await scrollTo(tester, find.byKey(const Key('rerun-suggested')));
       await tester.tap(find.byKey(const Key('rerun-suggested')));
       await tester.pumpAndSettle();
       final request = api.started.single;

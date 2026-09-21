@@ -77,8 +77,8 @@ class _Steps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final total = totalMs ?? steps.fold(0, (sum, s) => sum + s.durationMs);
-    final calls = llmCalls ?? steps.fold(0, (sum, s) => sum + s.llmCalls);
+    final total = totalMs ?? steps.fold<int>(0, (sum, s) => sum + s.durationMs);
+    final calls = llmCalls ?? steps.fold<int>(0, (sum, s) => sum + s.llmCalls);
     final slowest = steps.fold(0, (max, s) => s.durationMs > max ? s.durationMs : max);
 
     return ListView(

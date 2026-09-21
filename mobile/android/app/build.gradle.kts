@@ -19,8 +19,12 @@ val hasReleaseKey = releaseStoreFile != null && file(releaseStoreFile).exists()
 android {
     namespace = "com.bcsakalar.menu_kopilot"
     // receive_sharing_intent is compiled against API 37 and requires the app to compile against 37 too. Only the
-    // compile SDK moves; targetSdk (runtime behaviour) stays Flutter's default.
-    compileSdk = maxOf(flutter.compileSdkVersion, 37)
+    // compile SDK moves; targetSdk (runtime behaviour) stays Flutter's default. The SDK repository publishes
+    // Android 17 as "platforms;android-37.0" (an API level with a minor version): only the minor-level DSL finds
+    // it, `compileSdk = 37` looks for an "android-37" that is no longer published.
+    compileSdk {
+        version = release(maxOf(flutter.compileSdkVersion, 37)) { minorApiLevel = 0 }
+    }
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -9,7 +9,7 @@ import '../../core/utils/server_url.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/settings.dart';
 
-const String appVersion = '1.0.0';
+const String appVersion = '1.1.0';
 
 final quotaProvider = FutureProvider.autoDispose<QuotaInfo>((ref) => ref.watch(apiClientProvider).quota());
 

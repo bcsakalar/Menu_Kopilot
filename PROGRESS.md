@@ -1,7 +1,8 @@
 # PROGRESS
 
-Last update: 2026-09-21 — FAZ 0–3: Şubeler removed, one analysis screen (three sections) on a six-agent pipeline,
-category taxonomy editable in the app. Not deployed and not committed yet; mobile not compiled on this machine.
+Last update: 2026-09-21 — FAZ 0–3 done: Şubeler removed, one analysis screen (three sections) on a six-agent
+pipeline, categories editable in the app. App 1.1.0+2 compiled and tested here (Flutter 3.47.5, 56/56), signed with a
+new key (D-166). Waiting for GitHub push access from this PC before the production deploy.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.

@@ -331,8 +331,10 @@ flutter build apk --release --split-per-abi --target-platform android-arm64 --da
 ```
 
 Release signing: the production key lives in `%USERPROFILE%\.android-keys\menu-kopilot\` (`menu-kopilot-upload.jks` + a copy of
-`key.properties`, created 2026-09-18, certificate `CN=Menu Kopilot, O=bcsakalar`); `mobile/android/key.properties` points at it and is
-git-ignored. On a new machine copy that folder back and the same `key.properties` into `mobile/android/`. For a brand-new key
+`key.properties`, created 2026-09-21 on the `old-pc` machine, certificate `CN=Menu Kopilot, O=bcsakalar, C=TR`, SHA-256
+`DE:00:43:5B:E8:64:85:7C:A6:CB:B9:59:5F:BF:BC:09:9F:E9:0B:99:FE:48:5E:E9:98:38:9F:25:48:52:14:E6`); `mobile/android/key.properties`
+points at it and is git-ignored. Builds up to 1.0.0 were signed with an earlier key that stayed on another PC
+(DECISIONS D-166): a phone with such a build uninstalls it once before installing 1.1.0. On a new machine copy that folder back and the same `key.properties` into `mobile/android/`. For a brand-new key
 `powershell -File mobile/scripts/create-keystore.ps1` asks for a password and writes both files. Without `key.properties` a release build is signed with the debug key (fine for your own phone, not for
 distribution). **Back up the keystore and its password** — an app signed with a different key cannot be installed
 over the existing one.

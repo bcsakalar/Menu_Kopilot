@@ -853,13 +853,13 @@ abstract class AppLocalizations {
   /// No description provided for @deleteTemplateConfirm.
   ///
   /// In tr, this message translates to:
-  /// **'"{name}" şablonu silinsin mi?'**
+  /// **'\"{name}\" şablonu silinsin mi?'**
   String deleteTemplateConfirm(String name);
 
   /// No description provided for @deleteSeedTemplateConfirm.
   ///
   /// In tr, this message translates to:
-  /// **'"{name}" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)'**
+  /// **'\"{name}\" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)'**
   String deleteSeedTemplateConfirm(String name);
 
   /// No description provided for @menuSettings.
@@ -895,7 +895,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoriesHelp.
   ///
   /// In tr, this message translates to:
-  /// **'Ürün adında bu kelimelerden biri geçerse ürün o kategoriye sayılır ("şalgam" → İçecek); büyük/küçük harf ve Türkçe karakter fark etmez. Birden çok kelime tek ifade olarak eşleşir ("sıcak çikolata"). Değişiklik bir sonraki analizde geçerli olur.'**
+  /// **'Ürün adında bu kelimelerden biri geçerse ürün o kategoriye sayılır (\"şalgam\" → İçecek); büyük/küçük harf ve Türkçe karakter fark etmez. Birden çok kelime tek ifade olarak eşleşir (\"sıcak çikolata\"). Değişiklik bir sonraki analizde geçerli olur.'**
   String get categoriesHelp;
 
   /// No description provided for @keywordsLabel.
