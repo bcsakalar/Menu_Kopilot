@@ -7,7 +7,7 @@ import { type Cache, getJson, setJson } from '../../cache/cache.js';
 import type { TaskKey } from '../../config/models.js';
 import type { PromptKey } from '../../db/seed/prompts.js';
 import { sha256Hex } from '../../lib/images.js';
-import { itemsEnvelopeSchema } from '../suggest/schemas.js';
+import { itemsEnvelopeSchema } from '../../agents/schemas/shared.js';
 
 /**
  * Stage A — read-only extraction from ONE image per call (long menus break JSON most often with many images).

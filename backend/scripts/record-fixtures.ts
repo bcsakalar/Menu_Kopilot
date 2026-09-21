@@ -17,7 +17,8 @@ import { parseEnv } from '../src/config/env.js';
 import { DEFAULT_ROUTES, type TaskKey } from '../src/config/models.js';
 import { SEED_PROMPTS, type PromptKey } from '../src/db/seed/prompts.js';
 import { toImageInput } from '../src/lib/images.js';
-import { enrichmentSchema, extractionSchema, itemsEnvelopeSchema } from '../src/modules/suggest/schemas.js';
+import { EXTRACTOR_SCHEMA_NAME, extractorSchema } from '../src/agents/schemas/extractor.js';
+import { PRODUCT_RECOMMENDER_SCHEMA_NAME, productRecommenderSchema } from '../src/agents/schemas/product-recommender.js';
 
 const config = parseEnv({ ...process.env, DATABASE_URL: process.env['DATABASE_URL'] ?? 'unused' });
 if (!config.providers.geminiApiKey && !config.providers.groqApiKey) {
@@ -50,20 +51,20 @@ const router = new AiRouter({
 const fixtures = fileURLToPath(new URL('../test/fixtures/', import.meta.url));
 const imageDir = join(fixtures, 'images');
 
-for (const file of readdirSync(imageDir).filter((f) => f.startsWith('menu-') && f.endsWith('.jpg'))) {
+// Extractor: every menu photo and panel screenshot goes through the same agent now.
+for (const file of readdirSync(imageDir).filter((f) => /\.(jpg|png)$/.test(f))) {
   const image = toImageInput(readFileSync(join(imageDir, file)));
   if (!image) continue;
   const started = Date.now();
   const result = await router.generate({
-    task: 'vision.menu_extract',
-    schema: itemsEnvelopeSchema,
-    providerSchema: extractionSchema,
-    schemaName: 'menu_extraction',
-    system: render('extract.menu.system').text,
-    user: render('extract.menu.user', { cuisine: 'Genel' }).text,
+    task: 'agent.extract',
+    schema: extractorSchema,
+    schemaName: EXTRACTOR_SCHEMA_NAME,
+    system: render('agent.extract.system').text,
+    user: render('agent.extract.user', { cuisine: 'Genel' }).text,
     images: [image],
   });
-  const out = join(fixtures, 'llm', 'extract', file.replace('.jpg', '.recorded.json'));
+  const out = join(fixtures, 'llm', 'extract', file.replace(/\.(jpg|png)$/, '.recorded.json'));
   if (result.ok) {
     writeFileSync(out, `${JSON.stringify(result.value, null, 2)}\n`, 'utf8');
     console.log(`${file}: ${result.value.items.length} items via ${result.meta.model} in ${Date.now() - started} ms → ${out}`);
@@ -72,24 +73,29 @@ for (const file of readdirSync(imageDir).filter((f) => f.startsWith('menu-') && 
   }
 }
 
-const unknownNames = ['İçli Köfte', 'Humus', 'Şalgam', 'Kazandibi', 'Trileçe', 'Çoban Salata'];
+// Product Recommender: a pide-only menu, whose open categories are exactly the ones the old recommender ignored.
 const started = Date.now();
-const enriched = await router.generate({
-  task: 'text.item_enrich',
-  schema: itemsEnvelopeSchema,
-  providerSchema: enrichmentSchema,
-  schemaName: 'menu_items',
-  system: render('enrich.system').text,
-  user: render('enrich.user', {
-    cuisine: 'Kebap & Izgara',
-    examples: '',
-    items: unknownNames.map((n, i) => `${i + 1}. ${n}`).join('\n'),
+const recommended = await router.generate({
+  task: 'agent.recommend',
+  schema: productRecommenderSchema,
+  schemaName: PRODUCT_RECOMMENDER_SCHEMA_NAME,
+  system: render('agent.recommend.system').text,
+  user: render('agent.recommend.user', {
+    cuisine: 'Pide & Lahmacun',
+    segment: 'orta',
+    existing: 'Kıymalı Pide, Kaşarlı Pide, Kuşbaşılı Pide, Karışık Pide, Sucuklu Yumurtalı Pide',
+    gaps: ['corba | Çorba | 0/1 | 1 eksik', 'salata-meze | Salata & Meze | 0/1 | 1 eksik', 'icecek | İçecek | 0/2 | 2 eksik', 'tatli | Tatlı | 0/1 | 1 eksik'].join('\n'),
+    already: '-',
+    target: '10',
+    current: '5',
+    notes: '-',
+    max: '8',
   }).text,
 });
-if (enriched.ok) {
-  const out = join(fixtures, 'llm', 'enrich-items.recorded.json');
-  writeFileSync(out, `${JSON.stringify(enriched.value, null, 2)}\n`, 'utf8');
-  console.log(`enrichment: ${unknownNames.length} items via ${enriched.meta.model} in ${Date.now() - started} ms → ${out}`);
+if (recommended.ok) {
+  const out = join(fixtures, 'llm', 'recommend-items.recorded.json');
+  writeFileSync(out, `${JSON.stringify(recommended.value, null, 2)}\n`, 'utf8');
+  console.log(`recommend: ${recommended.value.items.length} items via ${recommended.meta.model} in ${Date.now() - started} ms → ${out}`);
 } else {
-  console.error(`enrichment: ${enriched.error.kind} ${enriched.error.message}`);
+  console.error(`recommend: ${recommended.error.kind} ${recommended.error.message}`);
 }

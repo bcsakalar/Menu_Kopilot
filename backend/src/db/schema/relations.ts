@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
-import { branches, branchMenuItems, branchMenuSnapshots } from './branches.js';
+import { agentSteps } from './agents.js';
+import { cuisineCategories, menuCategories } from './categories.js';
 import { cuisines } from './cuisines.js';
 import { ingredients, itemAliases, itemEmbeddings, menuItems, optionGroups, options } from './menu-items.js';
 import { suggestionItems, suggestionRuns } from './suggestions.js';
@@ -7,7 +8,6 @@ import { devices, users } from './users.js';
 
 export const usersRelations = relations(users, ({ many }) => ({
   devices: many(devices),
-  branches: many(branches),
 }));
 
 export const devicesRelations = relations(devices, ({ one }) => ({
@@ -18,10 +18,21 @@ export const cuisinesRelations = relations(cuisines, ({ one, many }) => ({
   parent: one(cuisines, { fields: [cuisines.parentId], references: [cuisines.id], relationName: 'cuisine_parent' }),
   children: many(cuisines, { relationName: 'cuisine_parent' }),
   menuItems: many(menuItems),
+  categories: many(cuisineCategories),
+}));
+
+export const menuCategoriesRelations = relations(menuCategories, ({ many }) => ({
+  cuisines: many(cuisineCategories),
+}));
+
+export const cuisineCategoriesRelations = relations(cuisineCategories, ({ one }) => ({
+  cuisine: one(cuisines, { fields: [cuisineCategories.cuisineId], references: [cuisines.id] }),
+  category: one(menuCategories, { fields: [cuisineCategories.categoryKey], references: [menuCategories.key] }),
 }));
 
 export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
   cuisine: one(cuisines, { fields: [menuItems.cuisineId], references: [cuisines.id] }),
+  category: one(menuCategories, { fields: [menuItems.categoryKey], references: [menuCategories.key] }),
   optionGroups: many(optionGroups),
   ingredients: many(ingredients),
   aliases: many(itemAliases),
@@ -49,27 +60,16 @@ export const itemEmbeddingsRelations = relations(itemEmbeddings, ({ one }) => ({
   menuItem: one(menuItems, { fields: [itemEmbeddings.menuItemId], references: [menuItems.id] }),
 }));
 
-export const branchesRelations = relations(branches, ({ one, many }) => ({
-  user: one(users, { fields: [branches.userId], references: [users.id] }),
-  cuisine: one(cuisines, { fields: [branches.cuisineId], references: [cuisines.id] }),
-  snapshots: many(branchMenuSnapshots),
-  items: many(branchMenuItems),
-}));
-
-export const branchMenuSnapshotsRelations = relations(branchMenuSnapshots, ({ one }) => ({
-  branch: one(branches, { fields: [branchMenuSnapshots.branchId], references: [branches.id] }),
-}));
-
-export const branchMenuItemsRelations = relations(branchMenuItems, ({ one }) => ({
-  branch: one(branches, { fields: [branchMenuItems.branchId], references: [branches.id] }),
-  matchedItem: one(menuItems, { fields: [branchMenuItems.matchedItemId], references: [menuItems.id] }),
-}));
-
 export const suggestionRunsRelations = relations(suggestionRuns, ({ many }) => ({
   items: many(suggestionItems),
+  steps: many(agentSteps),
 }));
 
 export const suggestionItemsRelations = relations(suggestionItems, ({ one }) => ({
   run: one(suggestionRuns, { fields: [suggestionItems.runId], references: [suggestionRuns.id] }),
   matchedItem: one(menuItems, { fields: [suggestionItems.matchedItemId], references: [menuItems.id] }),
+}));
+
+export const agentStepsRelations = relations(agentSteps, ({ one }) => ({
+  run: one(suggestionRuns, { fields: [agentSteps.runId], references: [suggestionRuns.id] }),
 }));

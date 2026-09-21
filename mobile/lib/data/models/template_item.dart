@@ -1,5 +1,5 @@
 import 'json.dart';
-import 'suggestion.dart';
+import 'analysis.dart';
 import 'template_payload.dart';
 
 /// A template of the pool ("Şablon havuzu"). `source`: seed | user | ai | imported.

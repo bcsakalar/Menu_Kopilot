@@ -27,3 +27,36 @@ export const updateCuisineSchema = z.object({
   minItemCount: z.number().int().min(0).max(500).optional(),
   notes: z.string().trim().max(500).nullable().optional(),
 });
+
+// ---- category taxonomy and per-cuisine expectations (edited from Ayarlar > Mutfak Türleri) ----------------------
+
+export const categoryDtoSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  sortOrder: z.number().int(),
+  /** normalizeTr'd words or phrases; a product whose name contains one (as whole tokens) belongs to this category. */
+  keywords: z.array(z.string()),
+});
+export type CategoryDto = z.infer<typeof categoryDtoSchema>;
+
+export const updateCategorySchema = z.object({
+  label: z.string().trim().min(2).max(40).optional(),
+  sortOrder: z.number().int().min(0).max(1000).optional(),
+  /** Any spelling is accepted ("Şalgam", "ŞALGAM", "Sıcak Çikolata"); it is stored normalized. */
+  keywords: z.array(z.string().trim().min(1).max(40)).max(120).optional(),
+});
+
+export const cuisineCategoryDtoSchema = z.object({
+  categoryKey: z.string(),
+  label: z.string(),
+  minItems: z.number().int(),
+  sortOrder: z.number().int(),
+});
+export type CuisineCategoryDto = z.infer<typeof cuisineCategoryDtoSchema>;
+
+export const putCuisineCategoriesSchema = z.object({
+  /** The complete set for the cuisine: categories left out are removed from its expectations. */
+  items: z
+    .array(z.object({ categoryKey: z.string().min(1).max(40), minItems: z.number().int().min(0).max(100) }))
+    .max(20),
+});

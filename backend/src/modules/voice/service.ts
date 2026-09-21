@@ -8,7 +8,7 @@ import type { Database } from '../../db/client.js';
 import { menuItems } from '../../db/schema/index.js';
 import { sha256Hex } from '../../lib/images.js';
 import { stripPriceAmounts } from '../../lib/price-guard.js';
-import { parsePromptItems } from '../suggest/prompt-parse.js';
+import { parseMenuText } from '../analyze/service.js';
 import { type StoredTranscription, type TranscriptionDto, storedTranscriptionSchema } from './schemas.js';
 
 /** Whisper's prompt is limited to 224 tokens; ~600 characters of Turkish names stay well inside it. */
@@ -77,7 +77,7 @@ export class VoiceService {
     }
     return {
       ...stored,
-      items: parsePromptItems(stored.text).map((item) => item.rawName),
+      items: parseMenuText(stored.text),
       cached,
     };
   }

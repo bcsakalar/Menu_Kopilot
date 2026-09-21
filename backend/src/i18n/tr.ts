@@ -7,16 +7,30 @@ import { normalizeTr } from '../lib/normalize-tr.js';
  */
 
 export const TASK_LABELS: Readonly<Record<TaskKey, string>> = {
-  'vision.menu_extract': 'Menü fotoğrafı okuma',
-  'vision.panel_extract': 'Panel ekran görüntüsü okuma',
-  'text.item_enrich': 'Ürün kartı üretme',
-  'text.normalize_classify': 'İsim eşleştirme',
-  'text.gap_suggest': 'Eksik ürün önerisi',
-  'deep.analyze': 'Derin analiz',
+  'agent.extract': 'Menü okuma (Extractor)',
+  'agent.classify': 'Mutfak türü tahmini (Classifier)',
+  'agent.recommend': 'Yeni ürün önerisi (Product Recommender)',
+  'agent.options': 'Opsiyon & malzeme önerisi (Option/Modifier)',
+  'agent.validate': 'Çıktı onarımı (Validator)',
   embed: 'Anlamsal arama (embedding)',
   'audio.transcribe': 'Sesli not (konuşmayı yazıya çevirme)',
-  'research.web': 'Restoranı internette araştırma',
 };
+
+/** Tasks retired with the agent pipeline. Kept only so usage rows written before it still read in Turkish. */
+export const LEGACY_TASK_LABELS: Readonly<Record<string, string>> = {
+  'vision.menu_extract': 'Menü fotoğrafı okuma (eski)',
+  'vision.panel_extract': 'Panel ekran görüntüsü okuma (eski)',
+  'text.item_enrich': 'Ürün kartı üretme (eski)',
+  'text.normalize_classify': 'İsim eşleştirme (eski)',
+  'text.gap_suggest': 'Eksik ürün önerisi (eski)',
+  'deep.analyze': 'Derin analiz (eski)',
+  'research.web': 'Restoranı internette araştırma (eski)',
+};
+
+/** Label of any task key that may appear in usage history. */
+export function taskLabel(taskKey: string): string {
+  return (TASK_LABELS as Readonly<Record<string, string>>)[taskKey] ?? LEGACY_TASK_LABELS[taskKey] ?? taskKey;
+}
 
 /** "a" · "a ve b" · "a, b ve c" */
 export function joinTr(parts: readonly string[]): string {

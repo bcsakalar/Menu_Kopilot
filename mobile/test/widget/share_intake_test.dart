@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:menu_kopilot/core/utils/image_compressor.dart';
-import 'package:menu_kopilot/features/gap/gap_controller.dart';
 import 'package:menu_kopilot/features/home/home_controller.dart';
 import 'package:menu_kopilot/features/share/share_intake.dart';
 import 'package:menu_kopilot/features/share/share_listener.dart';
@@ -37,7 +36,6 @@ GoRouter testRouter() => GoRouter(
           builder: (context, state, child) => Scaffold(body: ShareIntakeListener(child: child)),
           routes: [
             GoRoute(path: '/suggest', builder: (_, _) => const Text('suggest-tab')),
-            GoRoute(path: '/gap', builder: (_, _) => const Text('gap-tab')),
           ],
         ),
       ],
@@ -78,7 +76,7 @@ void main() {
     expect(SharedIntake.fromMedia([SharedMediaFile(path: ' ', type: SharedMediaType.text)]).isEmpty, isTrue);
   });
 
-  testWidgets('photos that opened the app go to "Tamamla" as panel screenshots', (tester) async {
+  testWidgets('photos that opened the app land in the analysis draft', (tester) async {
     final source = FakeShareSource(first: const SharedIntake(imagePaths: ['/cache/p1.png', '/cache/p2.png']));
     final compressed = <String>[];
     await tester.pumpWidget(app(source, compressed));
@@ -86,30 +84,30 @@ void main() {
 
     expect(find.text('2 fotoğraf paylaşıldı'), findsOneWidget);
     expect(source.consumedCalls, 1);
-    await tester.tap(find.byKey(const Key('share-gap-screenshots')));
+    await tester.tap(find.byKey(const Key('share-photos')));
     await tester.pumpAndSettle();
 
-    expect(find.text('gap-tab'), findsOneWidget);
-    final container = ProviderScope.containerOf(tester.element(find.text('gap-tab')));
-    expect(container.read(gapDraftProvider).images.map((i) => i.path), ['/cache/p1.png', '/cache/p2.png']);
+    expect(find.text('suggest-tab'), findsOneWidget);
+    final container = ProviderScope.containerOf(tester.element(find.text('suggest-tab')));
+    expect(container.read(homeDraftProvider).images.map((i) => i.path), ['/cache/p1.png', '/cache/p2.png']);
     expect(compressed, hasLength(2));
   });
 
-  testWidgets('a product list shared while the app runs is appended to the "Öneri" prompt', (tester) async {
+  testWidgets('a product list shared while the app runs is appended to the menu field', (tester) async {
     final source = FakeShareSource();
     await tester.pumpWidget(app(source, []));
     await tester.pumpAndSettle();
     final container = ProviderScope.containerOf(tester.element(find.text('suggest-tab')));
-    container.read(homeDraftProvider.notifier).setPrompt('Künefe');
+    container.read(homeDraftProvider.notifier).setMenuText('Künefe');
 
     source.controller.add(const SharedIntake(text: 'Adana Kebap\nAyran'));
     await tester.pumpAndSettle();
     expect(find.text('Metin paylaşıldı'), findsOneWidget);
-    expect(find.byKey(const Key('share-gap-screenshots')), findsNothing);
-    await tester.tap(find.byKey(const Key('share-suggest-text')));
+    expect(find.byKey(const Key('share-photos')), findsNothing);
+    await tester.tap(find.byKey(const Key('share-text')));
     await tester.pumpAndSettle();
 
-    expect(container.read(homeDraftProvider).prompt, 'Künefe\nAdana Kebap\nAyran');
+    expect(container.read(homeDraftProvider).menuText, 'Künefe\nAdana Kebap\nAyran');
     expect(find.text('suggest-tab'), findsOneWidget);
   });
 }

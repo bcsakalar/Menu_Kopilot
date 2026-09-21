@@ -111,8 +111,8 @@ curl.exe -fsS https://menu.example.com/health/ready
 ssh myserver "docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}' | grep -E 'NAME|menu-kopilot'"
 ```
 
-End-to-end check against production (creates and deletes a test branch; with AI keys it also measures the latency
-targets and spends a few LLM calls). The password is read without echo and never lands in shell history:
+End-to-end check against production (starts a few analyses and marks one card skipped, never accepts one, so the
+template pool is untouched; with AI keys it also reads two screenshots and a menu photo and spends a few LLM calls). The password is read without echo and never lands in shell history:
 
 ```powershell
 $env:ADMIN_EMAIL = 'admin@example.com'

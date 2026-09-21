@@ -1,11 +1,20 @@
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, eq, inArray, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Database } from '../../db/client.js';
-import { branches, cuisines, menuItems } from '../../db/schema/index.js';
+import { cuisineCategories, cuisines, menuCategories, menuItems } from '../../db/schema/index.js';
 import { AppError, notFound } from '../../lib/errors.js';
-import { slugifyTr } from '../../lib/normalize-tr.js';
-import { MIN_BRANCH_ITEMS } from '../branches/branch-menu.js';
-import type { CuisineDto, createCuisineSchema, updateCuisineSchema } from './schemas.js';
+import { normalizeTr, slugifyTr } from '../../lib/normalize-tr.js';
+import { MIN_BRANCH_ITEMS, loadCategories, loadCategoryIndex, loadExpectations } from '../../agents/gap-analyst.js';
+import { recategorizeTemplates } from '../templates/template-store.js';
+import type {
+  CategoryDto,
+  CuisineCategoryDto,
+  CuisineDto,
+  createCuisineSchema,
+  putCuisineCategoriesSchema,
+  updateCategorySchema,
+  updateCuisineSchema,
+} from './schemas.js';
 
 /** Cuisine types; per-cuisine minimum product counts are user data (edited in settings), never hard-coded. */
 export class CuisineService {
@@ -88,11 +97,70 @@ export class CuisineService {
   async remove(id: string): Promise<void> {
     const current = await this.get(id);
     if (current.isSystem) throw new AppError('FORBIDDEN', 'Sistem mutfak türleri silinemez');
-    const [usedByBranch] = await this.db.select({ id: branches.id }).from(branches).where(eq(branches.cuisineId, id)).limit(1);
     const [usedByTemplate] = await this.db.select({ id: menuItems.id }).from(menuItems).where(eq(menuItems.cuisineId, id)).limit(1);
-    if (usedByBranch || usedByTemplate) {
-      throw new AppError('CONFLICT', 'Bu mutfak türü şube veya şablonlarda kullanılıyor');
+    if (usedByTemplate) {
+      throw new AppError('CONFLICT', 'Bu mutfak türü şablonlarda kullanılıyor');
     }
     await this.db.delete(cuisines).where(eq(cuisines.id, id));
+  }
+
+  // ---- categories ------------------------------------------------------------------------------------------
+
+  async listCategories(): Promise<CategoryDto[]> {
+    return (await loadCategories(this.db)).map((c) => ({ ...c, keywords: [...c.keywords] }));
+  }
+
+  /**
+   * Keywords are stored the way the classifier compares them: normalized ("Şalgam" → "salgam"). A multi-word keyword
+   * stays one phrase ("Sıcak Çikolata" → "sicak cikolata"), matched as whole tokens in order.
+   */
+  async updateCategory(key: string, input: z.infer<typeof updateCategorySchema>): Promise<CategoryDto> {
+    const [existing] = await this.db.select({ key: menuCategories.key }).from(menuCategories).where(eq(menuCategories.key, key)).limit(1);
+    if (!existing) throw notFound('Kategori');
+    const keywords =
+      input.keywords === undefined
+        ? undefined
+        : [...new Set(input.keywords.map((k) => normalizeTr(k)).filter((k) => k.length >= 2))];
+    await this.db
+      .update(menuCategories)
+      .set({
+        ...(input.label !== undefined ? { label: input.label } : {}),
+        ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
+        ...(keywords !== undefined ? { keywords } : {}),
+        editedByUser: true,
+      })
+      .where(eq(menuCategories.key, key));
+    // The pool follows at once: seed templates are re-classified with the new keywords (the recommender reads them).
+    if (keywords !== undefined) await recategorizeTemplates(this.db, await loadCategoryIndex(this.db));
+    const updated = (await this.listCategories()).find((c) => c.key === key);
+    if (!updated) throw notFound('Kategori');
+    return updated;
+  }
+
+  /** What the Gap Analyst expects from this cuisine: category → minimum products. */
+  async cuisineCategories(cuisineId: string): Promise<CuisineCategoryDto[]> {
+    await this.get(cuisineId);
+    const rows = await loadExpectations(this.db, cuisineId);
+    return rows.map(({ key, ...rest }) => ({ categoryKey: key, ...rest }));
+  }
+
+  /** Replaces the whole expectation set of a cuisine in one transaction (the screen always sends the full list). */
+  async replaceCuisineCategories(cuisineId: string, input: z.infer<typeof putCuisineCategoriesSchema>): Promise<CuisineCategoryDto[]> {
+    await this.get(cuisineId);
+    const keys = [...new Set(input.items.map((i) => i.categoryKey))];
+    if (keys.length !== input.items.length) throw new AppError('VALIDATION_ERROR', 'Aynı kategori iki kez var');
+    const known = keys.length === 0 ? [] : await this.db.select({ key: menuCategories.key, sortOrder: menuCategories.sortOrder }).from(menuCategories).where(inArray(menuCategories.key, keys));
+    const order = new Map(known.map((k) => [k.key, k.sortOrder]));
+    const unknown = keys.filter((k) => !order.has(k));
+    if (unknown.length > 0) throw new AppError('VALIDATION_ERROR', `Bilinmeyen kategori: ${unknown.join(', ')}`);
+    await this.db.transaction(async (tx) => {
+      await tx.update(cuisines).set({ categoriesEditedByUser: true, updatedAt: new Date() }).where(eq(cuisines.id, cuisineId));
+      await tx.delete(cuisineCategories).where(eq(cuisineCategories.cuisineId, cuisineId));
+      if (input.items.length === 0) return;
+      await tx.insert(cuisineCategories).values(
+        input.items.map((item) => ({ cuisineId, categoryKey: item.categoryKey, minItems: item.minItems, sortOrder: order.get(item.categoryKey) ?? 0 })),
+      );
+    });
+    return this.cuisineCategories(cuisineId);
   }
 }

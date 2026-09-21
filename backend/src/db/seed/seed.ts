@@ -3,9 +3,11 @@ import { DEFAULT_ROUTES, TASK_KEYS } from '../../config/models.js';
 import { templatePayloadSchema } from '../../domain/template.js';
 import { hashPassword } from '../../lib/password.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
-import { findApprovedByName, insertTemplate, replaceTemplateContent } from '../../modules/templates/template-store.js';
+import { loadCategoryIndex } from '../../agents/gap-analyst.js';
+import { findApprovedByName, insertTemplate, recategorizeTemplates, replaceTemplateContent } from '../../modules/templates/template-store.js';
 import type { Database } from '../client.js';
-import { cuisines, menuItems, promptTemplates, providerConfigs, users } from '../schema/index.js';
+import { cuisineCategories, cuisines, menuCategories, menuItems, promptTemplates, providerConfigs, users } from '../schema/index.js';
+import { SEED_CATEGORIES, SEED_CUISINE_CATEGORIES } from './categories.js';
 import { LEGACY_NOTES, SEED_CUISINES } from './cuisines.js';
 import { SEED_PROMPTS } from './prompts.js';
 import { SEED_TEMPLATES } from './templates.js';
@@ -23,6 +25,9 @@ export interface SeedReport {
   templatesSkipped: number;
   promptsInserted: number;
   providerConfigsInserted: number;
+  categoriesInserted: number;
+  cuisineCategoriesInserted: number;
+  templatesCategorized: number;
 }
 
 /**
@@ -43,6 +48,9 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
     templatesSkipped: 0,
     promptsInserted: 0,
     providerConfigsInserted: 0,
+    categoriesInserted: 0,
+    cuisineCategoriesInserted: 0,
+    templatesCategorized: 0,
   };
 
   // Validate everything up-front so a broken seed never half-applies.
@@ -83,8 +91,11 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
       report.cuisinesUpdated += refreshed.length;
     }
 
-    const cuisineRows = await tx.select({ id: cuisines.id, slug: cuisines.slug }).from(cuisines);
+    const cuisineRows = await tx
+      .select({ id: cuisines.id, slug: cuisines.slug, categoriesEditedByUser: cuisines.categoriesEditedByUser })
+      .from(cuisines);
     const cuisineIdBySlug = new Map(cuisineRows.map((c) => [c.slug, c.id]));
+    const userOwnedCategorySets = new Set(cuisineRows.filter((c) => c.categoriesEditedByUser).map((c) => c.id));
     const requireCuisine = (slug: string): string => {
       const id = cuisineIdBySlug.get(slug);
       if (!id) throw new Error(`Seed cuisine missing: ${slug}`);
@@ -97,6 +108,41 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
         .update(cuisines)
         .set({ parentId: requireCuisine(cuisine.parentSlug) })
         .where(and(eq(cuisines.slug, cuisine.slug), isNull(cuisines.parentId)));
+    }
+
+
+    // --- categories -------------------------------------------------------------------------------------------
+    // Labels and keywords are refreshed on every seed until the user edits a category; from then on the row is
+    // theirs. A cuisine's category set is seeded the same way: once the user edited it in settings (even removing a
+    // category), the seed leaves the whole set alone, so a removed category does not come back on the next start.
+    for (const category of SEED_CATEGORIES) {
+      const inserted = await tx
+        .insert(menuCategories)
+        .values({
+          key: category.key,
+          label: category.label,
+          sortOrder: category.sortOrder,
+          keywords: [...category.keywords],
+        })
+        .onConflictDoUpdate({
+          target: menuCategories.key,
+          set: { label: category.label, sortOrder: category.sortOrder, keywords: [...category.keywords] },
+          setWhere: eq(menuCategories.editedByUser, false),
+        })
+        .returning({ key: menuCategories.key });
+      report.categoriesInserted += inserted.length;
+    }
+
+    for (const entry of SEED_CUISINE_CATEGORIES) {
+      const cuisineId = cuisineIdBySlug.get(entry.cuisine);
+      if (!cuisineId || userOwnedCategorySets.has(cuisineId)) continue;
+      const sortOrder = SEED_CATEGORIES.find((c) => c.key === entry.category)?.sortOrder ?? 0;
+      const inserted = await tx
+        .insert(cuisineCategories)
+        .values({ cuisineId, categoryKey: entry.category, minItems: entry.minItems, sortOrder })
+        .onConflictDoNothing({ target: [cuisineCategories.cuisineId, cuisineCategories.categoryKey] })
+        .returning({ id: cuisineCategories.id });
+      report.cuisineCategoriesInserted += inserted.length;
     }
 
     for (const [index, seedTemplate] of SEED_TEMPLATES.entries()) {
@@ -139,6 +185,13 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
         report.templatesSkipped += 1;
       }
     }
+
+
+    // --- template categories ----------------------------------------------------------------------------------
+    // Every approved template gets a category so the recommender can filter on an index instead of classifying
+    // names on every request. Seed templates follow the taxonomy as stored — the user's keyword edits included —
+    // and a category that came from accepting a card stays (see recategorizeTemplates).
+    report.templatesCategorized = await recategorizeTemplates(tx, await loadCategoryIndex(tx));
 
     for (const prompt of SEED_PROMPTS) {
       const inserted = await tx

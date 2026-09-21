@@ -1,0 +1,73 @@
+{
+  "id": "kebapci",
+  "label": "Kebapçı (ocakbaşı)",
+  "cuisineSlug": "kebap-izgara",
+  "note": "Satıcı sadece ana ürünleri göndermiş; içecek ve tatlı hiç yok, ara sıcak tek kalem.",
+  "menu": [
+    "Adana Kebap",
+    "Urfa Kebap",
+    "Tavuk Şiş",
+    "Beyti Sarma",
+    "Ali Nazik",
+    "İçli Köfte"
+  ],
+  "expectCategories": [
+    "ana-yemek",
+    "corba",
+    "ara-sicak",
+    "salata-meze",
+    "icecek",
+    "tatli"
+  ],
+  "presentCategories": [
+    "ana-yemek",
+    "ara-sicak"
+  ],
+  "plausibleAdditions": [
+    "Antep Ezmesi",
+    "Ayran",
+    "Baklava",
+    "Bulgur Pilavı",
+    "Cacık",
+    "Çoban Salata",
+    "Ezme Salata",
+    "Ezogelin Çorbası",
+    "Fıstıklı Baklava",
+    "Gavurdağı Salatası",
+    "Haydari",
+    "Izgara Köfte",
+    "Kadayıf",
+    "Kaşarlı Pide",
+    "Kola",
+    "Közlenmiş Domates Biber",
+    "Közlenmiş Patlıcan",
+    "Kuzu Pirzola",
+    "Kuzu Şiş",
+    "Künefe",
+    "Künefe",
+    "Lahmacun",
+    "Maden Suyu",
+    "Mercimek Çorbası",
+    "Mevsim Salata",
+    "Patlıcan Kebap",
+    "Pilav",
+    "Piyaz",
+    "Soğan Ezmesi",
+    "Soğan Salatası",
+    "Su",
+    "Sütlaç",
+    "Şalgam",
+    "Şalgam Suyu",
+    "Tavuk Kanat",
+    "Türk Kahvesi",
+    "Yoğurtlu Kebap"
+  ],
+  "implausible": [
+    "Sushi",
+    "California Roll",
+    "Cheeseburger",
+    "Pad Thai",
+    "Latte Macchiato",
+    "Tiramisu"
+  ]
+}

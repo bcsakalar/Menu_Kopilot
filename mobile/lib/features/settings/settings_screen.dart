@@ -8,7 +8,6 @@ import '../../core/providers.dart';
 import '../../core/utils/server_url.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/settings.dart';
-import '../results/suggestion_card.dart';
 
 const String appVersion = '1.0.0';
 
@@ -54,6 +53,14 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(l10n.cuisinesAndMinimumsHint),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/settings/cuisines'),
+          ),
+          ListTile(
+            key: const Key('settings-categories'),
+            leading: const Icon(Icons.category_outlined),
+            title: Text(l10n.categoriesTitle),
+            subtitle: Text(l10n.categoriesHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/categories'),
           ),
           Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), child: SectionLabel(l10n.aiSection)),
           ListTile(

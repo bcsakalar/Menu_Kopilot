@@ -124,7 +124,7 @@ class SkeletonCard extends StatelessWidget {
   }
 }
 
-/// A list of skeleton rows (loading lists: branches, templates, settings).
+/// A list of skeleton rows (loading lists: templates, settings, pipeline steps).
 class SkeletonList extends StatelessWidget {
   const SkeletonList({super.key, this.rows = 5});
 

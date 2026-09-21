@@ -1,10 +1,10 @@
 import { and, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import type { QuotaService } from '../../ai/usage.js';
 import { startOfDay, startOfMonth } from '../../ai/usage.js';
-import { MODEL_CATALOG, isTaskKey } from '../../config/models.js';
+import { MODEL_CATALOG } from '../../config/models.js';
 import type { Database } from '../../db/client.js';
 import { suggestionItems, suggestionRuns, usageLog } from '../../db/schema/index.js';
-import { TASK_LABELS } from '../../i18n/tr.js';
+import { taskLabel } from '../../i18n/tr.js';
 import type { UsageSummary } from './schemas.js';
 
 const ratio = (part: number, total: number) => (total === 0 ? 0 : Math.round((part / total) * 1000) / 1000);
@@ -79,7 +79,7 @@ export class UsageService {
       timezone: this.config.timezone,
       totals: totals ?? { calls: 0, failed: 0, tokensIn: 0, tokensOut: 0, avgLatencyMs: 0 },
       byModel: byModel.map((m) => ({ ...m, label: MODEL_CATALOG[m.model]?.label ?? m.model })),
-      byTask: byTask.map((t) => ({ ...t, label: isTaskKey(t.taskKey) ? TASK_LABELS[t.taskKey] : t.taskKey })),
+      byTask: byTask.map((t) => ({ ...t, label: taskLabel(t.taskKey) })),
       errors: errors.map((e) => ({ code: e.code ?? 'unknown', count: e.count })),
       runs: { ...runTotals, cacheHitRatio: ratio(runTotals.cacheHit, runTotals.total) },
       cards: { ...cardTotals, dbHitRatio: ratio(cardTotals.fromDb, cardTotals.total) },

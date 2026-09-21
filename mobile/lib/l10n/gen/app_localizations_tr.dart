@@ -19,11 +19,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get changeServer => 'Değiştir';
 
   @override
-  String get disclaimer =>
-      'Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.';
-
-  @override
-  String get ok => 'Tamam';
+  String get disclaimer => 'Öneriler yapay zekâ ve şablonlardan üretilir; restoranla teyit et.';
 
   @override
   String get cancel => 'İptal';
@@ -56,20 +52,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get loading => 'Yükleniyor…';
 
   @override
-  String get offlineBanner =>
-      'Çevrimdışı: son sonuçlar ve şablonlar gösteriliyor';
+  String get offlineBanner => 'Çevrimdışı: son sonuçlar ve şablonlar gösteriliyor';
 
   @override
   String get genericError => 'Bir şeyler ters gitti';
 
   @override
   String get networkError => 'Sunucuya ulaşılamadı. Bağlantını kontrol et.';
-
-  @override
-  String get navSuggest => 'Öneri';
-
-  @override
-  String get navGap => 'Tamamla';
 
   @override
   String sharedPhotos(int count) {
@@ -80,25 +69,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sharedText => 'Metin paylaşıldı';
 
   @override
-  String get shareAsMenuPhotos => 'Menü fotoğrafı → Öneri';
+  String get shareAsMenuPhotos => 'Görüntüleri analize ekle';
 
   @override
-  String get shareAsMenuPhotosHint => 'Ürün kartları hazırlanır';
+  String get shareAsMenuPhotosHint =>
+      'Menü fotoğrafı ya da platform panel ekran görüntüsü — ikisi de olur';
 
   @override
-  String get shareAsScreenshots => 'Panel ekran görüntüsü → Tamamla';
-
-  @override
-  String get shareAsScreenshotsHint => 'Şubenin eksikleri bulunur';
-
-  @override
-  String get shareAsProductList => 'Ürün listesi → Öneri';
-
-  @override
-  String get shareAsMenuText => 'Menüdeki ürünler → Tamamla';
-
-  @override
-  String get navBranches => 'Şubeler';
+  String get shareAsProductList => 'Metni menü listesine ekle';
 
   @override
   String get navTemplates => 'Şablonlar';
@@ -136,14 +114,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invalidUrl => 'Geçerli bir adres gir (http/https)';
 
   @override
-  String get insecureUrl =>
-      'Güvenli bağlantı gerekli: adres https:// ile başlamalı';
+  String get insecureUrl => 'Güvenli bağlantı gerekli: adres https:// ile başlamalı';
 
   @override
   String get logout => 'Çıkış yap';
-
-  @override
-  String get newSuggestion => 'Yeni Öneri';
 
   @override
   String get cuisine => 'Mutfak türü';
@@ -158,18 +132,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get allCuisines => 'Tümü';
 
   @override
-  String get promptLabel => 'Ürünler';
-
-  @override
-  String get promptHint => 'ör. adana kebap, lahmacun, künefe var';
-
-  @override
   String get photos => 'Menü fotoğrafları';
-
-  @override
-  String photosCount(int count, int max) {
-    return '$count/$max fotoğraf';
-  }
 
   @override
   String get takePhoto => 'Kamera';
@@ -178,19 +141,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pickFromGallery => 'Galeri';
 
   @override
-  String get deepMode => 'Derin analiz (daha yavaş, daha ayrıntılı)';
-
-  @override
-  String get deepModeTitle => 'Derin analiz';
-
-  @override
-  String get deepModeHint => 'Daha yavaş, daha ayrıntılı kartlar';
-
-  @override
   String get productsUnit => 'ürün';
 
   @override
-  String get cardsUnit => 'kart';
+  String get cardsUnit => 'öneri';
 
   @override
   String aiCallsCount(int count) {
@@ -198,37 +152,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String detailGroups(int count) {
-    return '$count grup';
-  }
-
-  @override
-  String detailRemovables(int count) {
-    return '$count çıkarılabilir';
-  }
-
-  @override
-  String detailExtras(int count) {
-    return '$count ekstra';
-  }
-
-  @override
-  String get showDetails => 'Detaylar';
-
-  @override
-  String get hideDetails => 'Gizle';
-
-  @override
-  String get queuedShort => 'sırada';
-
-  @override
-  String get menuTextEyebrow => 'Menüdeki ürünler';
-
-  @override
   String get newShort => 'Yeni';
-
-  @override
-  String get branchStatus => 'Şube durumu';
 
   @override
   String get cameraStarting => 'Kamera açılıyor…';
@@ -237,10 +161,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get shareWhereTo => 'Nereye eklensin?';
 
   @override
-  String get suggestButton => 'Öner';
-
-  @override
-  String get needInput => 'Ürün yaz veya menü fotoğrafı ekle';
+  String get needInput => 'Menüdeki ürünleri yaz veya bir görüntü ekle';
 
   @override
   String get compressing => 'Fotoğraflar küçültülüyor…';
@@ -251,17 +172,16 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get recentRuns => 'Son öneriler';
+  String get recentRuns => 'Son analizler';
 
   @override
-  String get noRecentRuns => 'Henüz öneri yok';
+  String get noRecentRuns => 'Henüz analiz yok';
 
   @override
-  String get photoRunTitle => 'Fotoğraftan öneri';
+  String get photoRunTitle => 'Fotoğraftan analiz';
 
   @override
-  String get queuedOffline =>
-      'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
+  String get queuedOffline => 'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
 
   @override
   String pendingQueue(int count) {
@@ -283,10 +203,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cameraPermission => 'Kamera izni gerekli';
 
   @override
-  String get resultsTitle => 'Öneriler';
-
-  @override
-  String get streaming => 'Hazırlanıyor…';
+  String get resultsTitle => 'Analiz';
 
   @override
   String get readingPhotos => 'Fotoğraflar okunuyor…';
@@ -303,33 +220,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stopped => 'Durduruldu';
 
   @override
-  String get continueButton => 'Devam et';
-
-  @override
-  String budgetExhausted(int count) {
-    return 'Bu istek için bütçe doldu: $count ürün bekliyor';
-  }
-
-  @override
-  String pendingItemsCount(int count) {
-    return '$count ürün bekliyor';
-  }
-
-  @override
-  String pendingPhotosCount(int count) {
-    return '$count fotoğraf bekliyor';
-  }
-
-  @override
-  String doneSummary(int db, int ai, int review, int calls) {
-    return '$db DB, $ai AI, $review inceleme · $calls AI çağrısı';
-  }
-
-  @override
   String get fromCache => 'Tamamen veritabanı/önbellekten';
-
-  @override
-  String get placeholderPreparing => 'hazırlanıyor…';
 
   @override
   String get badgeSeed => 'Hazır şablon';
@@ -344,33 +235,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get badgeReview => 'İnceleme gerek';
 
   @override
-  String get reviewUnknown => 'Bunu bilmiyorum, sen doldur.';
-
-  @override
-  String get accept => 'Onayla';
-
-  @override
-  String get accepted => 'Onaylandı';
-
-  @override
-  String get skip => 'Atla';
-
-  @override
-  String get skipped => 'Atlandı';
-
-  @override
-  String get savedAsTemplate => 'Şablona kaydedildi';
-
-  @override
   String get acceptNeedsContent => 'Önce açıklama veya bir opsiyon grubu ekle';
 
   @override
   String get description => 'Açıklama';
-
-  @override
-  String descriptionCounter(int count) {
-    return '$count/160';
-  }
 
   @override
   String get servingNote => 'Servis şekli';
@@ -463,49 +331,17 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get gapTitle => 'Menü Tamamlama';
-
-  @override
-  String get branch => 'Şube';
-
-  @override
-  String get selectBranch => 'Şube seç';
-
-  @override
-  String get newBranch => 'Yeni şube';
-
-  @override
-  String get editBranch => 'Şubeyi düzenle';
-
-  @override
-  String get branchName => 'Şube adı';
-
-  @override
-  String get city => 'Şehir';
-
-  @override
   String get notes => 'Notlar';
 
   @override
-  String get targetOverride => 'Hedef ürün sayısı (boş = otomatik)';
-
-  @override
-  String targetOverrideHelp(int count) {
-    return 'Otomatik hedef: $count ürün';
-  }
-
-  @override
   String get invalidNumber => '1 ile 500 arasında bir sayı gir';
-
-  @override
-  String get noBranches => 'Henüz şube yok. Önce bir şube oluştur.';
 
   @override
   String get screenshots => 'Panel ekran görüntüleri';
 
   @override
   String get screenshotsHint =>
-      'platform panelindeki ürün listesinin ekran görüntülerini ekle; kaydırarak alınmış, üst üste binen görüntüler sorun değil.';
+      'İstersen platform panelinin ekran görüntülerini veya menü fotoğrafını ekle; üst üste binen görüntüler sorun değil.';
 
   @override
   String get extraNotes => 'Not (isteğe bağlı)';
@@ -514,53 +350,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get extraNotesHint => 'ör. restoran tatlı da yapıyor';
 
   @override
-  String get analyzeButton => 'Eksikleri bul';
+  String get analyzeButton => 'Analiz et';
 
   @override
-  String get needScreenshot =>
-      'Şube seç; ekran görüntüsü ekle ya da menüdeki ürünleri yaz';
+  String get menuTextLabel => 'Menüde neler var?';
 
   @override
-  String get menuTextLabel => 'Yaz ya da sesli söyle';
+  String get menuTextHint => 'ör. adana, urfa, lahmacun — ekran görüntüsü olmadan da çalışır';
 
   @override
-  String get menuTextHint =>
-      'ör. adana, urfa, lahmacun, ayran — ekran görüntüsü olmadan da çalışır';
-
-  @override
-  String typedItems(int count) {
-    return 'Yazdığın ürünler ($count)';
-  }
-
-  @override
-  String get typedItemsHint =>
-      'Sayıma dahil; açıklama/opsiyon durumları bilinmiyor';
-
-  @override
-  String analysisSummaryTyped(
-    int screenshots,
-    int typed,
-    int unique,
-    int calls,
-  ) {
-    return '$screenshots görüntü · $typed yazılı · $unique ürün · $calls AI çağrısı';
-  }
-
-  @override
-  String lastAnalysis(String date) {
-    return 'Son analiz: $date';
-  }
-
-  @override
-  String get openLastAnalysis => 'Aç';
-
-  @override
-  String get noAnalysisYet => 'Bu şube için henüz analiz yok';
-
-  @override
-  String countsLabel(int current, int target) {
-    return '$current / $target ürün';
-  }
+  String get noAnalysisYet => 'Henüz analiz yok — menüyü yaz veya ekran görüntüsü ekle';
 
   @override
   String missingCount(int count) {
@@ -571,135 +370,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get targetReached => 'Hedef tamam';
 
   @override
-  String get manualTarget => 'elle girilen hedef';
-
-  @override
   String get analyzing => 'Analiz ediliyor…';
 
   @override
-  String get analysisFromCache => 'Tamamen önbellekten (AI çağrısı yok)';
-
-  @override
-  String analysisSummary(int screenshots, int unique, int calls) {
-    return '$screenshots görüntü · $unique ürün · $calls AI çağrısı';
+  String analysisSummary(int items, int calls) {
+    return '$items ürün okundu · $calls AI çağrısı';
   }
-
-  @override
-  String callChecklist(int done, int total) {
-    return 'Çağrıda sor ($done/$total)';
-  }
-
-  @override
-  String get gapEmptyChecklist => 'Sorulacak bir şey kalmadı';
-
-  @override
-  String get clearTicks => 'İşaretleri temizle';
-
-  @override
-  String incompleteItems(int count) {
-    return 'Eksik bilgisi olan ürünler ($count)';
-  }
-
-  @override
-  String recommendedItems(int count) {
-    return 'Önerilen ürünler ($count)';
-  }
-
-  @override
-  String completeItems(int count) {
-    return 'Tamam olanlar ($count)';
-  }
-
-  @override
-  String get missingDescription => 'Açıklama yok';
-
-  @override
-  String get missingOptions => 'Opsiyon yok';
-
-  @override
-  String get missingRemovables => 'Malzeme yok';
-
-  @override
-  String get unknownDescription => 'Açıklama ?';
-
-  @override
-  String get unknownOptions => 'Opsiyon ?';
-
-  @override
-  String get unknownRemovables => 'Malzeme ?';
-
-  @override
-  String get prepareCard => 'Kart hazırla';
-
-  @override
-  String get addedToMenu => 'Şube menüsüne eklendi';
-
-  @override
-  String get branchStatusDraft => 'Taslak';
-
-  @override
-  String get branchStatusInProgress => 'Devam ediyor';
-
-  @override
-  String get branchStatusReady => 'Hazır';
-
-  @override
-  String get branchStatusOpened => 'Açıldı';
-
-  @override
-  String get deleteBranch => 'Şubeyi sil';
-
-  @override
-  String deleteBranchConfirm(String name) {
-    return '\"$name\" şubesi ve menüsü silinsin mi?';
-  }
-
-  @override
-  String deleteMenuItemConfirm(String name) {
-    return '\"$name\" şube menüsünden silinsin mi?';
-  }
-
-  @override
-  String get menu => 'Menü';
-
-  @override
-  String get export => 'Dışa aktar';
-
-  @override
-  String get exportCsv => 'Excel (CSV)';
-
-  @override
-  String get exportCsvHint => 'Türkçe Excel\'de doğrudan açılır';
-
-  @override
-  String get exportJson => 'JSON';
-
-  @override
-  String menuOnMenu(int count) {
-    return 'Menüde ($count)';
-  }
-
-  @override
-  String menuIncomplete(int count) {
-    return 'Eksik bilgi ($count)';
-  }
-
-  @override
-  String menuRecommended(int count) {
-    return 'Önerilen ($count)';
-  }
-
-  @override
-  String get markComplete => 'Tamam';
-
-  @override
-  String get markAvailable => 'Var';
-
-  @override
-  String get cardAccepted => 'Kart onaylı';
-
-  @override
-  String get targetAutomatic => 'otomatik hedef (mutfak minimumu)';
 
   @override
   String get searchTemplates => 'Şablon ara (ad veya takma ad)';
@@ -743,12 +419,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String deleteTemplateConfirm(String name) {
-    return '\"$name\" şablonu silinsin mi?';
+    return '"$name" şablonu silinsin mi?';
   }
 
   @override
   String deleteSeedTemplateConfirm(String name) {
-    return '\"$name\" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)';
+    return '"$name" hazır şablonu havuzdan kaldırılsın mı? (Arşivlenir, tekrar yüklenmez.)';
   }
 
   @override
@@ -758,7 +434,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cuisinesAndMinimums => 'Mutfak türleri ve minimum ürün sayıları';
 
   @override
-  String get cuisinesAndMinimumsHint => 'Şube hedefleri buradan hesaplanır';
+  String get cuisinesAndMinimumsHint => 'Açılış hedefi ve beklenen kategoriler buradan hesaplanır';
+
+  @override
+  String get categoriesTitle => 'Kategoriler ve anahtar kelimeler';
+
+  @override
+  String get categoriesHint => 'Bir ürünün hangi kategoriye düştüğünü adındaki kelimeler belirler';
+
+  @override
+  String get categoriesHelp =>
+      'Ürün adında bu kelimelerden biri geçerse ürün o kategoriye sayılır ("şalgam" → İçecek); büyük/küçük harf ve Türkçe karakter fark etmez. Birden çok kelime tek ifade olarak eşleşir ("sıcak çikolata"). Değişiklik bir sonraki analizde geçerli olur.';
+
+  @override
+  String get keywordsLabel => 'Anahtar kelimeler (virgülle ayır)';
+
+  @override
+  String keywordsCount(int count) {
+    return '$count anahtar kelime';
+  }
+
+  @override
+  String get cuisineCategoriesMenu => 'Kategoriler ve min. sayılar';
+
+  @override
+  String get cuisineCategoriesHelp =>
+      'İşaretli kategoriler bu mutfakta beklenir; sayı, açılış için o kategoride olması gereken en az ürün. 0 = olsa iyi olur. Değişiklik bir sonraki analizde geçerli olur.';
+
+  @override
+  String minItemsLabel(int count) {
+    return 'en az $count';
+  }
+
+  @override
+  String get savedMessage => 'Kaydedildi';
 
   @override
   String get newCuisine => 'Yeni mutfak türü';
@@ -771,7 +480,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get minimumsHelp =>
-      'Gerçek platform minimumlarını buraya gir. Şube hedefi = en az 10 veya bu sayı (hangisi büyükse); şubede elle hedef girilebilir.';
+      'Gerçek platform minimumlarını buraya gir. Açılış hedefi = en az 10 veya bu sayı (hangisi büyükse). Menüdeki ⋮ ile hangi kategorilerin beklendiğini de ayarlayabilirsin.';
 
   @override
   String minimumLine(int min, int target) {
@@ -814,8 +523,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get localOnlyOn =>
-      'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor';
+  String get localOnlyOn => 'Yerel mod açık: yalnızca veritabanı ve önbellek kullanılıyor';
 
   @override
   String get quotaExceeded => 'Günlük kota doldu';
@@ -928,8 +636,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cancelled => 'İptal edildi';
 
   @override
-  String get compressFailed =>
-      'Fotoğraf küçültülemedi, başka bir fotoğraf dene';
+  String get compressFailed => 'Fotoğraf küçültülemedi, başka bir fotoğraf dene';
 
   @override
   String get voiceNote => 'Sesli not';
@@ -952,69 +659,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get micPermission => 'Sesli not için mikrofon izni gerekli';
 
   @override
-  String get researchTitle => 'İnternette araştır';
-
-  @override
-  String get researchHint =>
-      'Restoranın herkese açık sayfaları (web sitesi, harita kaydı, sosyal medya) taranır. Bulunan ürünleri restoranla teyit et; fiyat ve iletişim bilgisi alınmaz.';
-
-  @override
-  String get researchStart => 'Restoranı internette araştır';
-
-  @override
-  String get researchRunning =>
-      'Web\'de aranıyor… (yarım dakika kadar sürebilir)';
-
-  @override
-  String get researchAgain => 'Yeniden araştır';
-
-  @override
-  String researchFound(int count) {
-    return 'İnternette $count ürün bulundu';
-  }
-
-  @override
-  String get researchNotFound => 'Restoran internette bulunamadı';
-
-  @override
-  String researchConfidence(int value) {
-    return 'güven %$value';
-  }
-
-  @override
-  String researchCachedAt(String date) {
-    return 'kayıtlı sonuç: $date';
-  }
-
-  @override
-  String researchNotOnMenu(int count) {
-    return 'Menüde olmayanlar ($count)';
-  }
-
-  @override
-  String researchOnMenu(int count) {
-    return 'Menüde olanlar ($count)';
-  }
-
-  @override
-  String researchItems(int count) {
-    return 'Bulunan ürünler ($count)';
-  }
-
-  @override
-  String researchPrepareAll(int count) {
-    return '$count ürün için kart hazırla';
-  }
-
-  @override
-  String researchTemplate(String name) {
-    return 'şablon: $name';
-  }
-
-  @override
-  String get researchSources => 'Kaynaklar';
-
-  @override
   String get settingsTitle => 'Ayarlar';
 
   @override
@@ -1030,4 +674,177 @@ class AppLocalizationsTr extends AppLocalizations {
   String version(String version) {
     return 'Sürüm $version';
   }
+
+  @override
+  String get navAnalyze => 'Analiz';
+
+  @override
+  String get newAnalysis => 'Menü analizi';
+
+  @override
+  String get cuisineAuto => 'Otomatik (menüden anla)';
+
+  @override
+  String cuisineLabelled(String name) {
+    return 'mutfak türü: $name';
+  }
+
+  @override
+  String cuisineMismatch(String name) {
+    return 'Menü $name gibi görünüyor.';
+  }
+
+  @override
+  String rerunAs(String name) {
+    return '$name olarak yeniden analiz et';
+  }
+
+  @override
+  String get changeCuisine => 'Mutfak türünü değiştir (menü yeniden okunmaz)';
+
+  @override
+  String get progressCurrent => 'Mevcut';
+
+  @override
+  String get progressTarget => 'hedef';
+
+  @override
+  String belowHardMinimum(int min) {
+    return 'Açılış için en az $min ürün gerekli';
+  }
+
+  @override
+  String get debugToggle => 'Ayrıntılı kayıt';
+
+  @override
+  String get debugToggleHint =>
+      'Her agent adımının girdi/çıktısını sakla; sonuç ekranındaki böcek simgesinden görürsün.';
+
+  @override
+  String get sectionNewProducts => 'YENİ ÜRÜNLER';
+
+  @override
+  String get sectionNewProductsHint => 'Menüde hiç yok — eklenmesi öneriliyor';
+
+  @override
+  String get sectionOptions => 'OPSİYON & MALZEME';
+
+  @override
+  String get sectionOptionsHint => 'Menüde olan ürünler için seçenek ve malzeme';
+
+  @override
+  String get sectionFixes => 'EKSİK / DÜZELTME';
+
+  @override
+  String get sectionFixesHint => 'Mevcut üründe boş alan veya hatalı isim';
+
+  @override
+  String get sectionEmpty => 'Bu bölümde bir şey çıkmadı.';
+
+  @override
+  String get filterAll => 'Tümü';
+
+  @override
+  String get filterNewProducts => 'Yeni ürün';
+
+  @override
+  String get filterOptions => 'Opsiyon';
+
+  @override
+  String get filterFixes => 'Düzeltme';
+
+  @override
+  String get selectCard => 'Kartı seç';
+
+  @override
+  String get selectAll => 'Hepsini seç';
+
+  @override
+  String selectedCount(int count) {
+    return '$count kart seçili';
+  }
+
+  @override
+  String get copySelected => 'Panoya kopyala';
+
+  @override
+  String get clearSelection => 'Seçimi temizle';
+
+  @override
+  String get copyOptions => 'Opsiyonları kopyala';
+
+  @override
+  String get copyLabelCategory => 'Kategori';
+
+  @override
+  String get copyLabelPriceRange => 'Tahmini fiyat';
+
+  @override
+  String get addCard => 'Ekle';
+
+  @override
+  String get reject => 'Reddet';
+
+  @override
+  String get markDone => 'Not aldım';
+
+  @override
+  String get acceptedBadge => 'eklendi';
+
+  @override
+  String get queuedBadge => 'kuyrukta';
+
+  @override
+  String get fixEmptyDescription => 'açıklama boş';
+
+  @override
+  String get fixBadName => 'ad düzeltilmeli';
+
+  @override
+  String get fixWrongCategory => 'kategori yanlış';
+
+  @override
+  String get pipelineDebug => 'Pipeline';
+
+  @override
+  String get pipelineEmpty => 'Bu koşu için adım kaydı yok';
+
+  @override
+  String pipelineTotal(int ms) {
+    return 'toplam $ms ms';
+  }
+
+  @override
+  String pipelineSteps(int count) {
+    return '$count adım';
+  }
+
+  @override
+  String pipelineTokens(int input, int output) {
+    return '$input / $output token';
+  }
+
+  @override
+  String get pipelineInput => 'Girdi';
+
+  @override
+  String get pipelineOutput => 'Çıktı';
+
+  @override
+  String get agentExtractor => 'Menü okuma';
+
+  @override
+  String get agentClassifier => 'Mutfak türü';
+
+  @override
+  String get agentGapAnalyst => 'Eksik analizi';
+
+  @override
+  String get agentProductRecommender => 'Yeni ürün önerisi';
+
+  @override
+  String get agentOptionModifier => 'Opsiyon & malzeme';
+
+  @override
+  String get agentValidator => 'Doğrulama';
 }

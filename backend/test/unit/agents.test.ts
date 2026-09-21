@@ -1,0 +1,254 @@
+import { describe, expect, it } from 'vitest';
+import { addTypedItems, dedupeExtracted, mergeFlag } from '../../src/agents/dedupe.js';
+import { looksAbbreviated } from '../../src/agents/gap-analyst.js';
+import type { ExtractedItem } from '../../src/agents/schemas/extractor.js';
+import { wantedCount } from '../../src/agents/product-recommender.js';
+import { cleanProductName } from '../../src/agents/validator.js';
+import { CategoryIndex, categoryGaps, FALLBACK_CATEGORY } from '../../src/domain/category.js';
+import { SEED_CATEGORIES } from '../../src/db/seed/categories.js';
+import { templatePayloadSchema, type TemplatePayload } from '../../src/domain/template.js';
+import { mergeOptionCard } from '../../src/modules/analyze/service.js';
+
+const item = (rawName: string, over: Partial<ExtractedItem> = {}): ExtractedItem => ({
+  rawName,
+  sectionText: null,
+  priceText: null,
+  descriptionText: null,
+  description: 'unknown',
+  options: 'unknown',
+  removables: 'unknown',
+  optionNames: [],
+  confidence: 0.9,
+  ...over,
+});
+
+const index = new CategoryIndex(SEED_CATEGORIES.map((c) => ({ ...c, keywords: [...c.keywords] })));
+
+describe('category classification', () => {
+  it('matches on whole tokens, so "Sütlaç" is not read as a drink because of "su"', () => {
+    expect(index.classify('Sütlaç')).toBe('tatli');
+    expect(index.classify('Su')).toBe('icecek');
+    expect(index.classify('Sucuklu Yumurtalı Pide')).toBe(FALLBACK_CATEGORY);
+  });
+
+  it('trusts the section heading the restaurant wrote over the product name', () => {
+    // "Karışık" alone says nothing; the heading does.
+    expect(index.classify('Karışık', 'İçecekler')).toBe('icecek');
+    expect(index.classify('Künefe', 'Tatlılar')).toBe('tatli');
+  });
+
+  it('falls back to the main-course category when nothing matches', () => {
+    expect(index.classify('Adana Kebap')).toBe(FALLBACK_CATEGORY);
+    expect(index.classify('')).toBe(FALLBACK_CATEGORY);
+  });
+
+  it('classifies the drinks and desserts a pide menu is missing', () => {
+    expect(index.classify('Ayran')).toBe('icecek');
+    expect(index.classify('Şalgam Suyu')).toBe('icecek');
+    expect(index.classify('Mercimek Çorbası')).toBe('corba');
+    expect(index.classify('Çoban Salata')).toBe('salata-meze');
+    expect(index.classify('Künefe')).toBe('tatli');
+  });
+
+  it('counts the cakes of a café as desserts, not as main courses', () => {
+    expect(index.classify('Islak Kek')).toBe('tatli');
+    expect(index.classify('Limonlu Tart')).toBe('tatli');
+  });
+});
+
+describe('categoryGaps', () => {
+  const expectations = [
+    { key: 'ana-yemek', label: 'Ana Yemek', minItems: 6, sortOrder: 20 },
+    { key: 'icecek', label: 'İçecek', minItems: 2, sortOrder: 70 },
+    { key: 'tatli', label: 'Tatlı', minItems: 1, sortOrder: 60 },
+  ];
+
+  it('reports what each category is short of, emptiest first', () => {
+    const gaps = categoryGaps(expectations, new Map([['ana-yemek', 5]]));
+    expect(gaps.map((g) => `${g.key}:${g.missing}`)).toEqual(['icecek:2', 'ana-yemek:1', 'tatli:1']);
+  });
+
+  it('never reports a negative gap for an over-covered category', () => {
+    const gaps = categoryGaps(expectations, new Map([['ana-yemek', 12]]));
+    expect(gaps.find((g) => g.key === 'ana-yemek')).toMatchObject({ present: 12, missing: 0 });
+  });
+});
+
+describe('dedupe across images', () => {
+  it('counts a product once when two screenshots overlap and merges what each one showed', () => {
+    const merged = dedupeExtracted([
+      [item('Kıymalı Pide', { description: 'present', options: 'unknown' })],
+      [item('Kıymalı Pide', { description: 'unknown', options: 'absent', optionNames: ['Boy'] })],
+    ]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({ seenIn: 2, description: 'present', options: 'absent', optionNames: ['Boy'] });
+  });
+
+  it('joins a clipped name to its full spelling and keeps the full one', () => {
+    const merged = dedupeExtracted([[item('Karışık Pi…')], [item('Karışık Pide')]]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0]?.name).toBe('Karışık Pide');
+  });
+
+  it('keeps genuinely different products apart', () => {
+    const merged = dedupeExtracted([[item('Tavuk Şiş'), item('Adana Kebap')]]);
+    expect(merged.map((m) => m.name)).toEqual(['Tavuk Şiş', 'Adana Kebap']);
+  });
+
+  it('drops low-confidence reads', () => {
+    expect(dedupeExtracted([[item('Bulanık', { confidence: 0.1 })]])).toHaveLength(0);
+  });
+
+  it('merges flags by information: present beats absent beats unknown', () => {
+    expect(mergeFlag('unknown', 'absent')).toBe('absent');
+    expect(mergeFlag('absent', 'present')).toBe('present');
+    expect(mergeFlag('present', 'unknown')).toBe('present');
+  });
+});
+
+describe('typed products', () => {
+  it('does not count a typed product that a screenshot already showed', () => {
+    const entries = addTypedItems(dedupeExtracted([[item('Ayran')]]), ['ayran', 'Künefe']);
+    expect(entries.map((e) => e.name)).toEqual(['Ayran', 'Künefe']);
+    expect(entries[1]).toMatchObject({ typed: true, seenIn: 0, options: 'unknown' });
+  });
+
+  it('title-cases a name typed in a hurry but leaves a deliberate spelling alone', () => {
+    const entries = addTypedItems([], ['adana kebap', 'XL Burger']);
+    expect(entries.map((e) => e.name)).toEqual(['Adana Kebap', 'XL Burger']);
+  });
+});
+
+describe('validator — product name cleaning', () => {
+  it('moves the packaging out of the name and into the portion field', () => {
+    expect(cleanProductName('Ayran (1 L)')).toEqual({ name: 'Ayran', movedToPortion: '1 L' });
+    expect(cleanProductName('Kola (33 cl)')).toEqual({ name: 'Kola', movedToPortion: '33 cl' });
+    expect(cleanProductName('Su (500 ml)')).toEqual({ name: 'Su', movedToPortion: '500 ml' });
+    expect(cleanProductName('Ayran 300 ml')).toEqual({ name: 'Ayran', movedToPortion: '300 ml' });
+  });
+
+  it('leaves a clean name untouched', () => {
+    expect(cleanProductName('Adana Kebap')).toEqual({ name: 'Adana Kebap', movedToPortion: '' });
+  });
+
+  it('strips price amounts from the name as well', () => {
+    expect(cleanProductName('Ayran 40 TL').name).toBe('Ayran');
+  });
+});
+
+describe('gap analyst — name heuristics', () => {
+  it('spots shorthand names worth asking about on the call', () => {
+    expect(looksAbbreviated('ADANA KBP')).toBe(true);
+    expect(looksAbbreviated('Pide')).toBe(true);
+    expect(looksAbbreviated('Adana Kebap')).toBe(false);
+    expect(looksAbbreviated('Sucuklu Yumurtalı Pide')).toBe(false);
+  });
+});
+
+describe('recommendation count', () => {
+  it('asks for a list a person can scan: at least 3, at most 12, target plus spares', () => {
+    expect(wantedCount(0)).toBe(3);
+    expect(wantedCount(5)).toBe(7);
+    expect(wantedCount(40)).toBe(12);
+  });
+});
+
+describe('category conflict (Section C "yanlış kategori")', () => {
+  it('reports a heading that contradicts the product name', () => {
+    expect(index.conflict('Ayran', 'Tatlılar')).toEqual({ section: 'tatli', name: 'icecek' });
+    expect(index.conflict('Künefe', 'İçecekler')).toEqual({ section: 'icecek', name: 'tatli' });
+  });
+
+  it('stays quiet when either side is unknown or both agree', () => {
+    // "Ocakbaşı" maps to nothing: no evidence, no alarm.
+    expect(index.conflict('Ayran', 'Ocakbaşı')).toBeNull();
+    expect(index.conflict('Adana Kebap', 'Tatlılar')).toBeNull();
+    expect(index.conflict('Künefe', 'Tatlılar')).toBeNull();
+    expect(index.conflict('Ayran', null)).toBeNull();
+  });
+});
+
+describe('merging an option card into a template', () => {
+  const base: TemplatePayload = {
+    name: 'Adana Kebap',
+    description: 'Acılı zırh kıyması, közde pişirilir; lavaş, közlenmiş domates ve biberle.',
+    servingNote: 'Sıcak servis',
+    portionInfo: '1 porsiyon ~180 g',
+    optionGroups: [
+      {
+        name: 'Porsiyon',
+        selectionType: 'single',
+        isRequired: true,
+        minSelect: 1,
+        maxSelect: 1,
+        options: [
+          { name: '1 Porsiyon', priceMode: 'sets_base', isDefault: true },
+          { name: '1,5 Porsiyon', priceMode: 'sets_base', isDefault: false },
+        ],
+      },
+      {
+        name: 'Acı Seviyesi',
+        selectionType: 'single',
+        isRequired: false,
+        minSelect: 0,
+        maxSelect: 1,
+        options: [
+          { name: 'Acılı', priceMode: 'free', isDefault: false },
+          { name: 'Acısız', priceMode: 'free', isDefault: false },
+        ],
+      },
+    ],
+    removableIngredients: ['Soğan'],
+    extraIngredients: [{ name: 'Ekstra Lavaş', priceHint: 'ek ücretli' }],
+    tags: ['acılı', 'kırmızı et'],
+    allergenNotes: ['gluten'],
+    upsellSuggestion: 'Yanına ayran',
+  };
+
+  it('keeps everything the card does not touch', () => {
+    const merged = mergeOptionCard(base, { optionGroups: [], removableIngredients: ['Maydanoz'], extraIngredients: [] });
+    expect(merged.description).toBe(base.description);
+    expect(merged.tags).toEqual(base.tags);
+    expect(merged.optionGroups).toEqual(base.optionGroups);
+    expect(merged.removableIngredients).toEqual(['Soğan', 'Maydanoz']);
+  });
+
+  it('replaces a group of the same name and never ends up with two base-price groups', () => {
+    const merged = mergeOptionCard(base, {
+      optionGroups: [
+        {
+          name: 'Boy',
+          selectionType: 'single',
+          isRequired: true,
+          minSelect: 1,
+          maxSelect: 1,
+          options: [
+            { name: 'Yarım', priceMode: 'sets_base' },
+            { name: 'Tam', priceMode: 'sets_base' },
+          ],
+        },
+        {
+          name: 'acı seviyesi',
+          selectionType: 'single',
+          isRequired: false,
+          minSelect: 0,
+          maxSelect: 1,
+          options: [
+            { name: 'Az Acılı', priceMode: 'free' },
+            { name: 'Çok Acılı', priceMode: 'free' },
+          ],
+        },
+      ],
+      removableIngredients: ['soğan'],
+      extraIngredients: ['Ekstra Lavaş', 'Ekstra Közlenmiş Biber'],
+    });
+    // The card's "Boy" sets the base price now; the template's "Porsiyon" had to go.
+    expect(merged.optionGroups.map((g) => g.name)).toEqual(['Boy', 'acı seviyesi']);
+    expect(merged.optionGroups.filter((g) => g.options.some((o) => o.priceMode === 'sets_base'))).toHaveLength(1);
+    // Case/diacritic-insensitive unions: no duplicate "Soğan", no duplicate "Ekstra Lavaş".
+    expect(merged.removableIngredients).toEqual(['Soğan']);
+    expect(merged.extraIngredients.map((e) => e.name)).toEqual(['Ekstra Lavaş', 'Ekstra Közlenmiş Biber']);
+    // And it is still a valid template.
+    expect(templatePayloadSchema.safeParse(merged).success).toBe(true);
+  });
+});

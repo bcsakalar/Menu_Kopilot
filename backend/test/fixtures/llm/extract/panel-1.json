@@ -1,0 +1,81 @@
+{
+  "items": [
+    {
+      "rawName": "Adana Kebap",
+      "description": "present",
+      "options": "present",
+      "removables": "absent",
+      "sectionText": "Kebaplar",
+      "confidence": 0.97,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Urfa Kebap",
+      "description": "present",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "Kebaplar",
+      "confidence": 0.96,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Tavuk Şiş",
+      "description": "absent",
+      "options": "present",
+      "removables": "unknown",
+      "sectionText": "Kebaplar",
+      "confidence": 0.95,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Lahmacun",
+      "description": "absent",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "Pide & Lahmacun",
+      "confidence": 0.96,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Kıymalı Pide",
+      "description": "present",
+      "options": "present",
+      "removables": "present",
+      "sectionText": "Pide & Lahmacun",
+      "confidence": 0.95,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Karışık Pi…",
+      "description": "absent",
+      "options": "present",
+      "removables": "absent",
+      "sectionText": "Pide & Lahmacun",
+      "confidence": 0.7,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Ayran",
+      "description": "present",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "İçecekler",
+      "confidence": 0.6,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    }
+  ]
+}

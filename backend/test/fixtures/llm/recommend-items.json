@@ -1,0 +1,51 @@
+{
+  "Pide & Lahmacun": {
+    "items": [
+      {
+        "name": "Mercimek Çorbası",
+        "categoryKey": "corba",
+        "shortDescription": "Süzme kırmızı mercimek çorbası, limon ve pul biberli tereyağı sosuyla servis edilir.",
+        "portionInfo": "1 kase ~300 ml",
+        "priceRangeHint": "50–80 TL",
+        "reason": "Pide salonlarında başlangıç olarak neredeyse her zaman bulunur",
+        "importance": 85
+      },
+      {
+        "name": "Ayran",
+        "categoryKey": "icecek",
+        "shortDescription": "Taze yoğurttan yapılmış tuzlu ayran, soğuk servis edilir.",
+        "portionInfo": "300 ml",
+        "priceRangeHint": "25–40 TL",
+        "reason": "Pidenin yanında en çok istenen içecek",
+        "importance": 95
+      },
+      {
+        "name": "Çoban Salata",
+        "categoryKey": "salata-meze",
+        "shortDescription": "Domates, salatalık, biber ve soğanla hazırlanan mevsim salatası, zeytinyağlı.",
+        "portionInfo": "1 porsiyon",
+        "priceRangeHint": "60–90 TL",
+        "reason": "Menüde tek salata seçeneği bile olmaması açılışta eksik sayılır",
+        "importance": 75
+      },
+      {
+        "name": "Künefe",
+        "categoryKey": "tatli",
+        "shortDescription": "Kadayıf arasına peynir konularak fırınlanan şerbetli tatlı, sıcak servis edilir.",
+        "portionInfo": "1 porsiyon",
+        "priceRangeHint": "120–180 TL",
+        "reason": "Pide salonlarının standart tatlısı",
+        "importance": 80
+      },
+      {
+        "name": "Kola",
+        "categoryKey": "icecek",
+        "shortDescription": "Gazlı soğuk içecek, kutu veya şişe olarak servis edilir.",
+        "portionInfo": "330 ml",
+        "priceRangeHint": "25–40 TL",
+        "reason": "İçecek kategorisinde ikinci seçenek olarak beklenir",
+        "importance": 70
+      }
+    ]
+  }
+}

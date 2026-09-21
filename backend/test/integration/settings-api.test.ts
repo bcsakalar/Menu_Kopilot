@@ -30,7 +30,7 @@ describe('settings & prompts API', () => {
       MODELS.groqWhisperTurbo,
       MODELS.groqWhisper,
     ]);
-    const vision = body.tasks.find((t) => t.taskKey === 'vision.menu_extract');
+    const vision = body.tasks.find((t) => t.taskKey === 'agent.extract');
     expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.geminiFlashLite, MODELS.groqQwen38, MODELS.geminiFlash]);
     expect(vision?.eligibleModels.map((m) => m.id)).not.toContain(MODELS.groqGptOss120b);
     expect(body.providers.every((p) => p.configured)).toBe(true);
@@ -39,21 +39,21 @@ describe('settings & prompts API', () => {
   it('changes the primary model of a task and keeps fallbacks', async () => {
     const res = await ctx.app.inject({
       method: 'PUT',
-      url: '/api/v1/settings/providers/vision.menu_extract',
+      url: '/api/v1/settings/providers/agent.extract',
       headers: bearer(token),
       payload: { model: MODELS.groqQwen38 },
     });
     expect(res.statusCode).toBe(200);
-    const vision = res.json<{ tasks: TaskDto[] }>().tasks.find((t) => t.taskKey === 'vision.menu_extract');
+    const vision = res.json<{ tasks: TaskDto[] }>().tasks.find((t) => t.taskKey === 'agent.extract');
     expect(vision?.chain.map((c) => c.id)).toEqual([MODELS.groqQwen38, MODELS.geminiFlashLite, MODELS.geminiFlash]);
-    const chain = await ctx.ai.routes.chain('vision.menu_extract');
+    const chain = await ctx.ai.routes.chain('agent.extract');
     expect(chain[0]?.model).toBe(MODELS.groqQwen38);
   });
 
   it('rejects a model that cannot do the task', async () => {
     const res = await ctx.app.inject({
       method: 'PUT',
-      url: '/api/v1/settings/providers/vision.menu_extract',
+      url: '/api/v1/settings/providers/agent.extract',
       headers: bearer(token),
       payload: { model: MODELS.groqGptOss20b },
     });
@@ -71,20 +71,20 @@ describe('settings & prompts API', () => {
       method: 'POST',
       url: '/api/v1/prompts',
       headers: bearer(token),
-      payload: { key: 'enrich.user', content: 'Yeni sürüm: {{cuisine}}\n{{items}}' },
+      payload: { key: 'agent.recommend.user', content: 'Yeni sürüm: {{cuisine}}\n{{gaps}}' },
     });
     expect(created.statusCode).toBe(201);
-    expect(created.json()).toMatchObject({ key: 'enrich.user', version: 2, isActive: true });
-    const active = await ctx.ai.prompts.render('enrich.user', { cuisine: 'Kebap', items: '1. Adana' });
-    expect(active).toEqual({ text: 'Yeni sürüm: Kebap\n1. Adana', version: 2 });
+    expect(created.json()).toMatchObject({ key: 'agent.recommend.user', version: 2, isActive: true });
+    const active = await ctx.ai.prompts.render('agent.recommend.user', { cuisine: 'Kebap', gaps: 'icecek | İçecek | 0/2 | 2 eksik' });
+    expect(active).toEqual({ text: 'Yeni sürüm: Kebap\nicecek | İçecek | 0/2 | 2 eksik', version: 2 });
 
     const list = await ctx.app.inject({ method: 'GET', url: '/api/v1/prompts', headers: bearer(token) });
     const v1 = list
       .json<{ data: { id: string; key: string; version: number }[] }>()
-      .data.find((p) => p.key === 'enrich.user' && p.version === 1);
+      .data.find((p) => p.key === 'agent.recommend.user' && p.version === 1);
     const back = await ctx.app.inject({ method: 'POST', url: `/api/v1/prompts/${v1?.id}/activate`, headers: bearer(token) });
     expect(back.statusCode).toBe(200);
-    expect((await ctx.ai.prompts.get('enrich.user')).version).toBe(1);
+    expect((await ctx.ai.prompts.get('agent.recommend.user')).version).toBe(1);
   });
 
   it('protects settings routes', async () => {

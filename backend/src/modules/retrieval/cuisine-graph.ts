@@ -33,6 +33,11 @@ export class CuisineGraph {
     return new CuisineGraph(rows);
   }
 
+  /** Every cuisine, in insertion order — the Classifier picks from this list. */
+  get all(): readonly CuisineNode[] {
+    return [...this.byId.values()];
+  }
+
   get(id: string): CuisineNode | undefined {
     return this.byId.get(id);
   }

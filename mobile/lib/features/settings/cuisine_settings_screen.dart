@@ -7,6 +7,7 @@ import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/common.dart';
+import 'category_settings_screen.dart';
 
 /// Cuisine types and their minimum product counts (user data — the real platform minimums are entered here).
 class CuisineSettingsScreen extends ConsumerWidget {
@@ -82,15 +83,21 @@ class CuisineSettingsScreen extends ConsumerWidget {
                   ].join('\n'),
                 ),
                 isThreeLine: cuisine.notes != null && cuisine.notes!.isNotEmpty,
-                trailing: cuisine.isSystem
-                    ? const Icon(Icons.edit_outlined)
-                    : PopupMenuButton<String>(
-                        onSelected: (v) => v == 'edit' ? _edit(context, ref, cuisine: cuisine) : _delete(context, ref, cuisine),
-                        itemBuilder: (_) => [
-                          PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                          PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
-                        ],
+                trailing: PopupMenuButton<String>(
+                  key: ValueKey('cuisine-menu-${cuisine.slug}'),
+                  onSelected: (v) => switch (v) {
+                    'categories' => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => CuisineCategoriesScreen(cuisine: cuisine)),
                       ),
+                    'delete' => _delete(context, ref, cuisine),
+                    _ => _edit(context, ref, cuisine: cuisine),
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                    PopupMenuItem(value: 'categories', child: Text(l10n.cuisineCategoriesMenu)),
+                    if (!cuisine.isSystem) PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                  ],
+                ),
                 onTap: () => _edit(context, ref, cuisine: cuisine),
               ),
           ],

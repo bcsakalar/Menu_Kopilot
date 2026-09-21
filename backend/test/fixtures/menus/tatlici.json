@@ -1,0 +1,65 @@
+{
+  "id": "tatlici",
+  "label": "Tatlıcı (şerbetli + sütlü)",
+  "cuisineSlug": "tatli",
+  "note": "Şerbetli tatlı ağırlıklı; sütlü tatlı tek kalem, içecek hiç yok.",
+  "menu": [
+    "Künefe",
+    "Fıstıklı Baklava",
+    "Kadayıf",
+    "Şöbiyet",
+    "Sütlaç"
+  ],
+  "expectCategories": [
+    "tatli",
+    "icecek",
+    "atistirmalik"
+  ],
+  "presentCategories": [
+    "tatli"
+  ],
+  "plausibleAdditions": [
+    "Aşure",
+    "Ayran",
+    "Bülbül Yuvası",
+    "Çay",
+    "Demleme Çay",
+    "Dondurma",
+    "Fırın Sütlaç",
+    "Fıstık Sarma",
+    "Havuç Dilim Baklava",
+    "İrmik Helvası",
+    "Katmer",
+    "Kaymak",
+    "Kaymaklı Künefe",
+    "Kazandibi",
+    "Kemalpaşa",
+    "Kutu Kola",
+    "Limonata",
+    "Maden Suyu",
+    "Magnolia",
+    "Maraş Dondurması",
+    "Profiterol",
+    "Revani",
+    "Salep",
+    "San Sebastian Cheesecake",
+    "Sıcak Çay",
+    "Sıcak Süt",
+    "Su",
+    "Sufle",
+    "Supangle",
+    "Şekerpare",
+    "Tavukgöğsü",
+    "Tiramisu",
+    "Trileçe",
+    "Türk Kahvesi"
+  ],
+  "implausible": [
+    "Adana Kebap",
+    "Lahmacun",
+    "Cheeseburger",
+    "Tavuk Şiş",
+    "Sushi",
+    "Pizza Margherita"
+  ]
+}

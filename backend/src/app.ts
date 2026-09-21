@@ -21,41 +21,30 @@ import { InlineJobQueue, type JobQueue } from './jobs/queue.js';
 import { durationToSeconds } from './lib/duration.js';
 import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
+import { RunRegistry } from './lib/run-registry.js';
+import { analyzeRoutes } from './modules/analyze/routes.js';
+import type { AnalyzeEvent } from './modules/analyze/schemas.js';
+import { AnalyzeService } from './modules/analyze/service.js';
+import { AnalyzeStore } from './modules/analyze/store.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
-import { branchRoutes } from './modules/branches/routes.js';
-import { BranchService } from './modules/branches/service.js';
 import { cuisineRoutes } from './modules/cuisines/routes.js';
 import { CuisineService } from './modules/cuisines/service.js';
 import { VisionExtractor } from './modules/extraction/vision-extractor.js';
-import { GapPipeline } from './modules/gap/pipeline.js';
-import { gapRoutes } from './modules/gap/routes.js';
-import type { GapEvent } from './modules/gap/schemas.js';
-import { GapService } from './modules/gap/service.js';
-import { GapStore } from './modules/gap/store.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { promptRoutes } from './modules/prompts/routes.js';
 import { RetrievalService } from './modules/retrieval/retrieval.service.js';
 import { settingsRoutes } from './modules/settings/routes.js';
 import { SettingsService } from './modules/settings/service.js';
-import { EnrichmentService } from './modules/suggest/enrichment.js';
-import { SuggestPipeline } from './modules/suggest/pipeline.js';
-import { suggestRoutes } from './modules/suggest/routes.js';
-import { RunRegistry } from './modules/suggest/run-registry.js';
-import type { SuggestEvent } from './modules/suggest/schemas.js';
-import { SuggestService } from './modules/suggest/service.js';
-import { SuggestionStore } from './modules/suggest/store.js';
 import { templateRoutes } from './modules/templates/routes.js';
 import { TemplateService } from './modules/templates/service.js';
-import { researchRoutes } from './modules/research/routes.js';
-import { ResearchService } from './modules/research/service.js';
 import { usageRoutes } from './modules/usage/routes.js';
 import { UsageService } from './modules/usage/service.js';
 import { voiceRoutes } from './modules/voice/routes.js';
 import { VoiceService } from './modules/voice/service.js';
 import { authPlugin } from './plugins/auth.js';
 
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.2.0';
 const JWT_ISSUER = 'menu-kopilot';
 const JWT_AUDIENCE = 'menu-kopilot-mobile';
 
@@ -75,8 +64,7 @@ export interface AppServices {
   ai: AiServices;
   queue: JobQueue;
   embedding: EmbeddingService;
-  suggest: SuggestService;
-  gap: GapService;
+  analyze: AnalyzeService;
 }
 
 declare module 'fastify' {
@@ -138,7 +126,9 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     openapi: {
       info: {
         title: 'Menü Kopilot API',
-        description: 'Suggestion and gap-analysis API for platform branch openings. Streaming endpoints use SSE.',
+        description:
+          'Menu analysis API for platform branch openings. One endpoint, six agents, three sections of cards. ' +
+          'Streaming endpoints use SSE.',
         version: APP_VERSION,
       },
       components: {
@@ -193,53 +183,31 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   const db = deps.db.db;
   const embedding = new EmbeddingService(db, ai.router, ai.prompts);
   const queue = deps.queue ?? new InlineJobQueue(embedding);
-  const store = new SuggestionStore(db);
   const retrieval = new RetrievalService(db, ai.router, ai.prompts, {
     trigramThreshold: config.retrieval.trigramThreshold,
     vectorThreshold: config.retrieval.vectorThreshold,
   });
   const extractor = new VisionExtractor(ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
-  const enrichment = new EnrichmentService(db, ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
-  const pipeline = new SuggestPipeline({
+  const analyzeStore = new AnalyzeStore(db);
+  const analyzeService = new AnalyzeService({
     db,
-    router: ai.router,
-    prompts: ai.prompts,
-    retrieval,
-    extractor,
-    enrichment,
-    store,
-    cache: deps.cache,
-    cacheTtlSeconds: config.cacheTtlSeconds,
-    budget: config.budget,
-  });
-  const suggestService = new SuggestService({
-    db,
-    store,
-    pipeline,
-    registry: new RunRegistry<SuggestEvent>(),
+    store: analyzeStore,
+    registry: new RunRegistry<AnalyzeEvent>(),
     queue,
-    budget: config.budget,
-    log: app.log,
-  });
-  const gapStore = new GapStore(db);
-  const gapService = new GapService({
-    db,
-    store: gapStore,
-    pipeline: new GapPipeline({
+    // `tracer` and `categories` are per-run: the service builds them for each analysis.
+    pipelineDeps: {
       db,
       router: ai.router,
       prompts: ai.prompts,
       retrieval,
       extractor,
-      store: gapStore,
       cache: deps.cache,
       cacheTtlSeconds: config.cacheTtlSeconds,
       budget: config.budget,
-    }),
-    registry: new RunRegistry<GapEvent>(),
+    },
     log: app.log,
   });
-  app.decorate('services', { ai, queue, embedding, suggest: suggestService, gap: gapService });
+  app.decorate('services', { ai, queue, embedding, analyze: analyzeService });
 
   await app.register(
     async (api) => {
@@ -249,10 +217,8 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         secured.addHook('onRequest', secured.authenticate);
         await secured.register(settingsRoutes, { service: settingsService });
         await secured.register(promptRoutes, { prompts: ai.prompts });
-        await secured.register(suggestRoutes, { service: suggestService, uploads: config.uploads });
+        await secured.register(analyzeRoutes, { service: analyzeService, uploads: config.uploads });
         await secured.register(cuisineRoutes, { service: new CuisineService(db) });
-        await secured.register(branchRoutes, { service: new BranchService(db) });
-        await secured.register(gapRoutes, { service: gapService, uploads: config.uploads });
         await secured.register(templateRoutes, { service: new TemplateService(db, queue) });
         await secured.register(usageRoutes, {
           service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),
@@ -266,9 +232,6 @@ export async function buildApp(deps: AppDeps): Promise<App> {
             ttlSeconds: config.cacheTtlSeconds,
           }),
           maxFileBytes: config.uploads.maxFileBytes,
-        });
-        await secured.register(researchRoutes, {
-          service: new ResearchService({ db, router: ai.router, prompts: ai.prompts, retrieval, cache: deps.cache }),
         });
       });
     },

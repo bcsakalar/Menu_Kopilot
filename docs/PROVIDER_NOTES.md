@@ -97,6 +97,9 @@ Source: https://console.groq.com/docs/speech-to-text
 - `whisper-large-v3-turbo` (faster, cheaper, no translation) → primary; `whisper-large-v3` → fallback.
 
 ### 1.8 Compound systems (Faz 7 — checked 2026-09-15)
+> 2026-09-21: the research feature that used compound was removed with the branches (DECISIONS D-151); the notes
+> stay as provider knowledge. No code calls compound any more.
+
 Sources: https://console.groq.com/docs/compound, …/compound/built-in-tools, …/compound/systems/compound,
 https://console.groq.com/docs/web-search
 - `groq/compound` (several tool calls per request) and `groq/compound-mini` (one tool call, ~3× lower latency)
@@ -233,3 +236,5 @@ Other listed IDs (not used): `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5
 | groq/compound, compound-mini + web_search | 413 "Request Entity Too Large" / 429 on the internal model (free tier) |
 | Gemini Interactions + `google_search` tool | 429 immediately on the free key (plain calls work) |
 | Live check (`pnpm live:check`) | 14/14; Mod 1 first card 3.8 s; Mod 2 two screenshots 2.6 s; research → clear plan-limit error |
+| 2026-09-21, Gemini key | 403 `PERMISSION_DENIED` "Your project has been denied access" (worked the night before) → every chain on Groq (D-164) |
+| 2026-09-21, live check on `/analyze` | 14/15: typed menu 0.3–5.9 s, re-run 2.6 s, two screenshots 2.2 s; the 15-item menu photo fails on Groq alone (1000 output tokens/minute) |

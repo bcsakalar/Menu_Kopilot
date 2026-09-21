@@ -1,6 +1,7 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import type { Executor } from '../../db/client.js';
 import { ingredients, itemAliases, menuItems, optionGroups, options } from '../../db/schema/index.js';
+import type { CategoryIndex } from '../../domain/category.js';
 import { PRICE_HINTS, type TemplatePayload } from '../../domain/template.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 
@@ -229,6 +230,27 @@ export async function getTemplates(db: Executor, ids: readonly string[]): Promis
   );
   // Preserve the requested order.
   return ids.map((id) => byId.get(id)).filter((r): r is TemplateRecord => r !== undefined);
+}
+
+/**
+ * Aligns template categories with the taxonomy as it is now: every seed template (the seed owns its content) and
+ * every template that has none yet. A category that came from accepting a card — the user's decision — stays.
+ * Run by the seed and after a keyword edit, so a new keyword ("kek" → Tatlı) reaches the pool at once.
+ * Returns how many rows changed.
+ */
+export async function recategorizeTemplates(db: Executor, index: CategoryIndex): Promise<number> {
+  const rows = await db
+    .select({ id: menuItems.id, name: menuItems.canonicalName, categoryKey: menuItems.categoryKey })
+    .from(menuItems)
+    .where(or(isNull(menuItems.categoryKey), eq(menuItems.source, 'seed')));
+  let changed = 0;
+  for (const row of rows) {
+    const next = index.classify(row.name);
+    if (next === row.categoryKey) continue;
+    await db.update(menuItems).set({ categoryKey: next }).where(eq(menuItems.id, row.id));
+    changed += 1;
+  }
+  return changed;
 }
 
 export async function getTemplate(db: Executor, id: string): Promise<TemplateRecord | undefined> {

@@ -1,18 +1,18 @@
 /**
  * Live end-to-end check against a RUNNING server (local Docker or production) over HTTP — the same calls the phone
- * makes. Creates a temporary branch and removes it at the end.
+ * makes, independent of the app. Read-only apart from the analysis runs it starts (and one card it marks skipped):
+ * it never accepts a card, so the template pool is left as it was.
  *
  *   pnpm live:check                                   # http://127.0.0.1:3030, admin from ../.env
  *   pnpm live:check --url https://menu.example.com    # production
  *   pnpm live:check --skip-ai                          # only the parts that need no provider key
  *
- * With provider keys on the server it also runs the AI flows (menu photo, panel screenshots, research, voice) and
- * prints the timings of the acceptance criteria (first card < 6 s, gap analysis p95 < 8 s).
+ * With provider keys on the server it also reads panel screenshots and a menu photo, and prints the end-to-end
+ * timings against the 15 s budget.
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { normalizeTr } from '../src/lib/normalize-tr.js';
 
 const { values: args } = parseArgs({
   options: {
@@ -20,7 +20,6 @@ const { values: args } = parseArgs({
     email: { type: 'string', default: process.env['ADMIN_EMAIL'] ?? '' },
     password: { type: 'string', default: process.env['ADMIN_PASSWORD'] ?? '' },
     'skip-ai': { type: 'boolean', default: false },
-    runs: { type: 'string', default: '3' },
   },
 });
 
@@ -28,6 +27,8 @@ const base = (args.url ?? '').replace(/\/+$/, '');
 const api = `${base}/api/v1`;
 const results: { name: string; ok: boolean; detail: string }[] = [];
 let token = '';
+/** The pipeline's end-to-end budget (FAZ 1 requirement). */
+const BUDGET_MS = 15_000;
 
 type Json = Record<string, unknown>;
 
@@ -52,13 +53,12 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-async function call(method: string, path: string, body?: unknown, headers: Record<string, string> = {}): Promise<{ status: number; json: Json; text: string }> {
+async function call(method: string, path: string, body?: unknown): Promise<{ status: number; json: Json; text: string }> {
   const response = await fetch(`${api}${path}`, {
     method,
     headers: {
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...(body !== undefined && !(body instanceof FormData) ? { 'content-type': 'application/json' } : {}),
-      ...headers,
     },
     body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
   });
@@ -76,6 +76,7 @@ function parseJson(text: string): Json {
 }
 
 const str = (value: unknown): string => (typeof value === 'string' ? value : '');
+const list = (value: unknown): Json[] => (Array.isArray(value) ? (value as Json[]) : []);
 
 interface SseRun {
   events: { event: string; data: Json; at: number }[];
@@ -83,12 +84,12 @@ interface SseRun {
 }
 
 /** Streams an SSE response and timestamps every event (ms since the request started). */
-async function sse(path: string, form: FormData): Promise<SseRun> {
+async function sse(path: string, init: { method: 'GET' | 'POST'; body?: FormData }): Promise<SseRun> {
   const started = Date.now();
   const response = await fetch(`${api}${path}`, {
-    method: 'POST',
+    method: init.method,
     headers: { authorization: `Bearer ${token}`, accept: 'text/event-stream' },
-    body: form,
+    ...(init.body ? { body: init.body } : {}),
   });
   if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}: ${await response.text().catch(() => '')}`);
   const reader = (response.body as ReadableStream<Uint8Array>).getReader();
@@ -98,7 +99,7 @@ async function sse(path: string, form: FormData): Promise<SseRun> {
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+    buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
     let index = buffer.indexOf('\n\n');
     while (index >= 0) {
       const block = buffer.slice(0, index);
@@ -116,22 +117,52 @@ async function sse(path: string, form: FormData): Promise<SseRun> {
   return { events, total: Date.now() - started };
 }
 
+/** A price AMOUNT. The card's `priceRangeHint` is allowed to carry one (a call note); a template never is. */
 const PRICE = /\d+(?:[.,]\d+)?\s*(?:tl|₺|try|lira)\b/i;
+/** Packaging or weight glued to a product name ("Ayran (1 L)"): the Validator moves it to the portion field. */
+const NAME_NOISE = /[([]?\s*\d+[.,]?\d*\s*(?:l|lt|ml|cl|gr|g|kg|adet|porsiyon)\b/i;
 const fixtures = fileURLToPath(new URL('../test/fixtures/images/', import.meta.url));
 const image = (name: string, type: string) => new Blob([readFileSync(`${fixtures}${name}`)], { type });
 
-const percentile = (values: number[], p: number) => {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.min(sorted.length - 1, Math.ceil((p / 100) * sorted.length) - 1)] ?? 0;
-};
+/** The rules every analysis result must keep, whatever the input. */
+function checkResult(result: Json): void {
+  const menu = list(result['menu']);
+  const cards = list(result['cards']);
+  const onMenu = new Set(menu.map((m) => str(m['normalized'])));
+  for (const card of cards) {
+    const section = str(card['section']);
+    assert(['new_product', 'option', 'fix'].includes(section), `unknown section ${section}`);
+    if (section === 'new_product') {
+      assert(!onMenu.has(str(card['name']).toLocaleLowerCase('tr-TR')), `"${str(card['name'])}" is already on the menu`);
+      assert(str(card['categoryKey']) !== '', `"${str(card['name'])}" has no category`);
+      assert(str(card['reason']) !== '', `"${str(card['name'])}" has no reason`);
+      assert(!NAME_NOISE.test(str(card['name'])), `packaging in the name: ${str(card['name'])}`);
+    } else {
+      assert(onMenu.has(str(card['targetNormalized'])), `${section} card "${str(card['name'])}" is not attached to a menu row`);
+    }
+    assert(!card['payload'] || !PRICE.test(JSON.stringify(card['payload'])), `price amount in the template of ${str(card['name'])}`);
+  }
+}
+
+const count = (result: Json, section: string) => list(result['cards']).filter((c) => c['section'] === section).length;
+
+/** Every image must have been read; a skipped one (rate limit, provider down) is named with the server's warning. */
+function checkImagesRead(result: Json): void {
+  const stats = (result['stats'] ?? {}) as Json;
+  const failed = Number(stats['imagesFailed'] ?? 0);
+  const warnings = list(result['warnings']).map((w) => `${str(w['code'])}: ${str(w['message'])}`);
+  console.log(`      images read ${String(stats['imagesRead'])} · failed ${failed}${warnings.length ? ` · ${warnings.join(' | ')}` : ''}`);
+  assert(failed === 0, `${failed} image(s) not read — ${warnings.join(' | ') || 'no warning'} (see the extractor step in /trace)`);
+}
 
 console.log(`Menü Kopilot live check → ${base}\n`);
 
 // ---- platform ----------------------------------------------------------------------------------------------------
-await step('health/ready: database + redis', async () => {
-  const response = await fetch(`${base}/health/ready`);
-  const json = (await response.json()) as Json;
-  assert(json['status'] === 'ready', JSON.stringify(json));
+await step('health + health/ready (database, redis)', async () => {
+  const health = (await (await fetch(`${base}/health`)).json()) as Json;
+  assert(health['status'] === 'ok', JSON.stringify(health));
+  const ready = (await (await fetch(`${base}/health/ready`)).json()) as Json;
+  assert(ready['status'] === 'ready', JSON.stringify(ready));
 });
 
 await step('login + me + refresh rotation', async () => {
@@ -148,73 +179,99 @@ await step('login + me + refresh rotation', async () => {
   token = String(refreshed.json['accessToken']);
 });
 
-const unauthorized = await fetch(`${api}/cuisines`);
-record('protected routes reject missing token', unauthorized.status === 401, `HTTP ${unauthorized.status}`);
+const unauthorized = await fetch(`${api}/analyze/latest`);
+record('protected routes reject a missing token', unauthorized.status === 401, `HTTP ${unauthorized.status}`);
 
-const cuisines = await step('cuisines (12 seeded)', async () => {
-  const res = await call('GET', '/cuisines');
-  const data = res.json['data'] as Json[];
+const cuisines = await step('cuisines', async () => {
+  const data = list((await call('GET', '/cuisines')).json['data']);
   assert(data.length >= 12, `only ${data.length}`);
   return data;
 });
-const kebap = cuisines?.find((c) => c['slug'] === 'kebap-izgara');
-const kebapId = str(kebap?.['id']);
+const idOf = (slug: string) => str(cuisines?.find((c) => c['slug'] === slug)?.['id']);
+const pideId = idOf('pide-lahmacun');
+const kebapId = idOf('kebap-izgara');
 
-// ---- Mod 1 without AI (acceptance #3) ----------------------------------------------------------------------------
-await step('suggest: 40 approved templates with ZERO LLM calls', async () => {
-  // Approved, not only source=seed: accepting a seed card turns it into source=user (D-019).
-  const templates = await call('GET', '/templates?limit=500');
-  const seen = new Set<string>();
-  const names: string[] = [];
-  for (const template of templates.json['data'] as Json[]) {
-    const name = String(template['name']);
-    if (seen.has(normalizeTr(name)) || names.length === 40) continue;
-    seen.add(normalizeTr(name));
-    names.push(name);
-  }
-  assert(names.length === 40, `approved templates: ${names.length}`);
-  const run = await call('POST', '/suggest', { cuisineId: kebapId, promptText: names.join('\n') });
-  assert(run.status === 200, `HTTP ${run.status} ${run.text.slice(0, 200)}`);
-  const cards = run.json['cards'] as Json[];
-  assert(cards.length === names.length, `cards ${cards.length}/${names.length}`);
-  assert(run.json['llmCalls'] === 0 && run.json['cacheHit'] === true, `llmCalls=${String(run.json['llmCalls'])}`);
-  assert(!PRICE.test(run.text), 'price amount in response');
+await step('category taxonomy + per-cuisine expectations (Postgres, editable)', async () => {
+  const categories = list((await call('GET', '/categories')).json['data']);
+  assert(categories.length >= 8, `categories: ${categories.length}`);
+  assert(categories.some((c) => c['key'] === 'icecek'), 'no drinks category');
+  const expected = list((await call('GET', `/cuisines/${pideId}/categories`)).json['data']);
+  assert(expected.some((c) => c['categoryKey'] === 'icecek'), `pide expects: ${expected.map((c) => str(c['categoryKey'])).join(',')}`);
 });
 
-await step('suggest over SSE (run → item… → done)', async () => {
+// ---- analysis of a typed menu (works with or without a provider key) ---------------------------------------------
+const typed = await step(`analysis: typed pide menu → three sections (< ${BUDGET_MS} ms)`, async () => {
+  const form = new FormData();
+  form.append('cuisineId', pideId);
+  form.append('menuText', 'Kıymalı Pide, Kaşarlı Pide, Kuşbaşılı Pide, Karışık Pide, Sucuklu Yumurtalı Pide');
+  form.append('debug', 'true');
+  const started = Date.now();
+  const res = await call('POST', '/analyze', form);
+  const elapsed = Date.now() - started;
+  assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 200)}`);
+  const counts = res.json['counts'] as Json;
+  assert(list(res.json['menu']).length === 5, `menu: ${list(res.json['menu']).length}`);
+  assert(counts['current'] === 5 && counts['target'] === 10 && counts['hardMinimum'] === 10, JSON.stringify(counts));
+  assert(list(counts['categories']).some((c) => Number(c['missing']) > 0), 'no open category on a pide-only menu');
+  assert(count(res.json, 'new_product') > 0, 'no new product');
+  checkResult(res.json);
+  const stats = res.json['stats'] as Json;
+  console.log(
+    `      ${elapsed} ms · ${count(res.json, 'new_product')} new / ${count(res.json, 'option')} option / ${count(res.json, 'fix')} fix · ${String(stats['llmCalls'])} LLM calls`,
+  );
+  assert(elapsed < BUDGET_MS, `${elapsed} ms`);
+  return res.json;
+});
+const runId = str(typed?.['runId']);
+
+await step('trace: one step per agent, served to the debug screen', async () => {
+  const trace = await call('GET', `/analyze/${runId}/trace`);
+  const agents = list(trace.json['steps']).map((s) => str(s['agent']));
+  for (const agent of ['extractor', 'classifier', 'gap_analyst', 'product_recommender', 'option_modifier', 'validator']) {
+    assert(agents.includes(agent), `no ${agent} step (${agents.join(',')})`);
+  }
+});
+
+await step('resume: latest analysis, snapshot and event replay', async () => {
+  const latest = await call('GET', '/analyze/latest');
+  assert(latest.json['runId'] === runId, `latest ${str(latest.json['runId'])}`);
+  const snapshot = await call('GET', `/analyze/${runId}`);
+  assert(snapshot.status === 200, `snapshot ${snapshot.status}`);
+  const replay = await sse(`/analyze/${runId}/events`, { method: 'GET' });
+  const names = replay.events.map((e) => e.event);
+  assert(names.includes('counts') && names.at(-1) === 'done', names.join(','));
+});
+
+await step('re-run with another cuisine: the menu is not read again', async () => {
   const form = new FormData();
   form.append('cuisineId', kebapId);
-  form.append('promptText', 'Adana Dürüm, lahmacun, İSKENDER, kunefe');
-  const run = await sse('/suggest', form);
+  form.append('fromRunId', runId);
+  const res = await call('POST', '/analyze', form);
+  assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 200)}`);
+  assert((res.json['counts'] as Json)['cuisineId'] === kebapId, 'cuisine not overridden');
+  assert(list(res.json['menu']).length === 5, 'menu changed');
+  checkResult(res.json);
+  const steps = list((await call('GET', `/analyze/${str(res.json['runId'])}/trace`)).json['steps']);
+  assert(steps.find((s) => s['agent'] === 'extractor')?.['status'] === 'skipped', 'extractor ran again');
+});
+
+await step('SSE: run first, counts before the first card, done last', async () => {
+  const form = new FormData();
+  form.append('cuisineId', pideId);
+  form.append('menuText', 'Lahmacun, Kıymalı Pide');
+  const run = await sse('/analyze', { method: 'POST', body: form });
   const names = run.events.map((e) => e.event);
   assert(names[0] === 'run' && names.at(-1) === 'done', names.join(','));
-  assert(names.filter((n) => n === 'item').length === 4, `items: ${names.join(',')}`);
+  const firstItem = names.indexOf('item');
+  assert(firstItem < 0 || names.indexOf('counts') < firstItem, names.join(','));
+  console.log(`      counts after ${run.events.find((e) => e.event === 'counts')?.at ?? '-'} ms · done after ${run.total} ms`);
 });
 
-// ---- branches, export, template pool, settings --------------------------------------------------------------------
-const branch = await step('branch create + target override', async () => {
-  const created = await call('POST', '/branches', { name: `Canlı Test ${new Date().toISOString().slice(0, 16)}`, cuisineId: kebapId, city: 'İzmir' });
-  assert(created.status === 201, `HTTP ${created.status} ${created.text}`);
-  const patched = await call('PATCH', `/branches/${String(created.json['id'])}`, { targetItemCount: 14 });
-  assert(patched.json['effectiveTarget'] === 14, patched.text);
-  return created.json;
-});
-const branchId = str(branch?.['id']);
-
-await step('branch export CSV (Excel) + JSON', async () => {
-  const csv = await fetch(`${api}/branches/${branchId}/export?format=csv`, { headers: { authorization: `Bearer ${token}` } });
-  // Read raw bytes: text() would drop the BOM that Turkish Excel needs.
-  const bytes = Buffer.from(await csv.arrayBuffer());
-  assert(csv.ok && bytes.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf])), `csv ${csv.status}: no UTF-8 BOM`);
-  assert(bytes.subarray(3).toString('utf8').startsWith('Ürün;Durum'), 'csv header');
-  const json = await call('GET', `/branches/${branchId}/export?format=json`);
-  assert(json.status === 200 && typeof json.json['branch'] === 'object', `json ${json.status}`);
-});
-
-await step('template pool search (name + alias, Turkish-insensitive)', async () => {
-  const res = await call('GET', `/templates?q=${encodeURIComponent('acılı kebap')}`);
-  const names = (res.json['data'] as Json[]).map((t) => t['name']);
-  assert(names.includes('Adana Kebap'), JSON.stringify(names));
+await step('skip marks a card without touching the template pool', async () => {
+  const card = list(typed?.['cards']).find((c) => c['status'] === 'pending');
+  assert(card, 'no pending card');
+  const res = await call('POST', `/suggestion-items/${str(card['id'])}/skip`);
+  assert(res.status === 200 && res.json['status'] === 'skipped', `HTTP ${res.status} ${res.text.slice(0, 120)}`);
 });
 
 const providers = await step('settings: providers + quota + usage summary', async () => {
@@ -224,89 +281,69 @@ const providers = await step('settings: providers + quota + usage summary', asyn
   assert(settings.status === 200 && quota.status === 200 && usage.status === 200, 'settings endpoints');
   return settings.json;
 });
-const configured = new Set(
-  ((providers?.['providers'] as Json[] | undefined) ?? []).filter((p) => p['configured'] === true).map((p) => String(p['name'])),
-);
+const configured = new Set(list(providers?.['providers']).filter((p) => p['configured'] === true).map((p) => str(p['name'])));
 const localOnly = providers?.['localOnlyMode'] === true;
 console.log(`\n  providers configured: ${[...configured].join(', ') || 'none'}${localOnly ? ' (LOCAL_ONLY_MODE)' : ''}\n`);
 
-// ---- AI flows -----------------------------------------------------------------------------------------------------
+// ---- image flows (need a provider key) ----------------------------------------------------------------------------
 if (args['skip-ai'] || configured.size === 0 || localOnly) {
-  await step('without AI: panel screenshots degrade gracefully (warning, no crash)', async () => {
+  await step('without AI: a screenshot degrades to a warning, not a crash', async () => {
     const form = new FormData();
-    form.append('branchId', branchId);
+    form.append('cuisineId', kebapId);
     form.append('images', image('panel-1.png', 'image/png'), 'panel-1.png');
-    const run = await sse('/gap-analysis', form);
+    const run = await sse('/analyze', { method: 'POST', body: form });
     const names = run.events.map((e) => e.event);
-    assert(names.includes('counts') && names.at(-1) === 'done', names.join(','));
-  });
-  await step('without AI: voice note / research answer with a clear error', async () => {
-    const research = await call('POST', '/research', { branchId });
-    assert([409, 429, 503].includes(research.status), `research ${research.status} ${research.text}`);
+    assert(names.includes('warning') && names.at(-1) === 'done', names.join(','));
   });
 } else {
-  const runs = Math.max(1, Number(args.runs) || 3);
+  await step(`panel screenshots (2, overlapping) → options and fixes (< ${BUDGET_MS} ms)`, async () => {
+    const form = new FormData();
+    form.append('cuisineId', kebapId);
+    form.append('images', image('panel-1.png', 'image/png'), 'panel-1.png');
+    form.append('images', image('panel-2.png', 'image/png'), 'panel-2.png');
+    const started = Date.now();
+    const res = await call('POST', '/analyze', form);
+    const elapsed = Date.now() - started;
+    assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 200)}`);
+    const names = list(res.json['menu']).map((m) => str(m['normalized']));
+    assert(new Set(names).size === names.length, 'a product is counted twice');
+    checkResult(res.json);
+    checkImagesRead(res.json);
+    console.log(
+      `      ${elapsed} ms · menu ${names.length} · ${count(res.json, 'new_product')} new / ${count(res.json, 'option')} option / ${count(res.json, 'fix')} fix`,
+    );
+    assert(count(res.json, 'option') + count(res.json, 'fix') > 0, 'no option or fix card for a panel with empty fields');
+    assert(elapsed < BUDGET_MS, `${elapsed} ms`);
+  });
 
-  await step('Mod 1 photo: 15-item menu → cards (first card < 6 s)', async () => {
+  await step(`menu photo (kebapçı) → product list (< ${BUDGET_MS} ms)`, async () => {
     const form = new FormData();
     form.append('cuisineId', kebapId);
     form.append('images', image('menu-kebapci.jpg', 'image/jpeg'), 'menu-kebapci.jpg');
-    const run = await sse('/suggest', form);
-    const items = run.events.filter((e) => e.event === 'item');
-    const firstCard = items[0]?.at ?? Number.NaN;
-    const done = run.events.find((e) => e.event === 'done')?.data;
-    console.log(`      first card ${firstCard} ms · ${items.length} cards · total ${run.total} ms · stats ${JSON.stringify(done?.['stats'])}`);
-    assert(items.length >= 10, `only ${items.length} cards`);
-    assert(firstCard < 6000, `first card after ${firstCard} ms`);
-    assert(!PRICE.test(JSON.stringify(items.map((i) => i.data))), 'price amount in cards');
-    for (const item of items) {
-      const payload = (item.data['card'] as Json)['payload'] as Json;
-      assert(String(payload['description']).length <= 160, `description too long: ${String(payload['name'])}`);
-    }
+    const started = Date.now();
+    const res = await call('POST', '/analyze', form);
+    const elapsed = Date.now() - started;
+    assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 200)}`);
+    checkResult(res.json);
+    console.log(`      ${elapsed} ms · menu ${list(res.json['menu']).length} · ${list(res.json['cards']).length} cards`);
+    checkImagesRead(res.json);
+    assert(list(res.json['menu']).length >= 10, `only ${list(res.json['menu']).length} products read`);
+    assert(elapsed < BUDGET_MS, `${elapsed} ms`);
   });
+}
 
-  await step(`Mod 2: 2 panel screenshots → x/target + checklist (p95 < 8 s over ${runs} runs)`, async () => {
-    const totals: number[] = [];
-    let counts: Json | undefined;
-    for (let i = 0; i < runs; i += 1) {
-      const form = new FormData();
-      form.append('branchId', branchId);
-      form.append('images', image('panel-1.png', 'image/png'), 'panel-1.png');
-      form.append('images', image('panel-2.png', 'image/png'), 'panel-2.png');
-      const run = await sse('/gap-analysis', form);
-      const countsEvent = run.events.find((e) => e.event === 'counts');
-      counts = countsEvent?.data['counts'] as Json | undefined;
-      totals.push(run.total);
-      console.log(`      run ${i + 1}: counts after ${countsEvent?.at ?? '-'} ms · done after ${run.total} ms · ${JSON.stringify(counts)}`);
-    }
-    console.log(`      p95 ${percentile(totals, 95)} ms (first run reads the images, later runs use the cache)`);
-    assert(counts && Number(counts['fromScreenshots']) >= 10, `unique items: ${JSON.stringify(counts)}`);
-    assert(percentile(totals, 95) < 8000, `p95 ${percentile(totals, 95)} ms`);
-  });
-
-  if (configured.has('groq')) {
-    await step('research: web search for a real restaurant', async () => {
-      const res = await call('POST', '/research', { restaurantName: 'Hacı Abdullah Lokantası', city: 'İstanbul' });
-      const details = (res.json['error'] as Json | undefined)?.['details'] as Json | undefined;
-      if (res.status === 503 && details?.['status'] === 413) {
-        // Free API tiers: compound's own calls exceed Groq's per-minute token limit (D-142). The app gets a clear error.
-        console.log('      not available on this API plan (Groq 413 per-minute token limit) — clear error returned');
-        return;
-      }
-      assert(res.status === 200, `HTTP ${res.status} ${res.text.slice(0, 300)}`);
-      console.log(`      found=${String(res.json['found'])} items=${(res.json['items'] as Json[]).length} sources=${(res.json['sources'] as Json[]).length}`);
-      assert(!PRICE.test(res.text), 'price amount in research result');
-    });
+// ---- removed surfaces ---------------------------------------------------------------------------------------------
+await step('removed endpoints answer 404 (branches, gap analysis, research, suggest)', async () => {
+  for (const [method, path] of [
+    ['GET', '/branches'],
+    ['POST', '/gap-analysis'],
+    ['POST', '/research'],
+    ['POST', '/suggest'],
+  ] as const) {
+    const res = await call(method, path, method === 'POST' ? {} : undefined);
+    assert(res.status === 404, `${method} ${path} → ${res.status}`);
   }
-}
-
-// ---- cleanup --------------------------------------------------------------------------------------------------------
-if (branchId) {
-  await step('cleanup: delete the test branch', async () => {
-    const res = await call('DELETE', `/branches/${branchId}`);
-    assert(res.status === 204, `HTTP ${res.status}`);
-  });
-}
+});
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed${failed.length ? ` — FAILED: ${failed.map((f) => f.name).join('; ')}` : ''}`);

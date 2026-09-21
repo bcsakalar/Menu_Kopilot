@@ -5,7 +5,7 @@ import { EMBEDDING } from '../../config/models.js';
 import type { Database } from '../../db/client.js';
 import { itemAliases, itemEmbeddings, menuItems } from '../../db/schema/index.js';
 import type { TemplateSource } from '../templates/template-store.js';
-import type { MatchType } from '../suggest/schemas.js';
+import type { MatchType } from '../../agents/schemas/shared.js';
 import type { CuisineGraph } from './cuisine-graph.js';
 
 /**

@@ -6,7 +6,6 @@ import 'package:menu_kopilot/core/network/api_exception.dart';
 import 'package:menu_kopilot/core/utils/image_compressor.dart';
 import 'package:menu_kopilot/core/utils/server_url.dart';
 import 'package:menu_kopilot/core/widgets/common.dart';
-import 'package:menu_kopilot/features/gap/gap_controller.dart';
 import 'package:menu_kopilot/features/home/home_controller.dart';
 import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
@@ -91,12 +90,13 @@ void main() {
       expect(draft.compressing, isFalse);
     });
 
-    test('screenshots over the limit are skipped and duplicates (same content) dropped', () async {
+    test('images over the limit are skipped and duplicates (same content) dropped', () async {
       final container = containerWith((path) async => picked(path.startsWith('same') ? 'same' : path));
       addTearDown(container.dispose);
-      final result = await container.read(gapDraftProvider.notifier).addImages(['same-1', 'same-2', 'x', 'y', 'z', 'w', 'v']);
+      // Two files with identical content count once, so only four of the seven survive the 5-photo limit.
+      final result = await container.read(homeDraftProvider.notifier).addImages(['same-1', 'same-2', 'x', 'y', 'z', 'w', 'v']);
       expect(result, (skipped: 2, failed: 0));
-      expect(container.read(gapDraftProvider).images.map((i) => i.sha256), ['same', 'x', 'y', 'z']);
+      expect(container.read(homeDraftProvider).images.map((i) => i.sha256), ['same', 'x', 'y', 'z']);
     });
   });
 }

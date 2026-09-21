@@ -30,7 +30,11 @@
     "db:migrate": "tsx --env-file-if-exists=../.env src/db/migrate.ts",
     "db:rollback": "tsx --env-file-if-exists=../.env src/db/rollback.ts",
     "db:seed": "tsx --env-file-if-exists=../.env src/db/seed/run.ts",
-    "db:export-seed": "tsx --env-file-if-exists=../.env src/db/seed/export-seed.ts"
+    "user:add": "tsx --env-file-if-exists=../.env src/db/seed/add-user.ts",
+    "db:export-seed": "tsx --env-file-if-exists=../.env src/db/seed/export-seed.ts",
+    "measure": "tsx --env-file-if-exists=../.env scripts/measure-quality.ts",
+    "probe:recommender": "tsx --env-file-if-exists=../.env scripts/probe-recommender.ts",
+    "compare": "tsx scripts/compare-quality.ts"
   },
   "dependencies": {
     "@fastify/jwt": "^10.2.2",

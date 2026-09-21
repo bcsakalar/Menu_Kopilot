@@ -1,13 +1,103 @@
 {
   "items": [
-    { "rawName": "Künefe", "priceText": "190 TL", "sectionText": "TATLILAR", "confidence": 0.98 },
-    { "rawName": "Fıstıklı Baklava", "priceText": "260 TL", "sectionText": "TATLILAR", "confidence": 0.97 },
-    { "rawName": "Fırın Sütlaç", "priceText": "110 TL", "sectionText": "TATLILAR", "confidence": 0.97 },
-    { "rawName": "Kazandibi", "priceText": "120 TL", "sectionText": "TATLILAR", "confidence": 0.97 },
-    { "rawName": "Trileçe", "priceText": "130 TL", "sectionText": "TATLILAR", "confidence": 0.96 },
-    { "rawName": "Türk Kahvesi", "priceText": "70 TL", "sectionText": "SICAK İÇECEKLER", "confidence": 0.98 },
-    { "rawName": "Çay", "priceText": "25 TL", "sectionText": "SICAK İÇECEKLER", "confidence": 0.98 },
-    { "rawName": "Limonata", "priceText": "80 TL", "sectionText": "SOĞUK İÇECEKLER", "confidence": 0.97 },
-    { "rawName": "Ayran", "priceText": "40 TL", "sectionText": "SOĞUK İÇECEKLER", "confidence": 0.98 }
+    {
+      "rawName": "Künefe",
+      "priceText": "190 TL",
+      "sectionText": "TATLILAR",
+      "confidence": 0.98,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Fıstıklı Baklava",
+      "priceText": "260 TL",
+      "sectionText": "TATLILAR",
+      "confidence": 0.97,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Fırın Sütlaç",
+      "priceText": "110 TL",
+      "sectionText": "TATLILAR",
+      "confidence": 0.97,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Kazandibi",
+      "priceText": "120 TL",
+      "sectionText": "TATLILAR",
+      "confidence": 0.97,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Trileçe",
+      "priceText": "130 TL",
+      "sectionText": "TATLILAR",
+      "confidence": 0.96,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Türk Kahvesi",
+      "priceText": "70 TL",
+      "sectionText": "SICAK İÇECEKLER",
+      "confidence": 0.98,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Çay",
+      "priceText": "25 TL",
+      "sectionText": "SICAK İÇECEKLER",
+      "confidence": 0.98,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Limonata",
+      "priceText": "80 TL",
+      "sectionText": "SOĞUK İÇECEKLER",
+      "confidence": 0.97,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    },
+    {
+      "rawName": "Ayran",
+      "priceText": "40 TL",
+      "sectionText": "SOĞUK İÇECEKLER",
+      "confidence": 0.98,
+      "descriptionText": null,
+      "description": "unknown",
+      "options": "unknown",
+      "removables": "unknown",
+      "optionNames": []
+    }
   ]
 }

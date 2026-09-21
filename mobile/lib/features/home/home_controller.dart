@@ -10,22 +10,43 @@ import '../../core/utils/image_compressor.dart';
 const int maxPhotos = 5;
 
 class HomeDraft {
-  const HomeDraft({this.cuisineId, this.prompt = '', this.images = const [], this.deepMode = false, this.compressing = false});
+  const HomeDraft({
+    this.cuisineId,
+    this.menuText = '',
+    this.notes = '',
+    this.images = const [],
+    this.debug = false,
+    this.compressing = false,
+  });
 
+  /// Optional: the Classifier fills it from the menu when nothing is chosen.
   final String? cuisineId;
-  final String prompt;
+
+  /// Products the restaurant already sells, typed or dictated.
+  final String menuText;
+  final String notes;
   final List<PickedImage> images;
-  final bool deepMode;
+
+  /// Keep the agent payloads for the hidden pipeline screen.
+  final bool debug;
   final bool compressing;
 
-  bool get canSubmit => cuisineId != null && !compressing && (prompt.trim().isNotEmpty || images.isNotEmpty);
+  bool get canSubmit => !compressing && (menuText.trim().isNotEmpty || images.isNotEmpty);
 
-  HomeDraft copyWith({String? cuisineId, String? prompt, List<PickedImage>? images, bool? deepMode, bool? compressing}) =>
+  HomeDraft copyWith({
+    String? cuisineId,
+    String? menuText,
+    String? notes,
+    List<PickedImage>? images,
+    bool? debug,
+    bool? compressing,
+  }) =>
       HomeDraft(
         cuisineId: cuisineId ?? this.cuisineId,
-        prompt: prompt ?? this.prompt,
+        menuText: menuText ?? this.menuText,
+        notes: notes ?? this.notes,
         images: images ?? this.images,
-        deepMode: deepMode ?? this.deepMode,
+        debug: debug ?? this.debug,
         compressing: compressing ?? this.compressing,
       );
 }
@@ -49,9 +70,11 @@ class HomeDraftController extends Notifier<HomeDraft> {
     await ref.read(recentCuisinesProvider.notifier).touch(cuisineId);
   }
 
-  void setPrompt(String prompt) => state = state.copyWith(prompt: prompt);
+  void setMenuText(String value) => state = state.copyWith(menuText: value);
 
-  void setDeepMode(bool value) => state = state.copyWith(deepMode: value);
+  void setNotes(String value) => state = state.copyWith(notes: value);
+
+  void setDebug(bool value) => state = state.copyWith(debug: value);
 
   /// Adds photos up to the limit and reports how many were over it or could not be read.
   Future<AddImagesResult> addImages(List<String> paths) async {
@@ -83,7 +106,7 @@ class HomeDraftController extends Notifier<HomeDraft> {
     state = state.copyWith(images: images);
   }
 
-  void resetInputs() => state = HomeDraft(cuisineId: state.cuisineId, deepMode: state.deepMode);
+  void resetInputs() => state = HomeDraft(cuisineId: state.cuisineId, debug: state.debug);
 }
 
 final homeDraftProvider = NotifierProvider<HomeDraftController, HomeDraft>(HomeDraftController.new);

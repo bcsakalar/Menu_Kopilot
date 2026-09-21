@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../data/models/suggestion.dart';
+import '../../data/models/analysis.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design/components.dart';
 import '../design/tokens.dart';
@@ -34,6 +34,76 @@ void showMessage(BuildContext context, String message) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(message)));
+}
+
+/// Opens a one-field editor in a bottom sheet; resolves to the trimmed text, or null when cancelled.
+Future<String?> showFieldEditor(
+  BuildContext context, {
+  required String title,
+  required String initial,
+  int? maxLength,
+  String? helper,
+}) {
+  return showModalBottomSheet<String>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    builder: (context) => _FieldEditSheet(title: title, initial: initial, maxLength: maxLength, helper: helper),
+  );
+}
+
+class _FieldEditSheet extends StatefulWidget {
+  const _FieldEditSheet({required this.title, required this.initial, this.maxLength, this.helper});
+
+  final String title;
+  final String initial;
+  final int? maxLength;
+  final String? helper;
+
+  @override
+  State<_FieldEditSheet> createState() => _FieldEditSheetState();
+}
+
+class _FieldEditSheetState extends State<_FieldEditSheet> {
+  late final TextEditingController _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, MediaQuery.viewInsetsOf(context).bottom + AppSpace.page),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.editField(widget.title), style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppSpace.md),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            minLines: 1,
+            maxLines: 5,
+            maxLength: widget.maxLength,
+            decoration: InputDecoration(helperText: widget.helper),
+          ),
+          const SizedBox(height: AppSpace.sm),
+          Row(
+            children: [
+              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel))),
+              const SizedBox(width: AppSpace.sm),
+              Expanded(child: FilledButton(onPressed: () => Navigator.pop(context, _controller.text.trim()), child: Text(l10n.save))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class CopyButton extends StatelessWidget {

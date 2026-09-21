@@ -1,6 +1,7 @@
 # PROGRESS
 
-Last update: 2026-09-19 — production on myserver, 27 cuisines / 316 templates, signed release APK.
+Last update: 2026-09-21 — FAZ 0–3: Şubeler removed, one analysis screen (three sections) on a six-agent pipeline,
+category taxonomy editable in the app. Not deployed and not committed yet; mobile not compiled on this machine.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -26,8 +27,21 @@ Last update: 2026-09-19 — production on myserver, 27 cuisines / 316 templates,
 - [x] **Redesign + real keys** — anthracite/paprika design system (Manrope, count meters, skeletons, action dock,
       haptics), vision routing after real-key measurements, device run with keys, share fixes, `scripts/dev-up.ps1`,
       `scripts/new-prod-env.ps1`
+- [x] **FAZ 0–3 (2026-09-21)** — diagnosis (`docs/FAZ0_TESHIS.md`), Şubeler + research removed, Tamamla merged into
+      one `/analyze` screen with sections A/B/C, agent pipeline with trace + debug screen, categories in Postgres and
+      editable from the app, before/after measurement, report (`docs/FAZ3_RAPOR.md`)
+- [ ] **FAZ 0–3 follow-up (user)** — compile + test the app (CI on a PR or a machine with Flutter), device walk-through
+      with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
 
 ## Where I am
+**2026-09-21 — FAZ 0–3 done in the working tree, uncommitted.** Backend: 538 tests, lint + typecheck clean, the local
+Docker stack runs the new code, `pnpm live:check` 14/15 (the one failure is a menu photo: the Gemini key is denied
+with 403 and Groq's free vision tier caps output at 1000 tokens/minute — D-164). Quality (`pnpm compare`): new
+products 0 % duplicates, category gap closure 1/11 → 10/11, ~3 s per analysis cold. Mobile: rewritten result screen,
+settings for categories, offline queue fixes — checked statically only (D-162). Next steps are in **Pending
+verification by the user** below.
+
+**Before that (2026-09-18/19):**
 **Production is live on myserver** (2026-09-18): `/opt/menu-kopilot` (git clone, read-only deploy key), API image
 `menu-kopilot-api:<sha>` built on the PC, stack healthy behind nginx for `menu.example.com` (security headers,
 rate limits, Cloudflare real IP), secrets in `/etc/menu-kopilot/env`, nightly `pg_dump` to `/opt/yedek`. Production
@@ -37,6 +51,20 @@ Signed release APK on the desktop (`MenuKopilot-1.0.0-arm64.apk`, key in `%USERP
 Left for the user: the Cloudflare DNS record `menu` -> <SUNUCU_IP> (Proxied), uninstalling the old debug build on
 the phone before installing the signed one, deleting the `old-app` DNS record, and paid API tiers for heavy use.
 Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
+
+### FAZ 0–3 inventory (2026-09-21)
+- Backend new: `src/agents/` (six agents, prompts, schemas, tracer, dedupe, pipeline), `src/modules/analyze/`
+  (`/analyze`, SSE, snapshot/latest/events/trace, accept/skip with merge semantics, `fromRunId` re-run),
+  `src/domain/category.ts`, `src/db/schema/{categories,agents}.ts`, `src/db/seed/categories.ts`, migration
+  `0003_agents_categories` (+ down), category API in `src/modules/cuisines/`, `scripts/{measure-quality,
+  compare-quality,probe-recommender}.ts`, rewritten `scripts/live-check.ts`, frozen menus in `test/fixtures/menus/`.
+- Backend removed: `modules/{branches,gap,suggest,research,export/branch-export}`, `lib/contact-guard.ts`, the
+  branch schema, Groq compound, their tests and fixtures.
+- Mobile: `data/models/analysis.dart`, `features/results/{analysis_controller,section_cards,results_screen,
+  pipeline_debug_screen}.dart`, `features/settings/category_settings_screen.dart`, home = single input screen with
+  recent analyses; removed `features/{branches,gap,research}`, `run_controller`, `suggestion_card`,
+  `models/{branch,gap,suggestion}`; `models/voice_research.dart` → `transcription.dart`; l10n regenerated.
+- Docs: `docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, `docs/SSE_EVENTS.md` (analysis contract), README, D-150…D-164.
 
 ### Delivery inventory (2026-09-18/19)
 - Design: tokens + components in `mobile/lib/core/design/` (D-133…D-140), every screen moved over; 61 widget/unit tests,
@@ -176,7 +204,7 @@ Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
 |---|---|---|
 | 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ✅ 2026-09-16: stack up, migrations + seed on real Postgres/pgvector, `pnpm live:check` 13/13 |
 | 2 | No provider key in Flutter (grep) | ✅ `scripts/check-no-provider-keys.ps1` (keys + provider endpoints) |
-| 3 | 40 seed items → `/suggest` with zero LLM calls | ✅ e2e (`llmCalls=0`, usage_log unchanged, cache_hit) |
+| 3 | Known products answered with zero LLM calls | ✅ e2e (`/analyze` with AI off answers all three sections from the pool; `/suggest` was merged into `/analyze`, D-152) |
 | 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
 | 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ◐ e2e: 2 screenshots → 12 unique, 12/14, badges, ≤ 15 questions, counts before recommendations, 2 LLM calls; real p95 needs keys |
 | 6 | Same item in two screenshots counted once | ✅ unit + e2e (3 overlapping rows + clipped "Karışık Pi…" merged; `seenIn` = 2) |
@@ -187,9 +215,21 @@ Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ✅ release APK (debug-signed) exercised on a Galaxy S23 FE / Android 16 (all tabs); the newest build (icon, sharing, typed products) still to be installed; own signing key optional |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-130 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-164 |
+| 15 | FAZ 1: new products never already on the menu; sections A/B/C; pinned counter; < 15 s | ✅ backend (e2e + live: 0/26 duplicates, ~3 s cold); ◐ app screens checked statically, not yet compiled (D-162) |
 
 ## Pending verification by the user
+**FAZ 0–3 (2026-09-21), in this order:**
+- Compile and test the app: open a pull request (CI runs `flutter analyze`, `flutter test`, a debug APK) or, on a
+  machine with Flutter: `cd mobile; flutter pub get; flutter analyze; flutter test`.
+- Gemini: the key answers 403 "Your project has been denied access" — check the project in AI Studio / Google Cloud
+  or create a key in a new project, then replace it in `.env` and `/etc/menu-kopilot/env` (D-164).
+- Device walk-through with the phone on USB (`scripts/dev-up.ps1`, `flutter run`): panel screenshots → pinned
+  counter, A/B/C, filter chips, bulk copy, accept moves the counter, cuisine re-run, Ayarlar → Kategoriler.
+- Commit, push, `scripts/deploy.ps1` — migration 0003 drops the branch tables on production (a nightly dump exists;
+  take a fresh one first), then `pnpm live:check --url https://menu.example.com`.
+
+**Earlier items:**
 - Docker Desktop: reboot (or quit it and delete `%LOCALAPPDATA%\Docker\run\sailor-ingest.sock`), then
   `docker compose up -d` in the repo root and `cd backend; pnpm live:check`.
 - AI keys: put `GEMINI_API_KEY` / `GROQ_API_KEY` into `.env` (local) or `/etc/menu-kopilot/env` (server), then

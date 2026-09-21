@@ -533,3 +533,94 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   `%USERPROFILE%\.android-keys\menu-kopilot\`. The office APK is arm64-only with `API_BASE_URL` set to production;
   `apksigner` verifies it (v2). A phone with the earlier debug-signed build must uninstall it first. Also: the
   generated env file quotes `ADMIN_NAME` (a name with a space broke `source` in a shell; compose was fine).
+
+## FAZ 0–3 — one analysis screen and the agent pipeline (2026-09-21)
+
+The user's brief: remove Şubeler, rebuild Öneri as three scannable sections for a live phone call, decide what to do
+with Tamamla, and rebuild the AI as an auditable agent pipeline (< 15 s). Diagnosis: `docs/FAZ0_TESHIS.md`; report
+with the before/after numbers: `docs/FAZ3_RAPOR.md`.
+
+- **D-150** — Şubeler removed end to end: routes, service, schemas, the branch-menu merge, the branch CSV/JSON export,
+  the mobile screens/providers/models, the nav tab and the tables (`branches`, `branch_menu_snapshots`,
+  `branch_menu_items`, `suggestion_runs.branch_id`) in migration 0003. The down migration recreates the tables as
+  empty structures — dropped rows cannot come back, so take a dump before rolling back. *Why:* the user no longer
+  tracks branches; a half-removed feature would keep costing (queries, UI, tests). (F1)
+- **D-151** — "İnternette araştır" removed with it (it only worked on a branch), and with it Groq `compound` support
+  and `contact-guard`. Voice notes stay (they feed the analysis). *Why:* no branch → no research entry point; dead
+  provider code is a maintenance and privacy liability. (F1)
+- **D-152** — **Tamamla merged into Öneri** instead of rebuilt next to it: one endpoint `POST /analyze`, one result
+  screen. *Why (FAZ 0):* both modes took the same input (panel screenshots, a menu photo or typed products) and the
+  user had to pick a mode mid-call; Tamamla's valuable parts map one-to-one onto the new sections — its "eksik ürün"
+  recommendations → A, missing option/removable badges → B, the call checklist → C — while its "x / hedef" count
+  becomes the pinned header. Keeping two screens would have doubled the pipeline and the tests for no call-time gain.
+- **D-153** — Pipeline: Extractor → Classifier → Gap Analyst → Product Recommender ∥ Option/Modifier → Validator
+  (`backend/src/agents/`), one prompt file + one Zod schema per model agent (`agents/prompts`, `agents/schemas`),
+  each step traced into `agent_steps` (duration, provider/model, tokens, calls; input/output only with `debug=true`).
+  The Gap Analyst and the Validator are deterministic (counting and set subtraction do not need a model, and a model
+  can get arithmetic wrong). The Validator checks schema, dedupe against the menu (normalizeTr + fuzzy via the
+  template matcher), cuisine fit (category quotas) and the target in code; only when a model answer fails its schema
+  does it ask once more on its own route (`agent.validate`, `generateChecked`). The Extractor keeps its per-image
+  repair because the image has to be resent with it. (F1)
+- **D-154** — Per-agent model routes (`provider_configs`, editable in Ayarlar → Görev bazlı modeller): mechanical
+  steps on small models (extract: Flash-Lite → qwen3.8 → 3.8 Flash; classify: Flash-Lite → gpt-oss-20b), the
+  recommendation on the strong one (gpt-oss-120b first). Attempt timeouts 6 s for the text agents and an 11 s deadline
+  over the parallel recommender/option pair, after which the database answers ship. *Why:* 24.6 s was measured once
+  before the deadline existed; with it the worst case stays inside the 15 s budget. (F1)
+- **D-155** — Category taxonomy in Postgres, not in code: `menu_categories` (label, order, keywords) and
+  `cuisine_categories` (which categories a cuisine needs, with a minimum each). Classification matches whole tokens
+  ("su" never matches "Sütlaç"); a keyword with a space matches as a phrase ("sıcak çikolata"), so a precise keyword
+  does not drag every "sıcak" product along. Editable from the app (Ayarlar → Kategoriler; Mutfak Türleri → ⋮ →
+  Kategoriler ve min. sayılar) via `GET/PATCH /categories`, `GET/PUT /cuisines/:id/categories`. *Why:* the user
+  asked to edit templates and minimums later without a deploy. (F1)
+- **D-156** — The seed runs on every start (`SEED_ON_START=true`), so an edit must survive it: `menu_categories`
+  rows edited by the user (`edited_by_user`) and cuisines whose category set the user changed
+  (`categories_edited_by_user`) are left alone; everything else is refreshed. Seed templates are re-classified with
+  the stored taxonomy on every seed and right after a keyword edit (`recategorizeTemplates`); a category that came
+  from accepting a card stays. Both columns went into the still-unreleased migration 0003 (the local dev database got
+  the same `ALTER`s by hand). (F1)
+- **D-157** — Category quotas: the recommender asks for the larger of the product gap and the category "shape" gap,
+  fills the open categories round-robin, and the Validator enforces "never more of a category than the menu is short
+  of". *Why:* the old recommender answered a pide-only menu with six more pides (category gap closure 1/11). (F1)
+- **D-158** — Accept semantics: a section A card writes its template (template-backed cards carry the full pool
+  payload, so accepting unedited never thins a template out); a section B card MERGES into the product's template
+  (same-name groups replaced, a single base-price group, ingredient lists unioned, description and tags kept); a
+  section C card is only ticked. An option card is titled with the panel spelling (`targetName`, what the user looks
+  for on the call) and carries the pool spelling as `name`; accepting stores the panel spelling as an alias.
+  *Why:* the first version overwrote seed templates with an option-only payload (found by a test, fixed, guarded by
+  a mutation-checked test). (F1)
+- **D-159** — A section A card may show an estimated price range (`priceRangeHint`, e.g. "25–40 TL") because the user
+  asked for it as a talking point; it is never written into a template (`toPayload` strips amounts, the live check
+  asserts no amount in any payload). This narrows the earlier "no TL amount anywhere" rule to "no TL amount in the
+  template pool". (F1)
+- **D-160** — Classifier override: the user's pick always wins; when the Classifier disagrees the phone offers a
+  one-tap re-run, and the cuisine on the pinned header can be changed any time. The re-run sends `fromRunId`: the
+  server reuses the stored product list (`suggestion_runs.menu_snapshot.extracted`), skips the Extractor (traced as
+  `skipped`) and answers in ~2.5 s with no vision call — the empty-description / missing-option evidence carries
+  over. (F1)
+- **D-161** — Result screen: the progress strip and the filter chips are pinned outside the scroll view; each section
+  is a `SliverMainAxisGroup` whose header sticks only while that section is on screen (three pinned headers stacked
+  up to 168 px before); "Hepsini seç" selects one section; decided cards leave the bulk selection; a re-attached
+  stream (app restarted mid-run) keeps the decisions made since and shows each warning once. Home shows the recent
+  analyses again. (F1)
+- **D-162** — Mobile could not be compiled here (no Flutter/Android SDK on this machine, the phone not visible on USB;
+  installing an SDK needs downloads and licence acceptance, which were not authorised). Substitute: static checks
+  written for this refactor — import reachability (including `part` files and `Type.member` statics), l10n
+  keys/arity, and a stand-in for `flutter gen-l10n` that reproduces the checked-in format. They found and fixed real
+  compile errors: `showFieldEditor` defined only in a deleted file, `AppDatabase.forTesting` (does not exist), missing
+  test imports. Widget/unit tests were written for the new screens but not run; CI (`ci.yml`) runs `flutter analyze`,
+  `flutter test` and a debug APK build on every pull request — the first real compile. (F2)
+- **D-163** — Measuring quality: four frozen menus (`backend/test/fixtures/menus/`: pideci, kebapçı, kafe, tatlıcı)
+  and a frozen judge (`scripts/measure-quality.ts`: duplicate of the menu, irrelevant to the cuisine, directly usable,
+  category coverage, time) run against the live stack before and after; `pnpm compare` prints the table. The judge
+  was not changed after seeing results; where it misjudged (its own keyword copy lacks "kek"; option cards titled with
+  the pool spelling before D-158) the report says so instead of re-scoring. (F0/F2)
+- **D-164** — Findings on 2026-09-21 that are environment, not code: the Gemini key answers 403 `PERMISSION_DENIED`
+  ("Your project has been denied access") since the morning — it worked the night before — so every chain runs on
+  Groq; Groq's free tier caps qwen3.8 vision at 1000 output tokens per minute, which a 15-item menu photo exceeds
+  (first attempt cut at exactly 1000 tokens, the retry rate-limited). Panel screenshots are read; large menu photos
+  need a working Gemini key (first in the vision chain) or Groq's Dev tier. (F2)
+- **D-165** — Per-analysis budget: the configured `REQUEST_MAX_LLM_CALLS` / `REQUEST_MAX_INPUT_TOKENS` is what the
+  agents may spend; each image adds one call and 4 000 input tokens on top. *Why:* with one shared budget of six, five
+  panel screenshots used five calls, the Classifier the sixth, and the option/recommendation agents were refused —
+  the biggest menus got database answers only. Found while writing the report; covered by an e2e test that fails
+  without the fix. (F2)

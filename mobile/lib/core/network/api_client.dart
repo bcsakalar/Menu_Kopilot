@@ -3,15 +3,13 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
-import '../../data/models/branch.dart';
+import '../../data/models/analysis.dart';
 import '../../data/models/common.dart';
-import '../../data/models/gap.dart';
 import '../../data/models/json.dart';
 import '../../data/models/settings.dart';
-import '../../data/models/suggestion.dart';
 import '../../data/models/template_item.dart';
 import '../../data/models/template_payload.dart';
-import '../../data/models/voice_research.dart';
+import '../../data/models/transcription.dart';
 import '../storage/token_store.dart';
 import 'api_exception.dart';
 import 'sse.dart';
@@ -22,35 +20,47 @@ class UploadImage {
   final String sha256;
 }
 
-class SuggestRequestData {
-  const SuggestRequestData({
-    required this.cuisineId,
-    this.promptText = '',
-    this.branchId,
-    this.deepMode = false,
+/// Everything one analysis run needs. `cuisineId` may be empty: the Classifier fills it from the menu.
+class AnalyzeRequestData {
+  const AnalyzeRequestData({
+    this.cuisineId = '',
+    this.menuText = '',
+    this.notes = '',
+    this.debug = false,
     this.images = const [],
+    this.fromRunId = '',
   });
 
   final String cuisineId;
-  final String promptText;
-  final String? branchId;
-  final bool deepMode;
+  final String menuText;
+  final String notes;
+
+  /// Re-run of an earlier analysis (another cuisine picked on the result screen): the server reuses that run's
+  /// product list, so no image is sent or read again.
+  final String fromRunId;
+
+  /// Store agent input/output payloads so the hidden debug screen can show them.
+  final bool debug;
   final List<UploadImage> images;
+
+  bool get hasInput => menuText.trim().isNotEmpty || images.isNotEmpty || fromRunId.isNotEmpty;
 
   Json toJson() => {
         'cuisineId': cuisineId,
-        'promptText': promptText,
-        'branchId': branchId,
-        'deepMode': deepMode,
+        'menuText': menuText,
+        'notes': notes,
+        'debug': debug,
         'images': images.map((i) => {'path': i.path, 'sha256': i.sha256}).toList(),
+        if (fromRunId.isNotEmpty) 'fromRunId': fromRunId,
       };
 
-  static SuggestRequestData fromJson(Json json) => SuggestRequestData(
+  static AnalyzeRequestData fromJson(Json json) => AnalyzeRequestData(
         cuisineId: json.str('cuisineId'),
-        promptText: json.str('promptText'),
-        branchId: json.strOrNull('branchId'),
-        deepMode: json.boolean('deepMode'),
+        menuText: json.str('menuText'),
+        notes: json.str('notes'),
+        debug: json.boolean('debug'),
         images: json.objects('images').map((i) => UploadImage(path: i.str('path'), sha256: i.str('sha256'))).toList(),
+        fromRunId: json.str('fromRunId'),
       );
 }
 
@@ -204,20 +214,21 @@ class ApiClient {
         return (response.data ?? const {}).objects('data').map(Cuisine.fromJson).toList();
       });
 
-  // ---- suggestions ------------------------------------------------------------------------------------------
+  // ---- analysis (one endpoint, three sections) ---------------------------------------------------------------
 
-  Future<FormData> _form(SuggestRequestData request) async => FormData.fromMap({
-        'cuisineId': request.cuisineId,
-        if (request.promptText.trim().isNotEmpty) 'promptText': request.promptText,
-        if (request.branchId != null) 'branchId': request.branchId,
-        'deepMode': request.deepMode.toString(),
+  Future<FormData> _analyzeForm(AnalyzeRequestData request) async => FormData.fromMap({
+        if (request.cuisineId.isNotEmpty) 'cuisineId': request.cuisineId,
+        if (request.menuText.trim().isNotEmpty) 'menuText': request.menuText.trim(),
+        if (request.notes.trim().isNotEmpty) 'notes': request.notes.trim(),
+        if (request.debug) 'debug': 'true',
+        if (request.fromRunId.isNotEmpty) 'fromRunId': request.fromRunId,
         'images': [
           for (final image in request.images)
             await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
         ],
       });
 
-  Stream<SuggestEvent> _sse(Future<Response<ResponseBody>> Function() open) async* {
+  Stream<AnalyzeEvent> _sse(Future<Response<ResponseBody>> Function() open) async* {
     final Response<ResponseBody> response;
     try {
       response = await open();
@@ -230,7 +241,7 @@ class ApiClient {
     try {
       await for (final chunk in utf8.decoder.bind(body.stream.cast<List<int>>())) {
         for (final message in parser.add(chunk)) {
-          final event = SuggestEvent.fromSse(message.event, message.data);
+          final event = AnalyzeEvent.fromSse(message.event, message.data);
           if (event != null) yield event;
         }
       }
@@ -245,137 +256,56 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 90),
       );
 
-  Stream<SuggestEvent> suggestStream(SuggestRequestData request, {CancelToken? cancelToken}) => _sse(
+  Stream<AnalyzeEvent> analyzeStream(AnalyzeRequestData request, {CancelToken? cancelToken}) => _sse(
         () async => _dio.post<ResponseBody>(
-          '/suggest',
-          data: await _form(request),
+          '/analyze',
+          data: await _analyzeForm(request),
           options: _sseOptions,
           cancelToken: cancelToken,
         ),
       );
 
-  Future<String> suggestAsync(SuggestRequestData request) => _guard(() async {
-        final response = await _dio.post<Json>('/suggest', queryParameters: {'async': '1'}, data: await _form(request));
+  /// Queues a run without waiting for it (offline queue flush).
+  Future<String> analyzeAsync(AnalyzeRequestData request) => _guard(() async {
+        final response = await _dio.post<Json>('/analyze', queryParameters: {'async': '1'}, data: await _analyzeForm(request));
         return (response.data ?? const {}).str('runId');
       });
 
-  Stream<SuggestEvent> continueStream(String runId, List<UploadImage> images, {CancelToken? cancelToken}) => _sse(
-        () async => _dio.post<ResponseBody>(
-          '/suggest/$runId/continue',
-          data: FormData.fromMap({
-            'images': [
-              for (final image in images)
-                await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
-            ],
-          }),
-          options: _sseOptions,
-          cancelToken: cancelToken,
-        ),
+  Stream<AnalyzeEvent> runEvents(String runId, {CancelToken? cancelToken}) => _sse(
+        () => _dio.get<ResponseBody>('/analyze/$runId/events', options: _sseOptions, cancelToken: cancelToken),
       );
 
-  Stream<SuggestEvent> runEvents(String runId, {CancelToken? cancelToken}) => _sse(
-        () => _dio.get<ResponseBody>('/suggest/$runId/events', options: _sseOptions, cancelToken: cancelToken),
-      );
+  Future<AnalysisResult> analysis(String runId) => _guard(() async {
+        final response = await _dio.get<Json>('/analyze/$runId');
+        return AnalysisResult.fromJson(response.data ?? const {});
+      });
 
-  Future<RunSnapshot> run(String runId) => _guard(() async {
-        final response = await _dio.get<Json>('/suggest/$runId');
-        return RunSnapshot.fromJson(response.data ?? const {});
+  /// The most recent analysis, or null when there is none yet. Restores the result screen on a cold open.
+  Future<AnalysisResult?> latestAnalysis() => _guard(() async {
+        final response = await _dio.get<Json>('/analyze/latest');
+        final data = response.data;
+        if (data == null || data.isEmpty) return null;
+        return AnalysisResult.fromJson(data);
+      });
+
+  Future<RunTrace> analysisTrace(String runId) => _guard(() async {
+        final response = await _dio.get<Json>('/analyze/$runId/trace');
+        return RunTrace.fromJson(response.data ?? const {});
       });
 
   Future<bool> cancelRun(String runId) => _guard(() async {
-        final response = await _dio.post<Json>('/suggest/$runId/cancel');
+        final response = await _dio.post<Json>('/analyze/$runId/cancel');
         return (response.data ?? const {}).boolean('cancelled');
       });
 
-  Future<({SuggestionCard card, String templateId})> accept(
-    String itemId, {
-    TemplatePayload? payload,
-    String? branchId,
-  }) =>
-      _guard(() async {
-        final response = await _dio.post<Json>(
-          '/suggestion-items/$itemId/accept',
-          data: {
-            'payload': ?payload?.toJson(),
-            'branchId': ?branchId,
-          },
-        );
-        final data = response.data ?? const {};
-        return (card: SuggestionCard.fromJson(data.object('card') ?? const {}), templateId: data.str('templateId'));
+  Future<AnalysisCard> accept(String itemId, {TemplatePayload? payload}) => _guard(() async {
+        final response = await _dio.post<Json>('/suggestion-items/$itemId/accept', data: {'payload': ?payload?.toJson()});
+        return AnalysisCard.fromJson(response.data ?? const {});
       });
 
-  Future<SuggestionCard> skip(String itemId) => _guard(() async {
+  Future<AnalysisCard> skip(String itemId) => _guard(() async {
         final response = await _dio.post<Json>('/suggestion-items/$itemId/skip');
-        return SuggestionCard.fromJson(response.data ?? const {});
-      });
-
-  // ---- branches ---------------------------------------------------------------------------------------------
-
-  Future<List<Branch>> branches() => _guard(() async {
-        final response = await _dio.get<Json>('/branches');
-        return (response.data ?? const {}).objects('data').map(Branch.fromJson).toList();
-      });
-
-  Future<Branch> branch(String id) => _guard(() async {
-        final response = await _dio.get<Json>('/branches/$id');
-        return Branch.fromJson(response.data ?? const {});
-      });
-
-  Future<Branch> createBranch({
-    required String name,
-    required String cuisineId,
-    String? city,
-    String? notes,
-    int? targetItemCount,
-  }) =>
-      _guard(() async {
-        final response = await _dio.post<Json>(
-          '/branches',
-          data: {
-            'name': name,
-            'cuisineId': cuisineId,
-            'city': ?city,
-            'notes': ?notes,
-            'targetItemCount': ?targetItemCount,
-          },
-        );
-        return Branch.fromJson(response.data ?? const {});
-      });
-
-  /// Only the given keys are changed; pass `targetItemCount: null` inside [changes] to reset the target.
-  Future<Branch> updateBranch(String id, Json changes) => _guard(() async {
-        final response = await _dio.patch<Json>('/branches/$id', data: changes);
-        return Branch.fromJson(response.data ?? const {});
-      });
-
-  Future<void> deleteBranch(String id) => _guard(() async {
-        await _dio.delete<Object?>('/branches/$id');
-      });
-
-  Future<BranchMenu> branchMenu(String branchId) => _guard(() async {
-        final response = await _dio.get<Json>('/branches/$branchId/menu');
-        return BranchMenu.fromJson(response.data ?? const {});
-      });
-
-  Future<BranchMenu> updateMenuItem(String branchId, String itemId, MenuItemStatus status) => _guard(() async {
-        final response = await _dio.patch<Json>('/branches/$branchId/menu/$itemId', data: {'status': status.name});
-        return BranchMenu.fromJson(response.data ?? const {});
-      });
-
-  Future<void> deleteMenuItem(String branchId, String itemId) => _guard(() async {
-        await _dio.delete<Object?>('/branches/$branchId/menu/$itemId');
-      });
-
-  /// Branch menu export; the file name comes from the server's Content-Disposition.
-  Future<({String fileName, String body})> exportBranch(String branchId, {String format = 'csv'}) => _guard(() async {
-        final response = await _dio.get<String>(
-          '/branches/$branchId/export',
-          queryParameters: {'format': format},
-          options: Options(responseType: ResponseType.plain),
-        );
-        final disposition = response.headers.value('content-disposition') ?? '';
-        final match = RegExp('filename="([^"]+)"').firstMatch(disposition);
-        return (fileName: match?.group(1) ?? 'menu.$format', body: response.data ?? '');
+        return AnalysisCard.fromJson(response.data ?? const {});
       });
 
   // ---- template pool ----------------------------------------------------------------------------------------
@@ -455,12 +385,42 @@ class ApiClient {
         await _dio.delete<Object?>('/cuisines/$id');
       });
 
+  /// The category taxonomy: label, menu order and the keywords that put a product into each category.
+  Future<List<MenuCategory>> categories() => _guard(() async {
+        final response = await _dio.get<Json>('/categories');
+        return (response.data ?? const {}).objects('data').map(MenuCategory.fromJson).toList();
+      });
+
+  Future<MenuCategory> updateCategory(String key, {String? label, List<String>? keywords}) => _guard(() async {
+        final response = await _dio.patch<Json>('/categories/$key', data: {'label': ?label, 'keywords': ?keywords});
+        return MenuCategory.fromJson(response.data ?? const {});
+      });
+
+  /// What a cuisine is expected to have: category → minimum products (the Gap Analyst's yardstick).
+  Future<List<CuisineCategory>> cuisineCategories(String cuisineId) => _guard(() async {
+        final response = await _dio.get<Json>('/cuisines/$cuisineId/categories');
+        return (response.data ?? const {}).objects('data').map(CuisineCategory.fromJson).toList();
+      });
+
+  /// Replaces the whole set; a category left out is no longer expected from the cuisine.
+  Future<List<CuisineCategory>> replaceCuisineCategories(String cuisineId, Map<String, int> minItemsByKey) => _guard(() async {
+        final response = await _dio.put<Json>(
+          '/cuisines/$cuisineId/categories',
+          data: {
+            'items': [
+              for (final entry in minItemsByKey.entries) {'categoryKey': entry.key, 'minItems': entry.value},
+            ],
+          },
+        );
+        return (response.data ?? const {}).objects('data').map(CuisineCategory.fromJson).toList();
+      });
+
   Future<UsageSummary> usageSummary(String range) => _guard(() async {
         final response = await _dio.get<Json>('/usage/summary', queryParameters: {'range': range});
         return UsageSummary.fromJson(response.data ?? const {});
       });
 
-  // ---- voice notes & research (Faz 7) -----------------------------------------------------------------------
+  // ---- voice notes ------------------------------------------------------------------------------------------
 
   /// Sends a recorded voice note; the server turns it into text + product names (the file is not stored).
   Future<Transcription> transcribe(String path, {String language = 'tr', String? cuisineId}) => _guard(() async {
@@ -475,96 +435,4 @@ class ApiClient {
         );
         return Transcription.fromJson(response.data ?? const {});
       });
-
-  /// Searches the web for the branch's restaurant (slow: web search + reading pages).
-  Future<ResearchResult> research({String? branchId, String? restaurantName, String? city, bool refresh = false}) =>
-      _guard(() async {
-        final response = await _dio.post<Json>(
-          '/research',
-          data: {'branchId': ?branchId, 'restaurantName': ?restaurantName, 'city': ?city, 'refresh': refresh},
-          options: Options(receiveTimeout: const Duration(seconds: 120)),
-        );
-        return ResearchResult.fromJson(response.data ?? const {});
-      });
-
-  // ---- gap analysis (Mod 2) ---------------------------------------------------------------------------------
-
-  Stream<GapEvent> gapStream({
-    required String branchId,
-    required List<UploadImage> images,
-    String? extraNotes,
-    String? menuText,
-    CancelToken? cancelToken,
-  }) async* {
-    final form = FormData.fromMap({
-      'branchId': branchId,
-      if (extraNotes != null && extraNotes.trim().isNotEmpty) 'extraNotes': extraNotes.trim(),
-      if (menuText != null && menuText.trim().isNotEmpty) 'menuText': menuText.trim(),
-      'images': [
-        for (final image in images)
-          await MultipartFile.fromFile(image.path, filename: '${image.sha256}.jpg', contentType: DioMediaType('image', 'jpeg')),
-      ],
-    });
-    try {
-      await for (final message in streamMultipart('/gap-analysis', form, cancelToken: cancelToken)) {
-        final event = GapEvent.fromSse(message.event, message.data);
-        if (event != null) yield event;
-      }
-    } on DioException catch (e) {
-      throw await _toApiException(e);
-    }
-  }
-
-  Future<GapResult> gapResult(String runId) => _guard(() async {
-        final response = await _dio.get<Json>('/gap-analysis/$runId');
-        return GapResult.fromJson(response.data ?? const {});
-      });
-
-  /// Latest analysis of a branch, or null when it has none yet.
-  Future<GapResult?> latestGap(String branchId) => _guard(() async {
-        try {
-          final response = await _dio.get<Json>('/branches/$branchId/gap/latest');
-          return GapResult.fromJson(response.data ?? const {});
-        } on DioException catch (e) {
-          if (e.response?.statusCode == 404) return null;
-          rethrow;
-        }
-      });
-
-  Future<bool> cancelGap(String runId) => _guard(() async {
-        final response = await _dio.post<Json>('/gap-analysis/$runId/cancel');
-        return (response.data ?? const {}).boolean('cancelled');
-      });
-
-  // ---- generic helpers for the other feature modules ---------------------------------------------------------
-
-  Future<Json> getJson(String path, {Map<String, Object?>? query}) => _guard(() async {
-        final response = await _dio.get<Json>(path, queryParameters: query);
-        return response.data ?? const {};
-      });
-
-  Future<Json> sendJson(String method, String path, {Object? body}) => _guard(() async {
-        final response = await _dio.request<Json>(path, data: body, options: Options(method: method));
-        return response.data ?? const {};
-      });
-
-  Future<String> getText(String path, {Map<String, Object?>? query}) => _guard(() async {
-        final response = await _dio.get<String>(path, queryParameters: query, options: Options(responseType: ResponseType.plain));
-        return response.data ?? '';
-      });
-
-  Stream<SseMessage> streamMultipart(String path, FormData data, {CancelToken? cancelToken}) async* {
-    final Response<ResponseBody> response;
-    try {
-      response = await _dio.post<ResponseBody>(path, data: data, options: _sseOptions, cancelToken: cancelToken);
-    } on DioException catch (e) {
-      throw await _toApiException(e);
-    }
-    final body = response.data;
-    if (body == null) return;
-    final parser = SseParser();
-    await for (final chunk in utf8.decoder.bind(body.stream.cast<List<int>>())) {
-      yield* Stream.fromIterable(parser.add(chunk));
-    }
-  }
 }

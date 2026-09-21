@@ -1,7 +1,32 @@
-# Streaming contract (SSE)
+# Analysis API and streaming contract (SSE)
 
-`POST /api/v1/suggest` and `POST /api/v1/suggest/:runId/continue` stream Server-Sent Events when the request has
-`Accept: text/event-stream`. Each message is:
+One endpoint does what "Öneri" and "Tamamla" used to do separately:
+
+`POST /api/v1/analyze` — multipart (or JSON without images):
+
+| field | | |
+|---|---|---|
+| `images` | ≤ 5 | platform panel screenshots and/or menu photos; overlapping screenshots are deduplicated |
+| `menuText` | optional | products typed or dictated during the call, `,` / `;` / newline separated — parsed without a model |
+| `cuisineId` | optional | the user's pick; left out → the Classifier decides |
+| `notes` | optional | free text for the call |
+| `fromRunId` | optional | re-run of an earlier analysis (another cuisine picked on the result screen): that run's product list is reused, no image is sent or read again (`409` when the run cannot be reused) |
+| `debug` | optional | `true` stores every agent's input/output for the hidden debug screen |
+
+At least one image, `menuText` or a reusable `fromRunId` is required.
+
+Response modes:
+
+- `Accept: text/event-stream` → SSE (below). The phone uses this.
+- `?async=1` → `202 { runId }` (offline queue flush).
+- otherwise → waits and returns the result (`analyzeResultSchema`, same shape as the snapshot).
+
+Around a run: `GET /analyze/:runId` (snapshot) · `GET /analyze/:runId/events` (re-attach; replays past events, or
+the stored result once the run left memory) · `GET /analyze/latest` (restore after the phone locked mid-call) ·
+`GET /analyze/:runId/trace` (agent steps) · `POST /analyze/:runId/cancel` · `POST /suggestion-items/:id/accept`
+(body `{ payload? }`) · `POST /suggestion-items/:id/skip`.
+
+## Framing
 
 ```
 id: <sequence>
@@ -9,90 +34,83 @@ event: <type>
 data: <JSON, also contains "type">
 ```
 
-A `: ping` comment is sent every 15 s. The run keeps going if the client disconnects; re-attach with
-`GET /api/v1/suggest/:runId/events` (replays past events) or read `GET /api/v1/suggest/:runId` (snapshot).
-Cancel with `POST /api/v1/suggest/:runId/cancel`.
+A `: ping` comment is sent every 15 s. The run keeps going if the client disconnects.
+
+## Order
+
+`run → progress* → classification → menu → counts → progress → item* → done`, with `trace` after every agent step
+and `warning` whenever something degrades. **`counts` always comes before the first `item`**: on a phone call the
+number ("5 / 10") is the first thing that matters.
 
 | event | payload | notes |
 |---|---|---|
-| `run` | `{ runId, cuisineId, resumed, budget: { maxCalls, maxInputTokens } }` | always first |
-| `progress` | `{ stage: extract\|retrieve\|canonicalize\|enrich\|finalize, message, done?, total? }` | UI status line |
-| `extracted` | `{ names: string[] }` | names read from one photo — show placeholders |
-| `item` | `{ card }` — see `cardDtoSchema` | one per product, in display order |
-| `warning` | `{ code, message }` | `provider_fallback`, `local_only`, `quota_exceeded`, `images_skipped`, `extract_failed`, `not_a_product` |
-| `budget_exhausted` | `{ pendingItems, pendingImageHashes, message }` | offer "Devam et" (re-send the listed images) |
-| `done` | `{ status, stats }` | `status`: completed \| partial \| cancelled; `stats.cacheHit` = no external API call |
+| `run` | `{ runId }` | always first |
+| `progress` | `{ agent, message, done?, total? }` | status line; `done/total` = images read |
+| `classification` | `{ classification: { cuisineId, cuisineName, priceSegment, confidence, reason, disagrees, suggestedCuisineId, suggestedCuisineName } }` | `disagrees` → the phone offers "X olarak yeniden analiz et" (a `fromRunId` re-run) |
+| `menu` | `{ items: MenuItem[] }` | what the restaurant already sells, deduplicated |
+| `counts` | `{ counts: { current, target, missing, hardMinimum, cuisineMin, cuisineName, cuisineId, categories: CategoryCount[] } }` | `target = max(hardMinimum 10, cuisineMin)`; `categories` = the cuisine's expected categories, emptiest first |
+| `item` | `{ card }` | one card of section A, B or C (below), in display order |
+| `trace` | `{ step }` | one agent step: `agent, label, status (ok\|failed\|skipped), provider, model, durationMs, tokensIn, tokensOut, llmCalls, input?, output?, error` — payloads only with `debug` |
+| `warning` | `{ code, message }` | see below |
+| `done` | `{ status, stats }` | `status`: completed \| partial \| failed \| cancelled |
 | `error` | `{ code, message }` | terminal |
+
+Warning codes: `local_only` / `quota_exceeded` / `not_configured` (AI off: answered from the template pool only),
+`images_skipped`, `extract_failed` (some images unreadable), `no_items`, `agent_failed` (an agent threw; the run
+continued without it), `slow_providers` (the recommender/option deadline of 11 s passed; database answers shipped),
+`recommend_failed`, `options_failed`, `target_unreachable` (even accepting everything leaves the menu short).
+
+`stats`: `llmCalls, tokensIn, tokensOut, latencyMs, imagesRead, imagesFailed, menuItems, newProducts, optionCards,
+fixCards, dropped` (cards the Validator refused), `cacheHit` (no model call at all).
 
 ## Card (`item.card`)
 
+Every section uses one shape; fields a section does not use are empty.
+
 ```jsonc
 {
-  "id": "uuid",               // suggestion item id → /suggestion-items/:id/accept | skip
+  "id": "uuid",                 // → /suggestion-items/:id/accept | skip
   "runId": "uuid",
-  "rawName": "İçli Köfte",
-  "origin": "seed | db | ai | review",   // badge: Hazır şablon / DB'den / AI / İnceleme gerek
+  "section": "new_product | option | fix",
+  "name": "Ayran",              // A: the proposed product. B/C: the product the card is about (canonical spelling)
+  "targetName": "Ayran 300ml",  // B/C: as written on the panel. A: null
+  "targetNormalized": "ayran 300ml", // B/C: join key to menu[].normalized. A: null
+  "categoryKey": "icecek", "categoryLabel": "İçecek",
+  "source": "seed | db | ai | review",   // badge: Hazır şablon / DB'den / AI / İnceleme gerek
   "matchedTemplateId": "uuid | null",
-  "matchType": "exact | alias | trigram | vector | canonical | null",
-  "score": 0.91,
-  "needsReview": false,
-  "reviewReason": null,        // e.g. "Bunu bilmiyorum, sen doldur."
-  "confidence": 0.93,
-  "sectionText": "ARA SICAKLAR",
+  "shortDescription": "Taze yoğurttan tuzlu ayran, soğuk servis edilir.",  // A: one line to paste
+  "portionInfo": "300 ml",
+  "priceRangeHint": "25–40 TL", // A: a call note only — never written into a template
+  "reason": "İçecek kategorisi boş (0/2)",
+  "importance": 70,
+  "optionGroups": [             // B
+    { "name": "Boy", "selectionType": "single | multi", "isRequired": true, "minSelect": 1, "maxSelect": 1,
+      "options": [{ "name": "Yarım", "priceMode": "sets_base" }, { "name": "Tam", "priceMode": "sets_base" }] }
+  ],
+  "removableIngredients": ["Soğan"], "extraIngredients": ["Ekstra Lavaş"],   // B
+  "fixKind": "empty_description | bad_name | wrong_category | null",       // C
+  "currentValue": "Karışık Pd", "suggestedValue": "Karışık Pide",           // C
+  "payload": { /* A: the full TemplatePayload written to the pool on accept */ },
   "status": "pending | accepted | skipped",
-  "sortOrder": 7,
-  "payload": { /* TemplatePayload: name, description (≤160), servingNote, portionInfo, optionGroups[], removableIngredients[], extraIngredients[], tags[], allergenNotes[], upsellSuggestion */ }
+  "sortOrder": 0
 }
 ```
 
-Prices never appear in cards. `priceMode` is `free | surcharge | sets_base` (`sets_base` = selecting the option sets
-the product's base price, e.g. "Boy: Orta").
+`priceMode` is the panel's "fiyat farkı" in words: `free` (ücretsiz), `surcharge` (ek ücretli), `sets_base`
+(tabanı belirler — choosing it sets the product's base price, e.g. "Boy: Tam"). Amounts are never suggested.
 
----
+Accept semantics: a section A card writes its payload into the template pool (a new template, or merged into the
+matching one). A section B card MERGES into the product's template — groups of the same name are replaced, other
+groups, the description and the tags are kept, ingredient lists are unioned. A section C card is a note for the
+call: accepting it only ticks it off.
 
-# Gap analysis (Mod 2)
+## Categories (settings)
 
-`POST /api/v1/gap-analysis` (multipart: `branchId`, `menuText?`, `extraNotes?`, `images` ≤ 5 panel screenshots;
-screenshots or `menuText` required) streams with the same framing. `menuText` = products typed or dictated during the
-call ("adana, urfa, lahmacun ve ayran var"), parsed without an LLM — a run with only `menuText` needs no AI key. Re-attach: `GET /api/v1/gap-analysis/:runId/events`; result: `GET /api/v1/gap-analysis/:runId`;
-latest of a branch: `GET /api/v1/branches/:id/gap/latest`; cancel: `POST /api/v1/gap-analysis/:runId/cancel`.
+The Gap Analyst's yardstick lives in Postgres and is edited from the phone (Ayarlar):
 
-The order is fixed so the phone can show the most useful parts first during a call:
-`run → progress* → counts → questions → items → recommendations(db) → [recommendations(ai) → questions_append] → done`.
+- `GET /categories` · `PATCH /categories/:key` `{ label?, sortOrder?, keywords? }` — keywords are stored normalized
+  (`"Şalgam"` → `salgam`); a multi-word keyword matches as a phrase.
+- `GET /cuisines/:id/categories` · `PUT /cuisines/:id/categories` `{ items: [{ categoryKey, minItems }] }` — the
+  complete set for the cuisine.
 
-| event | payload | notes |
-|---|---|---|
-| `run` | `{ runId, branchId }` | always first |
-| `progress` | `{ stage: extract\|analyze\|recommend, message, done?, total? }` | status line |
-| `counts` | `{ counts: { current, target, missing, fromScreenshots, cuisineMin, targetOverridden } }` | big "x / hedef"; `current` = union of the stored branch menu, the screenshots and the typed products |
-| `questions` | `{ items: Question[] }` | "Çağrıda sor" checklist, ≤ 15 |
-| `items` | `{ items: GapItem[] }` | one per unique product (screenshots first; a typed product already seen on a screenshot is not repeated) |
-| `recommendations` | `{ source: db\|ai, items: Recommendation[] }` | `db` always sent (may be empty); `ai` only when the DB could not fill the list |
-| `questions_append` | `{ items: Question[] }` | "var mı?" lines for AI recommendations |
-| `warning` | `{ code, message }` | `provider_fallback`, `extract_failed`, `ai_unavailable`, `no_items`, `ai_recommendations_failed` |
-| `done` | `{ status, stats: { llmCalls, latencyMs, screenshots, extracted, unique, cacheHit, typed } }` | `status`: completed \| partial \| failed \| cancelled (`failed` only when every screenshot failed and nothing was typed) |
-| `error` | `{ code, message }` | terminal |
-
-```jsonc
-// GapItem
-{ "name": "Adana Kebap", "normalized": "adana kebap",
-  "flags": { "description": "present", "options": "present", "removables": "absent" },   // present | absent | unknown
-  "completeness": 0.75, "status": "ok | incomplete",
-  "missing": [{ "field": "removables", "state": "absent" }],   // badges; fields the template lacks are not expected
-  "matchedTemplateId": "uuid | null", "templateName": "Adana Kebap", "origin": "seed | db | null",
-  "sectionText": "Kebaplar", "seenIn": 1,
-  "typed": false }   // true = typed/dictated: fields unknown, no badges, no missing-field questions
-// Question — key is stable across runs (ticks are stored per key on the phone)
-{ "key": "fields:lahmacun:dor", "text": "Lahmacun: açıklamayı, seçenekleri ve çıkarılabilir malzemeleri sor",
-  "kind": "missing_item | missing_field | cuisine", "itemName": "Lahmacun",
-  "hints": ["Boy: Fındık (Küçük) / Normal / Büyük · ayrıca Acı Seviyesi, Hamur, Yanında"] }
-// Recommendation
-{ "name": "Beyti Sarma", "reason": "Kebap & Izgara menülerinde sık görülür", "importance": 70,
-  "source": "db | ai", "templateId": "uuid | null" }
-```
-
-Completeness weights: description .40, options .35, removable ingredients .25; `unknown` counts half; `ok` ≥ 0.85.
-
-Typed products are stored on the branch menu as `manual` rows only when the product is new (or was only recommended);
-they never overwrite what a screenshot or an accepted card says about a product. The warning `ai_unavailable` also
-covers a server without any AI key (`not_configured`).
+An edit marks the row as the user's: the seed that runs on every start no longer overwrites it.

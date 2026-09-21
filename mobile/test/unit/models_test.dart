@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:menu_kopilot/core/utils/copy_format.dart';
 import 'package:menu_kopilot/core/utils/image_compressor.dart';
-import 'package:menu_kopilot/data/models/suggestion.dart';
+import 'package:menu_kopilot/data/models/analysis.dart';
 import 'package:menu_kopilot/data/models/template_payload.dart';
 import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
@@ -117,19 +117,42 @@ void main() {
     });
   });
 
-  group('SuggestionCard', () {
-    test('parses origin/status and keeps unknown values safe', () {
-      final card = SuggestionCard.fromJson({
+  group('AnalysisCard', () {
+    test('parses the section, the source and the status, and keeps unknown values safe', () {
+      final card = AnalysisCard.fromJson({
         'id': 'c1',
         'runId': 'r1',
-        'rawName': 'x',
-        'origin': 'mystery',
+        'section': 'option',
+        'name': 'Adana Kebap',
+        'targetName': 'Adana Kbp',
+        'targetNormalized': 'adana kebap',
+        'source': 'mystery',
         'status': 'accepted',
-        'payload': {'name': 'X'},
+        'optionGroups': [
+          {
+            'name': 'Porsiyon',
+            'selectionType': 'single',
+            'isRequired': true,
+            'minSelect': 1,
+            'maxSelect': 1,
+            'options': [
+              {'name': 'Yarım', 'priceMode': 'sets_base'},
+            ],
+          },
+        ],
       });
+      expect(card.section, CardSection.option);
       expect(card.origin, CardOrigin.review);
       expect(card.status, CardStatus.accepted);
-      expect(card.copyWith(edited: true).edited, isTrue);
+      expect(card.targetNormalized, 'adana kebap');
+      expect(card.optionGroups.single.options.single.priceMode, 'sets_base');
+      expect(card.copyWith(queued: true).queued, isTrue);
+    });
+
+    test('defaults an unknown section to the new-product one', () {
+      final card = AnalysisCard.fromJson({'id': 'c', 'runId': 'r', 'section': 'nonsense', 'name': 'X'});
+      expect(card.section, CardSection.newProduct);
+      expect(card.targetNormalized, isNull);
     });
   });
 }

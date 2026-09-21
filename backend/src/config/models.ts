@@ -7,16 +7,20 @@
 
 export type ProviderName = 'gemini' | 'groq';
 
+/**
+ * Every task a model is called for. The six pipeline steps have one key each except the two deterministic ones
+ * (Gap Analyst, and the Validator whose key only serves its single repair round). The pre-agent keys
+ * (vision.*, text.*, deep.analyze, research.web) are retired; their old usage rows are still labelled through
+ * LEGACY_TASK_LABELS.
+ */
 export const TASK_KEYS = [
-  'vision.menu_extract',
-  'vision.panel_extract',
-  'text.item_enrich',
-  'text.normalize_classify',
-  'text.gap_suggest',
-  'deep.analyze',
+  'agent.extract',
+  'agent.classify',
+  'agent.recommend',
+  'agent.options',
+  'agent.validate',
   'embed',
   'audio.transcribe',
-  'research.web',
 ] as const;
 export type TaskKey = (typeof TASK_KEYS)[number];
 
@@ -34,8 +38,6 @@ export const MODELS = {
   groqQwen38: 'qwen/qwen3.8-27b',
   groqWhisperTurbo: 'whisper-large-v3-turbo',
   groqWhisper: 'whisper-large-v3',
-  groqCompound: 'groq/compound',
-  groqCompoundMini: 'groq/compound-mini',
 } as const;
 
 /**
@@ -53,8 +55,7 @@ export interface ModelSpec {
   id: string;
   provider: ProviderName;
   label: string;
-  /** compound = Groq agentic system with server-side web search (only for research). */
-  kind: 'chat' | 'embedding' | 'audio' | 'compound';
+  kind: 'chat' | 'embedding' | 'audio';
   vision: boolean;
   maxImages: number;
   /** Max total request size when images are inlined. */
@@ -197,32 +198,6 @@ export const MODEL_CATALOG: Readonly<Record<string, ModelSpec>> = {
     preview: false,
     maxOutputTokens: 0,
   },
-  [MODELS.groqCompound]: {
-    id: MODELS.groqCompound,
-    provider: 'groq',
-    label: 'Compound (Groq, web araması)',
-    kind: 'compound',
-    vision: false,
-    maxImages: 0,
-    maxRequestBytes: 20 * MB,
-    imageTokens: null,
-    structured: 'json_object',
-    preview: false,
-    maxOutputTokens: 8192,
-  },
-  [MODELS.groqCompoundMini]: {
-    id: MODELS.groqCompoundMini,
-    provider: 'groq',
-    label: 'Compound Mini (Groq, tek arama, hızlı)',
-    kind: 'compound',
-    vision: false,
-    maxImages: 0,
-    maxRequestBytes: 20 * MB,
-    imageTokens: null,
-    structured: 'json_object',
-    preview: false,
-    maxOutputTokens: 8192,
-  },
 };
 
 export function getModelSpec(modelId: string): ModelSpec | undefined {
@@ -239,8 +214,6 @@ export interface RouteParams {
   temperature?: number;
   /** Embeddings only. */
   dim?: number;
-  /** Groq compound only: built-in tools the system may use (`compound_custom.tools.enabled_tools`). */
-  enabledTools?: string[];
 }
 
 export interface RouteEntry {
@@ -264,32 +237,33 @@ const cheapTextChain: RouteEntry[] = [
 ];
 
 export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = {
-  'vision.menu_extract': visionChain,
-  'vision.panel_extract': visionChain,
-  // Free tiers (D-142): 3.8 Flash allows 20 requests a day, so every chain ends on a model with a larger daily quota.
-  // New entries go last: the start-up seed appends them to existing databases without reordering a user's choice.
-  'text.item_enrich': [
-    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 16_000 } },
-    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 16_000 } },
-    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 16_000 } },
+  // --- Agent pipeline (Faz 8) ----------------------------------------------------------------------------------
+  // Model per agent: mechanical work on a small model, judgement on a strong one. The chains stay editable from
+  // Ayarlar > Modeller, so the Gemini/Groq split remains the user's choice.
+  'agent.extract': visionChain,
+  'agent.classify': [
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'minimal', maxOutputTokens: 1024 } },
+    { provider: 'groq', model: MODELS.groqGptOss20b, params: { reasoningEffort: 'low', maxOutputTokens: 1024 } },
   ],
-  'text.normalize_classify': cheapTextChain,
-  'text.gap_suggest': cheapTextChain,
-  'deep.analyze': [
-    { provider: 'gemini', model: MODELS.geminiPro, params: { thinkingLevel: 'high', maxOutputTokens: 24_000 } },
-    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'medium', maxOutputTokens: 16_000 } },
-    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'high', maxOutputTokens: 16_000 } },
+  // Recommendation quality is the whole point of the redesign: strongest model first.
+  'agent.recommend': [
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'medium', maxOutputTokens: 8000 } },
+    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'medium', maxOutputTokens: 8000 } },
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
   ],
+  // Option groups are long output but a well-understood shape: low reasoning, high token ceiling.
+  'agent.options': [
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 12_000 } },
+    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 12_000 } },
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 12_000 } },
+  ],
+  // Only ever used for the single repair round after invalid JSON.
+  'agent.validate': cheapTextChain,
   embed: [{ provider: 'gemini', model: MODELS.geminiEmbedding, params: { dim: 768 } }],
   // Voice notes (Faz 7): turbo is faster and cheaper; v3 is the fallback.
   'audio.transcribe': [
     { provider: 'groq', model: MODELS.groqWhisperTurbo, params: {} },
     { provider: 'groq', model: MODELS.groqWhisper, params: {} },
-  ],
-  // Restaurant research (Faz 7): web search + reading pages only (no code execution / Wolfram).
-  'research.web': [
-    { provider: 'groq', model: MODELS.groqCompound, params: { maxOutputTokens: 4096, enabledTools: ['web_search', 'visit_website'] } },
-    { provider: 'groq', model: MODELS.groqCompoundMini, params: { maxOutputTokens: 4096, enabledTools: ['web_search'] } },
   ],
 };
 
@@ -297,16 +271,16 @@ export const EMBEDDING = { model: MODELS.geminiEmbedding, dim: 768 } as const;
 
 /** Per-attempt timeouts. Slow attempts fall through to the next provider in the chain. */
 export const TASK_TIMEOUT_MS: Readonly<Record<TaskKey, number>> = {
-  'vision.menu_extract': 30_000,
-  'vision.panel_extract': 20_000,
-  'text.item_enrich': 60_000,
-  'text.normalize_classify': 15_000,
-  'text.gap_suggest': 20_000,
-  'deep.analyze': 120_000,
+  // Under the 15 s end-to-end budget. Measured with real keys: a healthy recommend call answers in 2–3 s, so a 6 s
+  // ceiling only cuts off a provider that is already failing and leaves the pipeline deadline (RECOMMEND_DEADLINE_MS,
+  // 11 s over both recommendation agents) room for one fallback.
+  'agent.extract': 18_000,
+  'agent.classify': 6_000,
+  'agent.recommend': 6_000,
+  'agent.options': 6_000,
+  'agent.validate': 8_000,
   embed: 15_000,
   'audio.transcribe': 30_000,
-  // Web search + reading pages takes a while; the phone shows a progress state.
-  'research.web': 90_000,
 };
 
 /** Models a user may pick per task in the settings screen (capability-filtered). */
@@ -314,7 +288,6 @@ export function eligibleModels(task: TaskKey): ModelSpec[] {
   const specs = Object.values(MODEL_CATALOG);
   if (task === 'embed') return specs.filter((s) => s.kind === 'embedding');
   if (task === 'audio.transcribe') return specs.filter((s) => s.kind === 'audio');
-  if (task === 'research.web') return specs.filter((s) => s.kind === 'compound');
-  if (task.startsWith('vision.')) return specs.filter((s) => s.kind === 'chat' && s.vision);
+  if (task === 'agent.extract') return specs.filter((s) => s.kind === 'chat' && s.vision);
   return specs.filter((s) => s.kind === 'chat');
 }

@@ -1,0 +1,68 @@
+{
+  "id": "pideci",
+  "label": "Pideci (taş fırın)",
+  "cuisineSlug": "pide-lahmacun",
+  "note": "Sadece pide çeşitleri var; lahmacun, içecek, tatlı ve salata eksik.",
+  "menu": [
+    "Kıymalı Pide",
+    "Kaşarlı Pide",
+    "Kuşbaşılı Pide",
+    "Karışık Pide",
+    "Sucuklu Yumurtalı Pide"
+  ],
+  "expectCategories": [
+    "ana-yemek",
+    "corba",
+    "salata-meze",
+    "icecek",
+    "tatli"
+  ],
+  "presentCategories": [
+    "ana-yemek"
+  ],
+  "plausibleAdditions": [
+    "Ayran",
+    "Baklava",
+    "Çoban Salata",
+    "Çorba",
+    "Etli Ekmek",
+    "Ezme",
+    "Ezmeli Salata",
+    "Ezogelin Çorbası",
+    "Fındık Lahmacun",
+    "Fırın Sütlaç",
+    "Gavurdağı Salatası",
+    "Ispanaklı Pide",
+    "Kadayıf",
+    "Kavurmalı Pide",
+    "Kaymaklı Katmer",
+    "Kola",
+    "Közlenmiş Biber ve Domates",
+    "Kuşbaşılı Kaşarlı Pide",
+    "Künefe",
+    "Lahmacun",
+    "Maden Suyu",
+    "Mercimek Çorbası",
+    "Mevsim Salata",
+    "Pastırmalı Kaşarlı Pide",
+    "Pastırmalı Pide",
+    "Peynirli Pide",
+    "Su",
+    "Sucuklu Pide",
+    "Sütlaç",
+    "Şalgam",
+    "Şalgam Suyu",
+    "Tahinli Pide",
+    "Tavuklu Pide",
+    "Turşu",
+    "Yayla Çorbası"
+  ],
+  "implausible": [
+    "Sushi",
+    "Burrito",
+    "Pad Thai",
+    "Espresso Tonic",
+    "Bonfile",
+    "Hamburger"
+  ]
+}

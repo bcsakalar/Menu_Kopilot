@@ -14,6 +14,8 @@ export const cuisines = pgTable(
     /** Minimum product count expected for a branch opening in this cuisine (user-editable, never hard-coded). */
     minItemCount: integer('min_item_count').notNull().default(10),
     notes: text('notes'),
+    /** The user edited which categories this cuisine needs (cuisine_categories); the seed no longer touches them. */
+    categoriesEditedByUser: boolean('categories_edited_by_user').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

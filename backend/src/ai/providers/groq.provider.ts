@@ -12,35 +12,22 @@ import type {
   Result,
   TranscribeOptions,
   Transcription,
-  WebSource,
 } from '../types.js';
 import { outputTokenLimit, validateOutput, withTimeout } from './shared.js';
 
 /**
  * Groq via its OpenAI-compatible `/chat/completions` endpoint (native fetch, no SDK):
- * strict json_schema for gpt-oss / qwen3.8, JSON mode + prompt-embedded schema for the compound systems.
+ * strict json_schema for gpt-oss / qwen3.8; JSON mode + a prompt-embedded schema for any model the catalog marks
+ * `json_object`.
  */
 
 const DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
-
-const searchResultSchema = z.object({ title: z.string().nullish(), url: z.string().nullish() });
-
-/** Groq compound: tools the system ran server-side; web search results carry title + url. Parsed leniently. */
-const executedToolSchema = z.object({
-  type: z.string().nullish(),
-  search_results: z
-    .union([z.array(searchResultSchema), z.object({ results: z.array(searchResultSchema).nullish() })])
-    .nullish(),
-});
 
 const chatResponseSchema = z.object({
   choices: z
     .array(
       z.object({
-        message: z.object({
-          content: z.string().nullish(),
-          executed_tools: z.array(executedToolSchema).nullish().catch(null),
-        }),
+        message: z.object({ content: z.string().nullish() }),
         finish_reason: z.string().nullish(),
       }),
     )
@@ -53,21 +40,6 @@ const transcriptionSchema = z.object({
   language: z.string().nullish(),
   duration: z.number().nullish(),
 });
-
-function sourcesOf(tools: z.infer<typeof executedToolSchema>[] | null | undefined): WebSource[] {
-  const seen = new Set<string>();
-  const sources: WebSource[] = [];
-  for (const tool of tools ?? []) {
-    const results = Array.isArray(tool.search_results) ? tool.search_results : (tool.search_results?.results ?? []);
-    for (const result of results) {
-      const url = result.url?.trim();
-      if (!url || !/^https?:\/\//i.test(url) || seen.has(url)) continue;
-      seen.add(url);
-      sources.push({ title: result.title?.trim() || url, url });
-    }
-  }
-  return sources;
-}
 
 const errorBodySchema = z.object({
   error: z.object({
@@ -140,7 +112,6 @@ export class GroqProvider implements LLMProvider {
         : opts.user;
 
     const params = opts.params ?? {};
-    const compound = spec.kind === 'compound';
     const body: Record<string, unknown> = {
       model,
       messages: [
@@ -153,17 +124,10 @@ export class GroqProvider implements LLMProvider {
         ? { type: 'json_schema', json_schema: { name: opts.schemaName ?? 'output', strict: true, schema: forGroqStrict(jsonSchema) } }
         : { type: 'json_object' },
     };
-    if (compound) {
-      // Agentic system: only the built-in tools we allow; sampling/reasoning knobs are not documented for it.
-      if (params.enabledTools && params.enabledTools.length > 0) {
-        body['compound_custom'] = { tools: { enabled_tools: params.enabledTools } };
-      }
-    } else {
-      body['temperature'] = params.temperature !== undefined && params.temperature > 0 ? params.temperature : 0.3;
-      if (params.reasoningEffort) body['reasoning_effort'] = params.reasoningEffort;
-      if (spec.reasoningControl === 'include_reasoning') body['include_reasoning'] = false;
-      if (spec.reasoningControl === 'reasoning_format') body['reasoning_format'] = 'hidden';
-    }
+    body['temperature'] = params.temperature !== undefined && params.temperature > 0 ? params.temperature : 0.3;
+    if (params.reasoningEffort) body['reasoning_effort'] = params.reasoningEffort;
+    if (spec.reasoningControl === 'include_reasoning') body['include_reasoning'] = false;
+    if (spec.reasoningControl === 'reasoning_format') body['reasoning_format'] = 'hidden';
 
     const started = this.now();
     const timer = withTimeout(opts.signal, opts.timeoutMs);
@@ -199,8 +163,6 @@ export class GroqProvider implements LLMProvider {
     meta.tokensOut = parsed.usage?.completion_tokens ?? 0;
     const choice = parsed.choices[0];
     const content = choice?.message.content ?? '';
-    const sources = sourcesOf(choice?.message.executed_tools);
-    if (sources.length > 0) meta.sources = sources;
     if (choice?.finish_reason === 'length') {
       return fail(
         new ProviderError({
@@ -227,7 +189,7 @@ export class GroqProvider implements LLMProvider {
     } catch {
       parsedError = undefined;
     }
-    // 413: the request (or, for compound, the model's own follow-up calls) exceeds the plan's per-minute token limit;
+    // 413: the request exceeds the plan's per-minute token limit;
     // waiting does not help, so it stays a bad_request and the chain moves on (D-142).
     const message =
       status === 413

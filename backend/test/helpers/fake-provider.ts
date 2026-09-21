@@ -9,11 +9,10 @@ import type {
   Result,
   TranscribeOptions,
   Transcription,
-  WebSource,
 } from '../../src/ai/types.js';
 
 export type FakeReply =
-  | { ok: true; raw: string; tokensIn?: number; tokensOut?: number; latencyMs?: number; sources?: WebSource[] }
+  | { ok: true; raw: string; tokensIn?: number; tokensOut?: number; latencyMs?: number }
   | { ok: false; kind: ProviderErrorKind; retryAfterMs?: number; raw?: string; status?: number; message?: string };
 
 export type FakeResponder = (opts: GenerateStructuredOptions<unknown>, callIndex: number) => FakeReply | Promise<FakeReply>;
@@ -76,7 +75,7 @@ export class FakeProvider implements LLMProvider {
     }
     const validated = validateOutput(opts.schema, reply.raw, { provider: this.name, model });
     if (!validated.ok) return { ok: false, error: validated.error, meta };
-    return { ok: true, value: validated.value, raw: reply.raw, meta: reply.sources ? { ...meta, sources: reply.sources } : meta };
+    return { ok: true, value: validated.value, raw: reply.raw, meta };
   }
 
   transcribe(audio: AudioInput, opts: TranscribeOptions): Promise<Result<Transcription>> {

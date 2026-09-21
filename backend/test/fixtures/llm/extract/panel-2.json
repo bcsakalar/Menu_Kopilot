@@ -1,0 +1,92 @@
+{
+  "items": [
+    {
+      "rawName": "Kıymalı Pide",
+      "description": "present",
+      "options": "present",
+      "removables": "present",
+      "sectionText": "Pide & Lahmacun",
+      "confidence": 0.95,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Karışık Pide",
+      "description": "absent",
+      "options": "present",
+      "removables": "absent",
+      "sectionText": "Pide & Lahmacun",
+      "confidence": 0.94,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Ayran",
+      "description": "present",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "İçecekler",
+      "confidence": 0.95,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Künefe",
+      "description": "absent",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "Tatlılar",
+      "confidence": 0.96,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Mercimek Çorbası",
+      "description": "present",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "Çorbalar",
+      "confidence": 0.95,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "İçli Köfte",
+      "description": "absent",
+      "options": "absent",
+      "removables": "absent",
+      "sectionText": "Ara Sıcaklar",
+      "confidence": 0.93,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Şalgam",
+      "description": "present",
+      "options": "present",
+      "removables": "absent",
+      "sectionText": "İçecekler",
+      "confidence": 0.94,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    },
+    {
+      "rawName": "Çoban Salata",
+      "description": "absent",
+      "options": "absent",
+      "removables": "present",
+      "sectionText": "Salatalar",
+      "confidence": 0.92,
+      "priceText": null,
+      "descriptionText": null,
+      "optionNames": []
+    }
+  ]
+}

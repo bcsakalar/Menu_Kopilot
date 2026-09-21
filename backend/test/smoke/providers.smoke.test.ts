@@ -48,7 +48,7 @@ describe.skipIf(!geminiKey)('Gemini (live)', () => {
 
   it.for([MODELS.geminiFlash, MODELS.geminiFlashLite])('%s returns schema-valid JSON via the Interactions API', async (model, { skip }) => {
     const result = await provider.generateStructured({
-      task: 'text.normalize_classify',
+      task: 'agent.validate',
       schema: dishSchema,
       system,
       user,
@@ -78,7 +78,7 @@ describe.skipIf(!geminiKey)('Gemini (live)', () => {
     const image = loadFixtureImage();
     if (!image) return;
     const result = await provider.generateStructured({
-      task: 'vision.menu_extract',
+      task: 'agent.extract',
       schema: extractSchema,
       system: 'Menüdeki ürün adlarını çıkar.',
       user: 'Ürünleri listele.',
@@ -95,7 +95,7 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
 
   it.for([MODELS.groqGptOss20b, MODELS.groqGptOss120b])('%s returns strict json_schema output', async (model, { skip }) => {
     const result = await provider.generateStructured({
-      task: 'text.item_enrich',
+      task: 'agent.recommend',
       schema: dishSchema,
       schemaName: 'dishes',
       system,
@@ -112,7 +112,7 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
     const image = loadFixtureImage();
     if (!image) return;
     const result = await provider.generateStructured({
-      task: 'vision.menu_extract',
+      task: 'agent.extract',
       schema: extractSchema,
       schemaName: 'menu',
       system: 'Menüdeki ürün adlarını çıkar.',
@@ -129,20 +129,6 @@ describe.skipIf(!groqKey)('Groq (live)', () => {
     const result = await provider.transcribe(toneWav(), { model, language: 'tr', prompt: 'Adana Kebap, Lahmacun', timeoutMs: 60_000 });
     // A pure tone has no words: only the call itself is verified here.
     expect(typeof valueOf(result, skip).text).toBe('string');
-  });
-
-  it.for([MODELS.groqCompound, MODELS.groqCompoundMini])('%s searches the web and answers in JSON mode', async (model, { skip }) => {
-    const result = await provider.generateStructured({
-      task: 'research.web',
-      schema: z.object({ found: z.boolean(), items: z.array(z.object({ name: z.string() })) }),
-      system: 'Restoranın menüsünü internette ara. Yalnızca {"found": boolean, "items": [{"name": string}]} biçiminde JSON döndür.',
-      user: 'Restoran: Hacı Abdullah Lokantası\nŞehir: İstanbul',
-      model,
-      params: { enabledTools: ['web_search'], maxOutputTokens: 2048 },
-      timeoutMs: 90_000,
-    });
-    valueOf(result, skip);
-    expect(result.meta.sources?.length ?? 0).toBeGreaterThan(0);
   });
 });
 

@@ -45,6 +45,8 @@ class PendingRequests extends Table {
 }
 
 /// Call checklist ticks of a gap analysis ("Çağrıda sor"), persisted while on the phone.
+/// Kept for the schema version, unused since the call checklist became the "Eksik / Düzeltme" section.
+/// Dropping it needs a Drift migration and a build_runner pass — see docs/FAZ3_RAPOR.md.
 class ChecklistTicks extends Table {
   TextColumn get analysisId => text()();
   TextColumn get questionKey => text()();

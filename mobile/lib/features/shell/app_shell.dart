@@ -8,7 +8,10 @@ import '../../core/widgets/common.dart';
 import '../../core/utils/haptics.dart';
 import '../share/share_listener.dart';
 
-/// Bottom navigation: Öneri · Tamamla · Şubeler · Şablonlar · Ayarlar (flat bar on the canvas, hairline on top).
+/// Bottom navigation: Analiz · Şablonlar · Ayarlar (flat bar on the canvas, hairline on top).
+///
+/// Three tabs, not five: the analysis screen now covers what "Tamamla" used to do, and "Şubeler" is gone —
+/// during a live call every extra destination is one more place to get lost in.
 class AppShell extends StatelessWidget {
   const AppShell({required this.shell, super.key});
 
@@ -31,17 +34,7 @@ class AppShell extends StatelessWidget {
             NavigationDestination(
               icon: const Icon(Icons.playlist_add_rounded),
               selectedIcon: const Icon(Icons.playlist_add_check_rounded),
-              label: l10n.navSuggest,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.fact_check_outlined),
-              selectedIcon: const Icon(Icons.fact_check_rounded),
-              label: l10n.navGap,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.storefront_outlined),
-              selectedIcon: const Icon(Icons.storefront_rounded),
-              label: l10n.navBranches,
+              label: l10n.navAnalyze,
             ),
             NavigationDestination(
               icon: const Icon(Icons.menu_book_outlined),

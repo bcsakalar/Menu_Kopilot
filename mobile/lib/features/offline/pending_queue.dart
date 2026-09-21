@@ -11,7 +11,7 @@ import '../../core/storage/app_database.dart';
 import '../../data/models/json.dart';
 import '../../data/models/template_payload.dart';
 
-/// Offline request queue: suggestions / accepts / skips made without a connection are stored in SQLite (images
+/// Offline request queue: analyses / accepts / skips made without a connection are stored in SQLite (images
 /// copied into the app's documents folder) and sent later — by the app on reconnect or by the background worker.
 class PendingQueue {
   PendingQueue(this._db, {this.storageDir});
@@ -22,7 +22,7 @@ class PendingQueue {
   final Future<Directory> Function()? storageDir;
   static const _uuid = Uuid();
 
-  Future<String> enqueueSuggest(SuggestRequestData request, {String cuisineName = ''}) async {
+  Future<String> enqueueAnalyze(AnalyzeRequestData request, {String cuisineName = ''}) async {
     final id = _uuid.v4();
     final images = <UploadImage>[];
     final dirFactory = storageDir;
@@ -37,17 +37,18 @@ class PendingQueue {
       final copy = await File(image.path).copy(p.join(target.path, '${image.sha256}.jpg'));
       images.add(UploadImage(path: copy.path, sha256: image.sha256));
     }
-    final stored = SuggestRequestData(
+    final stored = AnalyzeRequestData(
       cuisineId: request.cuisineId,
-      promptText: request.promptText,
-      branchId: request.branchId,
-      deepMode: request.deepMode,
+      menuText: request.menuText,
+      notes: request.notes,
+      debug: request.debug,
       images: images,
+      fromRunId: request.fromRunId,
     );
     await _db.into(_db.pendingRequests).insert(
           PendingRequestsCompanion.insert(
             id: id,
-            kind: 'suggest',
+            kind: 'analyze',
             payloadJson: jsonEncode({...stored.toJson(), 'cuisineName': cuisineName}),
             imagePathsJson: Value(jsonEncode(images.map((i) => i.path).toList())),
             createdAt: DateTime.now(),
@@ -56,15 +57,14 @@ class PendingQueue {
     return id;
   }
 
-  Future<void> enqueueAccept(String itemId, {TemplatePayload? payload, String? branchId}) =>
-      _db.into(_db.pendingRequests).insert(
-            PendingRequestsCompanion.insert(
-              id: _uuid.v4(),
-              kind: 'accept',
-              payloadJson: jsonEncode({'itemId': itemId, 'payload': payload?.toJson(), 'branchId': branchId}),
-              createdAt: DateTime.now(),
-            ),
-          );
+  Future<void> enqueueAccept(String itemId, {TemplatePayload? payload}) => _db.into(_db.pendingRequests).insert(
+        PendingRequestsCompanion.insert(
+          id: _uuid.v4(),
+          kind: 'accept',
+          payloadJson: jsonEncode({'itemId': itemId, 'payload': payload?.toJson()}),
+          createdAt: DateTime.now(),
+        ),
+      );
 
   Future<void> enqueueSkip(String itemId) => _db.into(_db.pendingRequests).insert(
         PendingRequestsCompanion.insert(
@@ -83,28 +83,22 @@ class PendingQueue {
       try {
         String? runId;
         switch (request.kind) {
+          case 'analyze':
+            runId = await _sendAnalyze(api, AnalyzeRequestData.fromJson(data), data.str('cuisineName'));
+          // Queued by the app before the single analysis screen ("Öneri"): a product list and menu photos.
           case 'suggest':
-            runId = await api.suggestAsync(SuggestRequestData.fromJson(data));
-            await _db.saveRecentRun(
-              RecentRunsCompanion.insert(
-                runId: runId,
-                cuisineId: Value(data.strOrNull('cuisineId')),
-                cuisineName: Value(data.str('cuisineName')),
-                title: Value(_title(data.str('promptText'))),
-                status: 'running',
-                snapshotJson: '{}',
-                createdAt: DateTime.now(),
-              ),
-            );
+            runId = await _sendAnalyze(api, _fromLegacySuggest(data), data.str('cuisineName'));
           case 'accept':
             final payload = data.object('payload');
-            await api.accept(
-              data.str('itemId'),
-              payload: payload == null ? null : TemplatePayload.fromJson(payload),
-              branchId: data.strOrNull('branchId'),
-            );
+            await api.accept(data.str('itemId'), payload: payload == null ? null : TemplatePayload.fromJson(payload));
           case 'skip':
             await api.skip(data.str('itemId'));
+          default:
+            // A kind this version cannot send (a removed screen): kept for inspection, never reported as sent.
+            await (_db.update(_db.pendingRequests)..where((t) => t.id.equals(request.id))).write(
+                  PendingRequestsCompanion(status: const Value('failed'), lastError: Value('unsupported: ${request.kind}')),
+                );
+            continue;
         }
         await (_db.update(_db.pendingRequests)..where((t) => t.id.equals(request.id))).write(
               PendingRequestsCompanion(status: const Value('sent'), serverRunId: Value(runId)),
@@ -124,6 +118,29 @@ class PendingQueue {
     }
     return sent;
   }
+
+  Future<String> _sendAnalyze(ApiClient api, AnalyzeRequestData request, String cuisineName) async {
+    final runId = await api.analyzeAsync(request);
+    await _db.saveRecentRun(
+      RecentRunsCompanion.insert(
+        runId: runId,
+        cuisineId: Value(request.cuisineId.isEmpty ? null : request.cuisineId),
+        cuisineName: Value(cuisineName),
+        title: Value(_title(request.menuText)),
+        status: 'running',
+        snapshotJson: '{}',
+        createdAt: DateTime.now(),
+      ),
+    );
+    return runId;
+  }
+
+  /// The old "Öneri" request: its product list becomes the analysis' menu text, its photos stay photos.
+  static AnalyzeRequestData _fromLegacySuggest(Json data) => AnalyzeRequestData(
+        cuisineId: data.str('cuisineId'),
+        menuText: data.str('promptText'),
+        images: data.objects('images').map((i) => UploadImage(path: i.str('path'), sha256: i.str('sha256'))).toList(),
+      );
 
   Future<void> _cleanupImages(PendingRequest request) async {
     final decoded = jsonDecode(request.imagePathsJson);

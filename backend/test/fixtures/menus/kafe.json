@@ -1,0 +1,69 @@
+{
+  "id": "kafe",
+  "label": "Kafe (kahve dükkânı)",
+  "cuisineSlug": "kafe-icecek",
+  "note": "Sadece sıcak kahveler girilmiş; soğuk içecek, çay, atıştırmalık ve tatlı yok.",
+  "menu": [
+    "Türk Kahvesi",
+    "Americano",
+    "Latte",
+    "Cappuccino",
+    "Espresso"
+  ],
+  "expectCategories": [
+    "icecek",
+    "atistirmalik",
+    "tatli"
+  ],
+  "presentCategories": [
+    "icecek"
+  ],
+  "plausibleAdditions": [
+    "Bitki Çayı",
+    "Brownie",
+    "Chai Latte",
+    "Cheesecake",
+    "Cold Brew",
+    "Cookie",
+    "Çay",
+    "Donut",
+    "Filtre Kahve",
+    "Flat White",
+    "Frappe",
+    "Ice Latte",
+    "Iced Latte",
+    "Kruvasan",
+    "Kurabiye",
+    "Latte Macchiato",
+    "Limonata",
+    "Maden Suyu",
+    "Matcha Latte",
+    "Milkshake",
+    "Mocha",
+    "Muffin",
+    "Poğaça",
+    "Portakal Suyu",
+    "Salep",
+    "San Sebastian",
+    "San Sebastian Cheesecake",
+    "Sandviç",
+    "Sıcak Çikolata",
+    "Soğuk Kahve",
+    "Souffle",
+    "Su",
+    "Sufle",
+    "Taze Sıkılmış Portakal Suyu",
+    "Taze Sıkma Portakal Suyu",
+    "Tost",
+    "Türk Kahvesi",
+    "Türk Kahvesi Menengiç"
+  ],
+  "implausible": [
+    "Adana Kebap",
+    "İskender",
+    "Lahmacun",
+    "Sushi",
+    "Kuzu Tandır",
+    "Kokoreç"
+  ]
+}

@@ -3,18 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/providers.dart';
-import 'data/models/branch.dart';
 import 'features/auth/login_screen.dart';
-import 'features/branches/branch_detail_screen.dart';
-import 'features/branches/branches_screen.dart';
 import 'features/camera/camera_capture_screen.dart';
-import 'features/gap/gap_controller.dart';
-import 'features/gap/gap_result_screen.dart';
-import 'features/gap/gap_screen.dart';
 import 'features/home/home_screen.dart';
-import 'features/research/research_screen.dart';
+import 'features/results/analysis_controller.dart';
+import 'features/results/pipeline_debug_screen.dart';
 import 'features/results/results_screen.dart';
-import 'features/results/run_controller.dart';
+import 'features/settings/category_settings_screen.dart';
 import 'features/settings/cuisine_settings_screen.dart';
 import 'features/settings/model_settings_screen.dart';
 import 'features/settings/settings_screen.dart';
@@ -63,77 +58,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (_, state) {
                       final extra = state.extra;
                       return ResultsScreen(
-                        request: extra is RunRequest ? extra : null,
-                        runId: state.uri.queryParameters['runId'],
-                        branchId: state.uri.queryParameters['branchId'],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/gap',
-                builder: (_, _) => const GapScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'result',
-                    builder: (_, state) {
-                      final extra = state.extra;
-                      return GapResultScreen(
-                        request: extra is GapRequest ? extra : null,
-                        branch: extra is Branch ? extra : null,
+                        request: extra is AnalyzeRequest ? extra : null,
                         runId: state.uri.queryParameters['runId'],
                       );
                     },
                   ),
+                  // Hidden: reached from the bug icon on the result screen, never from the navigation bar.
                   GoRoute(
-                    path: 'card',
-                    builder: (_, state) {
-                      final extra = state.extra;
-                      return ResultsScreen(
-                        request: extra is RunRequest ? extra : null,
-                        runId: state.uri.queryParameters['runId'],
-                        branchId: state.uri.queryParameters['branchId'],
-                        slot: runSlotGap,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/branches',
-                builder: (_, _) => const BranchesScreen(),
-                routes: [
-                  // Listed before ':id' so "card" is not taken for a branch id.
-                  GoRoute(
-                    path: 'card',
-                    builder: (_, state) {
-                      final extra = state.extra;
-                      return ResultsScreen(
-                        request: extra is RunRequest ? extra : null,
-                        runId: state.uri.queryParameters['runId'],
-                        branchId: state.uri.queryParameters['branchId'],
-                        slot: runSlotBranches,
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: ':id',
-                    builder: (_, state) => BranchDetailScreen(branchId: state.pathParameters['id'] ?? ''),
-                    routes: [
-                      GoRoute(
-                        path: 'research',
-                        builder: (_, state) => ResearchScreen(branchId: state.pathParameters['id'] ?? ''),
-                      ),
-                    ],
+                    path: 'debug',
+                    builder: (_, state) => PipelineDebugScreen(runId: state.uri.queryParameters['runId'] ?? ''),
                   ),
                 ],
               ),
@@ -147,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 builder: (_, _) => const SettingsScreen(),
                 routes: [
                   GoRoute(path: 'cuisines', builder: (_, _) => const CuisineSettingsScreen()),
+                  GoRoute(path: 'categories', builder: (_, _) => const CategorySettingsScreen()),
                   GoRoute(path: 'models', builder: (_, _) => const ModelSettingsScreen()),
                   GoRoute(path: 'usage', builder: (_, _) => const UsageScreen()),
                 ],

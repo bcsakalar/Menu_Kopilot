@@ -48,6 +48,40 @@ class Cuisine {
       };
 }
 
+/// One category of the taxonomy (Çorba, Ana Yemek, İçecek …). Keywords are stored normalized ("salgam").
+class MenuCategory {
+  const MenuCategory({required this.key, required this.label, required this.sortOrder, this.keywords = const []});
+
+  factory MenuCategory.fromJson(Json json) => MenuCategory(
+        key: json.str('key'),
+        label: json.str('label'),
+        sortOrder: json.integer('sortOrder'),
+        keywords: json.strings('keywords'),
+      );
+
+  final String key;
+  final String label;
+  final int sortOrder;
+  final List<String> keywords;
+}
+
+/// A category a cuisine is expected to have, with the minimum product count for a branch opening.
+class CuisineCategory {
+  const CuisineCategory({required this.categoryKey, required this.label, required this.minItems, required this.sortOrder});
+
+  factory CuisineCategory.fromJson(Json json) => CuisineCategory(
+        categoryKey: json.str('categoryKey'),
+        label: json.str('label'),
+        minItems: json.integer('minItems'),
+        sortOrder: json.integer('sortOrder'),
+      );
+
+  final String categoryKey;
+  final String label;
+  final int minItems;
+  final int sortOrder;
+}
+
 class AuthUser {
   const AuthUser({required this.id, required this.email, required this.name, required this.role});
 

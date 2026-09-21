@@ -1,26 +1,31 @@
 # Menü Kopilot
 
-A personal field assistant for a delivery platform branch-opening specialist. It has two modes:
+A personal field assistant for a delivery platform branch-opening specialist, used during the live phone call with
+the restaurant. **One screen, one button:** screenshots of the restaurant's platform panel, a menu photo, or simply the
+products typed/dictated during the call ("adana, urfa, ayran") → **Analiz et** → a result that can be scanned in
+seconds:
 
-- **Mod 1 · Öneri:** cuisine type + free text and/or up to 5 menu photos → editable, copy-ready product cards
-  (description ≤ 160 characters, option groups with price logic, removable / extra ingredients, portion, serving
-  note, tags, allergens, upsell). Known products are served from the database in milliseconds; the AI only fills
-  the unknown ones.
-- **Mod 2 · Menü Tamamlama (the main value):** screenshots of the restaurant's existing platform panel menu — or simply
-  the products typed/dictated during the call ("adana, urfa, ayran") — → a single screen for the live phone call:
-  `12 / 14 ürün`, a "Çağrıda sor" checklist, items with missing fields (description / options / removable
-  ingredients) and the products the menu most likely lacks. Cards accepted during the call move the count at once.
-  Typed products need neither screenshots nor AI keys.
-- **Extras:** *Paylaş → Menü Kopilot* — a menu photo from WhatsApp, panel screenshots from the gallery or a product
-  list sent as text go straight into Öneri or Tamamla; *Sesli not* — dictate product names instead of typing (Groq
-  Whisper); *İnternette araştır* — what a branch's restaurant sells according to its public web pages, compared with
-  the branch menu (Groq compound web search). Voice and research are optional and off in `LOCAL_ONLY_MODE`.
+- pinned on top: `Mevcut 5 ürün / hedef 10 — mutfak türü: Pide & Lahmacun`, the 10-product rule and the categories
+  still short (`İçecek 0/2`); it moves as cards are accepted;
+- **A · YENİ ÜRÜNLER** — products the menu does NOT have (never one it already has): name, a one-line description to
+  paste, category, an estimated price range for the conversation, and why;
+- **B · OPSİYON & MALZEME** — for products already on the menu: option groups (required/optional, single/multi,
+  price effect), removable and extra ingredients;
+- **C · EKSİK / DÜZELTME** — empty descriptions, abbreviated or wrong names, a product under the wrong heading.
+
+Filter chips, bulk select + copy, one-tap copy per card, and a one-tap re-run with another cuisine when the
+Classifier reads the menu differently. Behind it, six agents (Extractor → Classifier → Gap Analyst → Product
+Recommender ∥ Option/Modifier → Validator) with a trace per step; the category expectations per cuisine live in
+Postgres and are edited from the app. Extras: *Paylaş → Menü Kopilot* (a menu photo from WhatsApp, panel screenshots
+from the gallery, a product list as text) and *Sesli not* (dictate product names; Groq Whisper, off in
+`LOCAL_ONLY_MODE`).
 
 > **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
 > restaurant; the app shows this warning on every result screen. The tool never talks to any delivery platform system:
-> input is manual (typing, photos, screenshots) and output is copy/paste or a CSV/JSON export.
-> **It never produces prices** — no TL amount appears anywhere; prices read on photos are kept only as a visual
-> reference and are never assigned to a product.
+> input is manual (typing, photos, screenshots) and output is copy/paste.
+> **Templates never contain a price.** The only amount the app shows is a new product's *estimated* price range
+> (`25–40 TL`), a prompt for the conversation that is never written into the template pool; prices read on photos
+> are never assigned to a product.
 
 | | |
 |---|---|
@@ -49,8 +54,8 @@ A personal field assistant for a delivery platform branch-opening specialist. It
 ```mermaid
 flowchart LR
   subgraph Phone["Flutter app (no provider keys)"]
-    UI[Öneri · Tamamla · Şubeler · Şablonlar · Ayarlar]
-    Local[(Drift: history, template pool,<br/>offline queue, checklist ticks)]
+    UI[Analiz · Şablonlar · Ayarlar]
+    Local[(Drift: recent analyses, template pool,<br/>offline queue)]
   end
   subgraph VPS["Docker Compose on a small droplet"]
     Caddy[nginx or Caddy<br/>HTTPS, no buffering] --> API[Fastify API<br/>+ embedding worker]
@@ -68,11 +73,12 @@ Token economy — the database and caches answer first, the LLM is the last reso
    316 seed templates in 27 cuisines aligned with the platform's kitchen categories (`source='seed'`, badge **Hazır şablon**)
    and every card the user approves (badge **DB'den**)
    come back with zero LLM calls (`cache_hit=true`).
-2. **Caches (Redis, 30 days):** per-image extraction, per-item enrichment, canonical name decisions and gap
-   suggestions — the same photo or menu never costs twice.
-3. **AI with a budget:** at most 6 calls / 25 k input tokens per request (then "Devam et"), a daily quota per user,
-   batches of 3 → 10 items with 2 in flight, a single repair attempt, and uncertain items end up as
-   **İnceleme gerek** cards ("Bunu bilmiyorum, sen doldur.").
+2. **Caches (Redis, 30 days):** per-image extraction, recommender answers per gap set and voice transcriptions —
+   the same photo or menu never costs twice.
+3. **AI with a budget:** at most 6 agent calls / 25 k input tokens per analysis (plus one call per image) and a daily quota per user; images are read
+   3 in flight, the two recommendation agents run in parallel under an 11 s deadline, and anything a model could not
+   answer in time or in shape is filled from the database. The Validator checks every model answer in code (schema,
+   dedupe against the menu, cuisine fit, category quotas) and asks the model again at most once.
 4. **Provider router:** a fallback chain per task (e.g. vision: Gemini Flash → Groq Qwen), circuit breaker, rate-limit
    headers, cooldowns and full-jitter backoff. Prompts are versioned in the database (`prompt_templates`), not in the
    code.
@@ -116,9 +122,7 @@ key (or keep Gemini for text-only tasks), enable Groq ZDR, never photograph docu
 on `LOCAL_ONLY_MODE` when external processing is not acceptable. Policies change — re-check the linked pages.
 
 Voice notes are sent to Groq for transcription and are not stored by this backend (only a hash for the cache); the
-phone deletes the recording after upload. *İnternette araştır* sends the restaurant name, city and cuisine to Groq,
-whose compound system searches the public web (Tavily); the answer is reduced to menu item names and a short summary —
-prices, phone numbers and e-mail addresses are removed before anything is stored or shown.
+phone deletes the recording after upload.
 
 ## Local setup
 
@@ -193,7 +197,7 @@ All keys are listed in [`.env.example`](.env.example) (a test keeps it in sync w
 | `GEMINI_API_KEY`, `GROQ_API_KEY` | — | provider keys (server only); a missing key just removes that provider from the chains |
 | `LOCAL_ONLY_MODE` | `false` | never call external APIs |
 | `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA`, `QUOTA_TIMEZONE` | `300`, `1500000`, `Europe/Istanbul` | per-user daily quota; after it the app answers from DB/cache only |
-| `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | per-request budget ("Devam et" after it) |
+| `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | what the agents may spend per analysis; every image adds one call and 4 000 tokens on top; past it the remaining sections come from the database |
 | `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | DB match thresholds |
 | `CACHE_TTL_DAYS` | `30` | Redis cache lifetime |
 | `UPLOAD_MAX_FILES`, `UPLOAD_MAX_FILE_MB` | `5`, `8` | photo upload limits |
@@ -224,7 +228,9 @@ Run from `backend/` (PowerShell: chain commands with `;`).
 | `pnpm dev` | API with hot reload (reads `../.env`) |
 | `pnpm test` / `pnpm test:watch` | unit + integration + e2e (hermetic: PGlite with pgvector/pg_trgm, fake providers) |
 | `pnpm test:smoke` | live provider checks (needs keys) |
-| `pnpm live:check [--url https://…] [--skip-ai] [--runs 5]` | end-to-end check of a running server over HTTP (auth rotation, zero-LLM seeds, SSE, branches, export, templates, settings; with keys also photo/gap latency and research). Uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` from the environment or `../.env` |
+| `pnpm live:check [--url https://…] [--skip-ai]` | end-to-end check of a running server over HTTP, independent of the app: auth rotation, categories, a typed analysis (three sections, no duplicate of the menu, no price in a template, < 15 s), trace, resume/replay, re-run with another cuisine, SSE order; with keys also panel screenshots and a menu photo. Never accepts a card. Uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` from the environment or `../.env` |
+| `pnpm measure --label <name>` · `pnpm compare` | quality measurement on the frozen menu fixtures (`test/fixtures/menus/`: duplicates, irrelevant, directly usable, category coverage, time) → `exports/quality-<name>.json`; `compare` prints the before/after table |
+| `pnpm probe:recommender` | the Product Recommender alone on the fixture gaps (name noise, category fit) |
 | `pnpm lint` · `pnpm typecheck` · `pnpm build` | ESLint (no `any`), `tsc --noEmit`, compile to `dist/` |
 | `pnpm db:migrate` · `pnpm db:rollback` | apply / revert the last migration (every migration has a `drizzle/down/*.sql`) |
 | `pnpm db:generate` | new migration from schema changes (add the matching down file) |
@@ -242,17 +248,16 @@ missing key), `LOCAL_ONLY_MODE` (409), `QUOTA_EXCEEDED` (429) or `PROVIDER_UNAVA
 | Area | Endpoints |
 |---|---|
 | Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me` |
-| Mod 1 | `POST /suggest` (multipart: `cuisineId`, `promptText?`, `branchId?`, `deepMode?`, `images[]` ≤ 5; SSE with `Accept: text/event-stream`, `?async=1` → 202), `GET /suggest/:runId`, `GET /suggest/:runId/events`, `POST /suggest/:runId/cancel`, `POST /suggest/:runId/continue`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
-| Mod 2 | `POST /gap-analysis` (multipart: `branchId`, `menuText?` — products typed or dictated, `extraNotes?`, `images[]` ≤ 5; screenshots or `menuText` required; SSE / async / sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`, `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest` |
-| Branches | `GET/POST /branches`, `GET/PATCH/DELETE /branches/:id`, `GET /branches/:id/menu`, `PATCH/DELETE /branches/:id/menu/:itemId`, `GET /branches/:id/export?format=csv\|json` |
+| Analysis | `POST /analyze` (multipart: `images[]` ≤ 5, `menuText?`, `cuisineId?`, `notes?`, `fromRunId?`, `debug?`; SSE with `Accept: text/event-stream`, `?async=1` → 202, otherwise the result), `GET /analyze/latest`, `GET /analyze/:runId`, `GET /analyze/:runId/events`, `GET /analyze/:runId/trace`, `POST /analyze/:runId/cancel`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
+| Categories | `GET /categories`, `PATCH /categories/:key` (label, order, keywords), `GET/PUT /cuisines/:id/categories` (which categories a cuisine needs, with a minimum each) |
 | Template pool | `GET /templates?q=&cuisineId=&source=&approved=&sort=usage\|name\|updated`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
-| Voice / research | `POST /transcribe` (multipart: `audio` m4a/mp3/ogg/wav/webm/flac, `language?`, `cuisineId?` → text + product names), `POST /research` (`branchId` or `restaurantName` + `city?` → items, summary, sources; cached 7 days, `refresh: true` to search again) |
+| Voice | `POST /transcribe` (multipart: `audio` m4a/mp3/ogg/wav/webm/flac, `language?`, `cuisineId?` → text + product names) |
 | Settings | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary?range=today\|month`, `GET/POST /prompts`, `POST /prompts/:id/activate` (admin) |
 | Health | `GET /health`, `GET /health/ready` (database + Redis) |
 
-Streaming events and payload shapes: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md). Mod 2 streams
-`run → counts → questions → items → recommendations(db) → recommendations(ai) → done`, so the count and the checklist
-reach the phone before anything else.
+Streaming events and payload shapes: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md). An analysis streams
+`run → classification → menu → counts → item* → done` (plus `trace` per agent step and `warning`), so the count
+reaches the phone before the first card.
 
 ## Deploying
 
@@ -294,7 +299,7 @@ from GHCR (`.github/workflows/release.yml` on a `v*` tag): `-ImageSource ghcr -T
 - `curl -fsS https://<host>/health/ready` → `{"status":"ready",...}`
 - `pnpm -C backend live:check --url https://<host>` (see the runbook for passing the admin password safely)
 - `docker stats --no-stream` — the stack stays well below its limits; `free -m` shows swap
-- SSE through the proxy: suggestion cards appear one by one, not all at the end
+- SSE through the proxy: analysis cards appear one by one, not all at the end
 
 **Windows → Linux pitfalls (already handled, keep it that way)**
 
@@ -354,17 +359,17 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 ## Tests
 
-- Backend: `cd backend; pnpm test` — ~570 tests: Turkish normalization, price guard, env, seed data, JSON-schema
+- Backend: `cd backend; pnpm test` — ~530 tests: Turkish normalization, price guard, env, seed data, JSON-schema
   conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
-  → up, and end-to-end runs of both pipelines against recorded fixtures (all 316 seed items, cuisine by cuisine, with
-  zero LLM calls, broken
-  JSON → review cards, provider down → fallback, accepted card served from the DB, 12 unique items from overlapping
-  screenshots, typed products without screenshots or keys, LOCAL_ONLY_MODE, missing AI keys, voice notes and web
-research with contact/price scrubbing). Fixtures are
-  hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
-- Mobile: `cd mobile; flutter analyze; flutter test` — ~50 tests: SSE parser, models, error texts, HTTPS rule,
-  controllers (offline queue, gap stream and live branch sync, template pool cache, photo limits) and widget tests
-  (cards, checklist, branch menu, voice note button, research screen, sharing into the app).
+  → up, the agents one by one (dedupe across screenshots, category classification and gaps, name cleaning, option
+  merge on accept) and end-to-end runs of the pipeline against recorded fixtures: three sections, no new product
+  that is already on the menu, category quotas, a failing agent → partial result, re-run with another cuisine without
+  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, voice notes. Fixtures are hand-written
+  stand-ins; see `backend/test/fixtures/llm/README.md`.
+- Mobile: `cd mobile; flutter analyze; flutter test` — ~55 tests: SSE parser, models, error texts, HTTPS rule,
+  offline queue (re-runs, requests queued by older versions), template pool cache, photo limits, and widget tests
+  (result screen: pinned counter, sections, filters, bulk select, live counter, cuisine re-run; category settings;
+  voice note button; sharing into the app).
 - Live: `cd backend; pnpm live:check` against the running stack (see Backend commands).
 - Acceptance criteria and what still needs a real device / real keys: [`PROGRESS.md`](PROGRESS.md).
 
@@ -374,19 +379,21 @@ research with contact/price scrubbing). Fixtures are
   another proxy disable response buffering for `text/event-stream`.
 - **`quota_exceeded` / `local_only` warnings** — the daily quota is used up or `LOCAL_ONLY_MODE` is on; the app keeps
   answering from the database and caches. **Ayarlar → Kullanım** shows calls, errors and cache/DB hit ratios.
-- **"AI anahtarı tanımlı değil"** — no `GEMINI_API_KEY` / `GROQ_API_KEY` on the server. Typed products, seed/approved
-  templates and the gap checklist keep working; unknown products become review cards. Add a key to the server's env
-  file and redeploy (Ayarlar → Görev bazlı modeller shows provider status).
+- **"AI anahtarı tanımlı değil"** — no `GEMINI_API_KEY` / `GROQ_API_KEY` on the server. Typed products and the
+  seed/approved templates keep working (all three sections, answered from the database). Add a key to the server's
+  env file and redeploy (Ayarlar → Görev bazlı modeller shows provider status).
+- **A key is rejected (403 `PERMISSION_DENIED`, "Your project has been denied access")** — the provider disabled the
+  project behind the key; its routes fail and the chains fall back to the other provider. Create a new key in a
+  healthy project and replace it in the env file.
 - **Photos are not read** — no provider key (above), or both providers are down (circuit breaker opens for 60 s
   after 3 failures).
 - **The app still talks to the old server** — the address is stored on the phone after the first login; change it in
   **Ayarlar → Sunucu adresi**.
-- **Sesli not / İnternette araştır do nothing** — both need `GROQ_API_KEY` (Whisper and compound exist only on Groq)
-  and are refused in `LOCAL_ONLY_MODE`; voice notes also need the microphone permission on the phone.
-- **"İnternet araştırması bu AI planında yapılamıyor"** — expected on free API tiers: Groq compound's own follow-up
-  calls exceed the free per-minute token limit (413) and Gemini's search tool answers 429 on a free key (DECISIONS
-  D-142). Everything else works on free tiers; for daily office use prefer Groq's Dev tier and Gemini Tier 1 (3.8
-  Flash allows only 20 requests a day for free, so chains fall back to Flash-Lite / gpt-oss more often).
+- **Sesli not does nothing** — it needs `GROQ_API_KEY` (Whisper exists only on Groq), is refused in
+  `LOCAL_ONLY_MODE` and needs the microphone permission on the phone.
+- **A photo is sometimes not read on a free tier** — Groq's free per-minute limit for the vision model is reached
+  after a few images in a row; with a working Gemini key the chain falls back to it, otherwise that image is skipped
+  with a warning. For daily office use prefer Groq's Dev tier and Gemini Tier 1.
 - **The app shows skeletons forever on a USB phone** — the `adb reverse` bridge dropped (cable replugged, PC slept):
   run `scripts/dev-up.ps1` again.
 - **Release build warns about the Kotlin Gradle Plugin** (`flutter_image_compress_common`, `workmanager_android`) —

@@ -34,11 +34,6 @@ export interface GenerateStructuredOptions<T> {
   timeoutMs?: number;
 }
 
-export interface WebSource {
-  title: string;
-  url: string;
-}
-
 export interface CallMeta {
   provider: ProviderName;
   model: string;
@@ -46,8 +41,6 @@ export interface CallMeta {
   tokensIn: number;
   tokensOut: number;
   rateLimit?: RateLimitSnapshot;
-  /** Pages found by server-side web search (Groq compound `executed_tools`). */
-  sources?: WebSource[];
 }
 
 export type Result<T> =

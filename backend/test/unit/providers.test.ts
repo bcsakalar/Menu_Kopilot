@@ -44,7 +44,7 @@ describe('GroqProvider', () => {
     const captured: Captured[] = [];
     const provider = new GroqProvider({ apiKey: 'gsk_test', fetch: mockFetch(() => completion(ok), captured) });
     const result = await provider.generateStructured({
-      task: 'text.item_enrich',
+      task: 'agent.recommend',
       schema,
       system: 'sys',
       user: 'usr',
@@ -66,31 +66,11 @@ describe('GroqProvider', () => {
     expect(body['max_completion_tokens']).toBe(1000);
   });
 
-  it('uses JSON mode + prompt schema for the compound systems', async () => {
-    const captured: Captured[] = [];
-    const provider = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion(ok), captured) });
-    await provider.generateStructured({
-      task: 'research.web',
-      schema,
-      system: 'sys',
-      user: 'find',
-      model: MODELS.groqCompound,
-      params: { maxOutputTokens: 4096, enabledTools: ['web_search'] },
-      jsonInstructions: 'ONLY JSON: {schema}',
-    });
-    const body = captured[0]?.body ?? {};
-    expect(body['response_format']).toEqual({ type: 'json_object' });
-    expect(body['compound_custom']).toEqual({ tools: { enabled_tools: ['web_search'] } });
-    expect(body['reasoning_format']).toBeUndefined();
-    const messages = body['messages'] as { role: string; content: unknown }[];
-    expect(String(messages[0]?.content)).toContain('ONLY JSON');
-  });
-
   it('sends images as data URLs and keeps the route token cap below the requested size', async () => {
     const captured: Captured[] = [];
     const provider = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion(ok), captured) });
     await provider.generateStructured({
-      task: 'vision.menu_extract',
+      task: 'agent.extract',
       schema,
       system: 'sys',
       user: 'read',
@@ -120,7 +100,7 @@ describe('GroqProvider', () => {
           }),
       ),
     });
-    const result = await provider.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const result = await provider.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe('rate_limited');
@@ -133,13 +113,13 @@ describe('GroqProvider', () => {
       apiKey: 'k',
       fetch: mockFetch(() => new Response('Request Entity Too Large', { status: 413 })),
     });
-    const result = await provider.generateStructured({ task: 'research.web', schema, system: 's', user: 'u', model: MODELS.groqCompound });
+    const result = await provider.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss120b });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe('bad_request');
       expect(result.error.status).toBe(413);
       expect(result.error.message).toContain('dakikalık token');
-      const app = providerFailure(result.error, 'İnternet araştırması');
+      const app = providerFailure(result.error, 'Yeni ürün önerisi');
       expect(app.code).toBe('PROVIDER_UNAVAILABLE');
       expect(app.message).toContain('bu AI planında yapılamıyor');
     }
@@ -156,35 +136,35 @@ describe('GroqProvider', () => {
           ),
       ),
     });
-    const result = await provider.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const result = await provider.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(result.ok || result.error.kind).toBe('invalid_output');
     if (!result.ok) expect(result.error.raw).toBe('{"items": [');
   });
 
   it('maps 5xx, truncation, schema mismatch and a missing key', async () => {
     const e500 = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => new Response('oops', { status: 503 })) });
-    const r500 = await e500.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const r500 = await e500.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(!r500.ok && r500.error.kind).toBe('unavailable');
 
     const cut = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion('{"items":[', 'length')) });
-    const rCut = await cut.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const rCut = await cut.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(!rCut.ok && rCut.error.kind).toBe('invalid_output');
 
     const wrong = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion('{"items":[{"rawName":1}]}')) });
-    const rWrong = await wrong.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const rWrong = await wrong.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(!rWrong.ok && rWrong.error.kind).toBe('invalid_output');
     if (!rWrong.ok) expect(rWrong.error.issues?.length).toBeGreaterThan(0);
 
     const noKey = new GroqProvider({ apiKey: undefined });
     expect(noKey.isConfigured()).toBe(false);
-    const rNoKey = await noKey.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
+    const rNoKey = await noKey.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.groqGptOss20b });
     expect(!rNoKey.ok && rNoKey.error.kind).toBe('not_configured');
   });
 
   it('refuses images on text-only models and rejects embeddings', async () => {
     const provider = new GroqProvider({ apiKey: 'k', fetch: mockFetch(() => completion('{}')) });
     const result = await provider.generateStructured({
-      task: 'vision.menu_extract',
+      task: 'agent.extract',
       schema,
       system: 's',
       user: 'u',
@@ -227,7 +207,7 @@ describe('GeminiProvider', () => {
     const transport = new FakeTransport(() => okResponse);
     const provider = new GeminiProvider({ transport });
     const result = await provider.generateStructured({
-      task: 'vision.menu_extract',
+      task: 'agent.extract',
       schema,
       system: 'sys',
       user: 'read this',
@@ -255,7 +235,7 @@ describe('GeminiProvider', () => {
       });
     });
     const provider = new GeminiProvider({ transport });
-    const result = await provider.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
+    const result = await provider.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe('rate_limited');
@@ -265,17 +245,17 @@ describe('GeminiProvider', () => {
 
   it('maps 5xx, invalid keys and truncated interactions', async () => {
     const down = new GeminiProvider({ transport: new FakeTransport(() => Promise.reject(Object.assign(new Error('boom'), { status: 503 }))) });
-    const rDown = await down.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
+    const rDown = await down.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
     expect(!rDown.ok && rDown.error.kind).toBe('unavailable');
 
     const badKey = new GeminiProvider({
       transport: new FakeTransport(() => Promise.reject(new Error('API key not valid. Please pass a valid API key.'))),
     });
-    const rKey = await badKey.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
+    const rKey = await badKey.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
     expect(!rKey.ok && rKey.error.kind).toBe('auth');
 
     const cut = new GeminiProvider({ transport: new FakeTransport(() => ({ ...okResponse, status: 'incomplete', outputText: '{"items":[' })) });
-    const rCut = await cut.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
+    const rCut = await cut.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
     expect(!rCut.ok && rCut.error.kind).toBe('invalid_output');
   });
 
@@ -292,7 +272,7 @@ describe('GeminiProvider', () => {
   it('is not configured without a key', async () => {
     const provider = new GeminiProvider({ apiKey: undefined });
     expect(provider.isConfigured()).toBe(false);
-    const result = await provider.generateStructured({ task: 'text.item_enrich', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
+    const result = await provider.generateStructured({ task: 'agent.recommend', schema, system: 's', user: 'u', model: MODELS.geminiFlash });
     expect(!result.ok && result.error.kind).toBe('not_configured');
   });
 });

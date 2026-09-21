@@ -1,8 +1,17 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '../../src/db/client.js';
-import { cuisines, menuItems, promptTemplates, providerConfigs, users } from '../../src/db/schema/index.js';
+import {
+  cuisineCategories,
+  cuisines,
+  menuCategories,
+  menuItems,
+  promptTemplates,
+  providerConfigs,
+  users,
+} from '../../src/db/schema/index.js';
 import { countSeedTemplates, seedDatabase } from '../../src/db/seed/seed.js';
+import { SEED_CATEGORIES, SEED_CUISINE_CATEGORIES } from '../../src/db/seed/categories.js';
 import { LEGACY_NOTES, SEED_CUISINES } from '../../src/db/seed/cuisines.js';
 import { SEED_PROMPTS } from '../../src/db/seed/prompts.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
@@ -38,6 +47,9 @@ describe('seedDatabase', () => {
       templatesSkipped: 0,
       promptsInserted: SEED_PROMPTS.length,
       providerConfigsInserted: routeCount,
+      categoriesInserted: SEED_CATEGORIES.length,
+      cuisineCategoriesInserted: SEED_CUISINE_CATEGORIES.length,
+      templatesCategorized: SEED_TEMPLATES.length,
     });
     expect(await countSeedTemplates(handle.db)).toBe(SEED_TEMPLATES.length);
 
@@ -59,7 +71,7 @@ describe('seedDatabase', () => {
     const meze = await handle.db.query.cuisines.findFirst({ where: eq(cuisines.slug, 'meze'), with: { parent: true } });
     expect(meze?.parent?.slug).toBe('balik-deniz');
 
-    const configs = await handle.db.select().from(providerConfigs).where(eq(providerConfigs.taskKey, 'vision.menu_extract'));
+    const configs = await handle.db.select().from(providerConfigs).where(eq(providerConfigs.taskKey, 'agent.extract'));
     expect(configs.map((c) => c.priority).sort()).toEqual([0, 1, 2]);
   });
 
@@ -98,12 +110,42 @@ describe('seedDatabase', () => {
     expect(report.templatesSkipped).toBe(1);
     expect(report.promptsInserted).toBe(0);
     expect(report.providerConfigsInserted).toBe(0);
+    // Categories were assigned on the first pass; a re-seed must not touch them again.
+    expect(report.templatesCategorized).toBe(0);
 
     const [after] = await getTemplates(handle.db, [adana.id]);
     expect(after?.payload.description).toBe(edited.description);
     expect(after?.source).toBe('user');
     const [kebap] = await handle.db.select().from(cuisines).where(eq(cuisines.slug, 'kebap-izgara'));
     expect(kebap?.minItemCount).toBe(14);
+  });
+
+  it('keeps a category and a cuisine category set the user edited, refreshes the rest', async () => {
+    // The user adds a keyword to drinks and drops desserts from the pide cuisine.
+    await handle.db.update(menuCategories).set({ keywords: ['kombucha'], editedByUser: true }).where(eq(menuCategories.key, 'icecek'));
+    await handle.db.update(menuCategories).set({ keywords: ['bozuldu'] }).where(eq(menuCategories.key, 'tatli'));
+    const [pide] = await handle.db.select({ id: cuisines.id }).from(cuisines).where(eq(cuisines.slug, 'pide-lahmacun'));
+    if (!pide) throw new Error('pide missing');
+    await handle.db
+      .delete(cuisineCategories)
+      .where(and(eq(cuisineCategories.cuisineId, pide.id), eq(cuisineCategories.categoryKey, 'tatli')));
+    await handle.db.update(cuisines).set({ categoriesEditedByUser: true }).where(eq(cuisines.id, pide.id));
+    // A cuisine the user never touched loses a row by accident (or an older release lacked it): the seed restores it.
+    const [burger] = await handle.db.select({ id: cuisines.id }).from(cuisines).where(eq(cuisines.slug, 'burger'));
+    if (!burger) throw new Error('burger missing');
+    await handle.db
+      .delete(cuisineCategories)
+      .where(and(eq(cuisineCategories.cuisineId, burger.id), eq(cuisineCategories.categoryKey, 'icecek')));
+
+    await seedDatabase(handle.db, { admin });
+
+    const categories = new Map((await handle.db.select().from(menuCategories)).map((c) => [c.key, c.keywords]));
+    expect(categories.get('icecek')).toEqual(['kombucha']);
+    expect(categories.get('tatli')).toEqual(SEED_CATEGORIES.find((c) => c.key === 'tatli')?.keywords);
+    const pideKeys = (await handle.db.select().from(cuisineCategories).where(eq(cuisineCategories.cuisineId, pide.id))).map((r) => r.categoryKey);
+    expect(pideKeys).not.toContain('tatli');
+    const burgerKeys = (await handle.db.select().from(cuisineCategories).where(eq(cuisineCategories.cuisineId, burger.id))).map((r) => r.categoryKey);
+    expect(burgerKeys).toContain('icecek');
   });
 
   it('refreshes cuisine notes an earlier seed wrote, never notes the user edited', async () => {

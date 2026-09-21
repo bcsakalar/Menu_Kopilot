@@ -11,7 +11,7 @@ import '../../core/network/api_exception.dart';
 import '../../core/providers.dart';
 import '../../core/utils/haptics.dart';
 import '../../core/widgets/common.dart';
-import '../../data/models/voice_research.dart';
+import '../../data/models/transcription.dart';
 import 'voice_recorder.dart';
 
 enum _VoiceState { idle, recording, sending }

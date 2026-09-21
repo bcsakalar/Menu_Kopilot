@@ -16,13 +16,14 @@ import '../../core/utils/image_compressor.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/photo_thumb.dart';
 import '../offline/background.dart';
-import '../results/run_controller.dart';
+import '../results/analysis_controller.dart';
 import '../voice/voice_note_button.dart';
 import 'cuisine_picker.dart';
 import 'home_controller.dart';
 
-/// "Yeni öneri": cuisine + product names and/or up to 5 menu photos → streaming cards. Capture tools and "Öner" sit
-/// in the floating dock at the bottom.
+/// The single input screen: whatever you have about the restaurant's menu — panel screenshots, a menu photo, or
+/// the products typed/dictated during the call — goes in here, and one button produces the three result sections.
+/// The cuisine is optional: the Classifier reads it from the menu when it is left blank.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -31,11 +32,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late final TextEditingController _prompt = TextEditingController(text: ref.read(homeDraftProvider).prompt);
+  late final TextEditingController _menuText = TextEditingController(text: ref.read(homeDraftProvider).menuText);
+  late final TextEditingController _notes = TextEditingController(text: ref.read(homeDraftProvider).notes);
 
   @override
   void dispose() {
-    _prompt.dispose();
+    _menuText.dispose();
+    _notes.dispose();
     super.dispose();
   }
 
@@ -80,32 +83,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _submit() async {
     final draft = ref.read(homeDraftProvider);
-    final cuisines = ref.read(cuisinesProvider).value ?? const [];
-    final cuisine = cuisines.firstWhereOrNull((c) => c.id == draft.cuisineId);
-    if (!draft.canSubmit || cuisine == null) {
+    if (!draft.canSubmit) {
       showMessage(context, context.l10n.needInput);
       return;
     }
-    final request = RunRequest(
-      cuisineName: cuisine.name,
+    final cuisines = ref.read(cuisinesProvider).value ?? const [];
+    final cuisine = cuisines.firstWhereOrNull((c) => c.id == draft.cuisineId);
+    final request = AnalyzeRequest(
+      cuisineName: cuisine?.name ?? '',
       images: draft.images,
-      data: SuggestRequestData(
-        cuisineId: cuisine.id,
-        promptText: draft.prompt,
-        deepMode: draft.deepMode,
+      data: AnalyzeRequestData(
+        cuisineId: cuisine?.id ?? '',
+        menuText: draft.menuText,
+        notes: draft.notes,
+        debug: draft.debug,
         images: draft.images.map((i) => UploadImage(path: i.path, sha256: i.sha256)).toList(),
       ),
     );
     ref.read(homeDraftProvider.notifier).resetInputs();
-    _prompt.clear();
+    _menuText.clear();
+    _notes.clear();
     await context.push('/suggest/results', extra: request);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final p = context.palette;
-    final text = Theme.of(context).textTheme;
     final draft = ref.watch(homeDraftProvider);
     final cuisines = ref.watch(cuisinesProvider).value ?? const [];
     final selected = cuisines.firstWhereOrNull((c) => c.id == draft.cuisineId);
@@ -113,14 +116,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.watch(queueFlusherProvider);
     final notifier = ref.read(homeDraftProvider.notifier);
     // Text can also arrive from outside the field (shared from another app).
-    ref.listen(homeDraftProvider.select((d) => d.prompt), (_, next) {
-      if (_prompt.text != next) _prompt.text = next;
+    ref.listen(homeDraftProvider.select((d) => d.menuText), (_, next) {
+      if (_menuText.text != next) _menuText.text = next;
     });
 
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
-        title: Text(l10n.newSuggestion),
+        title: Text(l10n.newAnalysis),
         actions: [
           if (queued > 0)
             Padding(
@@ -131,7 +134,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       bottomNavigationBar: ActionDock(
         tools: [
-          DockButton(key: const Key('photo-camera'), icon: Icons.photo_camera_outlined, tooltip: l10n.takePhoto, onPressed: draft.compressing ? null : _addFromCamera),
+          DockButton(
+            key: const Key('photo-camera'),
+            icon: Icons.photo_camera_outlined,
+            tooltip: l10n.takePhoto,
+            onPressed: draft.compressing ? null : _addFromCamera,
+          ),
           DockButton(
             key: const Key('photo-gallery'),
             icon: Icons.photo_library_outlined,
@@ -143,17 +151,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             compact: true,
             cuisineId: draft.cuisineId,
             onText: (transcription) {
-              final addition = transcription.items.isNotEmpty ? transcription.items.join('\n') : transcription.text;
-              final current = _prompt.text.trimRight();
-              _prompt.text = current.isEmpty ? addition : '$current\n$addition';
-              notifier.setPrompt(_prompt.text);
+              final addition = transcription.items.isNotEmpty ? transcription.items.join(', ') : transcription.text;
+              final current = _menuText.text.trimRight();
+              _menuText.text = current.isEmpty ? addition : '$current, $addition';
+              notifier.setMenuText(_menuText.text);
             },
           ),
         ],
         primary: FilledButton(
-          key: const Key('suggest-button'),
+          key: const Key('analyze-button'),
           onPressed: draft.canSubmit ? _submit : null,
-          child: Text(l10n.suggestButton),
+          child: Text(l10n.analyzeButton),
         ),
       ),
       body: ListView(
@@ -163,45 +171,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             key: const Key('cuisine-button'),
             icon: Icons.restaurant_menu_rounded,
             label: l10n.cuisine,
-            value: selected?.name ?? l10n.selectCuisine,
+            value: selected?.name ?? l10n.cuisineAuto,
             placeholder: selected == null,
             onTap: _pickCuisine,
           ),
           const SizedBox(height: AppSpace.md),
+          // The heart of the screen: what the restaurant already sells. Works with no photo and no AI key.
           TextField(
-            key: const Key('prompt-field'),
-            controller: _prompt,
+            key: const Key('menu-text-field'),
+            controller: _menuText,
             minLines: 4,
             maxLines: 10,
             textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(labelText: l10n.promptLabel, hintText: l10n.promptHint, alignLabelWithHint: true),
-            onChanged: notifier.setPrompt,
+            decoration: InputDecoration(
+              labelText: l10n.menuTextLabel,
+              hintText: l10n.menuTextHint,
+              alignLabelWithHint: true,
+            ),
+            onChanged: notifier.setMenuText,
           ),
           if (draft.compressing || draft.images.isNotEmpty) ...[
-            Eyebrow(l10n.photosCount(draft.images.length, maxPhotos), padding: const EdgeInsets.only(top: 20, bottom: 8)),
+            Eyebrow(l10n.screenshots, padding: const EdgeInsets.only(top: 20, bottom: 6)),
             SizedBox(
-              height: 96,
+              height: 120,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: draft.images.length + (draft.compressing ? 1 : 0),
                 separatorBuilder: (_, _) => const SizedBox(width: AppSpace.sm),
                 itemBuilder: (context, index) => index >= draft.images.length
-                    ? const Shimmer(child: SkeletonBox(width: 80, height: 96, radius: 10))
-                    : PhotoThumb(path: draft.images[index].path, onDelete: () => notifier.removeImage(index)),
+                    ? const Shimmer(child: SkeletonBox(width: 64, height: 120, radius: 10))
+                    : PhotoThumb(
+                        path: draft.images[index].path,
+                        width: 64,
+                        height: 120,
+                        onDelete: () => notifier.removeImage(index),
+                      ),
               ),
             ),
-          ],
-          const SizedBox(height: AppSpace.md),
-          Material(
-            color: p.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.control), side: BorderSide(color: p.border)),
-            clipBehavior: Clip.antiAlias,
-            child: SwitchListTile(
-              value: draft.deepMode,
-              onChanged: notifier.setDeepMode,
-              title: Text(l10n.deepModeTitle, style: text.titleSmall),
-              subtitle: Text(l10n.deepModeHint, style: text.bodySmall),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(l10n.screenshotsHint, style: Theme.of(context).textTheme.bodySmall),
             ),
+          const SizedBox(height: AppSpace.md),
+          TextField(
+            key: const Key('notes-field'),
+            controller: _notes,
+            minLines: 1,
+            maxLines: 4,
+            decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
+            onChanged: notifier.setNotes,
+          ),
+          const SizedBox(height: AppSpace.sm),
+          SwitchListTile.adaptive(
+            key: const Key('debug-switch'),
+            value: draft.debug,
+            onChanged: notifier.setDebug,
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.debugToggle, style: Theme.of(context).textTheme.titleSmall),
+            subtitle: Text(l10n.debugToggleHint, style: Theme.of(context).textTheme.bodySmall),
           ),
           const _RecentRuns(),
         ],
@@ -212,6 +240,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 final _recentRunsProvider = StreamProvider((ref) => ref.watch(appDatabaseProvider).watchRecentRuns());
 
+/// Analyses kept on the phone: the call dropped, the phone locked, a second restaurant came in between — one tap
+/// reopens the result (from the server, or from the saved copy when offline).
 class _RecentRuns extends ConsumerWidget {
   const _RecentRuns();
 
@@ -234,13 +264,16 @@ class _RecentRuns extends ConsumerWidget {
             children: [
               for (final run in runs.take(10))
                 ListTile(
+                  key: ValueKey('recent-${run.runId}'),
                   title: Text(
                     run.title.isEmpty ? l10n.photoRunTitle : run.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: text.titleSmall,
                   ),
-                  subtitle: Text('${run.cuisineName} · ${format.format(run.createdAt)}'),
+                  subtitle: Text(
+                    [if (run.cuisineName.isNotEmpty) run.cuisineName, format.format(run.createdAt)].join(' · '),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

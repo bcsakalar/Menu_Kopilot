@@ -72,19 +72,19 @@ describe('AiRouter', () => {
   });
 
   it('serves the primary route and logs usage', async () => {
-    const result = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const result = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.meta.provider).toBe('groq'); // text.item_enrich primary = gpt-oss-120b
     expect(groq.calls[0]?.model).toBe(MODELS.groqGptOss120b);
-    expect(groq.calls[0]?.params?.reasoningEffort).toBe('low');
+    expect(groq.calls[0]?.params?.reasoningEffort).toBe('medium');
     const rows = await usageRows();
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ taskKey: 'text.item_enrich', provider: 'groq', success: true });
+    expect(rows[0]).toMatchObject({ taskKey: 'agent.recommend', provider: 'groq', success: true });
   });
 
   it('falls back when the primary returns 500 (after one same-provider retry)', async () => {
     groq.setResponder(() => ({ ok: false, kind: 'unavailable', status: 500 }));
-    const result = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const result = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.meta.provider).toBe('gemini');
     expect(groq.calls).toHaveLength(2);
@@ -95,7 +95,7 @@ describe('AiRouter', () => {
 
   it('skips a provider whose key is missing', async () => {
     groq.configured = false;
-    const result = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const result = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(result.ok && result.meta.provider).toBe('gemini');
     expect(result.attempts[0]).toMatchObject({ provider: 'groq', outcome: 'skipped', reason: 'not_configured' });
     expect(groq.calls).toHaveLength(0);
@@ -107,7 +107,7 @@ describe('AiRouter', () => {
     const router = makeRouter();
     const availability = await router.availability(undefined);
     expect(!availability.ok && availability.error.kind).toBe('not_configured');
-    const result = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const result = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(!result.ok && result.error.kind).toBe('not_configured');
 
     // Only the embed chain lacks a key: that task alone says not_configured.
@@ -120,17 +120,17 @@ describe('AiRouter', () => {
   it('retries a short 429 on the same provider and cools down on a long one', async () => {
     let n = 0;
     groq.setResponder(() => (n++ === 0 ? { ok: false, kind: 'rate_limited', retryAfterMs: 1200 } : good));
-    const short = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const short = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(short.ok && short.meta.provider).toBe('groq');
     expect(sleeps[0]).toBeGreaterThanOrEqual(1200);
 
     groq.setResponder(() => ({ ok: false, kind: 'rate_limited', retryAfterMs: 60_000 }));
-    const long = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const long = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(long.ok && long.meta.provider).toBe('gemini');
     expect(cooldowns.isCooling(`groq:${MODELS.groqGptOss120b}`)).toBe(true);
 
     const callsBefore = groq.calls.length;
-    const next = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const next = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(next.ok && next.meta.provider).toBe('gemini');
     expect(groq.calls.length).toBe(callsBefore);
     expect(next.attempts[0]).toMatchObject({ outcome: 'skipped', reason: 'cooling_down' });
@@ -140,31 +140,31 @@ describe('AiRouter', () => {
     groq.setResponder(() => ({ ok: false, kind: 'timeout' }));
     const router = makeRouter();
     for (let i = 0; i < 3; i += 1) {
-      const r = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+      const r = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
       expect(r.ok && r.meta.provider).toBe('gemini');
     }
     expect(breaker.state('groq')).toBe('open');
     const calls = groq.calls.length;
-    await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(groq.calls.length).toBe(calls); // skipped while open
 
     now += 60_001;
     groq.setResponder(() => good);
-    const trial = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const trial = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(trial.ok && trial.meta.provider).toBe('groq');
     expect(breaker.state('groq')).toBe('closed');
   });
 
   it('a whole provider going down keeps vision working through the fallback chain', async () => {
     gemini.setResponder(() => ({ ok: false, kind: 'auth', status: 403 }));
-    const result = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
+    const result = await makeRouter().generate({ task: 'agent.extract', schema, system: 's', user: 'u', images: [image] });
     expect(result.ok && result.meta.model).toBe(MODELS.groqQwen38);
     expect(breaker.state('gemini')).toBe('open');
   });
 
   it('returns invalid output to the caller without falling back', async () => {
     groq.setResponder(() => ({ ok: true, raw: '{"items": [' }));
-    const result = await makeRouter().generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const result = await makeRouter().generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.kind).toBe('invalid_output');
@@ -177,11 +177,11 @@ describe('AiRouter', () => {
   it('repairs on the same route with generateOnRoute', async () => {
     const router = makeRouter();
     groq.setResponder(() => ({ ok: true, raw: 'not json' }));
-    const first = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const first = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(first.ok).toBe(false);
     if (first.ok || !first.route) throw new Error('expected a failed routed result');
     groq.setResponder(() => good);
-    const repaired = await router.generateOnRoute({ task: 'text.item_enrich', schema, system: 's', user: 'u + fix' }, first.route);
+    const repaired = await router.generateOnRoute({ task: 'agent.recommend', schema, system: 's', user: 'u + fix' }, first.route);
     expect(repaired.ok).toBe(true);
     expect(groq.calls.at(-1)?.user).toBe('u + fix');
   });
@@ -189,32 +189,28 @@ describe('AiRouter', () => {
   it('enforces the per-request budget, LOCAL_ONLY_MODE and the daily quota', async () => {
     const budget = new RequestBudget(1, 25_000);
     const router = makeRouter();
-    expect((await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' }, { budget })).ok).toBe(true);
-    const second = await router.generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' }, { budget });
+    expect((await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' }, { budget })).ok).toBe(true);
+    const second = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' }, { budget });
     expect(!second.ok && second.error.kind).toBe('budget_exceeded');
 
-    const local = await makeRouter({ localOnly: true }).generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const local = await makeRouter({ localOnly: true }).generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(!local.ok && local.error.kind).toBe('local_only');
 
-    const quota = await makeRouter({ dailyCalls: 1 }).generate({ task: 'text.item_enrich', schema, system: 's', user: 'u' });
+    const quota = await makeRouter({ dailyCalls: 1 }).generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(!quota.ok && quota.error.kind).toBe('quota_exceeded');
   });
 
-  it('never sends images to text-only models and renders JSON instructions for JSON-mode models', async () => {
+  it('never sends images to text-only models, and needs no JSON instructions for schema-enforcing models', async () => {
     gemini.setResponder(() => ({ ok: false, kind: 'unavailable' }));
-    const vision = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
+    const vision = await makeRouter().generate({ task: 'agent.extract', schema, system: 's', user: 'u', images: [image] });
     expect(vision.ok && vision.meta.model).toBe(MODELS.groqQwen38);
     expect(groq.calls.find((c) => c.model === MODELS.groqQwen38)?.jsonInstructions).toBeUndefined();
-
-    const research = await makeRouter().generate({ task: 'research.web', schema, system: 's', user: 'u' });
-    expect(research.ok && research.meta.model).toBe(MODELS.groqCompound);
-    expect(groq.calls.find((c) => c.model === MODELS.groqCompound)?.jsonInstructions).toContain('JSON');
   });
 
   it('moves on when Groq rejects a request larger than the free per-minute token limit', async () => {
     gemini.setResponder((opts) => (opts.model === MODELS.geminiFlashLite ? { ok: false, kind: 'unavailable' } : good));
     groq.setResponder(() => ({ ok: false, kind: 'bad_request', status: 413 }));
-    const result = await makeRouter().generate({ task: 'vision.menu_extract', schema, system: 's', user: 'u', images: [image] });
+    const result = await makeRouter().generate({ task: 'agent.extract', schema, system: 's', user: 'u', images: [image] });
     expect(result.ok && result.meta.model).toBe(MODELS.geminiFlash);
     expect(result.attempts.map((a) => a.model)).toEqual([MODELS.geminiFlashLite, MODELS.geminiFlashLite, MODELS.groqQwen38, MODELS.geminiFlash]);
   });

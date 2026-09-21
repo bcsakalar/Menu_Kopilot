@@ -7,10 +7,9 @@ import 'package:menu_kopilot/core/network/api_exception.dart';
 import 'package:menu_kopilot/core/providers.dart';
 import 'package:menu_kopilot/core/storage/app_database.dart';
 import 'package:menu_kopilot/core/storage/token_store.dart';
-import 'package:menu_kopilot/data/models/branch.dart';
 import 'package:menu_kopilot/data/models/json.dart';
 import 'package:menu_kopilot/data/models/settings.dart';
-import 'package:menu_kopilot/data/models/suggestion.dart';
+import 'package:menu_kopilot/data/models/analysis.dart';
 import 'package:menu_kopilot/data/models/template_item.dart';
 import 'package:menu_kopilot/data/models/template_payload.dart';
 import 'package:menu_kopilot/features/templates/template_pool.dart';
@@ -178,20 +177,6 @@ void main() {
       expect(summary.cacheHitRatio, 0.5);
       expect(summary.dbHitRatio, 0.8);
       expect(summary.quota.dailyCalls, 300);
-    });
-
-    test('groups the branch menu by status', () {
-      final menu = BranchMenu.fromJson({
-        'branch': {'id': 'b1', 'name': 'Şube', 'cuisineId': 'k1', 'effectiveTarget': 14, 'currentItemCount': 2},
-        'items': [
-          {'id': 'i1', 'name': 'Lahmacun', 'status': 'incomplete', 'source': 'screenshot', 'missingFields': ['description']},
-          {'id': 'i2', 'name': 'Adana Kebap', 'status': 'ok', 'source': 'suggestion', 'payload': {'name': 'Adana Kebap', 'description': 'x'}},
-          {'id': 'i3', 'name': 'Beyti Sarma', 'status': 'missing', 'source': 'recommendation', 'reason': 'Sık görülür'},
-        ],
-      });
-      expect(menu.withStatus(MenuItemStatus.ok).single.content?.name, 'Adana Kebap');
-      expect(menu.withStatus(MenuItemStatus.incomplete).single.missingFields, ['description']);
-      expect(menu.withStatus(MenuItemStatus.missing).single.reason, 'Sık görülür');
     });
   });
 }

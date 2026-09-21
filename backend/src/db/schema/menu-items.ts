@@ -16,6 +16,7 @@ import {
   varchar,
   vector,
 } from 'drizzle-orm/pg-core';
+import { menuCategories } from './categories.js';
 import { cuisines } from './cuisines.js';
 import { ingredientKind, menuItemSource, priceMode, selectionType } from './enums.js';
 import { users } from './users.js';
@@ -33,6 +34,8 @@ export const menuItems = pgTable(
     cuisineId: uuid('cuisine_id')
       .notNull()
       .references(() => cuisines.id, { onDelete: 'restrict' }),
+    /** Menu category (`menu_categories.key`); null for rows seeded before the taxonomy existed. */
+    categoryKey: text('category_key').references(() => menuCategories.key, { onDelete: 'set null' }),
     description: varchar('description', { length: DESCRIPTION_MAX }).notNull().default(''),
     servingNote: text('serving_note').notNull().default(''),
     portionInfo: text('portion_info').notNull().default(''),
@@ -54,6 +57,7 @@ export const menuItems = pgTable(
     index('menu_items_normalized_name_trgm_idx').using('gin', t.normalizedName.op('gin_trgm_ops')),
     uniqueIndex('menu_items_cuisine_name_approved_uq').on(t.cuisineId, t.normalizedName, t.approved),
     index('menu_items_cuisine_usage_idx').on(t.cuisineId, t.approved, t.usageCount),
+    index('menu_items_cuisine_category_idx').on(t.cuisineId, t.approved, t.categoryKey),
     check('menu_items_description_len_chk', sql`char_length(${t.description}) <= 160`),
     check('menu_items_importance_chk', sql`${t.importance} between 0 and 100`),
   ],

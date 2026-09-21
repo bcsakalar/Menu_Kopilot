@@ -7,15 +7,15 @@ import 'package:go_router/go_router.dart';
 import '../../core/design/tokens.dart';
 import '../../core/utils/image_compressor.dart';
 import '../../core/widgets/common.dart';
-import '../gap/gap_controller.dart';
 import '../home/home_controller.dart';
 import 'share_intake.dart';
 
-enum ShareTarget { suggestPhotos, gapScreenshots, suggestText, gapText }
+/// Where a share goes. There is only one analysis screen now, so the question is just "photos or text?" —
+/// the pipeline works out by itself whether a picture is a menu photo or a panel screenshot.
+enum ShareTarget { photos, text }
 
-/// Receives what other apps share ("Paylaş → Menü Kopilot") and asks where it goes: menu photos / a product list to
-/// "Öneri", panel screenshots / the products on the menu to "Tamamla". Lives in the signed-in shell, so a share that
-/// opened the app waits until login.
+/// Receives what other apps share ("Paylaş → Menü Kopilot") and drops it into the analysis screen. Lives in the
+/// signed-in shell, so a share that opened the app waits until login.
 class ShareIntakeListener extends ConsumerStatefulWidget {
   const ShareIntakeListener({required this.child, super.key});
 
@@ -76,35 +76,20 @@ class _ShareIntakeListenerState extends ConsumerState<ShareIntakeListener> {
 
   Future<void> _apply(SharedIntake intake, ShareTarget target) async {
     final l10n = context.l10n;
-    String append(String current, String addition, String separator) {
-      final trimmed = current.trimRight();
-      return trimmed.isEmpty ? addition : '$trimmed$separator$addition';
-    }
-
-    void report(AddImagesResult result, int limit) {
-      if (!mounted) return;
-      if (result.failed > 0) {
-        showMessage(context, l10n.compressFailed);
-      } else if (result.skipped > 0) {
-        showMessage(context, l10n.maxPhotos(limit));
-      }
-    }
-
+    context.go('/suggest');
     switch (target) {
-      case ShareTarget.suggestPhotos:
-        context.go('/suggest');
-        report(await ref.read(homeDraftProvider.notifier).addImages(intake.imagePaths), maxPhotos);
-      case ShareTarget.gapScreenshots:
-        context.go('/gap');
-        report(await ref.read(gapDraftProvider.notifier).addImages(intake.imagePaths), maxScreenshots);
-      case ShareTarget.suggestText:
-        context.go('/suggest');
+      case ShareTarget.photos:
+        final result = await ref.read(homeDraftProvider.notifier).addImages(intake.imagePaths);
+        if (!mounted) return;
+        if (result.failed > 0) {
+          showMessage(context, l10n.compressFailed);
+        } else if (result.skipped > 0) {
+          showMessage(context, l10n.maxPhotos(maxPhotos));
+        }
+      case ShareTarget.text:
         final draft = ref.read(homeDraftProvider);
-        ref.read(homeDraftProvider.notifier).setPrompt(append(draft.prompt, intake.text, '\n'));
-      case ShareTarget.gapText:
-        context.go('/gap');
-        final draft = ref.read(gapDraftProvider);
-        ref.read(gapDraftProvider.notifier).setMenuText(append(draft.menuText, intake.text, '\n'));
+        final current = draft.menuText.trimRight();
+        ref.read(homeDraftProvider.notifier).setMenuText(current.isEmpty ? intake.text : '$current\n${intake.text}');
     }
   }
 
@@ -151,22 +136,14 @@ class ShareTargetSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              if (photos > 0) ...[
+              if (photos > 0)
                 _ShareOption(
-                  key: const Key('share-suggest-photos'),
+                  key: const Key('share-photos'),
                   icon: Icons.playlist_add_rounded,
                   title: l10n.shareAsMenuPhotos,
                   subtitle: l10n.shareAsMenuPhotosHint,
-                  onTap: () => Navigator.pop(context, ShareTarget.suggestPhotos),
+                  onTap: () => Navigator.pop(context, ShareTarget.photos),
                 ),
-                _ShareOption(
-                  key: const Key('share-gap-screenshots'),
-                  icon: Icons.fact_check_outlined,
-                  title: l10n.shareAsScreenshots,
-                  subtitle: l10n.shareAsScreenshotsHint,
-                  onTap: () => Navigator.pop(context, ShareTarget.gapScreenshots),
-                ),
-              ],
               if (intake.text.trim().isNotEmpty) ...[
                 Container(
                   margin: const EdgeInsets.fromLTRB(20, 6, 20, 6),
@@ -175,16 +152,10 @@ class ShareTargetSheet extends StatelessWidget {
                   child: Text(intake.text.trim(), maxLines: 3, overflow: TextOverflow.ellipsis, style: text.bodySmall),
                 ),
                 _ShareOption(
-                  key: const Key('share-suggest-text'),
-                  icon: Icons.playlist_add_rounded,
+                  key: const Key('share-text'),
+                  icon: Icons.notes_rounded,
                   title: l10n.shareAsProductList,
-                  onTap: () => Navigator.pop(context, ShareTarget.suggestText),
-                ),
-                _ShareOption(
-                  key: const Key('share-gap-text'),
-                  icon: Icons.fact_check_outlined,
-                  title: l10n.shareAsMenuText,
-                  onTap: () => Navigator.pop(context, ShareTarget.gapText),
+                  onTap: () => Navigator.pop(context, ShareTarget.text),
                 ),
               ],
               const SizedBox(height: 10),

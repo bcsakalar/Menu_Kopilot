@@ -24,6 +24,12 @@ export interface AttemptRecord {
   outcome: 'ok' | 'skipped' | ProviderErrorKind;
   reason?: string;
   latencyMs?: number;
+  /**
+   * Tokens of this one attempt, as billed to the request budget (0 when the provider processed nothing). Kept per
+   * attempt so an agent running in parallel with another can still report exactly what it spent.
+   */
+  tokensIn?: number;
+  tokensOut?: number;
 }
 
 /** The error once a chain is exhausted without a usable answer: "no key for any route" is not a transient outage. */
@@ -197,6 +203,8 @@ export class AiRouter {
         model: route.model,
         outcome: result.ok ? 'ok' : result.error.kind,
         latencyMs: result.meta.latencyMs,
+        tokensIn: processed ? tokensIn : 0,
+        tokensOut: result.meta.tokensOut,
       });
 
       if (result.ok) {
