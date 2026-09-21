@@ -38,7 +38,8 @@ six-agent pipeline, Şubeler removed, categories editable in the app. App 1.1.0+
 **2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
 (migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
 `MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:
-`admin@example.com` (admin), `uzman@example.com` (uzman, password in the Desktop note). Flutter
+`admin@example.com` (admin), `uzman@example.com` (uzman), `uzman2@example.com` (uzman) —
+passwords handed over in Desktop notes. Gemini key rotated on production the same evening (D-170). Flutter
 3.47.5 / Android SDK / JDK 17 now live in `%USERPROFILE%\dev` and `%LOCALAPPDATA%\Android\Sdk` on this PC.
 
 **2026-09-21 — FAZ 0–3 done in the working tree, uncommitted.** Backend: 538 tests, lint + typecheck clean, the local

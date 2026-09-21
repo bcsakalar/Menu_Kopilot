@@ -646,4 +646,10 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
 - **D-169** — Production deploy of FAZ 0–3 (2026-09-21, `f2e12a2`) after a fresh pre-migration dump; the
   post-deploy live check with the new account passed 15/15, the menu photo included — the Gemini key that answers
   403 (D-164) is only the one in this PC's local `.env`; production's key works.
-
+- **D-170** — 2026-09-21, user request: the Gemini key rotated on production from the local `.env` (only the
+  provider keys travel, as in `scripts/new-prod-env.ps1`; the Groq key was already identical). Checked first on the
+  local stack (a menu photo read by gemini-3.5-flash-lite), then from inside the production API container (Gemini
+  answers 200). The value went over ssh stdin into an environment variable, never a command line; the previous env
+  file is kept as `/etc/menu-kopilot/env.bak-2026-09-21-193619`. The whole stack was then recreated (volumes kept).
+  A third account: `uzman2@example.com` (role `uzman`) — the request said "uzman2@example", which
+  is not a valid e-mail, so `.com` was added; password in a Desktop note.
