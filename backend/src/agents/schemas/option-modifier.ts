@@ -3,6 +3,9 @@ import { z } from 'zod';
 /**
  * Option/Modifier agent — JSON schema. Suggests option groups and ingredients for products ALREADY on the menu.
  * Every card names its target product, because on the phone the first question is always "hangi ürün için?".
+ *
+ * As in the recommender's schema, the bounds are wider than a card's: the answer is parsed in one go, so a single
+ * over-long line must not cost the whole batch. The canonical rules are applied per card by the Validator.
  */
 
 export const suggestedOptionSchema = z.object({
@@ -18,16 +21,16 @@ export const suggestedOptionGroupSchema = z.object({
   isRequired: z.boolean(),
   minSelect: z.number().int().min(0).max(15),
   maxSelect: z.number().int().min(1).max(15),
-  options: z.array(suggestedOptionSchema).min(2).max(10).describe('Uygun olan her yerde 4–7 opsiyon'),
+  options: z.array(suggestedOptionSchema).min(1).max(15).describe('Uygun olan her yerde 4–7 opsiyon'),
 });
 export type SuggestedOptionGroup = z.infer<typeof suggestedOptionGroupSchema>;
 
 export const optionSuggestionSchema = z.object({
   targetName: z.string().min(1).max(120).describe('Menüde ZATEN olan ürünün adı, verilen listeden aynen'),
-  optionGroups: z.array(suggestedOptionGroupSchema).max(4),
-  removableIngredients: z.array(z.string().min(1).max(50)).max(12).describe('Müşterinin çıkarabileceği malzemeler'),
-  extraIngredients: z.array(z.string().min(1).max(50)).max(12).describe('Ek ücretle eklenebilecek malzemeler'),
-  reason: z.string().max(120).describe('Tek satır: bu opsiyonlar neden gerekli'),
+  optionGroups: z.array(suggestedOptionGroupSchema).max(6),
+  removableIngredients: z.array(z.string().max(80)).max(20).describe('Müşterinin çıkarabileceği malzemeler'),
+  extraIngredients: z.array(z.string().max(80)).max(20).describe('Ek ücretle eklenebilecek malzemeler'),
+  reason: z.string().max(200).describe('Tek satır: bu opsiyonlar neden gerekli'),
 });
 export type OptionSuggestion = z.infer<typeof optionSuggestionSchema>;
 

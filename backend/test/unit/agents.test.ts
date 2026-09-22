@@ -206,6 +206,25 @@ describe('run plan — how many products and from which categories', () => {
     expect(plan.optionTargets).toBe(0);
   });
 
+  it('follows the cuisine minimum when its category table asks for far less', () => {
+    // A café whose opening minimum is 50 but whose three categories sum to 13: capping each category at twice
+    // its own minimum would answer a 10-product menu with 26 suggestions and still report "hedefe ulaşılamıyor".
+    const kafe = categoryGaps(
+      [
+        { key: 'icecek', label: 'İçecek', minItems: 8, sortOrder: 1 },
+        { key: 'atistirmalik', label: 'Atıştırmalık', minItems: 3, sortOrder: 2 },
+        { key: 'tatli', label: 'Tatlı', minItems: 2, sortOrder: 3 },
+      ],
+      new Map([
+        ['icecek', 8],
+        ['atistirmalik', 1],
+      ]),
+    );
+    const plan = planRun({ mode: 'full', categories: kafe, missing: 40, needOptions: 10 });
+    expect(plan.products).toBe(40);
+    expect(plan.quota.get('icecek')).toBeGreaterThan(16);
+  });
+
   it('never gives a category more than its cap, even when the target cannot be reached', () => {
     const tiny = categoryGaps([{ key: 'tatli', label: 'Tatlı', minItems: 2, sortOrder: 1 }], new Map());
     const quota = allocate(tiny, 30, (c) => c.minItems * 2);

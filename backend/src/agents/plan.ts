@@ -167,7 +167,19 @@ export function planRun(input: PlanInput): RunPlan {
 
   // Full: enough to actually reach the opening target (plus two spares), never below the floor.
   const wanted = Math.min(MAX_PRODUCTS, Math.max(FULL_FLOOR, input.missing + 2, shape));
-  const quota = allocate(input.categories, wanted, (c) => (LAST_RESORT.has(c.key) ? 1 : Math.max(2, c.minItems * 2)));
+  /**
+   * A category's ceiling. Twice what the cuisine expects is enough for a normal menu, but some cuisines ask for
+   * far more products than their category table describes — a café with a minimum of 50 has three categories
+   * summing to 13, and capping each at double left the run 24 products short of a target it was told to reach.
+   * So the ceiling also follows the category's share of what this run needs.
+   */
+  const shapeTotal = input.categories.reduce((sum, c) => sum + Math.max(1, c.minItems), 0);
+  const capOf = (c: CategoryGap): number => {
+    if (LAST_RESORT.has(c.key)) return 1;
+    const share = Math.ceil((wanted * Math.max(1, c.minItems)) / Math.max(1, shapeTotal));
+    return Math.max(2, c.minItems * 2, share);
+  };
+  const quota = allocate(input.categories, wanted, capOf);
   return {
     mode: 'full',
     products: sum(quota),

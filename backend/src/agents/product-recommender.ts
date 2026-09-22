@@ -452,10 +452,11 @@ function toRecommended(
     name,
     normalized: normalizeTr(name),
     categoryKey,
-    shortDescription: raw.shortDescription.trim(),
+    // The wire schema accepts more than a card shows (see its header): trim here rather than lose the product.
+    shortDescription: raw.shortDescription.trim().slice(0, 160),
     portionInfo: raw.portionInfo.trim(),
     priceRangeHint: raw.priceRangeHint.trim(),
-    reason: raw.reason.trim(),
+    reason: raw.reason.trim().slice(0, 120),
     importance: Math.round(Math.max(0, Math.min(100, raw.importance))),
     source: 'ai',
     templateId: null,
