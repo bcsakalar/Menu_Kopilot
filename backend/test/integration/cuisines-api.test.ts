@@ -126,10 +126,10 @@ describe('cuisines API', () => {
     });
 
     it('stores keywords the way the classifier reads them, and the next run uses them', async () => {
-      // Before: "Kombucha" is not a known drink, so it lands in the fallback category.
+      // Before: "Hardaliye" is not a known drink, so it lands in the fallback category.
       const before0 = await loadCategoryIndex(ctx.db.db);
-      expect(before0.classify('Kombucha')).toBe('ana-yemek');
-      expect(before0.classify('Sıcak Salep')).toBe('ana-yemek');
+      expect(before0.classify('Hardaliye')).toBe('ana-yemek');
+      expect(before0.classify('Sıcak Hardaliye')).toBe('ana-yemek');
 
       const before = (await ctx.app.inject({ method: 'GET', url: '/api/v1/categories', headers: bearer(token) })).json<{ data: CategoryDto[] }>();
       const drinks = before.data.find((c) => c.key === 'icecek');
@@ -137,12 +137,12 @@ describe('cuisines API', () => {
         method: 'PATCH',
         url: '/api/v1/categories/icecek',
         headers: bearer(token),
-        payload: { keywords: [...(drinks?.keywords ?? []), 'KOMBUCHA', 'Sıcak Salep', 'kombucha'] },
+        payload: { keywords: [...(drinks?.keywords ?? []), 'HARDALIYE', 'Sıcak Hardaliye', 'hardaliye'] },
       });
       expect(res.statusCode).toBe(200);
       const updated = res.json<CategoryDto>();
       // Normalized, phrases kept whole, no duplicates.
-      expect(updated.keywords).toEqual(expect.arrayContaining(['kombucha', 'sicak salep']));
+      expect(updated.keywords).toEqual(expect.arrayContaining(['hardaliye', 'sicak hardaliye']));
       expect(updated.keywords).not.toContain('sicak');
       expect(new Set(updated.keywords).size).toBe(updated.keywords.length);
       const [edited] = await ctx.db.db.select({ owned: menuCategories.editedByUser }).from(menuCategories).where(eq(menuCategories.key, 'icecek'));
@@ -150,8 +150,8 @@ describe('cuisines API', () => {
 
       // No restart: the index is read per run. The phrase matches only as a phrase.
       const after = await loadCategoryIndex(ctx.db.db);
-      expect(after.classify('Kombucha')).toBe('icecek');
-      expect(after.classify('Sıcak Salep')).toBe('icecek');
+      expect(after.classify('Hardaliye')).toBe('icecek');
+      expect(after.classify('Sıcak Hardaliye')).toBe('icecek');
       expect(after.classify('Sıcak Sandviç')).not.toBe('icecek');
     });
 
@@ -169,8 +169,8 @@ describe('cuisines API', () => {
         allergenNotes: [],
         upsellSuggestion: '',
       });
-      const seedId = await insertTemplate(ctx.db.db, { cuisineId, payload: payload('Zencefilli Şerbet'), source: 'seed', approved: true });
-      const userId = await insertTemplate(ctx.db.db, { cuisineId, payload: payload('Şerbet Tabağı'), source: 'user', approved: true });
+      const seedId = await insertTemplate(ctx.db.db, { cuisineId, payload: payload('Zencefilli Demirhindi'), source: 'seed', approved: true });
+      const userId = await insertTemplate(ctx.db.db, { cuisineId, payload: payload('Demirhindi Tabağı'), source: 'user', approved: true });
       // What accepting a card does: the user's template carries the card's category.
       await ctx.db.db.update(menuItems).set({ categoryKey: 'tatli' }).where(eq(menuItems.id, userId));
 
@@ -181,7 +181,7 @@ describe('cuisines API', () => {
         method: 'PATCH',
         url: '/api/v1/categories/icecek',
         headers: bearer(token),
-        payload: { keywords: [...(drinks?.keywords ?? []), 'şerbet'] },
+        payload: { keywords: [...(drinks?.keywords ?? []), 'demirhindi'] },
       });
       expect(res.statusCode).toBe(200);
 
