@@ -1177,13 +1177,13 @@ abstract class AppLocalizations {
   /// No description provided for @cardDetailsShow.
   ///
   /// In tr, this message translates to:
-  /// **'Opsiyon ve malzemeleri göster'**
+  /// **'Göster'**
   String get cardDetailsShow;
 
   /// No description provided for @cardDetailsHide.
   ///
   /// In tr, this message translates to:
-  /// **'Opsiyon ve malzemeleri gizle'**
+  /// **'Gizle'**
   String get cardDetailsHide;
 
   /// No description provided for @cardOptionGroupsCount.

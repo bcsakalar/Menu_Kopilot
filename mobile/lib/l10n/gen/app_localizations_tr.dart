@@ -615,10 +615,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get cardDetailsShow => 'Opsiyon ve malzemeleri göster';
+  String get cardDetailsShow => 'Göster';
 
   @override
-  String get cardDetailsHide => 'Opsiyon ve malzemeleri gizle';
+  String get cardDetailsHide => 'Gizle';
 
   @override
   String cardOptionGroupsCount(int count) {

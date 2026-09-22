@@ -216,8 +216,8 @@
 
   "copyMultiChoice": "çoklu seçim, en fazla {max}",
   "@copyMultiChoice": { "placeholders": { "max": { "type": "int" } } },
-  "cardDetailsShow": "Opsiyon ve malzemeleri göster",
-  "cardDetailsHide": "Opsiyon ve malzemeleri gizle",
+  "cardDetailsShow": "Göster",
+  "cardDetailsHide": "Gizle",
   "cardOptionGroupsCount": "{count} opsiyon grubu",
   "@cardOptionGroupsCount": { "placeholders": { "count": { "type": "int" } } },
   "cardIngredientsCount": "{count} malzeme",

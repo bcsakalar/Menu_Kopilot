@@ -359,16 +359,19 @@ class _CardDetailsState extends State<_CardDetails> {
               children: [
                 Icon(Icons.tune_rounded, size: 14, color: p.textFaint),
                 const SizedBox(width: 6),
-                Flexible(child: Text(summary, style: text.bodySmall?.copyWith(color: p.textMuted))),
-                Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: p.textFaint),
+                // The summary takes the room it needs and the affordance stays whole on the right: on a 360 dp
+                // phone the label was the part that got cut off, which is the one word that has to be readable.
                 Expanded(
                   child: Text(
-                    _open ? l10n.cardDetailsHide : l10n.cardDetailsShow,
-                    style: text.bodySmall?.copyWith(color: p.accentText),
+                    summary,
+                    style: text.bodySmall?.copyWith(color: p.textMuted),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 6),
+                Text(_open ? l10n.cardDetailsHide : l10n.cardDetailsShow, style: text.bodySmall?.copyWith(color: p.accentText)),
+                Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: p.accentText),
               ],
             ),
           ),
