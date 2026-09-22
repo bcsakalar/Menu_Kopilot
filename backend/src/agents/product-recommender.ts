@@ -26,9 +26,14 @@ import { generateChecked } from './validator.js';
  *  1. approved templates of the same / related cuisines, **filtered by the open categories** — no model call,
  *     deterministic one-line reason, instant. (The old recommender skipped the category filter, which is why it
  *     answered a pide-only menu with six more pides.)
- *  2. the model, for the categories the template pool cannot fill.
- * Model answers are cached per (menu + gaps + prompt version).
+ *  2. the model, for the categories the template pool cannot fill — in batches of a few categories each, run in
+ *     parallel, so a menu that is forty products short is several short answers instead of one long one.
+ * Model answers are cached per (menu + that batch's gaps + prompt version).
  */
+
+/** Products one model call is asked for. Above this an answer starts arriving late, or not at all. */
+const RECOMMEND_BATCH = 10;
+const MAX_RECOMMEND_BATCHES = 4;
 
 export interface RecommendedItem {
   name: string;
@@ -232,75 +237,115 @@ export async function runProductRecommender(
         });
       }
 
-      const cacheKey = `mk:rec:${input.cuisine.id}:${sha256Hex(
-        JSON.stringify([
-          [...takenNames].sort(),
-          remainingGaps.map((g) => `${g.key}:${g.want}`),
-          input.priceSegment,
-          input.target,
-          remaining,
-          input.notes ?? '',
-          await deps.prompts.versionTag(['agent.recommend.system', 'agent.recommend.user']),
-        ]),
-      ).slice(0, 32)}`;
-
-      let raw = await getJson(deps.cache, cacheKey, productRecommenderSchema);
-      const cached = raw !== undefined;
-      let attempts: AttemptRecord[] = [];
-      let provider: string | undefined;
-      let model: string | undefined;
-
-      if (!raw) {
-        const system = (await deps.prompts.render('agent.recommend.system')).text;
-        const user = (
-          await deps.prompts.render('agent.recommend.user', {
-            cuisine: input.cuisine.name,
-            segment: input.priceSegment,
-            current: input.current,
-            target: input.target,
-            existing: input.existing.map((i) => i.canonicalName ?? i.rawName).join(', ') || '-',
-            gaps: remainingGaps
-              .map((g) => `${g.key} | ${g.label} | menüde ${g.present}, mutfak minimumu ${g.minItems} | bu koşuda ${g.want} ürün iste`)
-              .join('\n'),
-            already: dbItems.map((i) => i.name).join(', ') || '-',
-            notes: input.notes?.trim() || '-',
-            max: remaining + 2,
-          })
-        ).text;
-
-        const request = {
-          task: 'agent.recommend' as const,
-          schema: productRecommenderSchema,
-          schemaName: PRODUCT_RECOMMENDER_SCHEMA_NAME,
-          system,
-          user,
-        };
-        // Invalid JSON gets exactly one repair round, owned by the Validator (see generateChecked).
-        const checked = await generateChecked(deps, request, run.ctx);
-        attempts = checked.attempts;
-        const result = checked.result;
-        if (!result.ok) {
-          const error = `${result.error.kind}: ${result.error.message}`;
-          return done(
-            {
-              items: dbItems,
-              fromDb: dbItems.length,
-              fromAi: 0,
-              attempts,
-              llmCalls: countCalls(attempts),
-              cached: false,
-              error,
-              templatePayloads: await templatePayloadsFor(deps, dbItems),
-            },
-            { fromDb: dbItems.length, fromAi: 0 },
-            dbItems.length > 0 ? 'ok' : 'failed',
-          );
+      /**
+       * One model call per group of categories. A café that is 43 products short used to go out as a single
+       * "give me 40 products, each with its options" call: measured on production it took 33 s and came back
+       * failed. Split into batches of ~10 it is three short calls that run in parallel — the same wall clock as
+       * one call, and each answer is small enough that a provider actually finishes it.
+       */
+      const batches: QuotaRow[][] = [];
+      let current: QuotaRow[] = [];
+      let currentWant = 0;
+      for (const gap of remainingGaps) {
+        current.push(gap);
+        currentWant += gap.want;
+        if (currentWant >= RECOMMEND_BATCH) {
+          batches.push(current);
+          current = [];
+          currentWant = 0;
         }
-        provider = result.meta.provider;
-        model = result.meta.model;
-        raw = result.value;
-        await setJson(deps.cache, cacheKey, raw, deps.cacheTtlSeconds);
       }
+      if (current.length > 0) batches.push(current);
+      const plannedBatches = batches.slice(0, MAX_RECOMMEND_BATCHES);
+
+      const system = (await deps.prompts.render('agent.recommend.system')).text;
+      const promptTag = await deps.prompts.versionTag(['agent.recommend.system', 'agent.recommend.user']);
+      const runs = await Promise.all(
+        plannedBatches.map(async (gaps) => {
+          const want = gaps.reduce((sum, g) => sum + g.want, 0);
+          const cacheKey = `mk:rec:${input.cuisine.id}:${sha256Hex(
+            JSON.stringify([
+              [...takenNames].sort(),
+              gaps.map((g) => `${g.key}:${g.want}`),
+              input.priceSegment,
+              input.target,
+              input.notes ?? '',
+              promptTag,
+            ]),
+          ).slice(0, 32)}`;
+          const hit = await getJson(deps.cache, cacheKey, productRecommenderSchema);
+          if (hit) return { value: hit, attempts: [] as AttemptRecord[], cached: true, error: undefined, meta: undefined };
+
+          const user = (
+            await deps.prompts.render('agent.recommend.user', {
+              cuisine: input.cuisine.name,
+              segment: input.priceSegment,
+              current: input.current,
+              target: input.target,
+              existing: input.existing.map((i) => i.canonicalName ?? i.rawName).join(', ') || '-',
+              gaps: gaps
+                .map((g) => `${g.key} | ${g.label} | menüde ${g.present}, mutfak minimumu ${g.minItems} | bu koşuda ${g.want} ürün iste`)
+                .join('\n'),
+              already: dbItems.map((i) => i.name).join(', ') || '-',
+              notes: input.notes?.trim() || '-',
+              max: want + 2,
+            })
+          ).text;
+          // Invalid JSON gets exactly one repair round, owned by the Validator (see generateChecked).
+          const checked = await generateChecked(
+            deps,
+            {
+              task: 'agent.recommend' as const,
+              schema: productRecommenderSchema,
+              schemaName: PRODUCT_RECOMMENDER_SCHEMA_NAME,
+              system,
+              user,
+            },
+            run.ctx,
+          );
+          if (!checked.result.ok) {
+            return {
+              value: undefined,
+              attempts: checked.attempts,
+              cached: false,
+              error: `${checked.result.error.kind}: ${checked.result.error.message}`,
+              meta: undefined,
+            };
+          }
+          await setJson(deps.cache, cacheKey, checked.result.value, deps.cacheTtlSeconds);
+          return {
+            value: checked.result.value,
+            attempts: checked.attempts,
+            cached: false,
+            error: undefined,
+            meta: checked.result.meta,
+          };
+        }),
+      );
+
+      const attempts = runs.flatMap((r) => r.attempts);
+      const answered = runs.flatMap((r) => (r.value ? [r.value] : []));
+      const cached = runs.length > 0 && runs.every((r) => r.cached);
+      const provider = runs.find((r) => r.meta)?.meta?.provider;
+      const model = runs.find((r) => r.meta)?.meta?.model;
+      if (answered.length === 0) {
+        const error = runs.find((r) => r.error)?.error ?? 'model cevabı yok';
+        return done(
+          {
+            items: dbItems,
+            fromDb: dbItems.length,
+            fromAi: 0,
+            attempts,
+            llmCalls: countCalls(attempts),
+            cached: false,
+            error,
+            templatePayloads: await templatePayloadsFor(deps, dbItems),
+          },
+          { fromDb: dbItems.length, fromAi: 0 },
+          dbItems.length > 0 ? 'ok' : 'failed',
+        );
+      }
+      const raw = { items: answered.flatMap((a) => a.items) };
 
       // Same two rules as the template path: a category never gets more than it is short of, and the answers are
       // taken emptiest-category-first rather than in the order the model happened to write them. Without the
@@ -363,7 +408,14 @@ export async function runProductRecommender(
           ...(provider ? { provider } : {}),
           ...(model ? { model } : {}),
         },
-        { fromDb: dbItems.length, fromAi: aiItems.length, cached, names: items.map((i) => i.name) },
+        {
+          fromDb: dbItems.length,
+          fromAi: aiItems.length,
+          cached,
+          batches: plannedBatches.length,
+          ...(plannedBatches.length - answered.length > 0 ? { failedBatches: plannedBatches.length - answered.length } : {}),
+          names: items.map((i) => i.name),
+        },
       );
     },
   );
