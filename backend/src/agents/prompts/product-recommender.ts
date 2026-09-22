@@ -11,6 +11,7 @@ Her önerinin categoryKey alanı, verilen kategori listesinden tam olarak bir an
 Bir kategori mutfağın minimumunu zaten karşılıyor ama senden yine de ürün isteniyorsa, o kategoriyi GENİŞLETEN farklı ürünler öner (aynı ürünün varyantını değil): restoran şubeyi açarken menüyü bu ürünlerle doldurur.
 
 AD KURALI:
+Bütün alanları TÜRKÇE karakterlerle yaz: ş, ç, ğ, ı, İ, ö, ü. ASCII'ye düşürme ("Karisik Atistirmalik" DEĞİL, "Karışık Atıştırmalık").
 name alanı yalnızca sade, kanonik ürün adıdır. İÇİNE ŞUNLARI YAZMA: hacim ("33 cl", "1 L", "300 ml"), gramaj ("250 g"), ambalaj ("kutu", "şişe"), porsiyon ("1 porsiyon"), fiyat, parantez içi açıklama.
   YANLIŞ: "Ayran (1 L)", "Kutu Kola", "Demleme Çay", "Soğuk Baklava"
   DOĞRU:  "Ayran", "Kola", "Çay", "Baklava"

@@ -34,7 +34,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v2: fill the per-category quota instead of only the gaps, and give every new product its own options.
   // v3: keep writing options for the products at the END of a long answer, not just the first few.
   // v4: a drink is a plain panel row — no description, no options (D-175).
-  'agent.recommend.system': 4,
+  // v5: write Turkish characters; a card the expert reads out loud should not say "Karisik Atistirmalik".
+  'agent.recommend.system': 5,
   'agent.recommend.user': 2,
   // v2: an unknown option set is not a reason to stay silent — answer for every product that was asked about.
   // v3: drinks never reach this agent.
