@@ -87,6 +87,10 @@ export const SEED_CATEGORIES: readonly SeedCategory[] = [
       'ayran', 'salgam', 'kola', 'gazoz', 'soda', 'maden', 'limonata', 'suyu', 'sahlep', 'cay', 'kahve',
       'latte', 'americano', 'espresso', 'cappuccino', 'mocha', 'frappe', 'milkshake', 'smoothie', 'brew',
       'filtre', 'icecek', 'macchiato', 'menengic', 'fanta', 'sprite', 'su', 'sut', 'boza', 'cikolata',
+      // A drink that lands in another category would be offered a description and options it never gets on the
+      // panel (D-175), so the spellings the model actually writes matter: "Salep" without the h, şerbetler,
+      // nektarlar, kefir.
+      'salep', 'oralet', 'serbet', 'nektar', 'kefir', 'shake', 'kombucha', 'nane-limon', 'ihlamur',
     ],
   },
   {
