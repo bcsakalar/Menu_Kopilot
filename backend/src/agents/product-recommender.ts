@@ -68,6 +68,8 @@ export interface ProductRecommenderInput {
   notes: string | undefined;
   /** How many recommendations to aim for overall. */
   limit: number;
+  /** How long one model attempt may take; the mode decides (see `plan.ts`). */
+  attemptTimeoutMs: number;
   /** False when no provider is configured / the quota is spent: only the template pool answers. */
   aiUsable: boolean;
 }
@@ -300,6 +302,7 @@ export async function runProductRecommender(
               schemaName: PRODUCT_RECOMMENDER_SCHEMA_NAME,
               system,
               user,
+              timeoutMs: input.attemptTimeoutMs,
             },
             run.ctx,
           );

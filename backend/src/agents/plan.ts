@@ -45,6 +45,15 @@ const QUICK_DEADLINE_MS = 11_000;
 const FULL_DEADLINE_MS = 26_000;
 
 /**
+ * How long ONE model attempt may take. Quick mode keeps the task default (6 s), which leaves room for a fallback
+ * inside its own deadline. Full mode asks for more in a single answer — ten products with their option groups —
+ * and measured on production the primary provider needs longer than 6 s for that; cutting it off there wasted the
+ * call AND the fallback, so the run came back with pool cards only.
+ */
+const QUICK_ATTEMPT_MS = 6_000;
+const FULL_ATTEMPT_MS = 11_000;
+
+/**
  * What the mode costs on top of the configured per-request budget. Full mode asks the option agent in batches and
  * gives the recommender a longer list to fill, so it needs room for those calls; quick mode is the old shape.
  */
@@ -61,6 +70,8 @@ export interface RunPlan {
   /** Category key → how many new products that category may receive. The Validator enforces the same map. */
   quota: Map<string, number>;
   deadlineMs: number;
+  /** How long one model attempt may take, handed to the two model-backed agents. */
+  attemptTimeoutMs: number;
   /** Model calls this mode may spend on top of the configured per-request budget. */
   extraLlmCalls: number;
 }
@@ -149,6 +160,7 @@ export function planRun(input: PlanInput): RunPlan {
       optionTargets: Math.min(QUICK_OPTION_TARGETS, input.needOptions),
       quota,
       deadlineMs: QUICK_DEADLINE_MS,
+      attemptTimeoutMs: QUICK_ATTEMPT_MS,
       extraLlmCalls: 0,
     };
   }
@@ -162,6 +174,7 @@ export function planRun(input: PlanInput): RunPlan {
     optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
     quota,
     deadlineMs: FULL_DEADLINE_MS,
+    attemptTimeoutMs: FULL_ATTEMPT_MS,
     extraLlmCalls: modeBudget('full').extraLlmCalls,
   };
 }

@@ -9,7 +9,14 @@ import type { ResolvedRoute } from './route-repository.js';
 import type { AudioInput, CallMeta, GenerateStructuredOptions, LLMProvider, Result, Transcription } from './types.js';
 import type { QuotaStatus, UsageSink } from './usage.js';
 
-export type RouterRequest<T> = Omit<GenerateStructuredOptions<T>, 'model' | 'params' | 'signal' | 'timeoutMs' | 'jsonInstructions'>;
+export type RouterRequest<T> = Omit<GenerateStructuredOptions<T>, 'model' | 'params' | 'signal' | 'timeoutMs' | 'jsonInstructions'> & {
+  /**
+   * How long ONE attempt may take, overriding the task default. The caller knows what it asked for: a ten-product
+   * answer with option groups is not the same call as a one-line classification, and cutting it off at the task
+   * default meant the second provider in the chain was never given a fair chance either.
+   */
+  timeoutMs?: number;
+};
 
 export interface CallContext {
   userId?: string | undefined;
@@ -177,7 +184,7 @@ export class AiRouter {
         ...request,
         model: route.model,
         params: route.params,
-        timeoutMs: TASK_TIMEOUT_MS[request.task],
+        timeoutMs: request.timeoutMs ?? TASK_TIMEOUT_MS[request.task],
         ...(ctx.signal ? { signal: ctx.signal } : {}),
         ...(jsonInstructions ? { jsonInstructions } : {}),
       });
