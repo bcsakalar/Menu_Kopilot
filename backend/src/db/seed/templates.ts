@@ -1,9 +1,11 @@
 import { DUNYA_DENIZ_EK_TEMPLATES } from './templates-dunya-deniz-ek.js';
+import { EK_GENIS_TEMPLATES } from './templates-ek-genis.js';
 import { EV_EK_TEMPLATES } from './templates-ev-ek.js';
 import { FASTFOOD_EK_TEMPLATES } from './templates-fastfood-ek.js';
 import { HAMUR_EV_TEMPLATES } from './templates-hamur-ev.js';
 import { KAHVALTI_KAFE_EK_TEMPLATES } from './templates-kahvalti-kafe-ek.js';
 import { KEBAP_DONER_TEMPLATES } from './templates-kebap-doner.js';
+import { KOMBO_ICECEK_TEMPLATES } from './templates-kombo-icecek.js';
 import { KEBAP_EK_TEMPLATES } from './templates-kebap-ek.js';
 import { TATLI_DIGER_TEMPLATES } from './templates-tatli-diger.js';
 import { TATLI_SOKAK_EK_TEMPLATES } from './templates-tatli-sokak-ek.js';
@@ -25,4 +27,8 @@ export const SEED_TEMPLATES: readonly SeedTemplate[] = [
   ...FASTFOOD_EK_TEMPLATES,
   ...KAHVALTI_KAFE_EK_TEMPLATES,
   ...DUNYA_DENIZ_EK_TEMPLATES,
+  // Third wave (D-175): the categories a complete menu needs but the pool was thin on — menü & kampanya (it had
+  // none at all), çorba, yan ürün, ara sıcak, tatlı — plus the smallest kitchens and drinks as plain panel rows.
+  ...KOMBO_ICECEK_TEMPLATES,
+  ...EK_GENIS_TEMPLATES,
 ];

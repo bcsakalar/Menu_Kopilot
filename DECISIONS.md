@@ -704,3 +704,19 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
      short. The ceiling now also follows the category's share of what the run needs.
   Measured on production after all five (kafe-icecek, 7-product menu, full mode): 36 new products, 7/7 products
   with an option card, 43/50 reachable, 19 s, `completed` — from 12 products, `partial` and 33 s.
+- **D-175** — 2026-09-22 (user): **a drink is a plain panel row.** "İçeceklerde ne açıklama ne opsiyon oluyor,
+  orası direkt ürün diye geçiyor." So the `icecek` category is now a *plain category* (`PLAIN_CATEGORIES` in
+  `src/domain/category.ts`) and four places honour it: the Gap Analyst raises no option card and no
+  "açıklama boş" fix for a drink, the Validator strips the description, options and ingredients from a suggested
+  drink (even one that comes from a curated pool template) and refuses an option card aimed at one, and the
+  recommender's prompt (v4) says to leave those fields empty for `icecek`. Consequence worth knowing: in a café
+  the option section is nearly empty, because almost every product there is a drink.
+- **D-176** — The template pool grew from 316 to **424** (`templates-kombo-icecek.ts`, `templates-ek-genis.ts`).
+  Measured first: çorba and yan ürün had 13 templates each across 27 cuisines, six kitchens (tantuni, mantı, çiğ
+  köfte, dondurma, steak, köfte) had fewer than ten products, and **menü & kampanya had none at all** — the
+  category every cuisine expects one of, so the "last resort" slot could only ever be filled by the model. Added:
+  12 combos with their own Menü/İçecek/Yan Ürün groups, 40 drinks as plain rows, and the soups, sides, ara sıcak
+  and desserts the thin kitchens were missing. Why it matters: a pool product is instant, carries curated options
+  and costs no model call, so every gap the pool can close is one the model does not have to invent. Side effect
+  on the tests: a five-product menu is now often filled from templates alone, so the three e2e tests that need a
+  model call empty or trim the pool first, on purpose.

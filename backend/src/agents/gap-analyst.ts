@@ -1,7 +1,14 @@
 import { asc, eq } from 'drizzle-orm';
 import type { Database, Executor } from '../db/client.js';
 import { cuisineCategories, menuCategories } from '../db/schema/index.js';
-import { type CategoryDef, CategoryIndex, type CategoryExpectation, type CategoryGap, categoryGaps } from '../domain/category.js';
+import {
+  type CategoryDef,
+  CategoryIndex,
+  type CategoryExpectation,
+  type CategoryGap,
+  categoryGaps,
+  isPlainCategory,
+} from '../domain/category.js';
 import type { AgentDeps, AgentRunContext, ExistingItem } from './types.js';
 
 /**
@@ -112,13 +119,15 @@ export async function runGapAnalyst(
       const optionRank = (item: ExistingItem): number =>
         (item.hasOptions === 'absent' ? 0 : 2) + (item.matchedTemplateId !== null ? 0 : 1);
       const needOptions = input.items
-        .filter((item) => item.hasOptions !== 'present')
+        // A drink is a plain row on the panel: no options to ask about (D-175).
+        .filter((item) => item.hasOptions !== 'present' && !isPlainCategory(item.categoryKey))
         .map((item, index) => ({ item, index }))
         .sort((a, b) => optionRank(a.item) - optionRank(b.item) || a.index - b.index)
         .map((entry) => entry.item);
       const needFixes = input.items.filter(
         (item) =>
-          item.hasDescription === 'absent' ||
+          // An empty description is not a gap for a drink; the other fixes (name, category) still apply.
+          (item.hasDescription === 'absent' && !isPlainCategory(item.categoryKey)) ||
           item.categoryConflict !== null ||
           looksAbbreviated(item.rawName) ||
           (item.canonicalName !== null && item.canonicalName !== item.rawName),

@@ -1,5 +1,6 @@
 import type { PromptRepository } from '../ai/prompt-repository.js';
 import type { AiRouter, AttemptRecord, CallContext, RoutedResult, RouterRequest } from '../ai/router.js';
+import { isPlainCategory } from '../domain/category.js';
 import { templateOptionGroupSchema, templatePayloadSchema, type TemplateOptionGroup, type TemplatePayload } from '../domain/template.js';
 import { cleanItemName } from '../lib/clean-name.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
@@ -106,6 +107,11 @@ class TakenIndex {
   }
 }
 
+/** The same product as a plain panel row: name and portion, no description, no options, no ingredients. */
+function plainRow(payload: TemplatePayload): TemplatePayload {
+  return { ...payload, description: '', servingNote: '', optionGroups: [], removableIngredients: [], extraIngredients: [], upsellSuggestion: '' };
+}
+
 /** A price-free, deduplicated ingredient list. */
 function cleanIngredients(names: readonly string[]): string[] {
   const seen = new Set<string>();
@@ -121,7 +127,9 @@ function cleanIngredients(names: readonly string[]): string[] {
 }
 
 function toPayload(item: RecommendedItem, portionExtra: string): TemplatePayload | null {
-  const description = stripPriceAmounts(item.shortDescription).trim().slice(0, 160);
+  // A drink goes on the panel as a plain row: name and volume, nothing else (D-175).
+  const plain = isPlainCategory(item.categoryKey);
+  const description = plain ? '' : stripPriceAmounts(item.shortDescription).trim().slice(0, 160);
   const portionInfo = [item.portionInfo, portionExtra].filter((p) => p.trim().length > 0).join(' · ').slice(0, 80);
   const base: TemplatePayload = {
     name: item.name,
@@ -136,6 +144,7 @@ function toPayload(item: RecommendedItem, portionExtra: string): TemplatePayload
     upsellSuggestion: '',
   };
   if (base.name.length === 0 || containsPriceAmount(`${base.name} ${base.description} ${base.portionInfo}`)) return null;
+  if (plain) return base;
 
   // The product's own options, when the recommender asked for them. A new product without its Boy/Porsiyon group
   // is half a panel row, so these ride along on the card — but never at the cost of the card itself: if the
@@ -233,7 +242,9 @@ export async function runValidator(
       const quota = new Map(input.categoryQuota);
       const newProducts: ValidatedNewProduct[] = [];
       for (const raw of input.recommended) {
-        const template = raw.templateId ? input.templatePayloads?.get(raw.templateId) : undefined;
+        // Even a curated pool drink is thinned to a plain row before it reaches the card (D-175).
+        const pool = raw.templateId ? input.templatePayloads?.get(raw.templateId) : undefined;
+        const template = pool && isPlainCategory(raw.categoryKey) ? plainRow(pool) : pool;
         // A curated pool name is used as it is; only free model output needs the volume/packaging scrub.
         const { name, movedToPortion } = template ? { name: template.name, movedToPortion: '' } : cleanProductName(raw.name);
         if (name.length < 2) {
@@ -255,13 +266,16 @@ export async function runValidator(
           continue;
         }
         const reason = stripPriceAmounts(raw.reason).trim();
+        // A drink is a plain row: the card shows the name (and the volume), nothing to paste into a description
+        // field that the panel does not have for it (D-175).
+        const plainRowItem = isPlainCategory(raw.categoryKey);
         const item: RecommendedItem = {
           ...raw,
           name,
           normalized,
           reason,
           // The pasteable text on the card is exactly what accepting it writes to the pool.
-          shortDescription: template?.description || raw.shortDescription,
+          shortDescription: plainRowItem ? '' : template?.description || raw.shortDescription,
           portionInfo: template?.portionInfo || raw.portionInfo,
           // A price hint is allowed here on purpose — it is a talking point for the call, never written to a
           // template. `toPayload` strips every amount from what reaches the pool.
@@ -279,12 +293,17 @@ export async function runValidator(
       }
 
       // --- option cards -------------------------------------------------------------------------------------
-      const onMenu = new Set(input.existing.map((i) => i.normalized));
+      const onMenu = new Map(input.existing.map((i) => [i.normalized, i.categoryKey]));
       const optionCards: OptionCard[] = [];
       const seenTargets = new Set<string>();
       for (const card of input.options) {
         if (!onMenu.has(card.targetNormalized)) {
           dropped.push({ card: card.targetName, reason: 'opsiyon önerisi menüde olmayan ürüne ait' });
+          continue;
+        }
+        // The last line of defence for the plain-row rule: a drink never gets an option card (D-175).
+        if (isPlainCategory(onMenu.get(card.targetNormalized))) {
+          dropped.push({ card: card.targetName, reason: 'içecek panelde düz ürün olarak girilir' });
           continue;
         }
         if (seenTargets.has(card.targetNormalized)) {

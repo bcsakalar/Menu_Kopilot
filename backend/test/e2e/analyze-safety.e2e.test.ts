@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { AiRouter } from '../../src/ai/router.js';
 import { cuisines, itemAliases, menuItems } from '../../src/db/schema/index.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
@@ -44,6 +44,31 @@ async function harness(responder: FakeResponder = fixtureResponder(fx)): Promise
   const rows = await ctx.db.db.select({ id: cuisines.id, slug: cuisines.slug }).from(cuisines);
   const ids = new Map(rows.map((r) => [r.slug, r.id]));
   return { ctx, token, gemini, groq, cuisineId: (slug) => ids.get(slug) ?? '' };
+}
+
+/**
+ * Takes the template pool out of the picture for one run. These tests are about what happens when a MODEL call
+ * misbehaves, and a pool rich enough to answer on its own (424 seed templates) means no model call is made at
+ * all — which is the right behaviour for a user and useless for this test.
+ */
+async function emptyPool(h: Harness): Promise<void> {
+  await h.ctx.db.db.update(menuItems).set({ approved: false });
+}
+
+/**
+ * Leaves the pool with a handful of templates for one cuisine: enough that pool cards still appear, too few to
+ * fill the run, so the model is asked for the rest. (With the full 424-template pool a five-product pide menu is
+ * filled from templates alone — good for the user, but then this test would never reach the model.)
+ */
+async function keepFewInPool(h: Harness, slug: string, keep: number): Promise<void> {
+  const [cuisine] = await h.ctx.db.db.select({ id: cuisines.id }).from(cuisines).where(eq(cuisines.slug, slug)).limit(1);
+  const rows = await h.ctx.db.db
+    .select({ id: menuItems.id })
+    .from(menuItems)
+    .where(eq(menuItems.cuisineId, cuisine?.id ?? ''))
+    .limit(keep);
+  await h.ctx.db.db.update(menuItems).set({ approved: false });
+  await h.ctx.db.db.update(menuItems).set({ approved: true }).where(inArray(menuItems.id, rows.map((r) => r.id)));
 }
 
 async function analyze(h: Harness, fields: Record<string, string>, images: string[] = []): Promise<AnalyzeResult> {
@@ -167,6 +192,7 @@ describe('accepting a card never thins out the template pool', () => {
 describe('fault tolerance', () => {
   it('finishes the run when an agent throws, with the other sections and the counts intact', async () => {
     const h = await harness(readsPanel([panelRow('Adana Kebap', { sectionText: 'Kebaplar', options: 'absent' })]));
+    await emptyPool(h);
     // Called with the spied instance as `this` below, so the unbound reference is intended.
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const original = AiRouter.prototype.generate;
@@ -223,6 +249,7 @@ describe("the Validator's single repair round", () => {
         },
       }),
     );
+    await emptyPool(h);
     const result = await analyze(h, { cuisineId: h.cuisineId('pide-lahmacun'), menuText: PIDE_MENU });
     const calls = [...h.gemini.calls, ...h.groq.calls];
     expect(calls.filter((c) => c.task === 'agent.validate')).toHaveLength(1);
@@ -236,6 +263,7 @@ describe("the Validator's single repair round", () => {
           opts.task === 'agent.recommend' || opts.task === 'agent.validate' ? okJson({ items: [{ name: 'x' }] }) : undefined,
       }),
     );
+    await keepFewInPool(h, 'pide-lahmacun', 3);
     const result = await analyze(h, { cuisineId: h.cuisineId('pide-lahmacun'), menuText: PIDE_MENU });
     const calls = [...h.gemini.calls, ...h.groq.calls];
     expect(calls.filter((c) => c.task === 'agent.validate')).toHaveLength(1);

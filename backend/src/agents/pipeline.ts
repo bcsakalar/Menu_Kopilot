@@ -5,6 +5,7 @@ import type { ImageInput } from '../ai/types.js';
 import type { VisionExtractor } from '../modules/extraction/vision-extractor.js';
 import type { CuisineGraph, CuisineNode } from '../modules/retrieval/cuisine-graph.js';
 import type { AnalyzeEvent, CardDto, CountsDto, MenuItemDto } from '../modules/analyze/schemas.js';
+import { isPlainCategory } from '../domain/category.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { getTemplates } from '../modules/templates/template-store.js';
 import { runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
@@ -595,7 +596,8 @@ function fixCards(
       });
     }
 
-    if (item.hasDescription === 'absent') {
+    // A drink needs no description on the panel (D-175), so an empty one is not a fix.
+    if (item.hasDescription === 'absent' && !isPlainCategory(item.categoryKey)) {
       const suggestion = item.matchedTemplateId ? descriptions.get(item.matchedTemplateId) : undefined;
       push({
         ...base,

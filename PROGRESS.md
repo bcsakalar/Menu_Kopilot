@@ -57,6 +57,11 @@ category's ceiling follows the cuisine's minimum. Production, kafe-icecek (minim
 36 new products, option cards for 7/7 products, 43/50 reachable, 19 s — from 12 products, `partial`, 33 s.
 App 1.2.0+3 signed and installed on the phone over USB.
 
+**Same evening (D-175, D-176):** drinks are entered as plain rows — no description, no options, no "açıklama
+boş" fix — and the template pool went from 316 to 424: combos (the menü & kampanya category had no templates at
+all), 40 plain drink rows, and the soups, sides, ara sıcak and desserts the thinnest kitchens lacked. Backend
+655 tests.
+
 **2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
 (migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
 `MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:

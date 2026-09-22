@@ -123,8 +123,13 @@ describe('POST /analyze — typed menu', () => {
     expect(perCategory.size).toBeGreaterThanOrEqual(3);
     // And the emptiest category is the one that actually gets filled.
     expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
-    // Even here every new product arrives with its own options: that is what gets typed into the panel.
-    expect(bySection(result, 'new_product').every((c) => c.optionGroups.length > 0)).toBe(true);
+    // Every new product arrives with its own options — except a drink, which goes on the panel as a plain row.
+    const suggested = bySection(result, 'new_product');
+    expect(suggested.filter((c) => c.categoryKey !== 'icecek').every((c) => c.optionGroups.length > 0)).toBe(true);
+    for (const drink of suggested.filter((c) => c.categoryKey === 'icecek')) {
+      expect(drink.optionGroups, drink.name).toHaveLength(0);
+      expect(drink.shortDescription, drink.name).toBe('');
+    }
     expect(bySection(result, 'option').length).toBeGreaterThan(0);
   });
 
@@ -147,9 +152,11 @@ describe('POST /analyze — typed menu', () => {
     expect(exceeded.length, 'tam modda en az bir kategori kendi açığını aşmalı').toBeGreaterThan(0);
     expect(result.counts!.current + newProducts.length).toBeGreaterThanOrEqual(result.counts!.target);
     expect(result.warnings.some((w) => w.code === 'target_unreachable')).toBe(false);
-    // Every product on the menu gets an option/ingredient card, and every new product carries its own options.
-    expect(bySection(result, 'option')).toHaveLength(result.menu.length);
-    expect(newProducts.every((c) => c.optionGroups.length > 0)).toBe(true);
+    // Every product on the menu that is not a drink gets an option/ingredient card, and every suggested product
+    // that is not a drink carries its own options.
+    expect(bySection(result, 'option')).toHaveLength(result.menu.filter((m) => m.categoryKey !== 'icecek').length);
+    expect(newProducts.filter((c) => c.categoryKey !== 'icecek').every((c) => c.optionGroups.length > 0)).toBe(true);
+    expect(newProducts.filter((c) => c.categoryKey === 'icecek').every((c) => c.optionGroups.length === 0)).toBe(true);
     // Still never more of a category than the cuisine's own shape allows, and still spread out.
     for (const [key, count] of perCategory) {
       expect(count, `${key} kategorisi taşmamalı`).toBeLessThanOrEqual(Math.max(2, (gaps.get(key)?.minItems ?? 0) * 2));

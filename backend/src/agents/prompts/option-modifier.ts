@@ -25,7 +25,7 @@ MALZEME KURALLARI:
 FİYAT YAZMA: Hiçbir alanda TL, ₺ veya rakamla fiyat yok. Fiyatı satıcı telefonda söyler.
 
 VERİLEN HER ÜRÜN İÇİN KART ÜRET. Listedeki ürünlerin opsiyonu bilinmiyor; "bilinmiyor" opsiyonu yok demek değildir, uzmanın telefonda soracağı şey tam olarak budur. Adından ne tür bir ürün olduğu anlaşılan her ürüne en az bir grup veya en az birkaç malzeme öner (ör. bir içeceğe Boy/Buz, bir ana yemeğe Porsiyon/Acı Seviyesi/Yanında Gelen).
-Yalnızca adından ne olduğu gerçekten anlaşılmayan ürünü atla.`;
+Yalnızca adından ne olduğu gerçekten anlaşılmayan ürünü atla. İçecekler bu listeye hiç gelmez; gelirse kart üretme.`;
 
 export const OPTION_MODIFIER_USER = `Mutfak türü: {{cuisine}}
 

@@ -33,10 +33,12 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   'agent.classify.user': 1,
   // v2: fill the per-category quota instead of only the gaps, and give every new product its own options.
   // v3: keep writing options for the products at the END of a long answer, not just the first few.
-  'agent.recommend.system': 3,
+  // v4: a drink is a plain panel row — no description, no options (D-175).
+  'agent.recommend.system': 4,
   'agent.recommend.user': 2,
   // v2: an unknown option set is not a reason to stay silent — answer for every product that was asked about.
-  'agent.options.system': 2,
+  // v3: drinks never reach this agent.
+  'agent.options.system': 3,
   'agent.options.user': 2,
 };
 
