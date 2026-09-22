@@ -100,9 +100,10 @@ describe('POST /analyze — typed menu', () => {
     for (const card of result.cards) expect(['new_product', 'option', 'fix']).toContain(card.section);
   });
 
-  it('fills the OPEN categories instead of piling more of what the menu already has', async () => {
+  it('quick mode: a handful of suggestions, one per category, never a second pide', async () => {
     const result = await analyze({
       cuisineId: cuisineIdBySlug.get('pide-lahmacun')!,
+      mode: 'quick',
       menuText: 'Kıymalı Pide, Kaşarlı Pide, Kuşbaşılı Pide, Karışık Pide, Sucuklu Yumurtalı Pide',
     });
     const counts = result.counts!;
@@ -111,18 +112,49 @@ describe('POST /analyze — typed menu', () => {
     expect(gaps.get('icecek')?.missing).toBe(2);
     expect(gaps.get('ana-yemek')?.missing).toBe(1);
 
-    const newProducts = bySection(result, 'new_product');
     const perCategory = new Map<string, number>();
-    for (const card of newProducts) {
+    for (const card of bySection(result, 'new_product')) {
       expect(card.categoryKey).not.toBeNull();
       perCategory.set(card.categoryKey!, (perCategory.get(card.categoryKey!) ?? 0) + 1);
     }
-    // The old recommender answered this menu with six more pides. The rule that stops it: no category ever gets
-    // more recommendations than it is actually short of.
-    for (const [key, count] of perCategory) {
-      expect(count, `${key} önerileri açığını aşmamalı`).toBeLessThanOrEqual(gaps.get(key)?.missing ?? 0);
-    }
+    // "Öneri versen yeter": a few products, each from a different category — the old recommender answered this
+    // menu with six more pides.
+    for (const [key, count] of perCategory) expect(count, `${key} tek ürün almalı`).toBeLessThanOrEqual(1);
+    expect(perCategory.size).toBeGreaterThanOrEqual(3);
     // And the emptiest category is the one that actually gets filled.
+    expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
+    // Even here every new product arrives with its own options: that is what gets typed into the panel.
+    expect(bySection(result, 'new_product').every((c) => c.optionGroups.length > 0)).toBe(true);
+    expect(bySection(result, 'option').length).toBeGreaterThan(0);
+  });
+
+  it('full mode: keeps recommending past the category minimums, up to the opening target', async () => {
+    const result = await analyze({
+      cuisineId: cuisineIdBySlug.get('pide-lahmacun')!,
+      mode: 'full',
+      menuText: 'Kıymalı Pide, Kaşarlı Pide, Kuşbaşılı Pide, Karışık Pide, Sucuklu Yumurtalı Pide',
+    });
+    const counts = result.counts!;
+    const gaps = new Map(counts.categories.map((c) => [c.key, c]));
+    const newProducts = bySection(result, 'new_product');
+    const perCategory = new Map<string, number>();
+    for (const card of newProducts) perCategory.set(card.categoryKey!, (perCategory.get(card.categoryKey!) ?? 0) + 1);
+
+    // The point of this mode: a category keeps receiving products after its own minimum is covered, because the
+    // menu as a whole is still short of the opening target. Before this, the gaps were the ceiling and the run
+    // ended with "hedefe N ürün kalıyor".
+    const exceeded = [...perCategory].filter(([key, count]) => count > (gaps.get(key)?.missing ?? 0));
+    expect(exceeded.length, 'tam modda en az bir kategori kendi açığını aşmalı').toBeGreaterThan(0);
+    expect(result.counts!.current + newProducts.length).toBeGreaterThanOrEqual(result.counts!.target);
+    expect(result.warnings.some((w) => w.code === 'target_unreachable')).toBe(false);
+    // Every product on the menu gets an option/ingredient card, and every new product carries its own options.
+    expect(bySection(result, 'option')).toHaveLength(result.menu.length);
+    expect(newProducts.every((c) => c.optionGroups.length > 0)).toBe(true);
+    // Still never more of a category than the cuisine's own shape allows, and still spread out.
+    for (const [key, count] of perCategory) {
+      expect(count, `${key} kategorisi taşmamalı`).toBeLessThanOrEqual(Math.max(2, (gaps.get(key)?.minItems ?? 0) * 2));
+    }
+    expect(perCategory.size).toBeGreaterThanOrEqual(3);
     expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
   });
 

@@ -1,6 +1,6 @@
 import type { PromptRepository } from '../ai/prompt-repository.js';
 import type { AiRouter, AttemptRecord, CallContext, RoutedResult, RouterRequest } from '../ai/router.js';
-import { templateOptionGroupSchema, type TemplateOptionGroup, type TemplatePayload } from '../domain/template.js';
+import { templateOptionGroupSchema, templatePayloadSchema, type TemplateOptionGroup, type TemplatePayload } from '../domain/template.js';
 import { cleanItemName } from '../lib/clean-name.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { containsPriceAmount, stripPriceAmounts } from '../lib/price-guard.js';
@@ -106,10 +106,24 @@ class TakenIndex {
   }
 }
 
+/** A price-free, deduplicated ingredient list. */
+function cleanIngredients(names: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const kept: string[] = [];
+  for (const raw of names) {
+    const name = stripPriceAmounts(raw).trim().slice(0, 50);
+    const key = normalizeTr(name);
+    if (name.length === 0 || seen.has(key) || containsPriceAmount(name)) continue;
+    seen.add(key);
+    kept.push(name);
+  }
+  return kept.slice(0, 12);
+}
+
 function toPayload(item: RecommendedItem, portionExtra: string): TemplatePayload | null {
   const description = stripPriceAmounts(item.shortDescription).trim().slice(0, 160);
   const portionInfo = [item.portionInfo, portionExtra].filter((p) => p.trim().length > 0).join(' · ').slice(0, 80);
-  const payload: TemplatePayload = {
+  const base: TemplatePayload = {
     name: item.name,
     description,
     servingNote: '',
@@ -121,14 +135,56 @@ function toPayload(item: RecommendedItem, portionExtra: string): TemplatePayload
     allergenNotes: [],
     upsellSuggestion: '',
   };
+  if (base.name.length === 0 || containsPriceAmount(`${base.name} ${base.description} ${base.portionInfo}`)) return null;
+
+  // The product's own options, when the recommender asked for them. A new product without its Boy/Porsiyon group
+  // is half a panel row, so these ride along on the card — but never at the cost of the card itself: if the
+  // extras do not pass the canonical schema, the plain payload is used instead of dropping the product.
+  const payload: TemplatePayload = {
+    ...base,
+    optionGroups: validGroups(item.optionGroups).kept,
+    removableIngredients: cleanIngredients(item.removableIngredients),
+    extraIngredients: cleanIngredients(item.extraIngredients).map((name) => ({ name, priceHint: 'ek ücretli' as const })),
+  };
   // The canonical schema is the same one the DB enforces: a payload that fails here would fail on accept.
-  return payload.name.length > 0 && !containsPriceAmount(`${payload.name} ${payload.description} ${payload.portionInfo}`)
-    ? payload
-    : null;
+  return templatePayloadSchema.safeParse(payload).success ? payload : base;
+}
+
+/**
+ * Pulls a group back inside the canonical rules before validating it.
+ *
+ * The rules are mechanical (a single-select group has maxSelect 1; a required group starts at minSelect 1; a
+ * base-price group is single, required and base-priced throughout) and a model gets exactly these wrong while
+ * proposing a perfectly sensible "Boy: Küçük / Orta / Büyük". Rejecting such a group threw away the answer the
+ * user was waiting for; fixing the arithmetic keeps it.
+ */
+function normalizeGroup(group: RawOptionGroup): RawOptionGroup {
+  const setsBase = group.options.filter((o) => o.priceMode === 'sets_base').length;
+  // Half or more of the options setting the base means it IS a base-price group; a single stray one is a slip.
+  const isBase = setsBase > 0 && setsBase * 2 >= group.options.length;
+  const options = group.options.map((option) => ({
+    ...option,
+    priceMode: isBase ? ('sets_base' as const) : option.priceMode === 'sets_base' ? ('surcharge' as const) : option.priceMode,
+  }));
+  const selectionType = isBase ? ('single' as const) : group.selectionType;
+  const isRequired = isBase ? true : group.isRequired;
+  const maxSelect = selectionType === 'single' ? 1 : Math.min(Math.max(1, group.maxSelect), Math.max(1, options.length));
+  const minSelect = isRequired ? Math.min(Math.max(1, group.minSelect), maxSelect) : 0;
+  return { ...group, options, selectionType, isRequired, minSelect, maxSelect };
+}
+
+/** An option group as an agent proposes it — the canonical shape minus the fields the schema fills in. */
+export interface RawOptionGroup {
+  name: string;
+  selectionType: 'single' | 'multi';
+  isRequired: boolean;
+  minSelect: number;
+  maxSelect: number;
+  options: { name: string; priceMode: 'free' | 'surcharge' | 'sets_base'; isDefault?: boolean }[];
 }
 
 /** Drops option groups that break the canonical rules rather than dropping the whole card. */
-function validGroups(groups: readonly TemplateOptionGroup[]): { kept: TemplateOptionGroup[]; dropped: number } {
+function validGroups(groups: readonly RawOptionGroup[]): { kept: TemplateOptionGroup[]; dropped: number } {
   const kept: TemplateOptionGroup[] = [];
   let dropped = 0;
   const seen = new Set<string>();
@@ -138,7 +194,7 @@ function validGroups(groups: readonly TemplateOptionGroup[]): { kept: TemplateOp
       dropped += 1;
       continue;
     }
-    const parsed = templateOptionGroupSchema.safeParse(group);
+    const parsed = templateOptionGroupSchema.safeParse(normalizeGroup(group));
     if (!parsed.success) {
       dropped += 1;
       continue;
@@ -235,7 +291,7 @@ export async function runValidator(
           dropped.push({ card: card.targetName, reason: 'aynı ürün için ikinci opsiyon kartı' });
           continue;
         }
-        const { kept, dropped: badGroups } = validGroups(card.optionGroups as TemplateOptionGroup[]);
+        const { kept, dropped: badGroups } = validGroups(card.optionGroups);
         if (badGroups > 0) dropped.push({ card: card.targetName, reason: `${badGroups} opsiyon grubu şemadan geçmedi` });
         const removable = card.removableIngredients.filter((i) => i.trim().length > 0 && !containsPriceAmount(i));
         if (kept.length === 0 && removable.length === 0) {

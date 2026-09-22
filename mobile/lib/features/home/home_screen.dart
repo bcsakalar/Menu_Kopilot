@@ -96,6 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         cuisineId: cuisine?.id ?? '',
         menuText: draft.menuText,
         notes: draft.notes,
+        mode: draft.mode,
         debug: draft.debug,
         images: draft.images.map((i) => UploadImage(path: i.path, sha256: i.sha256)).toList(),
       ),
@@ -213,6 +214,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.only(top: 10),
               child: Text(l10n.screenshotsHint, style: Theme.of(context).textTheme.bodySmall),
             ),
+          Eyebrow(l10n.modeTitle, padding: const EdgeInsets.only(top: 20, bottom: 6)),
+          _ModeChoice(
+            key: const Key('mode-quick'),
+            title: l10n.modeQuickTitle,
+            hint: l10n.modeQuickHint,
+            icon: Icons.bolt_rounded,
+            selected: draft.mode == AnalysisMode.quick,
+            onTap: () => notifier.setMode(AnalysisMode.quick),
+          ),
+          const SizedBox(height: AppSpace.sm),
+          _ModeChoice(
+            key: const Key('mode-full'),
+            title: l10n.modeFullTitle,
+            hint: l10n.modeFullHint,
+            icon: Icons.all_inclusive_rounded,
+            selected: draft.mode == AnalysisMode.full,
+            onTap: () => notifier.setMode(AnalysisMode.full),
+          ),
           const SizedBox(height: AppSpace.md),
           TextField(
             key: const Key('notes-field'),
@@ -233,6 +252,71 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const _RecentRuns(),
         ],
+      ),
+    );
+  }
+}
+
+/// One of the two ways to run the analysis. Two boxes, one of them always ticked: the expert picks between
+/// "bir iki öneri yeter" and "menüyü açılışa hazır hale getir" before the call, not in a settings screen.
+class _ModeChoice extends StatelessWidget {
+  const _ModeChoice({
+    required this.title,
+    required this.hint,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final String title;
+  final String hint;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
+    return Semantics(
+      checked: selected,
+      button: true,
+      child: AppCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.fromLTRB(12, 12, AppSpace.lg, 12),
+        borderColor: selected ? p.accent : null,
+        onTap: () {
+          if (!selected) Haptics.select();
+          onTap();
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              selected ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+              size: 22,
+              color: selected ? p.accentText : p.textFaint,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, size: 16, color: selected ? p.accentText : p.textMuted),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(title, style: text.titleSmall)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(hint, style: text.bodySmall?.copyWith(color: p.textMuted)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -20,12 +20,26 @@ class UploadImage {
   final String sha256;
 }
 
+/// How much work one analysis does. The choice the user makes on the home screen before pressing "Analiz et":
+/// [quick] answers with a handful of suggestions, [full] fills the menu up to the cuisine's opening minimum and
+/// asks for options on every product whose options are unknown.
+enum AnalysisMode {
+  quick('quick'),
+  full('full');
+
+  const AnalysisMode(this.wire);
+  final String wire;
+
+  static AnalysisMode fromWire(String value) => value == 'quick' ? AnalysisMode.quick : AnalysisMode.full;
+}
+
 /// Everything one analysis run needs. `cuisineId` may be empty: the Classifier fills it from the menu.
 class AnalyzeRequestData {
   const AnalyzeRequestData({
     this.cuisineId = '',
     this.menuText = '',
     this.notes = '',
+    this.mode = AnalysisMode.full,
     this.debug = false,
     this.images = const [],
     this.fromRunId = '',
@@ -34,6 +48,9 @@ class AnalyzeRequestData {
   final String cuisineId;
   final String menuText;
   final String notes;
+
+  /// How much work the run does — the two-way choice on the home screen.
+  final AnalysisMode mode;
 
   /// Re-run of an earlier analysis (another cuisine picked on the result screen): the server reuses that run's
   /// product list, so no image is sent or read again.
@@ -49,6 +66,7 @@ class AnalyzeRequestData {
         'cuisineId': cuisineId,
         'menuText': menuText,
         'notes': notes,
+        'mode': mode.wire,
         'debug': debug,
         'images': images.map((i) => {'path': i.path, 'sha256': i.sha256}).toList(),
         if (fromRunId.isNotEmpty) 'fromRunId': fromRunId,
@@ -58,6 +76,7 @@ class AnalyzeRequestData {
         cuisineId: json.str('cuisineId'),
         menuText: json.str('menuText'),
         notes: json.str('notes'),
+        mode: AnalysisMode.fromWire(json.str('mode')),
         debug: json.boolean('debug'),
         images: json.objects('images').map((i) => UploadImage(path: i.str('path'), sha256: i.str('sha256'))).toList(),
         fromRunId: json.str('fromRunId'),
@@ -220,6 +239,7 @@ class ApiClient {
         if (request.cuisineId.isNotEmpty) 'cuisineId': request.cuisineId,
         if (request.menuText.trim().isNotEmpty) 'menuText': request.menuText.trim(),
         if (request.notes.trim().isNotEmpty) 'notes': request.notes.trim(),
+        'mode': request.mode.wire,
         if (request.debug) 'debug': 'true',
         if (request.fromRunId.isNotEmpty) 'fromRunId': request.fromRunId,
         'images': [

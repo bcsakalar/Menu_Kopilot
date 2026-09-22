@@ -59,9 +59,11 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
     {
       schema: {
         tags: ['analyze'],
-        summary: 'Analyse a menu (multipart: cuisineId?, menuText?, notes?, fromRunId?, debug?, images[] ≤5)',
+        summary: 'Analyse a menu (multipart: cuisineId?, menuText?, notes?, mode?, fromRunId?, debug?, images[] ≤5)',
         description:
           'Runs the six-agent pipeline and returns three sections of cards (new_product, option, fix). ' +
+          'mode=quick → a few suggestions from different categories; mode=full (default) → recommend up to the ' +
+          "cuisine's opening minimum and ask for options on every product whose options are unknown. "  +
           'Accept: text/event-stream → SSE (run, progress, classification, menu, counts, item, trace, warning, ' +
           'done, error). ?async=1 → 202 {runId}. Otherwise waits and returns the result.',
         security,

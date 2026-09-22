@@ -65,6 +65,22 @@ Json result({String status = 'completed', bool disagrees = false}) => {
           'reason': 'İçecek kategorisi tamamen boş',
           'status': 'pending',
           'sortOrder': 0,
+          // A suggested product arrives with the options it should be opened with, exactly like a product the
+          // restaurant already sells.
+          'optionGroups': [
+            {
+              'name': 'Boy',
+              'selectionType': 'single',
+              'isRequired': true,
+              'minSelect': 1,
+              'maxSelect': 1,
+              'options': [
+                {'name': '300 ml', 'priceMode': 'sets_base'},
+                {'name': '1 L', 'priceMode': 'sets_base'},
+              ],
+            },
+          ],
+          'extraIngredients': ['Ekstra Tuz'],
           'payload': {'name': 'Ayran', 'description': 'Taze yoğurttan tuzlu ayran, soğuk servis edilir.'},
         },
         {
@@ -259,6 +275,19 @@ void main() {
       expect(find.text('25–40 TL'), findsOneWidget);
       final card = AnalysisResult.fromJson(result()).cards.first;
       expect(card.payload?.toJson().toString().contains('TL'), isFalse);
+    });
+
+    testWidgets('reveals the options and ingredients suggested for a new product', (tester) async {
+      await open(tester);
+      // Folded away at first — twenty products unrolling six groups each is a scroll, not a list — but the card
+      // says what is inside, and one tap opens it.
+      expect(find.text('1 opsiyon grubu · 1 malzeme'), findsOneWidget);
+      expect(find.text('300 ml · tabanı belirler'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('card-details-toggle')).first);
+      await tester.pumpAndSettle();
+      expect(find.text('300 ml · tabanı belirler'), findsOneWidget);
+      expect(find.textContaining('Ekstra Tuz'), findsOneWidget);
     });
 
     testWidgets('filters down to one section and back', (tester) async {

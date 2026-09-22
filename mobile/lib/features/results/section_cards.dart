@@ -47,25 +47,32 @@ String cardCopyText(AppLocalizations l10n, AnalysisCard card) {
       if (card.portionInfo.isNotEmpty) lines.add('${l10n.copyLabelPortion}: ${card.portionInfo}');
       if (card.categoryLabel != null) lines.add('${l10n.copyLabelCategory}: ${card.categoryLabel}');
       if (card.priceRangeHint.isNotEmpty) lines.add('${l10n.copyLabelPriceRange}: ${card.priceRangeHint}');
+      // A new product is pasted into the panel WITH its options: copying only the name and the description
+      // would leave the longest part of the job to be typed by hand.
+      lines.addAll(_optionLines(l10n, card));
     case CardSection.option:
       lines.add(card.targetName ?? card.name);
-      for (final group in card.optionGroups) {
-        final kind = group.isMulti ? l10n.copyMultiChoice(group.maxSelect) : l10n.singleChoice;
-        final need = group.isRequired ? l10n.required : l10n.optional;
-        lines.add('- ${group.name} ($kind, $need): ${group.options.map((o) => optionWithPrice(l10n, o)).join(', ')}');
-      }
-      if (card.removableIngredients.isNotEmpty) {
-        lines.add('${l10n.copyLabelRemovables}: ${card.removableIngredients.join(', ')}');
-      }
-      if (card.extraIngredients.isNotEmpty) {
-        lines.add('${l10n.copyLabelExtras}: ${card.extraIngredients.join(', ')}');
-      }
+      lines.addAll(_optionLines(l10n, card));
     case CardSection.fix:
       lines.add(card.targetName ?? card.name);
       if (card.suggestedValue != null) lines.add('→ ${card.suggestedValue}');
       if (card.reason.isNotEmpty) lines.add(card.reason);
   }
   return lines.join('\n');
+}
+
+/// Option groups and ingredients as pasteable lines — the same text for a new product and for a product the
+/// restaurant already sells.
+List<String> _optionLines(AppLocalizations l10n, AnalysisCard card) {
+  final lines = <String>[];
+  for (final group in card.optionGroups) {
+    final kind = group.isMulti ? l10n.copyMultiChoice(group.maxSelect) : l10n.singleChoice;
+    final need = group.isRequired ? l10n.required : l10n.optional;
+    lines.add('- ${group.name} ($kind, $need): ${group.options.map((o) => optionWithPrice(l10n, o)).join(', ')}');
+  }
+  if (card.removableIngredients.isNotEmpty) lines.add('${l10n.copyLabelRemovables}: ${card.removableIngredients.join(', ')}');
+  if (card.extraIngredients.isNotEmpty) lines.add('${l10n.copyLabelExtras}: ${card.extraIngredients.join(', ')}');
+  return lines;
 }
 
 String fixLabel(AppLocalizations l10n, FixKind? kind) => switch (kind) {
@@ -244,24 +251,15 @@ class _Body extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text('${l10n.copyLabelPortion}: ${card.portionInfo}', style: text.bodySmall?.copyWith(color: p.textMuted)),
               ),
+            // A suggested product comes with the options and ingredients it should be opened with. They are one
+            // tap away rather than always open: twenty products each unrolling six groups is a scroll, not a list.
+            if (_hasDetails(card)) _CardDetails(card: card),
           ],
         );
 
       case CardSection.option:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final group in card.optionGroups)
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: _OptionGroupRow(group: group),
-              ),
-            if (card.removableIngredients.isNotEmpty)
-              _IngredientRow(label: l10n.copyLabelRemovables, items: card.removableIngredients, icon: Icons.remove_circle_outline_rounded),
-            if (card.extraIngredients.isNotEmpty)
-              _IngredientRow(label: l10n.copyLabelExtras, items: card.extraIngredients, icon: Icons.add_circle_outline_rounded),
-          ],
-        );
+        // This section IS the options: nothing to fold away.
+        return _OptionsAndIngredients(card: card);
 
       case CardSection.fix:
         final current = card.currentValue;
@@ -291,6 +289,93 @@ class _Body extends StatelessWidget {
           ],
         );
     }
+  }
+}
+
+bool _hasDetails(AnalysisCard card) =>
+    card.optionGroups.isNotEmpty || card.removableIngredients.isNotEmpty || card.extraIngredients.isNotEmpty;
+
+/// The option groups and the two ingredient lists of a card, in reading order.
+class _OptionsAndIngredients extends StatelessWidget {
+  const _OptionsAndIngredients({required this.card});
+
+  final AnalysisCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final group in card.optionGroups)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: _OptionGroupRow(group: group),
+          ),
+        if (card.removableIngredients.isNotEmpty)
+          _IngredientRow(label: l10n.copyLabelRemovables, items: card.removableIngredients, icon: Icons.remove_circle_outline_rounded),
+        if (card.extraIngredients.isNotEmpty)
+          _IngredientRow(label: l10n.copyLabelExtras, items: card.extraIngredients, icon: Icons.add_circle_outline_rounded),
+      ],
+    );
+  }
+}
+
+/// "3 opsiyon grubu · 7 malzeme ⌄" — what a new product brings with it, one tap from being read in full.
+class _CardDetails extends StatefulWidget {
+  const _CardDetails({required this.card});
+
+  final AnalysisCard card;
+
+  @override
+  State<_CardDetails> createState() => _CardDetailsState();
+}
+
+class _CardDetailsState extends State<_CardDetails> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
+    final card = widget.card;
+    final ingredients = card.removableIngredients.length + card.extraIngredients.length;
+    final summary = [
+      if (card.optionGroups.isNotEmpty) l10n.cardOptionGroupsCount(card.optionGroups.length),
+      if (ingredients > 0) l10n.cardIngredientsCount(ingredients),
+    ].join(' · ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          key: const Key('card-details-toggle'),
+          onTap: () => setState(() => _open = !_open),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.tune_rounded, size: 14, color: p.textFaint),
+                const SizedBox(width: 6),
+                Flexible(child: Text(summary, style: text.bodySmall?.copyWith(color: p.textMuted))),
+                Icon(_open ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: p.textFaint),
+                Expanded(
+                  child: Text(
+                    _open ? l10n.cardDetailsHide : l10n.cardDetailsShow,
+                    style: text.bodySmall?.copyWith(color: p.accentText),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_open) _OptionsAndIngredients(card: card),
+      ],
+    );
   }
 }
 

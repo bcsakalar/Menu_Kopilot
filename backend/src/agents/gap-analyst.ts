@@ -20,7 +20,7 @@ export interface GapAnalysis {
   current: number;
   missing: number;
   categories: CategoryGap[];
-  /** Products already on the menu whose option info is absent — the Option/Modifier agent's input. */
+  /** Products on the menu whose options are not known to exist — the Option/Modifier agent's input, richest first. */
   needOptions: ExistingItem[];
   /** Products with an empty description / a suspicious name — the "Eksik / Düzeltme" section's input. */
   needFixes: ExistingItem[];
@@ -97,9 +97,25 @@ export async function runGapAnalyst(
       const current = input.items.length;
       const gaps = categoryGaps(expectations, presentByCategory);
 
-      // "absent" means the panel showed the field and it was empty — that is a real gap. "unknown" means the
-      // screenshot did not show the field at all, and typed products say nothing either: not a gap, a question.
-      const needOptions = input.items.filter((item) => item.hasOptions === 'absent' || (item.typed && item.matchedTemplateId !== null));
+      /**
+       * Every product whose options are not KNOWN to exist is a candidate for an option card.
+       *
+       * The old rule only took `absent` (the panel showed an empty options field) plus typed products that
+       * matched the pool. A menu photo shows no panel fields at all, so every product came back `unknown` and
+       * the whole section stayed empty — measured: 10 products read from a handwritten menu, 0 option cards.
+       * "Bilinmiyor" is not evidence that a product has options; for the expert on the phone it is exactly the
+       * case worth asking about.
+       *
+       * Ordered by how much is known: real gaps first, then the unknowns, and inside each group the products
+       * the pool already has curated options for — those cards cost no model call and are the richest.
+       */
+      const optionRank = (item: ExistingItem): number =>
+        (item.hasOptions === 'absent' ? 0 : 2) + (item.matchedTemplateId !== null ? 0 : 1);
+      const needOptions = input.items
+        .filter((item) => item.hasOptions !== 'present')
+        .map((item, index) => ({ item, index }))
+        .sort((a, b) => optionRank(a.item) - optionRank(b.item) || a.index - b.index)
+        .map((entry) => entry.item);
       const needFixes = input.items.filter(
         (item) =>
           item.hasDescription === 'absent' ||

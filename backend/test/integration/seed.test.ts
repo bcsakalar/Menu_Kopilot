@@ -46,6 +46,7 @@ describe('seedDatabase', () => {
       templatesUpdated: 0,
       templatesSkipped: 0,
       promptsInserted: SEED_PROMPTS.length,
+      promptsActivated: SEED_PROMPTS.length,
       providerConfigsInserted: routeCount,
       categoriesInserted: SEED_CATEGORIES.length,
       cuisineCategoriesInserted: SEED_CUISINE_CATEGORIES.length,

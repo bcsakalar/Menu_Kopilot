@@ -51,6 +51,13 @@ export interface OptionModifierResult {
 }
 
 const EXAMPLE_TEMPLATES = 3;
+/**
+ * Products per model call. One call for twenty products answers with twenty thin cards (and, on a free tier,
+ * runs into the per-minute output limit mid-answer); batches of this size come back complete and run in
+ * parallel, so "tam" mode costs the same wall clock as "yeter" mode did.
+ */
+const BATCH = 6;
+const MAX_BATCHES = 4;
 
 export async function runOptionModifier(
   deps: Pick<AgentDeps, 'db' | 'router' | 'prompts' | 'categories' | 'tracer'>,
@@ -111,36 +118,51 @@ export async function runOptionModifier(
         };
       }
 
-      // --- the rest go to the model ------------------------------------------------------------------------
+      // --- the rest go to the model, in small batches ------------------------------------------------------
       const examples = await exampleTemplates(deps, input.cuisine.id);
       const system = (await deps.prompts.render('agent.options.system')).text;
-      const user = (
-        await deps.prompts.render('agent.options.user', {
-          cuisine: input.cuisine.name,
-          items: forModel
-            .map((t) => {
-              const name = t.canonicalName ?? t.rawName;
-              const known = t.optionNames.length > 0 ? ` (ekranda görünen gruplar: ${t.optionNames.join(', ')})` : '';
-              return `- ${name}${known}`;
-            })
-            .join('\n'),
-          examples,
-          max: forModel.length,
-        })
-      ).text;
+      const batches: ExistingItem[][] = [];
+      for (let i = 0; i < forModel.length && batches.length < MAX_BATCHES; i += BATCH) {
+        batches.push(forModel.slice(i, i + BATCH));
+      }
 
-      const request = {
-        task: 'agent.options' as const,
-        schema: optionModifierSchema,
-        schemaName: OPTION_MODIFIER_SCHEMA_NAME,
-        system,
-        user,
-      };
-      // Invalid JSON gets exactly one repair round, owned by the Validator (see generateChecked).
-      const { result, attempts } = await generateChecked(deps, request, run.ctx);
+      const runs = await Promise.all(
+        batches.map(async (batch) => {
+          const user = (
+            await deps.prompts.render('agent.options.user', {
+              cuisine: input.cuisine.name,
+              items: batch
+                .map((t) => {
+                  const name = t.canonicalName ?? t.rawName;
+                  const known = t.optionNames.length > 0 ? ` (ekranda görünen gruplar: ${t.optionNames.join(', ')})` : '';
+                  return `- ${name}${known}`;
+                })
+                .join('\n'),
+              examples,
+              max: batch.length,
+            })
+          ).text;
+          // Invalid JSON gets exactly one repair round, owned by the Validator (see generateChecked).
+          return generateChecked(
+            deps,
+            {
+              task: 'agent.options' as const,
+              schema: optionModifierSchema,
+              schemaName: OPTION_MODIFIER_SCHEMA_NAME,
+              system,
+              user,
+            },
+            run.ctx,
+          );
+        }),
+      );
+
+      const attempts = runs.flatMap((r) => r.attempts);
       const llmCalls = countCalls(attempts);
-      if (!result.ok) {
-        const error = `${result.error.kind}: ${result.error.message}`;
+      const ok = runs.flatMap((r) => (r.result.ok ? [r.result] : []));
+      if (ok.length === 0) {
+        const first = runs[0]?.result;
+        const error = first && !first.ok ? `${first.error.kind}: ${first.error.message}` : 'model cevabı yok';
         return {
           value: { ...empty, items: dbCards, fromDb: dbCards.length, attempts, llmCalls, error } satisfies OptionModifierResult,
           status: dbCards.length > 0 ? ('ok' as const) : ('failed' as const),
@@ -159,7 +181,7 @@ export async function runOptionModifier(
         if (target.canonicalName) byNormalized.set(normalizeTr(target.canonicalName), target);
       }
       const aiCards: OptionCard[] = [];
-      for (const candidate of result.value.items) {
+      for (const candidate of ok.flatMap((r) => r.value.items)) {
         const parsed = optionSuggestionSchema.safeParse(candidate);
         if (!parsed.success) continue;
         const target = byNormalized.get(normalizeTr(parsed.data.targetName));
@@ -178,6 +200,7 @@ export async function runOptionModifier(
       }
 
       const items = [...dbCards, ...aiCards];
+      const failed = runs.length - ok.length;
       return {
         value: {
           items,
@@ -185,11 +208,17 @@ export async function runOptionModifier(
           fromAi: aiCards.length,
           attempts,
           llmCalls,
-          provider: result.meta.provider,
-          model: result.meta.model,
+          provider: ok[0]!.meta.provider,
+          model: ok[0]!.meta.model,
         } satisfies OptionModifierResult,
         attempts,
-        output: { fromDb: dbCards.length, fromAi: aiCards.length, names: items.map((c) => c.targetName) },
+        output: {
+          fromDb: dbCards.length,
+          fromAi: aiCards.length,
+          batches: batches.length,
+          ...(failed > 0 ? { failedBatches: failed } : {}),
+          names: items.map((c) => c.targetName),
+        },
       };
     },
   );

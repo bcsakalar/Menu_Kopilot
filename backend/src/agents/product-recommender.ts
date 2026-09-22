@@ -2,10 +2,11 @@ import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { AttemptRecord } from '../ai/router.js';
 import { getJson, setJson } from '../cache/cache.js';
 import { menuItems } from '../db/schema/index.js';
-import type { CategoryGap } from '../domain/category.js';
 import { sha256Hex } from '../lib/images.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import type { CuisineGraph } from '../modules/retrieval/cuisine-graph.js';
+import type { QuotaRow } from './plan.js';
+import type { SuggestedOptionGroup } from './schemas/option-modifier.js';
 import {
   PRODUCT_RECOMMENDER_SCHEMA_NAME,
   productRecommenderSchema,
@@ -29,9 +30,6 @@ import { generateChecked } from './validator.js';
  * Model answers are cached per (menu + gaps + prompt version).
  */
 
-export const MIN_RECOMMENDATIONS = 3;
-export const MAX_RECOMMENDATIONS = 12;
-
 export interface RecommendedItem {
   name: string;
   normalized: string;
@@ -43,6 +41,10 @@ export interface RecommendedItem {
   importance: number;
   source: 'db' | 'ai';
   templateId: string | null;
+  /** Options the product should open with. Pool items carry the curated set; model answers carry their own. */
+  optionGroups: SuggestedOptionGroup[];
+  removableIngredients: string[];
+  extraIngredients: string[];
 }
 
 export interface ProductRecommenderInput {
@@ -50,7 +52,12 @@ export interface ProductRecommenderInput {
   graph: CuisineGraph;
   priceSegment: string;
   existing: readonly ExistingItem[];
-  gaps: readonly CategoryGap[];
+  /**
+   * How many products each category may receive in THIS run. In quick mode it is one per category across five or
+   * six of them; in full mode it goes past the category minimums until the menu would reach the cuisine's
+   * opening target. Both paths below fill exactly this, and the Validator enforces the same map.
+   */
+  quota: readonly QuotaRow[];
   current: number;
   target: number;
   notes: string | undefined;
@@ -77,21 +84,17 @@ export interface ProductRecommenderResult {
   templatePayloads?: ReadonlyMap<string, TemplatePayload>;
 }
 
-/** How many to ask for: enough to reach the target plus spares, clamped to a list a person can scan on a phone. */
-export function wantedCount(missing: number): number {
-  return Math.min(MAX_RECOMMENDATIONS, Math.max(MIN_RECOMMENDATIONS, missing + 2));
-}
-
 /**
- * Approved templates of the cuisine family, restricted to the categories that are actually short, and capped per
- * category by that category's own gap. This is the single change that fixes the "six more pides" behaviour.
+ * Approved templates of the cuisine family, restricted to the categories the plan opened, and capped per category
+ * by that category's quota. The category filter is what fixes the "six more pides" behaviour; the quota is what
+ * lets a menu that is twenty products short actually get twenty suggestions.
  */
 async function fromTemplates(
   deps: Pick<AgentDeps, 'db' | 'categories'>,
   input: ProductRecommenderInput,
   taken: (normalized: string, templateId: string | null) => boolean,
 ): Promise<RecommendedItem[]> {
-  const openGaps = input.gaps.filter((g) => g.missing > 0);
+  const openGaps = input.quota;
   if (openGaps.length === 0 || input.limit <= 0) return [];
   const related = input.graph.related(input.cuisine.id, 2);
   if (related.length === 0) return [];
@@ -120,7 +123,7 @@ async function fromTemplates(
     buckets.get(categoryKey)?.push(row);
   }
 
-  const quota = new Map(openGaps.map((g) => [g.key, g.missing]));
+  const quota = new Map(openGaps.map((g) => [g.key, g.want]));
   const cursor = new Map(openGaps.map((g) => [g.key, 0]));
   const ownCuisine = input.cuisine.name;
   const picked: RecommendedItem[] = [];
@@ -155,11 +158,18 @@ async function fromTemplates(
         portionInfo: row.portionInfo,
         priceRangeHint: '',
         reason: sameCuisine
-          ? `${ownCuisine} menülerinde ${row.importance >= 70 ? 'neredeyse her zaman' : 'sık'} bulunur — ${gap.label} eksik`
-          : `${gap.label} kategorisini kapatır (${input.graph.get(row.cuisineId)?.name ?? ownCuisine})`,
+          ? `${ownCuisine} menülerinde ${row.importance >= 70 ? 'neredeyse her zaman' : 'sık'} bulunur${
+              gap.missing > 0 ? ` — ${gap.label} eksik` : ` — ${gap.label} tarafını güçlendirir`
+            }`
+          : `${gap.label} kategorisini ${gap.missing > 0 ? 'kapatır' : 'genişletir'} (${input.graph.get(row.cuisineId)?.name ?? ownCuisine})`,
         importance: row.importance,
         source: 'db',
         templateId: row.id,
+        // Left empty on purpose: the card is built from the WHOLE curated template (see `templatePayloadsFor`),
+        // so its options and ingredients come from the pool payload rather than from a thinned-out copy here.
+        optionGroups: [],
+        removableIngredients: [],
+        extraIngredients: [],
       });
     }
   }
@@ -177,7 +187,7 @@ export async function runProductRecommender(
     {
       limit: input.limit,
       existing: input.existing.length,
-      gaps: input.gaps.filter((g) => g.missing > 0).map((g) => `${g.key}:${g.missing}`),
+      quota: input.quota.map((g) => `${g.key}:${g.want}`),
     },
     async () => {
       // One index of everything that must not be proposed: the menu itself, plus what this run already picked.
@@ -205,12 +215,12 @@ export async function runProductRecommender(
       const dbItems = await fromTemplates(deps, input, isTaken);
       for (const item of dbItems) take(item.normalized, item.templateId);
 
-      const remainingGaps = input.gaps
+      const remainingGaps = input.quota
         .map((gap) => ({
           ...gap,
-          missing: Math.max(0, gap.missing - dbItems.filter((i) => i.categoryKey === gap.key).length),
+          want: Math.max(0, gap.want - dbItems.filter((i) => i.categoryKey === gap.key).length),
         }))
-        .filter((gap) => gap.missing > 0);
+        .filter((gap) => gap.want > 0);
       const remaining = Math.max(0, input.limit - dbItems.length);
 
       if (remaining === 0 || remainingGaps.length === 0 || run.signal.aborted || !input.aiUsable) {
@@ -225,7 +235,7 @@ export async function runProductRecommender(
       const cacheKey = `mk:rec:${input.cuisine.id}:${sha256Hex(
         JSON.stringify([
           [...takenNames].sort(),
-          remainingGaps.map((g) => `${g.key}:${g.missing}`),
+          remainingGaps.map((g) => `${g.key}:${g.want}`),
           input.priceSegment,
           input.target,
           remaining,
@@ -249,7 +259,9 @@ export async function runProductRecommender(
             current: input.current,
             target: input.target,
             existing: input.existing.map((i) => i.canonicalName ?? i.rawName).join(', ') || '-',
-            gaps: remainingGaps.map((g) => `${g.key} | ${g.label} | ${g.present}/${g.minItems} | ${g.missing} eksik`).join('\n'),
+            gaps: remainingGaps
+              .map((g) => `${g.key} | ${g.label} | menüde ${g.present}, mutfak minimumu ${g.minItems} | bu koşuda ${g.want} ürün iste`)
+              .join('\n'),
             already: dbItems.map((i) => i.name).join(', ') || '-',
             notes: input.notes?.trim() || '-',
             max: remaining + 2,
@@ -294,7 +306,7 @@ export async function runProductRecommender(
       // taken emptiest-category-first rather than in the order the model happened to write them. Without the
       // quota the model answers a pide-only menu with two extra salads and no drink; without the ordering it
       // spends the budget on whatever it listed first.
-      const quota = new Map(remainingGaps.map((g) => [g.key, g.missing]));
+      const quota = new Map(remainingGaps.map((g) => [g.key, g.want]));
       const allowed = new Set(remainingGaps.map((g) => g.key));
       const priority = new Map(remainingGaps.map((g, index) => [g.key, index]));
       const candidates = raw.items
@@ -390,5 +402,10 @@ function toRecommended(
     importance: Math.round(Math.max(0, Math.min(100, raw.importance))),
     source: 'ai',
     templateId: null,
+    // A new product is useless on the panel without its options — "Lahmacun" alone, with no Boy and no
+    // "Yanında ayran", is half a menu row. The Validator is what decides which of these survive.
+    optionGroups: raw.optionGroups ?? [],
+    removableIngredients: (raw.removableIngredients ?? []).map((i) => i.trim()).filter((i) => i.length > 0),
+    extraIngredients: (raw.extraIngredients ?? []).map((i) => i.trim()).filter((i) => i.length > 0),
   };
 }

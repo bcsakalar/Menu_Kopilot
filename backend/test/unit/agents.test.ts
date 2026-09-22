@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { addTypedItems, dedupeExtracted, mergeFlag } from '../../src/agents/dedupe.js';
 import { looksAbbreviated } from '../../src/agents/gap-analyst.js';
 import type { ExtractedItem } from '../../src/agents/schemas/extractor.js';
-import { wantedCount } from '../../src/agents/product-recommender.js';
+import { allocate, planRun, quotaRows } from '../../src/agents/plan.js';
 import { cleanProductName } from '../../src/agents/validator.js';
 import { CategoryIndex, categoryGaps, FALLBACK_CATEGORY } from '../../src/domain/category.js';
 import { SEED_CATEGORIES } from '../../src/db/seed/categories.js';
@@ -145,11 +145,71 @@ describe('gap analyst — name heuristics', () => {
   });
 });
 
-describe('recommendation count', () => {
-  it('asks for a list a person can scan: at least 3, at most 12, target plus spares', () => {
-    expect(wantedCount(0)).toBe(3);
-    expect(wantedCount(5)).toBe(7);
-    expect(wantedCount(40)).toBe(12);
+describe('run plan — how many products and from which categories', () => {
+  // A kebab shop's category table: the shape of a complete menu, 17 products across seven categories.
+  const kebap = categoryGaps(
+    [
+      { key: 'ana-yemek', label: 'Ana Yemek', minItems: 6, sortOrder: 2 },
+      { key: 'ara-sicak', label: 'Ara Sıcak', minItems: 2, sortOrder: 3 },
+      { key: 'salata-meze', label: 'Salata & Meze', minItems: 2, sortOrder: 4 },
+      { key: 'corba', label: 'Çorba', minItems: 1, sortOrder: 1 },
+      { key: 'tatli', label: 'Tatlı', minItems: 2, sortOrder: 5 },
+      { key: 'icecek', label: 'İçecek', minItems: 3, sortOrder: 6 },
+      { key: 'menu-kampanya', label: 'Menü & Kampanya', minItems: 1, sortOrder: 7 },
+    ],
+    new Map([
+      ['ana-yemek', 5],
+      ['icecek', 2],
+      ['salata-meze', 1],
+      ['corba', 1],
+      ['tatli', 1],
+    ]),
+  );
+
+  it('quick mode: six suggestions spread over six different categories, no combos', () => {
+    const plan = planRun({ mode: 'quick', categories: kebap, missing: 20, needOptions: 10 });
+    expect(plan.products).toBe(6);
+    expect(plan.optionTargets).toBe(3);
+    // One per category — the user's "5 farklı kategoriden 5-6 ürün".
+    expect([...plan.quota.values()].every((v) => v <= 1)).toBe(true);
+    expect(quotaRows(kebap, plan.quota)).toHaveLength(6);
+    expect(plan.quota.get('menu-kampanya')).toBe(0);
+  });
+
+  it('full mode: fills to the opening target, not just to the category minimums', () => {
+    // 10 products in a 30-product cuisine. The category gaps alone sum to 5 — the old cap.
+    const shape = kebap.reduce((sum, c) => sum + c.missing, 0);
+    expect(shape).toBeLessThan(10);
+    const plan = planRun({ mode: 'full', categories: kebap, missing: 20, needOptions: 10 });
+    expect(plan.products).toBe(22);
+    expect(plan.optionTargets).toBe(10);
+    // Every short category is served, and the surplus follows the cuisine's shape: mains get the largest share.
+    expect(plan.quota.get('corba')).toBeGreaterThan(0);
+    expect(plan.quota.get('ana-yemek')).toBeGreaterThan(plan.quota.get('tatli')!);
+    // Combos are the last resort: at most one, and only because everything else is capped.
+    expect(plan.quota.get('menu-kampanya')).toBeLessThanOrEqual(1);
+  });
+
+  it('full mode still answers a menu that already meets its minimum', () => {
+    const full = categoryGaps(
+      [
+        { key: 'ana-yemek', label: 'Ana Yemek', minItems: 6, sortOrder: 2 },
+        { key: 'icecek', label: 'İçecek', minItems: 3, sortOrder: 6 },
+      ],
+      new Map([
+        ['ana-yemek', 6],
+        ['icecek', 3],
+      ]),
+    );
+    const plan = planRun({ mode: 'full', categories: full, missing: 0, needOptions: 0 });
+    expect(plan.products).toBe(8);
+    expect(plan.optionTargets).toBe(0);
+  });
+
+  it('never gives a category more than its cap, even when the target cannot be reached', () => {
+    const tiny = categoryGaps([{ key: 'tatli', label: 'Tatlı', minItems: 2, sortOrder: 1 }], new Map());
+    const quota = allocate(tiny, 30, (c) => c.minItems * 2);
+    expect(quota.get('tatli')).toBe(4);
   });
 });
 

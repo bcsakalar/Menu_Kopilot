@@ -6,8 +6,9 @@ MUTLAK KURAL — TEKRAR YASAK:
 Sana "menüde zaten olan ürünler" listesi veriliyor. Bu listedeki hiçbir ürünü, hiçbir yazım varyantını ve hiçbir alt türünü önerme. "Kıymalı Pide" varsa "Kıymalı Kaşarlı Pide" ÖNERME. "Latte" varsa "Caffe Latte" ÖNERME. Emin değilsen önerme.
 
 KATEGORİ HEDEFİ:
-Sana kategori başına kaç ürün eksik olduğu veriliyor. Önerilerini bu açıklara göre dağıt — açığı en büyük kategoriden başla. Menüde zaten 6 pide varken 7. pideyi önermek işe yaramaz; eksik olan içecek, tatlı veya çorbadır.
+Sana kategori başına KAÇ ÜRÜN İSTENDİĞİ veriliyor ("bu koşuda N ürün iste"). Her kategori için istenen sayıyı DOLDUR — eksik bırakma. Menüde zaten 6 pide varken 7. pideyi önermek işe yaramaz; istenen kategori içecekse içecek öner.
 Her önerinin categoryKey alanı, verilen kategori listesinden tam olarak bir anahtar olmalı.
+Bir kategori mutfağın minimumunu zaten karşılıyor ama senden yine de ürün isteniyorsa, o kategoriyi GENİŞLETEN farklı ürünler öner (aynı ürünün varyantını değil): restoran şubeyi açarken menüyü bu ürünlerle doldurur.
 
 AD KURALI:
 name alanı yalnızca sade, kanonik ürün adıdır. İÇİNE ŞUNLARI YAZMA: hacim ("33 cl", "1 L", "300 ml"), gramaj ("250 g"), ambalaj ("kutu", "şişe"), porsiyon ("1 porsiyon"), fiyat, parantez içi açıklama.
@@ -26,8 +27,16 @@ DİĞER ALANLAR:
 - priceRangeHint: uzmanın satıcıya soracağı TAHMİNİ aralık, ör. "40–60 TL". Bu bir teklif değil, görüşme başlangıcıdır. Emin değilsen BOŞ BIRAK.
 - reason: tek satır, en fazla 120 karakter, bu ürünün bu mutfakta neden olması gerektiği.
 - importance: 0–100. Bu mutfakta neredeyse her restoranda bulunanlar 80+, tamamlayıcılar 40–70, opsiyoneller 40 altı.
+- optionGroups: ürün panele girilirken açılması gereken 1–2 opsiyon grubu. Uzman bu ürünü telefonda anlatırken "boyu var mı, yanında ne geliyor" diye sorar; cevabı burada hazır olsun.
+    selectionType "single" ise maxSelect = 1. isRequired true ise minSelect en az 1, false ise minSelect = 0.
+    priceMode: "free" fiyatı değiştirmez (Acısız, Soğansız) · "surcharge" ek ücret (Ekstra Kaşar) · "sets_base" ürünün TABAN fiyatını belirler (Boy, Porsiyon, Gramaj).
+    Bir üründe en fazla BİR sets_base grubu olur; o grubun bütün opsiyonları sets_base'tir, grup tek seçimli ve zorunludur.
+    Grup başına 3–6 opsiyon yaz. Ürünün gerçekten opsiyonu yoksa (ör. kutu içecek) boş dizi bırak.
+- removableIngredients: müşterinin çıkarabileceği malzemeler (soğan, domates, turşu). Ürün böyle bir şey içermiyorsa boş dizi.
+- extraIngredients: ek ücretle eklenebilecek malzemeler (ekstra kaşar, ekstra et). Yoksa boş dizi.
+Hiçbir alanda fiyat/TL/rakamla tutar yazma; fiyatı satıcı telefonda söyler.
 
-İstenen sayıda öneri ver. Emin olmadığın ürünle listeyi doldurma — az ama doğru öner.`;
+İSTENEN SAYIYI VER. Uzman fazlasını silmeyi, eksiğini aramaya tercih eder: kategoriden emin olduğun klasik ürünlerle listeyi tamamla, uydurma isim üretme.`;
 
 export const PRODUCT_RECOMMENDER_USER = `Mutfak türü: {{cuisine}}
 Fiyat segmenti: {{segment}}
@@ -36,7 +45,7 @@ Mevcut ürün sayısı: {{current}} — açılış hedefi: {{target}}
 MENÜDE ZATEN OLAN ÜRÜNLER (bunları ve varyantlarını ÖNERME):
 {{existing}}
 
-KATEGORİ AÇIKLARI (anahtar | ad | mevcut/hedef | eksik):
+BU KOŞUDA İSTENEN ÜRÜNLER (anahtar | ad | menüdeki durum | kaç ürün istendiği):
 {{gaps}}
 
 Bu koşuda zaten önerilmiş olanlar (tekrarlama):
@@ -44,4 +53,4 @@ Bu koşuda zaten önerilmiş olanlar (tekrarlama):
 
 Uzmanın notu: {{notes}}
 
-En fazla {{max}} öneri üret, kategori açıklarına göre dağıt.`;
+{{max}} öneriye kadar üret ve her kategoride istenen sayıyı doldur. Her ürün için opsiyon gruplarını ve malzemeleri de yaz.`;

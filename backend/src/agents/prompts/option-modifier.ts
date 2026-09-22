@@ -24,14 +24,15 @@ MALZEME KURALLARI:
 
 FİYAT YAZMA: Hiçbir alanda TL, ₺ veya rakamla fiyat yok. Fiyatı satıcı telefonda söyler.
 
-Ürünü tanımıyorsan o ürün için kart üretme. Uydurma opsiyon, boş liste vermekten daha kötüdür.`;
+VERİLEN HER ÜRÜN İÇİN KART ÜRET. Listedeki ürünlerin opsiyonu bilinmiyor; "bilinmiyor" opsiyonu yok demek değildir, uzmanın telefonda soracağı şey tam olarak budur. Adından ne tür bir ürün olduğu anlaşılan her ürüne en az bir grup veya en az birkaç malzeme öner (ör. bir içeceğe Boy/Buz, bir ana yemeğe Porsiyon/Acı Seviyesi/Yanında Gelen).
+Yalnızca adından ne olduğu gerçekten anlaşılmayan ürünü atla.`;
 
 export const OPTION_MODIFIER_USER = `Mutfak türü: {{cuisine}}
 
-Bu ürünler menüde ZATEN var ve opsiyon bilgileri eksik. Her biri için opsiyon grubu ve malzeme öner:
+Bu ürünler menüde ZATEN var ve opsiyon bilgileri bilinmiyor. HER BİRİ için opsiyon grubu ve malzeme öner:
 {{items}}
 
 Aynı mutfaktan onaylı örnek kartlar (üslup ve ayrıntı düzeyi için referans):
 {{examples}}
 
-En fazla {{max}} ürün için kart üret.`;
+{{max}} ürünün hepsi için kart üret.`;

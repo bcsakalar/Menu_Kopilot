@@ -20,6 +20,7 @@ export const suggestedOptionGroupSchema = z.object({
   maxSelect: z.number().int().min(1).max(15),
   options: z.array(suggestedOptionSchema).min(2).max(10).describe('Uygun olan her yerde 4–7 opsiyon'),
 });
+export type SuggestedOptionGroup = z.infer<typeof suggestedOptionGroupSchema>;
 
 export const optionSuggestionSchema = z.object({
   targetName: z.string().min(1).max(120).describe('Menüde ZATEN olan ürünün adı, verilen listeden aynen'),

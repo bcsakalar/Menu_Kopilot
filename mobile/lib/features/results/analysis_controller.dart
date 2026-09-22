@@ -174,6 +174,9 @@ class AnalysisController extends Notifier<AnalysisViewState> {
           // Typed names are already in the reused list (the server dedupes); sent again only as the run's title.
           menuText: previous?.menuText ?? '',
           notes: previous?.notes ?? '',
+          // The same kind of run as the one being corrected: a re-run is a cuisine fix, not a change of mind
+          // about how much work to do.
+          mode: previous?.mode ?? AnalysisMode.full,
           debug: previous?.debug ?? false,
         ),
       ),

@@ -12,12 +12,8 @@ import { addTypedItems, type MergedItem } from './dedupe.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
 import { runOptionModifier, type OptionCard, type OptionModifierResult } from './option-modifier.js';
-import {
-  MAX_RECOMMENDATIONS,
-  runProductRecommender,
-  wantedCount,
-  type ProductRecommenderResult,
-} from './product-recommender.js';
+import { modeBudget, planRun, quotaRows, type AnalysisMode } from './plan.js';
+import { runProductRecommender, type ProductRecommenderResult } from './product-recommender.js';
 import { AGENT_LABELS, type AgentDeps, type AgentName, type AgentRunContext, type ExistingItem } from './types.js';
 import { runValidator, type ValidatedNewProduct, type ValidationResult } from './validator.js';
 
@@ -57,6 +53,11 @@ export interface AnalyzeRunInput {
    */
   reuseItems?: readonly MergedItem[] | undefined;
   notes: string | undefined;
+  /**
+   * How much work this run does: `quick` answers with a handful of suggestions, `full` fills the menu up to the
+   * cuisine's opening minimum and asks for options on everything. The user picks it on the home screen.
+   */
+  mode: AnalysisMode;
   /** The cuisine the user picked; the Classifier fills the blank when it is undefined. */
   selectedCuisine: CuisineNode | undefined;
   cuisineOptions: readonly CuisineOption[];
@@ -94,35 +95,18 @@ export interface AnalyzeRunResult {
 
 const AI_OFF: ReadonlySet<ProviderErrorKind> = new Set(['local_only', 'quota_exceeded', 'not_configured']);
 const AI_OFF_MESSAGE = 'AI kapalı (anahtar/kota): yalnızca veritabanından cevap veriliyor.';
-/** Asking for options on more than this makes the call unscannable and the request slow. */
-const MAX_OPTION_TARGETS = 8;
 const MAX_FIX_CARDS = 12;
-/**
- * The two model agents get this long, together, before the pipeline ships what it has. Sized above a single
- * attempt timeout (6 s) on purpose: a rate-limited primary must still leave room for one fallback. Extraction
- * and classification take ~1–4 s before this point, so the 15 s end-to-end target holds.
- */
-const RECOMMEND_DEADLINE_MS = 11_000;
 /** Input tokens one image read may use on top of the agents' budget (a 15-item menu photo measured 2.3–3.7 k). */
 const IMAGE_TOKEN_ALLOWANCE = 4_000;
-
-/**
- * How many new products to ask for. The product-count gap alone is not enough: a menu can be 4 products short of
- * the target while its categories are 7 short, because the category table describes the SHAPE of a complete menu,
- * not just its size. Taking the larger of the two is what lets every open category get at least one card.
- */
-function recommendationLimit(analysis: { missing: number; categories: readonly { missing: number }[] }): number {
-  const shape = analysis.categories.reduce((sum, c) => sum + c.missing, 0);
-  return Math.min(MAX_RECOMMENDATIONS, Math.max(wantedCount(analysis.missing), shape));
-}
 
 export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunInput): Promise<AnalyzeRunResult> {
   const started = Date.now();
   // The configured budget is what the agents may spend; reading an image is paid on top (one call, a few thousand
   // tokens each). A shared budget let five screenshots starve the recommender and the option agent.
+  const extra = modeBudget(input.mode);
   const budget = new RequestBudget(
-    deps.budget.maxLlmCalls + input.images.length,
-    deps.budget.maxInputTokens + input.images.length * IMAGE_TOKEN_ALLOWANCE,
+    deps.budget.maxLlmCalls + input.images.length + extra.extraLlmCalls,
+    deps.budget.maxInputTokens + input.images.length * IMAGE_TOKEN_ALLOWANCE + extra.extraInputTokens,
   );
   const ctx: CallContext = { userId: input.userId, runId: input.runId, budget, signal: input.signal };
   const run: AgentRunContext = { runId: input.runId, userId: input.userId, ctx, signal: input.signal };
@@ -302,8 +286,27 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   input.emit({ type: 'counts', counts });
 
   // ---- 4 + 5 in parallel --------------------------------------------------------------------------------------
-  const categoryQuota = new Map(analysis.categories.map((c) => [c.key, c.missing]));
-  input.emit({ type: 'progress', agent: 'product_recommender', message: 'Eksik ürünler ve opsiyonlar hazırlanıyor' });
+  /**
+   * The run plan: how many products to ask for, which categories they come from and how many products get an
+   * option card. In `full` mode the quota goes past the per-category minimums until the menu would actually
+   * reach the cuisine's opening target — a 10-product menu in a 30-product cuisine is 20 products short, and
+   * before this the answer was capped at three cards by the category gaps alone.
+   */
+  const plan = planRun({
+    mode: input.mode,
+    categories: analysis.categories,
+    missing: analysis.missing,
+    needOptions: analysis.needOptions.length,
+  });
+  const categoryQuota = plan.quota;
+  input.emit({
+    type: 'progress',
+    agent: 'product_recommender',
+    message:
+      plan.mode === 'full'
+        ? `${plan.products} ürün ve ${plan.optionTargets} ürün için opsiyon hazırlanıyor`
+        : 'Eksik ürünler ve opsiyonlar hazırlanıyor',
+  });
 
   /**
    * Hard deadline over the two model-backed agents. Per-attempt timeouts alone are not enough: a three-entry
@@ -311,7 +314,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
    * When it fires, both agents return what they already have from the template pool and the run finishes
    * `partial`. Counts, the menu and the DB cards are already on screen by then — this only cuts the tail.
    */
-  const deadline = AbortSignal.timeout(RECOMMEND_DEADLINE_MS);
+  const deadline = AbortSignal.timeout(plan.deadlineMs);
   const bounded = AbortSignal.any([input.signal, deadline]);
   const boundedRun: AgentRunContext = { ...run, signal: bounded, ctx: { ...ctx, signal: bounded } };
 
@@ -326,11 +329,11 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
             graph: input.graph,
             priceSegment: classification.priceSegment,
             existing,
-            gaps: analysis.categories,
+            quota: quotaRows(analysis.categories, plan.quota),
             current: analysis.current,
             target: analysis.target,
             notes: input.notes,
-            limit: recommendationLimit(analysis),
+            limit: plan.products,
             aiUsable,
           },
           boundedRun,
@@ -345,7 +348,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
           {
             cuisine: { id: classification.cuisine.id, name: classification.cuisine.name },
             targets: analysis.needOptions,
-            limit: MAX_OPTION_TARGETS,
+            limit: plan.optionTargets,
             aiUsable,
           },
           boundedRun,
@@ -354,7 +357,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     ),
   ]);
   if (deadline.aborted && !input.signal.aborted) {
-    warn('slow_providers', `AI sağlayıcıları ${Math.round(RECOMMEND_DEADLINE_MS / 1000)} sn içinde cevap vermedi; veritabanı önerileriyle devam edildi.`);
+    warn('slow_providers', `AI sağlayıcıları ${Math.round(plan.deadlineMs / 1000)} sn içinde cevap vermedi; veritabanı önerileriyle devam edildi.`);
   } else {
     if (recommendation.error) warn('recommend_failed', 'Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi.');
     if (optionResult.error) warn('options_failed', 'Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor.');
@@ -469,9 +472,12 @@ function newProductCard(deps: Pick<AgentDeps, 'categories'>, item: ValidatedNewP
     priceRangeHint: item.priceRangeHint,
     reason: item.reason,
     importance: item.importance,
-    optionGroups: [],
-    removableIngredients: [],
-    extraIngredients: [],
+    // A new product reaches the phone complete: description, portion AND the options/ingredients it should open
+    // with. They come from the payload, which is exactly what accepting the card writes to the pool — so what the
+    // expert reads on the call and what lands in the panel are the same text.
+    optionGroups: item.payload.optionGroups,
+    removableIngredients: [...item.payload.removableIngredients],
+    extraIngredients: item.payload.extraIngredients.map((i) => i.name),
     fixKind: null,
     currentValue: null,
     suggestedValue: null,

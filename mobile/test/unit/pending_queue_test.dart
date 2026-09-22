@@ -46,6 +46,17 @@ void main() {
     expect(recent?.cuisineName, 'Kebap & Izgara');
   });
 
+  test('a request queued offline keeps the mode the user chose', () async {
+    // The choice is part of the request, not a device setting: an analysis sent from the tunnel must come back
+    // as the same kind of analysis it would have been on the spot.
+    await queue.enqueueAnalyze(
+      const AnalyzeRequestData(cuisineId: 'c1', menuText: 'Adana Kebap', mode: AnalysisMode.quick),
+      cuisineName: 'Kebap & Izgara',
+    );
+    expect(await queue.flush(api), 1);
+    expect(api.analyzed.single.mode, AnalysisMode.quick);
+  });
+
   test('sends a request queued by the old "Öneri" screen as an analysis of its product list', () async {
     await insertRaw('suggest', {'cuisineId': 'c1', 'promptText': 'adana, lahmacun', 'images': <Object?>[], 'cuisineName': 'Kebap'});
     expect(await queue.flush(api), 1);

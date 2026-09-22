@@ -1174,6 +1174,30 @@ abstract class AppLocalizations {
   /// **'çoklu seçim, en fazla {max}'**
   String copyMultiChoice(int max);
 
+  /// No description provided for @cardDetailsShow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyon ve malzemeleri göster'**
+  String get cardDetailsShow;
+
+  /// No description provided for @cardDetailsHide.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyon ve malzemeleri gizle'**
+  String get cardDetailsHide;
+
+  /// No description provided for @cardOptionGroupsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} opsiyon grubu'**
+  String cardOptionGroupsCount(int count);
+
+  /// No description provided for @cardIngredientsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} malzeme'**
+  String cardIngredientsCount(int count);
+
   /// No description provided for @copyLabelDescription.
   ///
   /// In tr, this message translates to:
@@ -1365,6 +1389,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Açılış için en az {min} ürün gerekli'**
   String belowHardMinimum(int min);
+
+  /// No description provided for @modeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne kadar öneri istiyorsun?'**
+  String get modeTitle;
+
+  /// No description provided for @modeQuickTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri versen yeter'**
+  String get modeQuickTitle;
+
+  /// No description provided for @modeQuickHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünlere 2-3 opsiyon, ayrı kategorilerden 5-6 yeni ürün. Hızlı.'**
+  String get modeQuickHint;
+
+  /// No description provided for @modeFullTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakikaten işimizi yapalım'**
+  String get modeFullTitle;
+
+  /// No description provided for @modeFullHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mutfağın minimum ürün sayısına kadar yeni ürün, her ürüne opsiyon ve malzeme. Biraz daha uzun sürer.'**
+  String get modeFullHint;
 
   /// No description provided for @debugToggle.
   ///

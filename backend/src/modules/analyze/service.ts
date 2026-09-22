@@ -105,6 +105,7 @@ export class AnalyzeService {
         typedNames,
         reuseItems: reuseItems ?? undefined,
         notes: fields.notes,
+        mode: fields.mode,
         selectedCuisine,
         cuisineOptions,
         graph,

@@ -1,5 +1,5 @@
 /**
- * Initial (v1) prompt templates. Runtime code reads prompts from the `prompt_templates` table, so a new
+ * Seeded prompt templates. Runtime code reads prompts from the `prompt_templates` table, so a new
  * version can be inserted and activated without a redeploy. Seeding only inserts missing (key, version)
  * pairs and activates a key that has no active version — it never overrides an activated newer version.
  * Placeholders use {{name}} syntax.
@@ -11,7 +11,7 @@ export interface SeedPrompt {
   content: string;
 }
 
-import { AGENT_PROMPTS, AGENT_PROMPT_KEYS } from '../../agents/prompts/index.js';
+import { AGENT_PROMPTS, AGENT_PROMPT_KEYS, AGENT_PROMPT_VERSIONS } from '../../agents/prompts/index.js';
 
 export const PROMPT_KEYS = [
   ...AGENT_PROMPT_KEYS,
@@ -46,4 +46,18 @@ JSON şeması:
 
 };
 
-export const SEED_PROMPTS: readonly SeedPrompt[] = PROMPT_KEYS.map((key) => ({ key, version: 1, content: v1[key] }));
+/** Bumped whenever the text of a key changes; everything else stays at the version it was seeded with. */
+const VERSIONS: Record<PromptKey, number> = {
+  ...AGENT_PROMPT_VERSIONS,
+  'repair.user': 1,
+  'json.instructions': 1,
+  'embed.query': 1,
+  'embed.document': 1,
+  'transcribe.vocabulary': 1,
+};
+
+export const SEED_PROMPTS: readonly SeedPrompt[] = PROMPT_KEYS.map((key) => ({
+  key,
+  version: VERSIONS[key],
+  content: v1[key],
+}));

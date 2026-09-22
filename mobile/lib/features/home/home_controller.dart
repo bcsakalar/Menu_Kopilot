@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/network/api_client.dart';
 import '../../core/providers.dart';
 import '../../core/utils/image_compressor.dart';
 
@@ -14,6 +15,7 @@ class HomeDraft {
     this.cuisineId,
     this.menuText = '',
     this.notes = '',
+    this.mode = AnalysisMode.full,
     this.images = const [],
     this.debug = false,
     this.compressing = false,
@@ -25,6 +27,9 @@ class HomeDraft {
   /// Products the restaurant already sells, typed or dictated.
   final String menuText;
   final String notes;
+
+  /// "Öneri versen yeter" or "hakikaten işimizi yapalım" — how much the run is asked to do.
+  final AnalysisMode mode;
   final List<PickedImage> images;
 
   /// Keep the agent payloads for the hidden pipeline screen.
@@ -37,6 +42,7 @@ class HomeDraft {
     String? cuisineId,
     String? menuText,
     String? notes,
+    AnalysisMode? mode,
     List<PickedImage>? images,
     bool? debug,
     bool? compressing,
@@ -45,6 +51,7 @@ class HomeDraft {
         cuisineId: cuisineId ?? this.cuisineId,
         menuText: menuText ?? this.menuText,
         notes: notes ?? this.notes,
+        mode: mode ?? this.mode,
         images: images ?? this.images,
         debug: debug ?? this.debug,
         compressing: compressing ?? this.compressing,
@@ -76,6 +83,8 @@ class HomeDraftController extends Notifier<HomeDraft> {
 
   void setDebug(bool value) => state = state.copyWith(debug: value);
 
+  void setMode(AnalysisMode value) => state = state.copyWith(mode: value);
+
   /// Adds photos up to the limit and reports how many were over it or could not be read.
   Future<AddImagesResult> addImages(List<String> paths) async {
     final free = maxPhotos - state.images.length;
@@ -106,7 +115,8 @@ class HomeDraftController extends Notifier<HomeDraft> {
     state = state.copyWith(images: images);
   }
 
-  void resetInputs() => state = HomeDraft(cuisineId: state.cuisineId, debug: state.debug);
+  // The mode is a preference, not an input: it survives a submitted analysis like the cuisine does.
+  void resetInputs() => state = HomeDraft(cuisineId: state.cuisineId, mode: state.mode, debug: state.debug);
 }
 
 final homeDraftProvider = NotifierProvider<HomeDraftController, HomeDraft>(HomeDraftController.new);

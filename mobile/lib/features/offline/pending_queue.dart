@@ -41,6 +41,7 @@ class PendingQueue {
       cuisineId: request.cuisineId,
       menuText: request.menuText,
       notes: request.notes,
+      mode: request.mode,
       debug: request.debug,
       images: images,
       fromRunId: request.fromRunId,

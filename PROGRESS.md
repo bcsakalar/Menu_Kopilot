@@ -1,8 +1,9 @@
 # PROGRESS
 
-Last update: 2026-09-21 — FAZ 0–3 live on production (`f2e12a2`, live check 15/15): one analysis screen on a
-six-agent pipeline, Şubeler removed, categories editable in the app. App 1.1.0+2 compiled and tested here (Flutter
-3.47.5, 56/56), signed with a new key (D-166); a second account `uzman@example.com` (D-168).
+Last update: 2026-09-22 — the suggestion engine reworked after the user's phone test (D-171…D-173): two modes
+("öneri versen yeter" / "hakikaten işimizi yapalım"), recommendations that fill up to the cuisine's minimum
+instead of stopping at the category gaps, option and ingredient suggestions for every product — the ones read from
+a photo included — and new products that carry their own options. Backend 545 tests, mobile 58, both clean.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -35,6 +36,20 @@ six-agent pipeline, Şubeler removed, categories editable in the app. App 1.1.0+
       with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
 
 ## Where I am
+**2026-09-22 — suggestion engine rework (D-171…D-173).** The user's complaint on the 1.1.0 build was reproduced
+first (local stack, real keys) and then fixed:
+
+| Senaryo | Önce | Sonra |
+| --- | --- | --- |
+| El yazısı menü fotoğrafı (10 ürün okundu) | 0 opsiyon kartı, 3 yeni ürün | 10 opsiyon kartı, 8 yeni ürün (hepsi opsiyonlu) |
+| 10 ürünlük menü, mutfak minimumu 30 | 3 yeni ürün + `target_unreachable` | 22 yeni ürün, kabul edilirse 32/30 |
+| 5 ürünlük menü, mutfak minimumu 30 | 8 yeni ürün | 25 yeni ürün, 30/30 |
+| "Yeter" modu (yeni) | — | 6 farklı kategoriden 6 ürün + 3 opsiyon kartı, ~1,5 sn |
+
+New: `backend/src/agents/plan.ts` (modes + per-category quota, D'Hondt apportionment), `mode` on `POST /analyze`,
+prompt versions that actually reach the database, option/ingredient data on section A cards, the mode selector on
+the home screen and a fold-out "opsiyon ve malzemeler" block on new-product cards.
+
 **2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
 (migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
 `MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:

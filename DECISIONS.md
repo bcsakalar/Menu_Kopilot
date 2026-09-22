@@ -653,3 +653,34 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   file is kept as `/etc/menu-kopilot/env.bak-2026-09-21-193619`. The whole stack was then recreated (volumes kept).
   A third account: `uzman2@example.com` (role `uzman`) — the request said "uzman2@example", which
   is not a valid e-mail, so `.com` was added; password in a Desktop note.
+
+- **D-171** — 2026-09-22, the user tested the 1.1.0 build on the phone and the answer was too thin: "ne ürün
+  öneriyor ne opsiyon". Measured against the local stack with real keys before touching anything: a handwritten
+  menu photo (10 products read) produced **0 option cards** and 3 new products; the same 10-product menu in a
+  cuisine whose minimum is 30 produced **3** new products and `target_unreachable`. Three causes, all in the
+  pipeline's arithmetic, none in the models:
+  1. `needOptions` only took products whose panel option field was *empty* (`absent`). A menu photo has no panel
+     fields, so every product came back `unknown` and section B stayed empty. Now every product whose options are
+     not known to exist is a candidate, richest-first (pool-backed ones first: those cost no model call).
+  2. The recommendation count was capped by the sum of the per-category gaps and by a hard 12. A 10-product menu
+     in a 30-product cuisine is 20 products short while its categories are only ~7 short, so it could never be
+     filled. The new `src/agents/plan.ts` hands out a per-category quota that first closes the gaps and then keeps
+     going — proportionally to what the cuisine expects of each category (D'Hondt) — until the menu would reach the
+     opening target. Combos (`menu-kampanya`) weigh almost nothing, so they are the last resort the user asked for.
+  3. Section A cards carried no options at all, so a suggested product reached the phone as a name and a sentence.
+     The recommender now asks for 1–2 option groups and the ingredient lists in the same call (no extra round
+     trip); pool-backed products keep using the curated template. The Validator normalizes a group's arithmetic
+     (single ⇒ maxSelect 1, required ⇔ minSelect ≥ 1, a base-price group is single/required/base throughout)
+     instead of dropping a nearly-right group, and falls back to the plain payload rather than losing the product.
+- **D-172** — Two modes on `/analyze` (`mode=quick|full`, default `full`), the user's "checkboxlı biriyle biri":
+  *quick* = one product per category across five or six categories plus 3 option cards, inside the 15 s promise;
+  *full* = fill to the cuisine's opening minimum (up to 40 products) with options for up to 24 menu products,
+  batched 6 per model call, under a 26 s deadline and a budget of +4 calls / +15 k tokens. The phone sends the
+  choice with every run, offline queue and cuisine re-run included. Measured after the change (local stack, real
+  keys): 10 products in a 30-product cuisine → **22** new products (all with options) and 10 option cards, 32/30
+  reachable; 5 products → 25 and 30/30; the handwritten photo → 8 new products and **10** option cards (was 0).
+- **D-173** — Seeded prompts are versioned (`AGENT_PROMPT_VERSIONS`) and the seeder now activates a newer seeded
+  version in place of an older one. Before this, a prompt edited in the repo never reached a database that already had
+  v1, so the wording that runs in production could silently differ from the file. A prompt written from the app
+  always lands on a version above the seeded ones and is never overwritten, and a version is only activated while
+  it still holds exactly the seeded text.

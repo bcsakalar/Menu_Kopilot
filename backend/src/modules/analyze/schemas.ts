@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ANALYSIS_MODES, DEFAULT_MODE } from '../../agents/plan.js';
 import { AGENT_NAMES } from '../../agents/types.js';
 import { templatePayloadSchema } from '../../domain/template.js';
 
@@ -197,6 +198,12 @@ export const analyzeFieldsSchema = z.object({
   /** Products the user typed or dictated, comma or newline separated. */
   menuText: z.string().max(4000).optional(),
   notes: z.string().max(1000).optional(),
+  /**
+   * How much work the run does. `quick` = "öneri versen yeter": a few products from different categories and a
+   * couple of option cards. `full` = "hakikaten işimizi yapalım": recommend up to the cuisine's opening minimum
+   * and ask for options/ingredients on everything. The app sends one of the two; an older client gets `full`.
+   */
+  mode: z.enum(ANALYSIS_MODES).default(DEFAULT_MODE),
   /**
    * Re-run an earlier analysis of the same menu — typically with another cuisine picked on the result screen. The
    * earlier run's product list is reused, so no image is read again.

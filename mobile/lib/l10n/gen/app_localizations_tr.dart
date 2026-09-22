@@ -615,6 +615,22 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get cardDetailsShow => 'Opsiyon ve malzemeleri göster';
+
+  @override
+  String get cardDetailsHide => 'Opsiyon ve malzemeleri gizle';
+
+  @override
+  String cardOptionGroupsCount(int count) {
+    return '$count opsiyon grubu';
+  }
+
+  @override
+  String cardIngredientsCount(int count) {
+    return '$count malzeme';
+  }
+
+  @override
   String get copyLabelDescription => 'Açıklama';
 
   @override
@@ -722,6 +738,23 @@ class AppLocalizationsTr extends AppLocalizations {
   String belowHardMinimum(int min) {
     return 'Açılış için en az $min ürün gerekli';
   }
+
+  @override
+  String get modeTitle => 'Ne kadar öneri istiyorsun?';
+
+  @override
+  String get modeQuickTitle => 'Öneri versen yeter';
+
+  @override
+  String get modeQuickHint =>
+      'Menüdeki ürünlere 2-3 opsiyon, ayrı kategorilerden 5-6 yeni ürün. Hızlı.';
+
+  @override
+  String get modeFullTitle => 'Hakikaten işimizi yapalım';
+
+  @override
+  String get modeFullHint =>
+      'Mutfağın minimum ürün sayısına kadar yeni ürün, her ürüne opsiyon ve malzeme. Biraz daha uzun sürer.';
 
   @override
   String get debugToggle => 'Ayrıntılı kayıt';

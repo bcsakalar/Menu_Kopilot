@@ -24,6 +24,8 @@ export interface SeedReport {
   templatesUpdated: number;
   templatesSkipped: number;
   promptsInserted: number;
+  /** Seeded prompt versions that became the active one (a new version of an existing key, or a first activation). */
+  promptsActivated: number;
   providerConfigsInserted: number;
   categoriesInserted: number;
   cuisineCategoriesInserted: number;
@@ -47,6 +49,7 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
     templatesUpdated: 0,
     templatesSkipped: 0,
     promptsInserted: 0,
+    promptsActivated: 0,
     providerConfigsInserted: 0,
     categoriesInserted: 0,
     cuisineCategoriesInserted: 0,
@@ -200,18 +203,30 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
         .onConflictDoNothing({ target: [promptTemplates.key, promptTemplates.version] })
         .returning({ id: promptTemplates.id });
       report.promptsInserted += inserted.length;
-      // Activate this version only when the key has no active version yet.
+      /**
+       * Activate the seeded version when the key has no active version yet, or when what is active is an OLDER
+       * version — that is how an improved prompt actually reaches production on a redeploy. A prompt written from
+       * the app always lands on a version above the seeded ones, so this never overwrites one; and the row is
+       * only activated when it still holds exactly the seeded text, so an inactive draft someone typed under the
+       * same version number is left alone.
+       */
       const active = await tx
-        .select({ id: promptTemplates.id })
+        .select({ id: promptTemplates.id, version: promptTemplates.version })
         .from(promptTemplates)
         .where(and(eq(promptTemplates.key, prompt.key), eq(promptTemplates.isActive, true)))
         .limit(1);
-      if (active.length === 0) {
-        await tx
-          .update(promptTemplates)
-          .set({ isActive: true })
-          .where(and(eq(promptTemplates.key, prompt.key), eq(promptTemplates.version, prompt.version)));
-      }
+      const current = active[0];
+      if (current && current.version >= prompt.version) continue;
+      const seeded = await tx
+        .select({ id: promptTemplates.id, content: promptTemplates.content })
+        .from(promptTemplates)
+        .where(and(eq(promptTemplates.key, prompt.key), eq(promptTemplates.version, prompt.version)))
+        .limit(1);
+      if (seeded[0]?.content !== prompt.content) continue;
+      // One active version per key is a unique index: the old one has to step down first.
+      if (current) await tx.update(promptTemplates).set({ isActive: false }).where(eq(promptTemplates.id, current.id));
+      await tx.update(promptTemplates).set({ isActive: true }).where(eq(promptTemplates.id, seeded[0].id));
+      report.promptsActivated += 1;
     }
 
     for (const task of TASK_KEYS) {
