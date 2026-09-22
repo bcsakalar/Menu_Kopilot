@@ -16,6 +16,14 @@ export type RouterRequest<T> = Omit<GenerateStructuredOptions<T>, 'model' | 'par
    * default meant the second provider in the chain was never given a fair chance either.
    */
   timeoutMs?: number;
+  /**
+   * Which route in the task's chain to START from, wrapping around. Parallel calls of the same task (the
+   * recommender's and the option agent's batches) pass their batch index, so batch 0 goes to the primary
+   * provider, batch 1 to the next one and so on. Measured on production: three batches sent to the same
+   * provider spend its per-minute token allowance and two of them come back 429, while spread over the chain
+   * they all answer, in parallel, in the time of a single call. Every route is still tried on failure.
+   */
+  routeOffset?: number;
 };
 
 export interface CallContext {
@@ -278,9 +286,11 @@ export class AiRouter {
     if (!available.ok) return { ok: false, error: available.error, attempts };
 
     const chain = await this.deps.routes.chain(request.task);
+    const offset = request.routeOffset === undefined || chain.length === 0 ? 0 : request.routeOffset % chain.length;
+    const ordered = offset === 0 ? chain : [...chain.slice(offset), ...chain.slice(0, offset)];
     let lastError: ProviderError | undefined;
     let lastRoute: ResolvedRoute | undefined;
-    for (const route of chain) {
+    for (const route of ordered) {
       const skip = this.skipReason(route, request);
       if (skip) {
         attempts.push({ provider: route.provider, model: route.model, outcome: 'skipped', reason: skip });

@@ -263,7 +263,7 @@ export async function runProductRecommender(
       const system = (await deps.prompts.render('agent.recommend.system')).text;
       const promptTag = await deps.prompts.versionTag(['agent.recommend.system', 'agent.recommend.user']);
       const runs = await Promise.all(
-        plannedBatches.map(async (gaps) => {
+        plannedBatches.map(async (gaps, batchIndex) => {
           const want = gaps.reduce((sum, g) => sum + g.want, 0);
           const cacheKey = `mk:rec:${input.cuisine.id}:${sha256Hex(
             JSON.stringify([
@@ -303,6 +303,8 @@ export async function runProductRecommender(
               system,
               user,
               timeoutMs: input.attemptTimeoutMs,
+              // Batches in flight at the same time start on different providers (see RouterRequest.routeOffset).
+              routeOffset: batchIndex,
             },
             run.ctx,
           );

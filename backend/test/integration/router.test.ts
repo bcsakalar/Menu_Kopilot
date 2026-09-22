@@ -117,6 +117,22 @@ describe('AiRouter', () => {
     expect(gemini.calls.length + groq.calls.length).toBe(0);
   });
 
+  it('starts parallel batches on different providers and still falls back through the whole chain', async () => {
+    // The recommend chain is groq (primary) then two gemini routes. Batch 1 starts one step further down, so two
+    // calls in flight do not spend the same provider's per-minute allowance — that is what made a full-mode run
+    // come back with half its batches rate-limited.
+    const router = makeRouter();
+    const first = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
+    const second = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u', routeOffset: 1 });
+    expect(first.ok && first.meta.provider).toBe('groq');
+    expect(second.ok && second.meta.provider).toBe('gemini');
+
+    // A rotated call that fails still walks the rest of the chain, wrapping back to the primary.
+    gemini.setResponder(() => ({ ok: false, kind: 'unavailable' }));
+    const third = await router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u', routeOffset: 1 });
+    expect(third.ok && third.meta.provider).toBe('groq');
+  });
+
   it('retries a short 429 on the same provider and cools down on a long one', async () => {
     let n = 0;
     groq.setResponder(() => (n++ === 0 ? { ok: false, kind: 'rate_limited', retryAfterMs: 1200 } : good));

@@ -129,7 +129,7 @@ export async function runOptionModifier(
       }
 
       const runs = await Promise.all(
-        batches.map(async (batch) => {
+        batches.map(async (batch, batchIndex) => {
           const user = (
             await deps.prompts.render('agent.options.user', {
               cuisine: input.cuisine.name,
@@ -154,6 +154,8 @@ export async function runOptionModifier(
               system,
               user,
               timeoutMs: input.attemptTimeoutMs,
+              // Batches in flight at the same time start on different providers (see RouterRequest.routeOffset).
+              routeOffset: batchIndex,
             },
             run.ctx,
           );
