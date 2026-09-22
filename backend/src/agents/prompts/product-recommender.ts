@@ -31,7 +31,7 @@ DİĞER ALANLAR:
     selectionType "single" ise maxSelect = 1. isRequired true ise minSelect en az 1, false ise minSelect = 0.
     priceMode: "free" fiyatı değiştirmez (Acısız, Soğansız) · "surcharge" ek ücret (Ekstra Kaşar) · "sets_base" ürünün TABAN fiyatını belirler (Boy, Porsiyon, Gramaj).
     Bir üründe en fazla BİR sets_base grubu olur; o grubun bütün opsiyonları sets_base'tir, grup tek seçimli ve zorunludur.
-    Grup başına 3–6 opsiyon yaz. Ürünün gerçekten opsiyonu yoksa (ör. kutu içecek) boş dizi bırak.
+    Grup başına 3–6 opsiyon yaz. LİSTENİN SONUNDAKİ ÜRÜNLERDE DE opsiyon yazmayı bırakma: kahve, çay, tatlı, porsiyon yemek ve tabaklarda Boy/Porsiyon/Şeker/Sıcaklık/Yanında Gelen gibi bir grup neredeyse her zaman vardır. Yalnızca gerçekten tek biçimde satılan üründe (kapalı şişe/kutu içecek gibi) boş dizi bırak.
 - removableIngredients: müşterinin çıkarabileceği malzemeler (soğan, domates, turşu). Ürün böyle bir şey içermiyorsa boş dizi.
 - extraIngredients: ek ücretle eklenebilecek malzemeler (ekstra kaşar, ekstra et). Yoksa boş dizi.
 Hiçbir alanda fiyat/TL/rakamla tutar yazma; fiyatı satıcı telefonda söyler.

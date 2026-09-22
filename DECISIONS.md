@@ -684,3 +684,23 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   v1, so the wording that runs in production could silently differ from the file. A prompt written from the app
   always lands on a version above the seeded ones and is never overwritten, and a version is only activated while
   it still holds exactly the seeded text.
+- **D-174** — What the production traces taught, after the first deploy of D-171/D-172 (2026-09-22). None of it was
+  visible in the fixture tests, all of it in `usage_log` and `agent_steps`:
+  1. **One 40-item call does not come back.** A café whose opening minimum is 50 is 43 products short; asking for
+     all of it in one call took 33 s and failed. The recommender now batches the open categories into calls of
+     about ten products, like the option agent.
+  2. **Parallel batches to one provider spend its per-minute allowance.** Groq's free tier caps tokens per minute,
+     so two of three batches came back 429. A request can now say which route in the chain to start from, and
+     both batching agents pass their batch index — batch 0 to the primary, batch 1 to the next provider. Every
+     route is still tried on failure.
+  3. **A 6 s per-attempt timeout was sized for the old, smaller answers.** After a 429 the retry and the fallback
+     both died on it, so the run finished with pool cards only. A request may now carry its own timeout; the plan
+     sets 6 s in quick mode (its 11 s deadline must still fit a fallback) and 11 s in full mode.
+  4. **One bad item cost the whole batch.** The answer is parsed against one schema, so a 200-character
+     description or a third option group failed everything with `invalid_output`. The wire schemas are now wider
+     than a card, and the exact rules are applied per item by the agent and the Validator.
+  5. **A cuisine can ask for more than its category table describes.** kafe-icecek expects 50 products across
+     three categories summing to 13; capping each category at twice its own minimum stopped the run 24 products
+     short. The ceiling now also follows the category's share of what the run needs.
+  Measured on production after all five (kafe-icecek, 7-product menu, full mode): 36 new products, 7/7 products
+  with an option card, 43/50 reachable, 19 s, `completed` — from 12 products, `partial` and 33 s.

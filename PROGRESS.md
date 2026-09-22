@@ -50,6 +50,13 @@ New: `backend/src/agents/plan.ts` (modes + per-category quota, D'Hondt apportion
 prompt versions that actually reach the database, option/ingredient data on section A cards, the mode selector on
 the home screen and a fold-out "opsiyon ve malzemeler" block on new-product cards.
 
+Then measured on **production** and fixed what only real providers show (D-174): recommendations go out in
+batches of ~10, parallel batches start on different providers in the chain, a request carries its own attempt
+timeout (11 s in full mode), the wire schemas are wider than a card so one bad item costs one card, and a
+category's ceiling follows the cuisine's minimum. Production, kafe-icecek (minimum 50) with a 7-product menu:
+36 new products, option cards for 7/7 products, 43/50 reachable, 19 s — from 12 products, `partial`, 33 s.
+App 1.2.0+3 signed and installed on the phone over USB.
+
 **2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
 (migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
 `MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:
