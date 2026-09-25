@@ -375,6 +375,7 @@ class AnalysisController extends Notifier<AnalysisViewState> {
         createdAt: DateTime.now(),
       );
       final title = state.request?.data.menuText.trim() ?? '';
+      final decided = state.cards.where((c) => c.section != CardSection.fix);
       await _db.saveRecentRun(
         RecentRunsCompanion.insert(
           runId: runId,
@@ -385,7 +386,18 @@ class AnalysisController extends Notifier<AnalysisViewState> {
           status: snapshot.status,
           cardCount: Value(state.cards.length),
           snapshotJson: jsonEncode(snapshot.toJson()),
+          // The time the run was made; saving it again later (a card accepted) keeps the first one (D-193).
           createdAt: DateTime.now(),
+          mode: Value(state.request?.data.mode.wire),
+          finishedAt: Value(snapshot.status == 'running' ? null : DateTime.now()),
+          productNamesJson: Value(jsonEncode(state.menu.take(5).map((m) => m.name).toList())),
+          menuCount: Value(state.menu.length),
+          newCount: Value(state.cards.where((c) => c.section == CardSection.newProduct).length),
+          menuCardCount: Value(state.cards.where((c) => c.section == CardSection.option).length),
+          acceptedCount: Value(decided.where((c) => c.status == CardStatus.accepted).length),
+          skippedCount: Value(decided.where((c) => c.status == CardStatus.skipped).length),
+          currentCount: Value(state.counts?.current),
+          targetCount: Value(state.counts?.target),
         ),
       );
     } on Object catch (_) {

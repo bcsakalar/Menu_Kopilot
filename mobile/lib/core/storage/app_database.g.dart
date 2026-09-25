@@ -300,6 +300,120 @@ class $RecentRunsTable extends RecentRuns
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finishedAtMeta = const VerificationMeta(
+    'finishedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> finishedAt = GeneratedColumn<DateTime>(
+    'finished_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _productNamesJsonMeta = const VerificationMeta(
+    'productNamesJson',
+  );
+  @override
+  late final GeneratedColumn<String> productNamesJson = GeneratedColumn<String>(
+    'product_names_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _menuCountMeta = const VerificationMeta(
+    'menuCount',
+  );
+  @override
+  late final GeneratedColumn<int> menuCount = GeneratedColumn<int>(
+    'menu_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _newCountMeta = const VerificationMeta(
+    'newCount',
+  );
+  @override
+  late final GeneratedColumn<int> newCount = GeneratedColumn<int>(
+    'new_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _menuCardCountMeta = const VerificationMeta(
+    'menuCardCount',
+  );
+  @override
+  late final GeneratedColumn<int> menuCardCount = GeneratedColumn<int>(
+    'menu_card_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _acceptedCountMeta = const VerificationMeta(
+    'acceptedCount',
+  );
+  @override
+  late final GeneratedColumn<int> acceptedCount = GeneratedColumn<int>(
+    'accepted_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _skippedCountMeta = const VerificationMeta(
+    'skippedCount',
+  );
+  @override
+  late final GeneratedColumn<int> skippedCount = GeneratedColumn<int>(
+    'skipped_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _currentCountMeta = const VerificationMeta(
+    'currentCount',
+  );
+  @override
+  late final GeneratedColumn<int> currentCount = GeneratedColumn<int>(
+    'current_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetCountMeta = const VerificationMeta(
+    'targetCount',
+  );
+  @override
+  late final GeneratedColumn<int> targetCount = GeneratedColumn<int>(
+    'target_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     runId,
@@ -310,6 +424,16 @@ class $RecentRunsTable extends RecentRuns
     cardCount,
     snapshotJson,
     createdAt,
+    mode,
+    finishedAt,
+    productNamesJson,
+    menuCount,
+    newCount,
+    menuCardCount,
+    acceptedCount,
+    skippedCount,
+    currentCount,
+    targetCount,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -385,6 +509,84 @@ class $RecentRunsTable extends RecentRuns
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    }
+    if (data.containsKey('finished_at')) {
+      context.handle(
+        _finishedAtMeta,
+        finishedAt.isAcceptableOrUnknown(data['finished_at']!, _finishedAtMeta),
+      );
+    }
+    if (data.containsKey('product_names_json')) {
+      context.handle(
+        _productNamesJsonMeta,
+        productNamesJson.isAcceptableOrUnknown(
+          data['product_names_json']!,
+          _productNamesJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('menu_count')) {
+      context.handle(
+        _menuCountMeta,
+        menuCount.isAcceptableOrUnknown(data['menu_count']!, _menuCountMeta),
+      );
+    }
+    if (data.containsKey('new_count')) {
+      context.handle(
+        _newCountMeta,
+        newCount.isAcceptableOrUnknown(data['new_count']!, _newCountMeta),
+      );
+    }
+    if (data.containsKey('menu_card_count')) {
+      context.handle(
+        _menuCardCountMeta,
+        menuCardCount.isAcceptableOrUnknown(
+          data['menu_card_count']!,
+          _menuCardCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('accepted_count')) {
+      context.handle(
+        _acceptedCountMeta,
+        acceptedCount.isAcceptableOrUnknown(
+          data['accepted_count']!,
+          _acceptedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('skipped_count')) {
+      context.handle(
+        _skippedCountMeta,
+        skippedCount.isAcceptableOrUnknown(
+          data['skipped_count']!,
+          _skippedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_count')) {
+      context.handle(
+        _currentCountMeta,
+        currentCount.isAcceptableOrUnknown(
+          data['current_count']!,
+          _currentCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('target_count')) {
+      context.handle(
+        _targetCountMeta,
+        targetCount.isAcceptableOrUnknown(
+          data['target_count']!,
+          _targetCountMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -426,6 +628,46 @@ class $RecentRunsTable extends RecentRuns
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      ),
+      finishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}finished_at'],
+      ),
+      productNamesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_names_json'],
+      )!,
+      menuCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}menu_count'],
+      )!,
+      newCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_count'],
+      )!,
+      menuCardCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}menu_card_count'],
+      )!,
+      acceptedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}accepted_count'],
+      )!,
+      skippedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}skipped_count'],
+      )!,
+      currentCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_count'],
+      ),
+      targetCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_count'],
+      ),
     );
   }
 
@@ -444,6 +686,20 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
   final int cardCount;
   final String snapshotJson;
   final DateTime createdAt;
+
+  /// "quick" or "full"; null for runs made before it was stored.
+  final String? mode;
+  final DateTime? finishedAt;
+
+  /// The first products of the menu, a JSON list — the row's title and what the search looks in.
+  final String productNamesJson;
+  final int menuCount;
+  final int newCount;
+  final int menuCardCount;
+  final int acceptedCount;
+  final int skippedCount;
+  final int? currentCount;
+  final int? targetCount;
   const RecentRun({
     required this.runId,
     this.cuisineId,
@@ -453,6 +709,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     required this.cardCount,
     required this.snapshotJson,
     required this.createdAt,
+    this.mode,
+    this.finishedAt,
+    required this.productNamesJson,
+    required this.menuCount,
+    required this.newCount,
+    required this.menuCardCount,
+    required this.acceptedCount,
+    required this.skippedCount,
+    this.currentCount,
+    this.targetCount,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -467,6 +733,24 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     map['card_count'] = Variable<int>(cardCount);
     map['snapshot_json'] = Variable<String>(snapshotJson);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || mode != null) {
+      map['mode'] = Variable<String>(mode);
+    }
+    if (!nullToAbsent || finishedAt != null) {
+      map['finished_at'] = Variable<DateTime>(finishedAt);
+    }
+    map['product_names_json'] = Variable<String>(productNamesJson);
+    map['menu_count'] = Variable<int>(menuCount);
+    map['new_count'] = Variable<int>(newCount);
+    map['menu_card_count'] = Variable<int>(menuCardCount);
+    map['accepted_count'] = Variable<int>(acceptedCount);
+    map['skipped_count'] = Variable<int>(skippedCount);
+    if (!nullToAbsent || currentCount != null) {
+      map['current_count'] = Variable<int>(currentCount);
+    }
+    if (!nullToAbsent || targetCount != null) {
+      map['target_count'] = Variable<int>(targetCount);
+    }
     return map;
   }
 
@@ -482,6 +766,22 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       cardCount: Value(cardCount),
       snapshotJson: Value(snapshotJson),
       createdAt: Value(createdAt),
+      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
+      finishedAt: finishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finishedAt),
+      productNamesJson: Value(productNamesJson),
+      menuCount: Value(menuCount),
+      newCount: Value(newCount),
+      menuCardCount: Value(menuCardCount),
+      acceptedCount: Value(acceptedCount),
+      skippedCount: Value(skippedCount),
+      currentCount: currentCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentCount),
+      targetCount: targetCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetCount),
     );
   }
 
@@ -499,6 +799,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       cardCount: serializer.fromJson<int>(json['cardCount']),
       snapshotJson: serializer.fromJson<String>(json['snapshotJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      mode: serializer.fromJson<String?>(json['mode']),
+      finishedAt: serializer.fromJson<DateTime?>(json['finishedAt']),
+      productNamesJson: serializer.fromJson<String>(json['productNamesJson']),
+      menuCount: serializer.fromJson<int>(json['menuCount']),
+      newCount: serializer.fromJson<int>(json['newCount']),
+      menuCardCount: serializer.fromJson<int>(json['menuCardCount']),
+      acceptedCount: serializer.fromJson<int>(json['acceptedCount']),
+      skippedCount: serializer.fromJson<int>(json['skippedCount']),
+      currentCount: serializer.fromJson<int?>(json['currentCount']),
+      targetCount: serializer.fromJson<int?>(json['targetCount']),
     );
   }
   @override
@@ -513,6 +823,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       'cardCount': serializer.toJson<int>(cardCount),
       'snapshotJson': serializer.toJson<String>(snapshotJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'mode': serializer.toJson<String?>(mode),
+      'finishedAt': serializer.toJson<DateTime?>(finishedAt),
+      'productNamesJson': serializer.toJson<String>(productNamesJson),
+      'menuCount': serializer.toJson<int>(menuCount),
+      'newCount': serializer.toJson<int>(newCount),
+      'menuCardCount': serializer.toJson<int>(menuCardCount),
+      'acceptedCount': serializer.toJson<int>(acceptedCount),
+      'skippedCount': serializer.toJson<int>(skippedCount),
+      'currentCount': serializer.toJson<int?>(currentCount),
+      'targetCount': serializer.toJson<int?>(targetCount),
     };
   }
 
@@ -525,6 +845,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     int? cardCount,
     String? snapshotJson,
     DateTime? createdAt,
+    Value<String?> mode = const Value.absent(),
+    Value<DateTime?> finishedAt = const Value.absent(),
+    String? productNamesJson,
+    int? menuCount,
+    int? newCount,
+    int? menuCardCount,
+    int? acceptedCount,
+    int? skippedCount,
+    Value<int?> currentCount = const Value.absent(),
+    Value<int?> targetCount = const Value.absent(),
   }) => RecentRun(
     runId: runId ?? this.runId,
     cuisineId: cuisineId.present ? cuisineId.value : this.cuisineId,
@@ -534,6 +864,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     cardCount: cardCount ?? this.cardCount,
     snapshotJson: snapshotJson ?? this.snapshotJson,
     createdAt: createdAt ?? this.createdAt,
+    mode: mode.present ? mode.value : this.mode,
+    finishedAt: finishedAt.present ? finishedAt.value : this.finishedAt,
+    productNamesJson: productNamesJson ?? this.productNamesJson,
+    menuCount: menuCount ?? this.menuCount,
+    newCount: newCount ?? this.newCount,
+    menuCardCount: menuCardCount ?? this.menuCardCount,
+    acceptedCount: acceptedCount ?? this.acceptedCount,
+    skippedCount: skippedCount ?? this.skippedCount,
+    currentCount: currentCount.present ? currentCount.value : this.currentCount,
+    targetCount: targetCount.present ? targetCount.value : this.targetCount,
   );
   RecentRun copyWithCompanion(RecentRunsCompanion data) {
     return RecentRun(
@@ -549,6 +889,30 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
           ? data.snapshotJson.value
           : this.snapshotJson,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      finishedAt: data.finishedAt.present
+          ? data.finishedAt.value
+          : this.finishedAt,
+      productNamesJson: data.productNamesJson.present
+          ? data.productNamesJson.value
+          : this.productNamesJson,
+      menuCount: data.menuCount.present ? data.menuCount.value : this.menuCount,
+      newCount: data.newCount.present ? data.newCount.value : this.newCount,
+      menuCardCount: data.menuCardCount.present
+          ? data.menuCardCount.value
+          : this.menuCardCount,
+      acceptedCount: data.acceptedCount.present
+          ? data.acceptedCount.value
+          : this.acceptedCount,
+      skippedCount: data.skippedCount.present
+          ? data.skippedCount.value
+          : this.skippedCount,
+      currentCount: data.currentCount.present
+          ? data.currentCount.value
+          : this.currentCount,
+      targetCount: data.targetCount.present
+          ? data.targetCount.value
+          : this.targetCount,
     );
   }
 
@@ -562,7 +926,17 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
           ..write('status: $status, ')
           ..write('cardCount: $cardCount, ')
           ..write('snapshotJson: $snapshotJson, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('mode: $mode, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('productNamesJson: $productNamesJson, ')
+          ..write('menuCount: $menuCount, ')
+          ..write('newCount: $newCount, ')
+          ..write('menuCardCount: $menuCardCount, ')
+          ..write('acceptedCount: $acceptedCount, ')
+          ..write('skippedCount: $skippedCount, ')
+          ..write('currentCount: $currentCount, ')
+          ..write('targetCount: $targetCount')
           ..write(')'))
         .toString();
   }
@@ -577,6 +951,16 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     cardCount,
     snapshotJson,
     createdAt,
+    mode,
+    finishedAt,
+    productNamesJson,
+    menuCount,
+    newCount,
+    menuCardCount,
+    acceptedCount,
+    skippedCount,
+    currentCount,
+    targetCount,
   );
   @override
   bool operator ==(Object other) =>
@@ -589,7 +973,17 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
           other.status == this.status &&
           other.cardCount == this.cardCount &&
           other.snapshotJson == this.snapshotJson &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.mode == this.mode &&
+          other.finishedAt == this.finishedAt &&
+          other.productNamesJson == this.productNamesJson &&
+          other.menuCount == this.menuCount &&
+          other.newCount == this.newCount &&
+          other.menuCardCount == this.menuCardCount &&
+          other.acceptedCount == this.acceptedCount &&
+          other.skippedCount == this.skippedCount &&
+          other.currentCount == this.currentCount &&
+          other.targetCount == this.targetCount);
 }
 
 class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
@@ -601,6 +995,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
   final Value<int> cardCount;
   final Value<String> snapshotJson;
   final Value<DateTime> createdAt;
+  final Value<String?> mode;
+  final Value<DateTime?> finishedAt;
+  final Value<String> productNamesJson;
+  final Value<int> menuCount;
+  final Value<int> newCount;
+  final Value<int> menuCardCount;
+  final Value<int> acceptedCount;
+  final Value<int> skippedCount;
+  final Value<int?> currentCount;
+  final Value<int?> targetCount;
   final Value<int> rowid;
   const RecentRunsCompanion({
     this.runId = const Value.absent(),
@@ -611,6 +1015,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     this.cardCount = const Value.absent(),
     this.snapshotJson = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.productNamesJson = const Value.absent(),
+    this.menuCount = const Value.absent(),
+    this.newCount = const Value.absent(),
+    this.menuCardCount = const Value.absent(),
+    this.acceptedCount = const Value.absent(),
+    this.skippedCount = const Value.absent(),
+    this.currentCount = const Value.absent(),
+    this.targetCount = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecentRunsCompanion.insert({
@@ -622,6 +1036,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     this.cardCount = const Value.absent(),
     required String snapshotJson,
     required DateTime createdAt,
+    this.mode = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.productNamesJson = const Value.absent(),
+    this.menuCount = const Value.absent(),
+    this.newCount = const Value.absent(),
+    this.menuCardCount = const Value.absent(),
+    this.acceptedCount = const Value.absent(),
+    this.skippedCount = const Value.absent(),
+    this.currentCount = const Value.absent(),
+    this.targetCount = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : runId = Value(runId),
        status = Value(status),
@@ -636,6 +1060,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     Expression<int>? cardCount,
     Expression<String>? snapshotJson,
     Expression<DateTime>? createdAt,
+    Expression<String>? mode,
+    Expression<DateTime>? finishedAt,
+    Expression<String>? productNamesJson,
+    Expression<int>? menuCount,
+    Expression<int>? newCount,
+    Expression<int>? menuCardCount,
+    Expression<int>? acceptedCount,
+    Expression<int>? skippedCount,
+    Expression<int>? currentCount,
+    Expression<int>? targetCount,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -647,6 +1081,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
       if (cardCount != null) 'card_count': cardCount,
       if (snapshotJson != null) 'snapshot_json': snapshotJson,
       if (createdAt != null) 'created_at': createdAt,
+      if (mode != null) 'mode': mode,
+      if (finishedAt != null) 'finished_at': finishedAt,
+      if (productNamesJson != null) 'product_names_json': productNamesJson,
+      if (menuCount != null) 'menu_count': menuCount,
+      if (newCount != null) 'new_count': newCount,
+      if (menuCardCount != null) 'menu_card_count': menuCardCount,
+      if (acceptedCount != null) 'accepted_count': acceptedCount,
+      if (skippedCount != null) 'skipped_count': skippedCount,
+      if (currentCount != null) 'current_count': currentCount,
+      if (targetCount != null) 'target_count': targetCount,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -660,6 +1104,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     Value<int>? cardCount,
     Value<String>? snapshotJson,
     Value<DateTime>? createdAt,
+    Value<String?>? mode,
+    Value<DateTime?>? finishedAt,
+    Value<String>? productNamesJson,
+    Value<int>? menuCount,
+    Value<int>? newCount,
+    Value<int>? menuCardCount,
+    Value<int>? acceptedCount,
+    Value<int>? skippedCount,
+    Value<int?>? currentCount,
+    Value<int?>? targetCount,
     Value<int>? rowid,
   }) {
     return RecentRunsCompanion(
@@ -671,6 +1125,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
       cardCount: cardCount ?? this.cardCount,
       snapshotJson: snapshotJson ?? this.snapshotJson,
       createdAt: createdAt ?? this.createdAt,
+      mode: mode ?? this.mode,
+      finishedAt: finishedAt ?? this.finishedAt,
+      productNamesJson: productNamesJson ?? this.productNamesJson,
+      menuCount: menuCount ?? this.menuCount,
+      newCount: newCount ?? this.newCount,
+      menuCardCount: menuCardCount ?? this.menuCardCount,
+      acceptedCount: acceptedCount ?? this.acceptedCount,
+      skippedCount: skippedCount ?? this.skippedCount,
+      currentCount: currentCount ?? this.currentCount,
+      targetCount: targetCount ?? this.targetCount,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -702,6 +1166,36 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (finishedAt.present) {
+      map['finished_at'] = Variable<DateTime>(finishedAt.value);
+    }
+    if (productNamesJson.present) {
+      map['product_names_json'] = Variable<String>(productNamesJson.value);
+    }
+    if (menuCount.present) {
+      map['menu_count'] = Variable<int>(menuCount.value);
+    }
+    if (newCount.present) {
+      map['new_count'] = Variable<int>(newCount.value);
+    }
+    if (menuCardCount.present) {
+      map['menu_card_count'] = Variable<int>(menuCardCount.value);
+    }
+    if (acceptedCount.present) {
+      map['accepted_count'] = Variable<int>(acceptedCount.value);
+    }
+    if (skippedCount.present) {
+      map['skipped_count'] = Variable<int>(skippedCount.value);
+    }
+    if (currentCount.present) {
+      map['current_count'] = Variable<int>(currentCount.value);
+    }
+    if (targetCount.present) {
+      map['target_count'] = Variable<int>(targetCount.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -719,6 +1213,16 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
           ..write('cardCount: $cardCount, ')
           ..write('snapshotJson: $snapshotJson, ')
           ..write('createdAt: $createdAt, ')
+          ..write('mode: $mode, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('productNamesJson: $productNamesJson, ')
+          ..write('menuCount: $menuCount, ')
+          ..write('newCount: $newCount, ')
+          ..write('menuCardCount: $menuCardCount, ')
+          ..write('acceptedCount: $acceptedCount, ')
+          ..write('skippedCount: $skippedCount, ')
+          ..write('currentCount: $currentCount, ')
+          ..write('targetCount: $targetCount, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2350,6 +2854,16 @@ typedef $$RecentRunsTableCreateCompanionBuilder = RecentRunsCompanion Function({
   Value<int> cardCount,
   required String snapshotJson,
   required DateTime createdAt,
+  Value<String?> mode,
+  Value<DateTime?> finishedAt,
+  Value<String> productNamesJson,
+  Value<int> menuCount,
+  Value<int> newCount,
+  Value<int> menuCardCount,
+  Value<int> acceptedCount,
+  Value<int> skippedCount,
+  Value<int?> currentCount,
+  Value<int?> targetCount,
   Value<int> rowid,
 });
 typedef $$RecentRunsTableUpdateCompanionBuilder = RecentRunsCompanion Function({
@@ -2361,6 +2875,16 @@ typedef $$RecentRunsTableUpdateCompanionBuilder = RecentRunsCompanion Function({
   Value<int> cardCount,
   Value<String> snapshotJson,
   Value<DateTime> createdAt,
+  Value<String?> mode,
+  Value<DateTime?> finishedAt,
+  Value<String> productNamesJson,
+  Value<int> menuCount,
+  Value<int> newCount,
+  Value<int> menuCardCount,
+  Value<int> acceptedCount,
+  Value<int> skippedCount,
+  Value<int?> currentCount,
+  Value<int?> targetCount,
   Value<int> rowid,
 });
 
@@ -2410,6 +2934,56 @@ class $$RecentRunsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productNamesJson => $composableBuilder(
+    column: $table.productNamesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get menuCount => $composableBuilder(
+    column: $table.menuCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get newCount => $composableBuilder(
+    column: $table.newCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get menuCardCount => $composableBuilder(
+    column: $table.menuCardCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get acceptedCount => $composableBuilder(
+    column: $table.acceptedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get skippedCount => $composableBuilder(
+    column: $table.skippedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentCount => $composableBuilder(
+    column: $table.currentCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2462,6 +3036,56 @@ class $$RecentRunsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productNamesJson => $composableBuilder(
+    column: $table.productNamesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get menuCount => $composableBuilder(
+    column: $table.menuCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get newCount => $composableBuilder(
+    column: $table.newCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get menuCardCount => $composableBuilder(
+    column: $table.menuCardCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get acceptedCount => $composableBuilder(
+    column: $table.acceptedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get skippedCount => $composableBuilder(
+    column: $table.skippedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentCount => $composableBuilder(
+    column: $table.currentCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RecentRunsTableAnnotationComposer
@@ -2500,6 +3124,50 @@ class $$RecentRunsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get productNamesJson => $composableBuilder(
+    column: $table.productNamesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get menuCount =>
+      $composableBuilder(column: $table.menuCount, builder: (column) => column);
+
+  GeneratedColumn<int> get newCount =>
+      $composableBuilder(column: $table.newCount, builder: (column) => column);
+
+  GeneratedColumn<int> get menuCardCount => $composableBuilder(
+    column: $table.menuCardCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get acceptedCount => $composableBuilder(
+    column: $table.acceptedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get skippedCount => $composableBuilder(
+    column: $table.skippedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get currentCount => $composableBuilder(
+    column: $table.currentCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
+    builder: (column) => column,
+  );
 }
 
 class $$RecentRunsTableTableManager
@@ -2541,6 +3209,16 @@ class $$RecentRunsTableTableManager
                 Value<int> cardCount = const Value.absent(),
                 Value<String> snapshotJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> mode = const Value.absent(),
+                Value<DateTime?> finishedAt = const Value.absent(),
+                Value<String> productNamesJson = const Value.absent(),
+                Value<int> menuCount = const Value.absent(),
+                Value<int> newCount = const Value.absent(),
+                Value<int> menuCardCount = const Value.absent(),
+                Value<int> acceptedCount = const Value.absent(),
+                Value<int> skippedCount = const Value.absent(),
+                Value<int?> currentCount = const Value.absent(),
+                Value<int?> targetCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecentRunsCompanion(
                 runId: runId,
@@ -2551,6 +3229,16 @@ class $$RecentRunsTableTableManager
                 cardCount: cardCount,
                 snapshotJson: snapshotJson,
                 createdAt: createdAt,
+                mode: mode,
+                finishedAt: finishedAt,
+                productNamesJson: productNamesJson,
+                menuCount: menuCount,
+                newCount: newCount,
+                menuCardCount: menuCardCount,
+                acceptedCount: acceptedCount,
+                skippedCount: skippedCount,
+                currentCount: currentCount,
+                targetCount: targetCount,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2563,6 +3251,16 @@ class $$RecentRunsTableTableManager
                 Value<int> cardCount = const Value.absent(),
                 required String snapshotJson,
                 required DateTime createdAt,
+                Value<String?> mode = const Value.absent(),
+                Value<DateTime?> finishedAt = const Value.absent(),
+                Value<String> productNamesJson = const Value.absent(),
+                Value<int> menuCount = const Value.absent(),
+                Value<int> newCount = const Value.absent(),
+                Value<int> menuCardCount = const Value.absent(),
+                Value<int> acceptedCount = const Value.absent(),
+                Value<int> skippedCount = const Value.absent(),
+                Value<int?> currentCount = const Value.absent(),
+                Value<int?> targetCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecentRunsCompanion.insert(
                 runId: runId,
@@ -2573,6 +3271,16 @@ class $$RecentRunsTableTableManager
                 cardCount: cardCount,
                 snapshotJson: snapshotJson,
                 createdAt: createdAt,
+                mode: mode,
+                finishedAt: finishedAt,
+                productNamesJson: productNamesJson,
+                menuCount: menuCount,
+                newCount: newCount,
+                menuCardCount: menuCardCount,
+                acceptedCount: acceptedCount,
+                skippedCount: skippedCount,
+                currentCount: currentCount,
+                targetCount: targetCount,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

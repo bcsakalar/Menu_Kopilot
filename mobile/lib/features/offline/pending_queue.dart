@@ -131,6 +131,7 @@ class PendingQueue {
         status: 'running',
         snapshotJson: '{}',
         createdAt: DateTime.now(),
+        mode: Value(request.mode.wire),
       ),
     );
     return runId;

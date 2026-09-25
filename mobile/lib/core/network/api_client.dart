@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../data/models/analysis.dart';
 import '../../data/models/common.dart';
+import '../../data/models/history.dart';
 import '../../data/models/json.dart';
 import '../../data/models/settings.dart';
 import '../../data/models/template_item.dart';
@@ -306,6 +307,56 @@ class ApiClient {
         final data = response.data;
         if (data == null || data.isEmpty) return null;
         return AnalysisResult.fromJson(data);
+      });
+
+  /// The user's analyses, newest first (D-193). Filters are optional; [before] pages back in time.
+  Future<HistoryPage> analysisHistory({
+    int limit = 50,
+    DateTime? before,
+    DateTime? from,
+    DateTime? to,
+    String? cuisineId,
+    String? mode,
+    String? query,
+  }) =>
+      _guard(() async {
+        final response = await _dio.get<Json>(
+          '/analyze/history',
+          queryParameters: {
+            'limit': '$limit',
+            if (before != null) 'before': before.toUtc().toIso8601String(),
+            if (from != null) 'from': from.toUtc().toIso8601String(),
+            if (to != null) 'to': to.toUtc().toIso8601String(),
+            if (cuisineId != null && cuisineId.isNotEmpty) 'cuisineId': cuisineId,
+            'mode': ?mode,
+            if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
+          },
+        );
+        return HistoryPage.fromJson(response.data ?? const {});
+      });
+
+  // ---- learning loop (D-194) ----------------------------------------------------------------------------------
+
+  /// What the team kept throwing away, which the suggestions no longer offer.
+  Future<LearningResult> learning() => _guard(() async {
+        final response = await _dio.get<Json>('/learning');
+        return LearningResult.fromJson(response.data ?? const {});
+      });
+
+  /// "Geri al" for a product turned down in one kitchen.
+  Future<int> forgetLearnedProduct({required String cuisineId, required String name}) => _guard(() async {
+        final response = await _dio.post<Json>('/learning/forget', data: {'scope': 'product', 'cuisineId': cuisineId, 'value': name});
+        return (response.data ?? const {}).integer('forgotten');
+      });
+
+  /// "Geri al" for a card suggestion deleted for one kind of product.
+  Future<int> forgetLearnedSuggestion({required String productType, required LearnedKind kind, required String value}) =>
+      _guard(() async {
+        final response = await _dio.post<Json>(
+          '/learning/forget',
+          data: {'scope': 'suggestion', 'productType': productType, 'kind': kind.wire, 'value': value},
+        );
+        return (response.data ?? const {}).integer('forgotten');
       });
 
   Future<RunTrace> analysisTrace(String runId) => _guard(() async {

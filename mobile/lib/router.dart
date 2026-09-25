@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'core/providers.dart';
 import 'features/auth/login_screen.dart';
 import 'features/camera/camera_capture_screen.dart';
+import 'features/history/history_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/results/analysis_controller.dart';
 import 'features/results/results_screen.dart';
 import 'features/settings/category_settings_screen.dart';
 import 'features/settings/cuisine_settings_screen.dart';
+import 'features/settings/learning_screen.dart';
 import 'features/settings/model_settings_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/shell/app_shell.dart';
@@ -62,6 +64,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                       );
                     },
                   ),
+                  GoRoute(path: 'history', builder: (_, _) => const HistoryScreen()),
                 ],
               ),
             ],
@@ -77,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(path: 'categories', builder: (_, _) => const CategorySettingsScreen()),
                   GoRoute(path: 'models', builder: (_, _) => const ModelSettingsScreen()),
                   GoRoute(path: 'usage', builder: (_, _) => const UsageScreen()),
+                  GoRoute(path: 'learning', builder: (_, _) => const LearningScreen()),
                 ],
               ),
             ],

@@ -345,14 +345,24 @@ class _RecentRuns extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Eyebrow(l10n.recentRuns, padding: const EdgeInsets.only(top: 24, bottom: 8)),
+        Eyebrow(
+          l10n.recentRuns,
+          padding: const EdgeInsets.only(top: 24, bottom: 8),
+          trailing: runs.isEmpty
+              ? null
+              : TextButton(
+                  key: const Key('history-open'),
+                  onPressed: () => context.push('/suggest/history'),
+                  child: Text(l10n.seeAllRuns),
+                ),
+        ),
         if (runs.isEmpty)
           Text(l10n.noRecentRuns, style: text.bodySmall)
         else
           SurfaceGroup(
             margin: EdgeInsets.zero,
             children: [
-              for (final run in runs.take(10))
+              for (final run in runs.take(5))
                 ListTile(
                   key: ValueKey('recent-${run.runId}'),
                   title: Text(

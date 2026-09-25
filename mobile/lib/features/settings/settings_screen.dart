@@ -87,6 +87,14 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
+            key: const Key('settings-learning'),
+            leading: const Icon(Icons.school_outlined),
+            title: Text(l10n.learningTitle),
+            subtitle: Text(l10n.learningHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/learning'),
+          ),
+          ListTile(
             key: const Key('settings-usage'),
             leading: const Icon(Icons.insights_outlined),
             title: Text(l10n.usageTitle),

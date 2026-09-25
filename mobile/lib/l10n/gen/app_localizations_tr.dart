@@ -132,7 +132,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get recentCuisines => 'Son kullanılanlar';
 
   @override
-  String get allCuisines => 'Tümü';
+  String get allCuisines => 'Tüm mutfaklar';
 
   @override
   String get photos => 'Menü fotoğrafları';
@@ -182,6 +182,154 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get photoRunTitle => 'Fotoğraftan analiz';
+
+  @override
+  String get seeAllRuns => 'Tümünü gör';
+
+  @override
+  String get historyTitle => 'Analiz geçmişi';
+
+  @override
+  String get historySearchHint => 'Ürün ya da mutfak ara';
+
+  @override
+  String get periodAll => 'Tarih';
+
+  @override
+  String get periodToday => 'Bugün';
+
+  @override
+  String get periodWeek => 'Son 7 gün';
+
+  @override
+  String get periodMonth => 'Bu ay';
+
+  @override
+  String get periodCustom => 'Tarih aralığı seç…';
+
+  @override
+  String get periodAllTimes => 'Tüm zamanlar';
+
+  @override
+  String get cuisineFilter => 'Mutfak';
+
+  @override
+  String get clearFilters => 'Temizle';
+
+  @override
+  String get historyYesterday => 'Dün';
+
+  @override
+  String historyDayCount(int count) {
+    return '$count analiz';
+  }
+
+  @override
+  String historyNew(int count) {
+    return '$count yeni';
+  }
+
+  @override
+  String historyOnMenu(int count) {
+    return '$count menüde';
+  }
+
+  @override
+  String historyAccepted(int count) {
+    return '$count kabul';
+  }
+
+  @override
+  String historySkipped(int count) {
+    return '$count çıkarıldı';
+  }
+
+  @override
+  String historyMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get historyEmpty =>
+      'Henüz analiz yok. Yaptığın her analiz burada tarihi ve saatiyle durur.';
+
+  @override
+  String get historyNoMatch => 'Bu filtreye uyan analiz yok.';
+
+  @override
+  String get historyOffline => 'Çevrimdışı: telefondaki kayıtlar gösteriliyor.';
+
+  @override
+  String get historyNeedsConnection => 'Bu analiz internet varken açılır.';
+
+  @override
+  String get historyStatusRunning => 'Sürüyor';
+
+  @override
+  String get historyStatusPartial => 'Eksik tamamlandı';
+
+  @override
+  String get historyStatusFailed => 'Hata';
+
+  @override
+  String get learningTitle => 'Ekibin sildikleri';
+
+  @override
+  String get learningHint => 'Sistemin öğrendiklerini gör, yanlışsa geri al';
+
+  @override
+  String get learningIntro =>
+      'Ekibin en az 3 kez ve çoğunlukla sildiği öneriler artık gelmiyor. Yanlışlıkla öğrenildiyse “Geri al”a dokun; bir sonraki analizde yeniden önerilir.';
+
+  @override
+  String get learningProducts => 'Artık önerilmeyen ürünler';
+
+  @override
+  String get learningSuggestions => 'Kartlarda artık gelmeyen öneriler';
+
+  @override
+  String get learningEmpty =>
+      'Henüz öğrenilen bir şey yok. Ekip bir öneriyi en az 3 kez silince burada görünür.';
+
+  @override
+  String learnedProductLine(String cuisine, int count, String date) {
+    return '$cuisine · $count kez “Önerme” · $date';
+  }
+
+  @override
+  String learnedSuggestionLine(
+    String type,
+    String kind,
+    int count,
+    String date,
+  ) {
+    return '$type · $kind · $count kez silindi · $date';
+  }
+
+  @override
+  String get kindOptionGroup => 'opsiyon grubu';
+
+  @override
+  String get kindRemovable => 'çıkarılabilir';
+
+  @override
+  String get kindExtra => 'ekstra';
+
+  @override
+  String get undoLearned => 'Geri al';
+
+  @override
+  String undoProductQuestion(String name, String cuisine) {
+    return '“$name” $cuisine mutfağında yeniden önerilsin mi?';
+  }
+
+  @override
+  String undoSuggestionQuestion(String value, String type) {
+    return '“$value” $type kartlarında yeniden önerilsin mi?';
+  }
+
+  @override
+  String get undoDone => 'Geri alındı; bir sonraki analizde yeniden önerilir.';
 
   @override
   String get queuedOffline =>

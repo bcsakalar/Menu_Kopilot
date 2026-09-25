@@ -325,7 +325,7 @@ abstract class AppLocalizations {
   /// No description provided for @allCuisines.
   ///
   /// In tr, this message translates to:
-  /// **'Tümü'**
+  /// **'Tüm mutfaklar'**
   String get allCuisines;
 
   /// No description provided for @photos.
@@ -417,6 +417,251 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Fotoğraftan analiz'**
   String get photoRunTitle;
+
+  /// No description provided for @seeAllRuns.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü gör'**
+  String get seeAllRuns;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz geçmişi'**
+  String get historyTitle;
+
+  /// No description provided for @historySearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün ya da mutfak ara'**
+  String get historySearchHint;
+
+  /// No description provided for @periodAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get periodAll;
+
+  /// No description provided for @periodToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get periodToday;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son 7 gün'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ay'**
+  String get periodMonth;
+
+  /// No description provided for @periodCustom.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih aralığı seç…'**
+  String get periodCustom;
+
+  /// No description provided for @periodAllTimes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm zamanlar'**
+  String get periodAllTimes;
+
+  /// No description provided for @cuisineFilter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mutfak'**
+  String get cuisineFilter;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get clearFilters;
+
+  /// No description provided for @historyYesterday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dün'**
+  String get historyYesterday;
+
+  /// No description provided for @historyDayCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} analiz'**
+  String historyDayCount(int count);
+
+  /// No description provided for @historyNew.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} yeni'**
+  String historyNew(int count);
+
+  /// No description provided for @historyOnMenu.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} menüde'**
+  String historyOnMenu(int count);
+
+  /// No description provided for @historyAccepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kabul'**
+  String historyAccepted(int count);
+
+  /// No description provided for @historySkipped.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} çıkarıldı'**
+  String historySkipped(int count);
+
+  /// No description provided for @historyMore.
+  ///
+  /// In tr, this message translates to:
+  /// **'+{count}'**
+  String historyMore(int count);
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz analiz yok. Yaptığın her analiz burada tarihi ve saatiyle durur.'**
+  String get historyEmpty;
+
+  /// No description provided for @historyNoMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu filtreye uyan analiz yok.'**
+  String get historyNoMatch;
+
+  /// No description provided for @historyOffline.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çevrimdışı: telefondaki kayıtlar gösteriliyor.'**
+  String get historyOffline;
+
+  /// No description provided for @historyNeedsConnection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu analiz internet varken açılır.'**
+  String get historyNeedsConnection;
+
+  /// No description provided for @historyStatusRunning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sürüyor'**
+  String get historyStatusRunning;
+
+  /// No description provided for @historyStatusPartial.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eksik tamamlandı'**
+  String get historyStatusPartial;
+
+  /// No description provided for @historyStatusFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata'**
+  String get historyStatusFailed;
+
+  /// No description provided for @learningTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibin sildikleri'**
+  String get learningTitle;
+
+  /// No description provided for @learningHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistemin öğrendiklerini gör, yanlışsa geri al'**
+  String get learningHint;
+
+  /// No description provided for @learningIntro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekibin en az 3 kez ve çoğunlukla sildiği öneriler artık gelmiyor. Yanlışlıkla öğrenildiyse “Geri al”a dokun; bir sonraki analizde yeniden önerilir.'**
+  String get learningIntro;
+
+  /// No description provided for @learningProducts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artık önerilmeyen ürünler'**
+  String get learningProducts;
+
+  /// No description provided for @learningSuggestions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartlarda artık gelmeyen öneriler'**
+  String get learningSuggestions;
+
+  /// No description provided for @learningEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz öğrenilen bir şey yok. Ekip bir öneriyi en az 3 kez silince burada görünür.'**
+  String get learningEmpty;
+
+  /// No description provided for @learnedProductLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'{cuisine} · {count} kez “Önerme” · {date}'**
+  String learnedProductLine(String cuisine, int count, String date);
+
+  /// No description provided for @learnedSuggestionLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'{type} · {kind} · {count} kez silindi · {date}'**
+  String learnedSuggestionLine(
+    String type,
+    String kind,
+    int count,
+    String date,
+  );
+
+  /// No description provided for @kindOptionGroup.
+  ///
+  /// In tr, this message translates to:
+  /// **'opsiyon grubu'**
+  String get kindOptionGroup;
+
+  /// No description provided for @kindRemovable.
+  ///
+  /// In tr, this message translates to:
+  /// **'çıkarılabilir'**
+  String get kindRemovable;
+
+  /// No description provided for @kindExtra.
+  ///
+  /// In tr, this message translates to:
+  /// **'ekstra'**
+  String get kindExtra;
+
+  /// No description provided for @undoLearned.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get undoLearned;
+
+  /// No description provided for @undoProductQuestion.
+  ///
+  /// In tr, this message translates to:
+  /// **'“{name}” {cuisine} mutfağında yeniden önerilsin mi?'**
+  String undoProductQuestion(String name, String cuisine);
+
+  /// No description provided for @undoSuggestionQuestion.
+  ///
+  /// In tr, this message translates to:
+  /// **'“{value}” {type} kartlarında yeniden önerilsin mi?'**
+  String undoSuggestionQuestion(String value, String type);
+
+  /// No description provided for @undoDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri alındı; bir sonraki analizde yeniden önerilir.'**
+  String get undoDone;
 
   /// No description provided for @queuedOffline.
   ///
