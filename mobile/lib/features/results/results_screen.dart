@@ -39,6 +39,11 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   late final ScreenWakelock _wakelock = ref.read(wakelockProvider);
   final Set<String> _busy = {};
 
+  /// Which product cards the user opened or closed. Unset: closed, unless the tab holds a single product.
+  final Map<String, bool> _open = {};
+
+  bool _isOpen(String key, {required bool byDefault}) => _open[key] ?? byDefault;
+
   @override
   void initState() {
     super.initState();
@@ -63,11 +68,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     super.dispose();
   }
 
-  Future<void> _act(String cardId, Future<Exception?> Function() action, {required bool accept}) async {
+  /// [collapse]: the card to close once the action succeeds — a decided product needs no room on the screen.
+  Future<void> _act(String cardId, Future<Exception?> Function() action, {required bool accept, String? collapse}) async {
     setState(() => _busy.add(cardId));
     final error = await action();
     if (!mounted) return;
-    setState(() => _busy.remove(cardId));
+    setState(() {
+      _busy.remove(cardId);
+      if (error == null && collapse != null) _open[collapse] = false;
+    });
     if (error == null) {
       await (accept ? Haptics.confirm() : Haptics.select());
       return;
@@ -190,15 +199,19 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               title: card.name,
               removed: state.removedOf(card.id),
               busy: _busy.contains(card.id),
+              expanded: _isOpen(card.id, byDefault: cards.length == 1),
+              onExpandedChanged: (open) => setState(() => _open[card.id] = open),
               onToggle: (key) => controller.toggleItem(card.id, key),
-              onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true),
-              onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false),
+              onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true, collapse: card.id),
+              onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false, collapse: card.id),
               onEdit: card.payload == null ? null : () => _openEditor(card),
             ),
         ];
       case ResultTab.menuProducts:
         final entries = state.menuEntries;
         if (entries.isEmpty) return [if (!state.isStreaming) empty(l10n.tabMenuProductsEmpty)];
+        // "Ürün ekle" with one product: its card opens by itself. A note-only row has nothing to fold.
+        final single = entries.where((e) => e.card != null).length == 1;
         return [
           hint,
           for (final entry in entries)
@@ -209,16 +222,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               notes: entry.notes,
               removed: entry.card == null ? const {} : state.removedOf(entry.card!.id),
               busy: entry.card != null && _busy.contains(entry.card!.id),
+              expanded: _isOpen('entry-${entry.key}', byDefault: single),
+              onExpandedChanged: (open) => setState(() => _open['entry-${entry.key}'] = open),
               onToggle: (key) {
                 if (entry.card != null) controller.toggleItem(entry.card!.id, key);
               },
               onAccept: () {
                 final card = entry.card;
-                if (card != null) _act(card.id, () => controller.accept(card.id), accept: true);
+                if (card != null) _act(card.id, () => controller.accept(card.id), accept: true, collapse: 'entry-${entry.key}');
               },
               onSkip: () {
                 final card = entry.card;
-                if (card != null) _act(card.id, () => controller.skip(card.id), accept: false);
+                if (card != null) _act(card.id, () => controller.skip(card.id), accept: false, collapse: 'entry-${entry.key}');
               },
               onNoteDone: (note) => _act(note.id, () => controller.accept(note.id), accept: true),
             ),

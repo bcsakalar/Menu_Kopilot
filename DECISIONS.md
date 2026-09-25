@@ -827,3 +827,8 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   a line about slow cooking: it has its own type (portion, yoghurt, butter sauce). Two fallback lines that were
   wrong for part of their type were replaced: "seçilen harçlı" for a börek or gözleme whose name fixes the filling,
   "isteğe göre sütlü" for a latte. 46 → 48 types.
+- **D-192** — **Product cards open and close** (user, testing 1.3.0 on the phone: the open cards were right but took
+  the whole screen). Closed, a card is its name, its badges ("Yeni ürün", "Kontrol et", "Kabul edildi") and one line
+  of what it holds as the user kept it ("1 opsiyon grubu · 2 çıkarılabilir · 2 ekstra · açıklama"); a tap anywhere on
+  the header opens the four sections with a short slide. Cards start closed, except when a tab holds a single product
+  ("ürün ekle"); a card closes itself once accepted or skipped. A note-only row stays open (it is one line).

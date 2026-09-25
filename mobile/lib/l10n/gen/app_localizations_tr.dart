@@ -952,7 +952,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String get skippedDone => 'Çıkarıldı';
 
   @override
-  String get tapToRemove => 'İstemediğine dokun, çıkarılsın';
+  String get tapToRemove =>
+      'Ürüne dokun, kartı açılsın. İstemediğin öneriye dokun, çıkarılsın.';
+
+  @override
+  String get openCard => 'Kartı aç';
+
+  @override
+  String get closeCard => 'Kartı kapat';
+
+  @override
+  String summaryGroups(int count) {
+    return '$count opsiyon grubu';
+  }
+
+  @override
+  String summaryRemovables(int count) {
+    return '$count çıkarılabilir';
+  }
+
+  @override
+  String summaryExtras(int count) {
+    return '$count ekstra';
+  }
+
+  @override
+  String get summaryDescription => 'açıklama';
+
+  @override
+  String summaryNotes(int count) {
+    return '$count not';
+  }
+
+  @override
+  String get summaryPlain => 'Hazır içecek, adıyla eklenir';
 
   @override
   String get checkThis => 'Kontrol et';

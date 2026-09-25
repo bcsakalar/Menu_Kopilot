@@ -1783,8 +1783,56 @@ abstract class AppLocalizations {
   /// No description provided for @tapToRemove.
   ///
   /// In tr, this message translates to:
-  /// **'İstemediğine dokun, çıkarılsın'**
+  /// **'Ürüne dokun, kartı açılsın. İstemediğin öneriye dokun, çıkarılsın.'**
   String get tapToRemove;
+
+  /// No description provided for @openCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartı aç'**
+  String get openCard;
+
+  /// No description provided for @closeCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartı kapat'**
+  String get closeCard;
+
+  /// No description provided for @summaryGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} opsiyon grubu'**
+  String summaryGroups(int count);
+
+  /// No description provided for @summaryRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} çıkarılabilir'**
+  String summaryRemovables(int count);
+
+  /// No description provided for @summaryExtras.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ekstra'**
+  String summaryExtras(int count);
+
+  /// No description provided for @summaryDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'açıklama'**
+  String get summaryDescription;
+
+  /// No description provided for @summaryNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} not'**
+  String summaryNotes(int count);
+
+  /// No description provided for @summaryPlain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hazır içecek, adıyla eklenir'**
+  String get summaryPlain;
 
   /// No description provided for @checkThis.
   ///

@@ -14,6 +14,9 @@ import '../../l10n/gen/app_localizations.dart';
 /// Açıklama. Every suggestion is a chip that is KEPT until tapped; one tap takes it out, a second brings it back.
 /// "Hepsini kabul et" saves what is left. Each section has its own "Kopyala". Nothing on the card needs a second
 /// screen, and nothing on it is a technical word.
+///
+/// On a phone a list of open cards is a long scroll, so a card opens and closes (user, after the first release): closed
+/// it is its name, its badges and one line of what it holds; a tap on the header opens the four sections.
 
 /// Below this confidence a card says "Kontrol et": the suggestions are generic for the product type.
 const int lowConfidence = 60;
@@ -35,6 +38,19 @@ String optionsCopyText(AppLocalizations l10n, List<OptionGroup> groups) => [
 
 String listCopyText(List<String> items) => items.join(', ');
 
+/// "1 opsiyon grubu · 2 çıkarılabilir · 2 ekstra · açıklama": what a closed card holds, as the user kept it.
+String cardSummary(AppLocalizations l10n, AnalysisCard card, Set<String> removed, {int notes = 0}) {
+  if (card.isPlainRow) return l10n.summaryPlain;
+  final kept = card.kept(removed);
+  return [
+    if (kept.optionGroups.isNotEmpty) l10n.summaryGroups(kept.optionGroups.length),
+    if (kept.removableIngredients.isNotEmpty) l10n.summaryRemovables(kept.removableIngredients.length),
+    if (kept.extraIngredients.isNotEmpty) l10n.summaryExtras(kept.extraIngredients.length),
+    if (kept.description.trim().isNotEmpty) l10n.summaryDescription,
+    if (notes > 0) l10n.summaryNotes(notes),
+  ].join(' · ');
+}
+
 class ProductCard extends StatelessWidget {
   const ProductCard({
     required this.card,
@@ -47,6 +63,8 @@ class ProductCard extends StatelessWidget {
     this.notes = const [],
     this.onNoteDone,
     this.onEdit,
+    this.expanded = true,
+    this.onExpandedChanged,
     super.key,
   });
 
@@ -62,6 +80,13 @@ class ProductCard extends StatelessWidget {
   final void Function(AnalysisCard note)? onNoteDone;
   final VoidCallback? onEdit;
 
+  /// Open: the four sections and the buttons. Closed: the name, the badges and one line of what the card holds.
+  final bool expanded;
+
+  /// Called with the new state when the header is tapped. Null: the card cannot be closed (a product with only a
+  /// note, which is short anyway).
+  final ValueChanged<bool>? onExpandedChanged;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -69,6 +94,9 @@ class ProductCard extends StatelessWidget {
     final card = this.card;
     final decided = card != null && !card.isPending;
     final isNew = card?.section == CardSection.newProduct;
+    final collapsible = card != null && onExpandedChanged != null;
+    final open = !collapsible || expanded;
+    final pendingNotes = notes.where((n) => n.isPending).length;
 
     return AppCard(
       key: card == null ? null : ValueKey('product-${card.id}'),
@@ -77,19 +105,44 @@ class ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Header(card: card, title: title, onEdit: decided ? null : onEdit),
-          for (final note in notes) _NoteRow(note: note, onDone: onNoteDone == null ? null : () => onNoteDone!(note)),
-          if (card != null) ...[
-            if (card.isPlainRow)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(l10n.plainProduct, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: p.textMuted)),
-              )
-            else
-              _Sections(card: card, removed: removed, enabled: !decided && !busy, onToggle: onToggle),
-            const SizedBox(height: 12),
-            _Actions(card: card, removed: removed, busy: busy, onAccept: onAccept, onSkip: onSkip),
-          ],
+          _Header(
+            card: card,
+            title: title,
+            onEdit: decided || !open ? null : onEdit,
+            open: open,
+            onToggle: collapsible
+                ? () {
+                    Haptics.select();
+                    onExpandedChanged!(!expanded);
+                  }
+                : null,
+            summary: collapsible && !open ? cardSummary(l10n, card, removed, notes: pendingNotes) : null,
+          ),
+          // Opening and closing slide rather than jump, so the eye keeps its place in the list.
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: !open
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final note in notes) _NoteRow(note: note, onDone: onNoteDone == null ? null : () => onNoteDone!(note)),
+                      if (card != null) ...[
+                        if (card.isPlainRow)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(l10n.plainProduct, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: p.textMuted)),
+                          )
+                        else
+                          _Sections(card: card, removed: removed, enabled: !decided && !busy, onToggle: onToggle),
+                        const SizedBox(height: 12),
+                        _Actions(card: card, removed: removed, busy: busy, onAccept: onAccept, onSkip: onSkip),
+                      ],
+                    ],
+                  ),
+          ),
         ],
       ),
     );
@@ -97,11 +150,25 @@ class ProductCard extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.card, required this.title, required this.onEdit});
+  const _Header({
+    required this.card,
+    required this.title,
+    required this.onEdit,
+    required this.open,
+    required this.onToggle,
+    required this.summary,
+  });
 
   final AnalysisCard? card;
   final String title;
   final VoidCallback? onEdit;
+  final bool open;
+
+  /// Opens or closes the card; null when it cannot be closed.
+  final VoidCallback? onToggle;
+
+  /// One line of what a closed card holds.
+  final String? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -115,20 +182,23 @@ class _Header extends StatelessWidget {
       if (card != null && card.portionInfo.isNotEmpty) l10n.portionLine(card.portionInfo),
     ].join(' · ');
 
-    return Column(
+    final header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Text(
-                title,
-                style: text.titleLarge?.copyWith(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w700,
-                  color: skipped ? p.textMuted : p.text,
-                  decoration: skipped ? TextDecoration.lineThrough : null,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  title,
+                  style: text.titleLarge?.copyWith(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: skipped ? p.textMuted : p.text,
+                    decoration: skipped ? TextDecoration.lineThrough : null,
+                  ),
                 ),
               ),
             ),
@@ -138,6 +208,15 @@ class _Header extends StatelessWidget {
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit_outlined, size: 20),
                 tooltip: l10n.edit,
+              ),
+            if (onToggle != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: AnimatedRotation(
+                  turns: open ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 220),
+                  child: Icon(Icons.expand_more_rounded, size: 28, color: p.textMuted),
+                ),
               ),
           ],
         ),
@@ -160,12 +239,30 @@ class _Header extends StatelessWidget {
             if (details.isNotEmpty) Text(details, style: text.bodyMedium?.copyWith(color: p.textMuted)),
           ],
         ),
-        if (card != null && card.section == CardSection.newProduct && card.priceRangeHint.isNotEmpty && card.isPending)
+        if (summary != null && summary!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(summary!, style: text.bodyMedium?.copyWith(color: p.textMuted)),
+          ),
+        if (open && card != null && card.section == CardSection.newProduct && card.priceRangeHint.isNotEmpty && card.isPending)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(l10n.priceAsk(card.priceRangeHint), style: text.bodyMedium?.copyWith(color: p.textMuted)),
           ),
       ],
+    );
+    if (onToggle == null) return header;
+    // The whole header is the switch: a big target for a thumb, the name included.
+    return Semantics(
+      button: true,
+      expanded: open,
+      hint: open ? l10n.closeCard : l10n.openCard,
+      child: InkWell(
+        key: ValueKey('open-${card!.id}'),
+        onTap: onToggle,
+        borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 48), child: header),
+      ),
     );
   }
 }
