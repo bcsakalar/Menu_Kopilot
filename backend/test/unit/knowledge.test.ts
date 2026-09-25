@@ -547,4 +547,42 @@ describe('learning — what the user kept', () => {
       ]),
     );
   });
+
+  // D-194: the second pass of the loop.
+  it('stops suggesting a product to the kitchen that kept turning it down, and only to that kitchen', () => {
+    const feedback = new FeedbackIndex(
+      new Map(),
+      new Map([
+        ['pizza-id|kunefe', { accepted: 0, removed: 3 }],
+        ['kebap-id|kunefe', { accepted: 2, removed: 3 }],
+      ]),
+    );
+    expect(feedback.isProductRejected('pizza-id', 'Künefe')).toBe(true);
+    expect(feedback.rejectedProducts('pizza-id')).toEqual(['kunefe']);
+    // Three "Önerme" against two acceptances is not a verdict; another kitchen is another question.
+    expect(feedback.isProductRejected('kebap-id', 'Künefe')).toBe(false);
+    expect(feedback.isProductRejected('tatli-id', 'Künefe')).toBe(false);
+    expect(feedback.isProductRejected(null, 'Künefe')).toBe(false);
+  });
+
+  it('puts what the team keeps taking first, and tells the model', () => {
+    const feedback = new FeedbackIndex(
+      new Map([
+        ['pide|extra|ekstra kasar', { accepted: 4, removed: 1 }],
+        ['pide|removable|sogan', { accepted: 3, removed: 0 }],
+        ['pide|extra|pastirma', { accepted: 1, removed: 0 }],
+      ]),
+    );
+    expect(feedback.isFavored('pide', 'extra', 'Ekstra Kaşar')).toBe(true);
+    // One acceptance is not a habit.
+    expect(feedback.isFavored('pide', 'extra', 'Pastırma')).toBe(false);
+    expect(feedback.favoredFor('pide')).toEqual(['ekstra kasar', 'sogan']);
+    const card = ground(
+      { optionGroups: [], removable: ['Domates', 'Soğan'], extras: ['Pastırma', 'Sucuk', 'Ekstra Kaşar'], description: null },
+      { productName: 'Karışık Pide', type: type('pide'), byName: true, source: 'model', want, feedback },
+    );
+    expect(card.extras.slice(0, 1)).toEqual(['Ekstra Kaşar']);
+    expect(card.removable.slice(0, 1)).toEqual(['Soğan']);
+    expect([...card.extras].sort()).toEqual(['Ekstra Kaşar', 'Pastırma', 'Sucuk']);
+  });
 });

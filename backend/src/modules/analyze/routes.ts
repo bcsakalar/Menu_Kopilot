@@ -10,6 +10,8 @@ import {
   analyzeFieldsSchema,
   analyzeResultSchema,
   cardDtoSchema,
+  historyQuerySchema,
+  historyResultSchema,
   traceResultSchema,
   type AnalyzeEvent,
 } from './schemas.js';
@@ -86,6 +88,20 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
       const asyncMode = request.query.async === '1' || request.query.async === 'true';
       return respond(request, reply, started, asyncMode);
     },
+  );
+
+  app.get(
+    '/analyze/history',
+    {
+      schema: {
+        tags: ['analyze'],
+        summary: 'The user\'s analyses, newest first: date, time, cuisine, mode, card counts; filtered and paged',
+        security,
+        querystring: historyQuerySchema,
+        response: { 200: historyResultSchema },
+      },
+    },
+    async (request) => service.history(getAuthUser(request).id, request.query),
   );
 
   app.get(

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { AttemptRecord } from '../ai/router.js';
 import { getJson, setJson } from '../cache/cache.js';
 import { menuItems } from '../db/schema/index.js';
@@ -129,7 +129,9 @@ async function fromTemplates(
     })
     .from(menuItems)
     .where(and(eq(menuItems.approved, true), inArray(menuItems.cuisineId, related)))
-    .orderBy(desc(menuItems.importance), desc(menuItems.usageCount));
+    // Importance says what such a kitchen usually sells; every time the team accepts a template it climbs a little,
+    // up to ten acceptances (D-194).
+    .orderBy(desc(sql`${menuItems.importance} + least(${menuItems.usageCount}, 10) * 3`), desc(menuItems.usageCount));
 
   // Candidates bucketed per open category, each bucket still ordered by importance.
   const buckets = new Map<string, typeof rows>(openGaps.map((g) => [g.key, []]));
@@ -195,7 +197,7 @@ async function fromTemplates(
 }
 
 export async function runProductRecommender(
-  deps: Pick<AgentDeps, 'db' | 'router' | 'prompts' | 'cache' | 'cacheTtlSeconds' | 'retrieval' | 'categories' | 'tracer'>,
+  deps: Pick<AgentDeps, 'db' | 'router' | 'prompts' | 'cache' | 'cacheTtlSeconds' | 'retrieval' | 'categories' | 'tracer' | 'feedback'>,
   input: ProductRecommenderInput,
   run: AgentRunContext,
 ): Promise<ProductRecommenderResult> {
@@ -218,10 +220,13 @@ export async function runProductRecommender(
         if (item.canonicalName) takenNames.add(normalizeTr(item.canonicalName));
         if (item.matchedTemplateId) takenTemplates.add(item.matchedTemplateId);
       }
+      // A product this kitchen's team kept turning down ("Önerme") is as good as taken (D-194).
+      const rejectedProducts = deps.feedback.rejectedProducts(input.cuisine.id);
       const isTaken = (normalized: string, templateId: string | null): boolean =>
         takenNames.has(normalized) ||
         (templateId !== null && takenTemplates.has(templateId)) ||
-        [...takenNames].some((name) => sameProductName(name, normalized));
+        [...takenNames].some((name) => sameProductName(name, normalized)) ||
+        deps.feedback.isProductRejected(input.cuisine.id, normalized);
       const take = (normalized: string, templateId: string | null): void => {
         takenNames.add(normalized);
         if (templateId) takenTemplates.add(templateId);
@@ -301,6 +306,7 @@ export async function runProductRecommender(
               input.priceSegment,
               input.target,
               input.notes ?? '',
+              rejectedProducts,
               promptTag,
             ]),
           ).slice(0, 32)}`;
@@ -318,6 +324,7 @@ export async function runProductRecommender(
                 .map((g) => `${g.key} | ${g.label} | menüde ${g.present}, mutfak minimumu ${g.minItems} | bu koşuda ${g.want} ürün iste`)
                 .join('\n'),
               already: dbItems.map((i) => i.name).join(', ') || '-',
+              rejected: rejectedProducts.join(', ') || '-',
               notes: input.notes?.trim() || '-',
               max: want + 2,
             })

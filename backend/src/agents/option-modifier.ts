@@ -99,6 +99,7 @@ function typeGuide(deps: Pick<AgentDeps, 'productTypes' | 'feedback'>, batch: re
       })
       .join(' | ');
     const rejected = deps.feedback.rejectedFor(type.key);
+    const favored = deps.feedback.favoredFor(type.key);
     lines.push(
       [
         `${type.key} — ${type.label}`,
@@ -107,6 +108,7 @@ function typeGuide(deps: Pick<AgentDeps, 'productTypes' | 'feedback'>, batch: re
         `  tipik ekstra: ${type.extras.join(', ') || '-'}`,
         `  bu tipte ASLA olmayan gruplar: ${type.forbiddenGroups.join(', ') || '-'}`,
         ...(rejected.length > 0 ? [`  ekibin sürekli sildiği öneriler (önerme): ${rejected.join(', ')}`] : []),
+        ...(favored.length > 0 ? [`  ekibin hep kabul ettiği öneriler (uygunsa öner): ${favored.join(', ')}`] : []),
       ].join('\n'),
     );
   }

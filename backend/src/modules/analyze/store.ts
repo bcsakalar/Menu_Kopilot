@@ -1,11 +1,26 @@
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, lt, lte, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
-import { agentSteps, menuItems, suggestionItems, suggestionRuns } from '../../db/schema/index.js';
+import { agentSteps, cuisines, menuItems, suggestionItems, suggestionRuns } from '../../db/schema/index.js';
 import type { MergedItem } from '../../agents/dedupe.js';
 import type { AgentName } from '../../agents/types.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import { templatePayloadSchema } from '../../domain/template.js';
-import type { AnalyzeResult, AnalyzeStats, CardDto, ClassificationDto, CountsDto, MenuItemDto, TraceStep } from './schemas.js';
+import type {
+  AnalyzeResult,
+  AnalyzeStats,
+  CardDto,
+  ClassificationDto,
+  CountsDto,
+  HistoryItem,
+  HistoryQuery,
+  HistoryResult,
+  MenuItemDto,
+  TraceStep,
+} from './schemas.js';
+
+/** `%` and `_` typed into the search box are letters, not wildcards. */
+const likePattern = (text: string): string => `%${text.replace(/[\\%_]/gu, (c) => `\\${c}`)}%`;
+const asInt = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : null);
 
 /** Persistence for analysis runs: the run row, its cards, its menu snapshot and its agent trace. */
 export class AnalyzeStore {
@@ -16,6 +31,7 @@ export class AnalyzeStore {
     cuisineId: string | null;
     promptText: string | null;
     imageHashes: string[];
+    analysisMode?: 'quick' | 'full' | undefined;
   }): Promise<string> {
     const [row] = await this.db
       .insert(suggestionRuns)
@@ -23,6 +39,7 @@ export class AnalyzeStore {
         userId: input.userId,
         cuisineId: input.cuisineId,
         mode: 'suggest',
+        analysisMode: input.analysisMode ?? null,
         promptText: input.promptText,
         imageHashes: input.imageHashes,
         status: 'running',
@@ -164,6 +181,99 @@ export class AnalyzeStore {
   }
 
   /** Most recent run of the user — what the result screen restores on a cold open. */
+  /**
+   * The user's runs, newest first, filtered and paged (D-193). The card counts come from one grouped query over the
+   * page, not one per row.
+   */
+  async history(userId: string, query: HistoryQuery): Promise<HistoryResult> {
+    const conditions: SQL[] = [eq(suggestionRuns.userId, userId)];
+    if (query.before) conditions.push(lt(suggestionRuns.createdAt, new Date(query.before)));
+    if (query.from) conditions.push(gte(suggestionRuns.createdAt, new Date(query.from)));
+    if (query.to) conditions.push(lte(suggestionRuns.createdAt, new Date(query.to)));
+    if (query.cuisineId) conditions.push(eq(suggestionRuns.cuisineId, query.cuisineId));
+    if (query.mode) conditions.push(eq(suggestionRuns.analysisMode, query.mode));
+    if (query.q) {
+      const pattern = likePattern(query.q);
+      const match = or(
+        ilike(suggestionRuns.promptText, pattern),
+        ilike(cuisines.name, pattern),
+        sql`${suggestionRuns.menuSnapshot}::text ilike ${pattern}`,
+      );
+      if (match) conditions.push(match);
+    }
+
+    const rows = await this.db
+      .select({
+        id: suggestionRuns.id,
+        createdAt: suggestionRuns.createdAt,
+        finishedAt: suggestionRuns.finishedAt,
+        status: suggestionRuns.status,
+        mode: suggestionRuns.analysisMode,
+        cuisineId: suggestionRuns.cuisineId,
+        cuisineName: cuisines.name,
+        menuSnapshot: suggestionRuns.menuSnapshot,
+        counts: suggestionRuns.counts,
+      })
+      .from(suggestionRuns)
+      .leftJoin(cuisines, eq(cuisines.id, suggestionRuns.cuisineId))
+      .where(and(...conditions))
+      .orderBy(desc(suggestionRuns.createdAt))
+      .limit(query.limit + 1);
+    const page = rows.slice(0, query.limit);
+
+    const ids = page.map((r) => r.id);
+    const tallies =
+      ids.length === 0
+        ? []
+        : await this.db
+            .select({
+              runId: suggestionItems.runId,
+              newProducts: sql<number>`count(*) filter (where ${suggestionItems.section} = 'new_product')::int`,
+              menuCards: sql<number>`count(*) filter (where ${suggestionItems.section} = 'option')::int`,
+              accepted: sql<number>`count(*) filter (where ${suggestionItems.accepted} = true and ${suggestionItems.section} <> 'fix')::int`,
+              skipped: sql<number>`count(*) filter (where ${suggestionItems.accepted} = false and ${suggestionItems.section} <> 'fix')::int`,
+            })
+            .from(suggestionItems)
+            .where(inArray(suggestionItems.runId, ids))
+            .groupBy(suggestionItems.runId);
+    const byRun = new Map(tallies.map((t) => [t.runId, t]));
+
+    const items: HistoryItem[] = page.map((row) => {
+      const menu = ((row.menuSnapshot as { items?: MenuItemDto[] } | null)?.items ?? []).map((i) => i.name);
+      const counts = (row.counts ?? {}) as { current?: unknown; target?: unknown };
+      const tally = byRun.get(row.id);
+      return {
+        runId: row.id,
+        createdAt: row.createdAt.toISOString(),
+        finishedAt: row.finishedAt?.toISOString() ?? null,
+        status: row.status,
+        mode: row.mode === 'quick' || row.mode === 'full' ? row.mode : null,
+        cuisineId: row.cuisineId,
+        cuisineName: row.cuisineName ?? null,
+        productNames: menu.slice(0, 5),
+        menuCount: menu.length,
+        newProducts: tally?.newProducts ?? 0,
+        menuCards: tally?.menuCards ?? 0,
+        accepted: tally?.accepted ?? 0,
+        skipped: tally?.skipped ?? 0,
+        current: asInt(counts.current),
+        target: asInt(counts.target),
+      };
+    });
+    const last = page[page.length - 1];
+    return { items, nextBefore: rows.length > query.limit && last ? last.createdAt.toISOString() : null };
+  }
+
+  /** The cuisine the run settled on (the classifier's, once the run finished; the user's pick before that). */
+  async runCuisineId(runId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ cuisineId: suggestionRuns.cuisineId })
+      .from(suggestionRuns)
+      .where(eq(suggestionRuns.id, runId))
+      .limit(1);
+    return row?.cuisineId ?? null;
+  }
+
   async latestRunId(userId: string): Promise<string | null> {
     const [row] = await this.db
       .select({ id: suggestionRuns.id })

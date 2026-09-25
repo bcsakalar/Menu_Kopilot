@@ -53,6 +53,9 @@ BU KOŞUDA İSTENEN ÜRÜNLER (anahtar | ad | menüdeki durum | kaç ürün iste
 Bu koşuda zaten önerilmiş olanlar (tekrarlama):
 {{already}}
 
+Ekibin bu mutfakta istemediği ürünler (bunları ve varyantlarını ÖNERME):
+{{rejected}}
+
 Uzmanın notu: {{notes}}
 
 {{max}} öneriye kadar üret ve her kategoride istenen sayıyı doldur. Her ürün için opsiyon gruplarını ve malzemeleri de yaz.`;

@@ -455,6 +455,15 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
   );
   removableFinal = removableFinal.filter((i) => !finalGroups.has(key(i)));
 
+  // What this team keeps taking for the type leads its list; the rest keep their order (D-194).
+  const favoredFirst = (items: string[], kind: 'removable' | 'extra'): string[] => {
+    if (!feedback) return items;
+    const favored = items.filter((i) => feedback.isFavored(type.key, kind, i));
+    return favored.length === 0 ? items : [...favored, ...items.filter((i) => !favored.includes(i))];
+  };
+  removableFinal = favoredFirst(removableFinal, 'removable');
+  extrasFinal = favoredFirst(extrasFinal, 'extra');
+
   // --- 5. description --------------------------------------------------------------------------------------------
   let description = '';
   if (options.want.description) {

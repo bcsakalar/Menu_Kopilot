@@ -32,6 +32,8 @@ import { cuisineRoutes } from './modules/cuisines/routes.js';
 import { CuisineService } from './modules/cuisines/service.js';
 import { VisionExtractor } from './modules/extraction/vision-extractor.js';
 import { healthRoutes } from './modules/health/routes.js';
+import { learningRoutes } from './modules/learning/routes.js';
+import { LearningService } from './modules/learning/service.js';
 import { promptRoutes } from './modules/prompts/routes.js';
 import { RetrievalService } from './modules/retrieval/retrieval.service.js';
 import { settingsRoutes } from './modules/settings/routes.js';
@@ -220,6 +222,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await secured.register(analyzeRoutes, { service: analyzeService, uploads: config.uploads });
         await secured.register(cuisineRoutes, { service: new CuisineService(db) });
         await secured.register(templateRoutes, { service: new TemplateService(db, queue) });
+        await secured.register(learningRoutes, { service: new LearningService(db) });
         await secured.register(usageRoutes, {
           service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),
         });

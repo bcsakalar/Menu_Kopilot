@@ -53,7 +53,7 @@ export function diffFeedback(
 
 export async function recordFeedback(
   db: Executor,
-  input: { userId: string; card: CardDto; rows: readonly FeedbackRow[] },
+  input: { userId: string; card: CardDto; cuisineId: string | null; rows: readonly FeedbackRow[] },
 ): Promise<void> {
   if (input.rows.length === 0) return;
   await db.insert(suggestionFeedback).values(
@@ -62,6 +62,7 @@ export async function recordFeedback(
       runId: input.card.runId,
       cardId: input.card.id,
       productType: input.card.productType,
+      cuisineId: input.cuisineId,
       kind: row.kind,
       value: row.value.slice(0, 200),
       action: row.action,

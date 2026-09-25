@@ -13,10 +13,10 @@ import type { JobQueue } from '../../jobs/queue.js';
 import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
-import { addAliases, findApprovedByName, getTemplate, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
+import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
 import { diffFeedback, recordFeedback } from './feedback.js';
-import type { AnalyzeEvent, AnalyzeFields, AnalyzeResult, CardDto, ClassificationDto } from './schemas.js';
+import type { AnalyzeEvent, AnalyzeFields, AnalyzeResult, CardDto, ClassificationDto, HistoryQuery, HistoryResult } from './schemas.js';
 import type { AnalyzeStore } from './store.js';
 
 /**
@@ -75,6 +75,7 @@ export class AnalyzeService {
       cuisineId: selectedCuisine?.id ?? null,
       promptText: fields.menuText ?? null,
       imageHashes: images.map((i) => i.sha256),
+      analysisMode: fields.mode,
     });
     const controller = registry.create(runId);
     const emit = (event: AnalyzeEvent): void => registry.emit(runId, event);
@@ -163,6 +164,11 @@ export class AnalyzeService {
     return result;
   }
 
+  /** The user's analyses, newest first, filtered by date, cuisine, mode or a product name (D-193). */
+  async history(userId: string, query: HistoryQuery): Promise<HistoryResult> {
+    return this.deps.store.history(userId, query);
+  }
+
   async latest(userId: string): Promise<AnalyzeResult | null> {
     const runId = await this.deps.store.latestRunId(userId);
     return runId === null ? null : this.deps.store.snapshot(userId, runId);
@@ -220,6 +226,7 @@ export class AnalyzeService {
         await recordFeedback(tx, {
           userId,
           card: existing,
+          cuisineId,
           rows: [
             ...(existing.section === 'new_product' ? [{ kind: 'product' as const, value: existing.name, action: 'accepted' as const }] : []),
             ...diffFeedback(existing, kept),
@@ -233,6 +240,8 @@ export class AnalyzeService {
     }
     if (templateId === null) return existing;
 
+    // What the team takes, again and again, climbs in the pool's own ranking (D-194).
+    await incrementUsage(db, [templateId]);
     await db.update(suggestionItems).set({ matchedItemId: templateId }).where(eq(suggestionItems.id, cardId));
     await this.deps.queue.enqueueEmbedding([templateId]);
     return { ...existing, matchedTemplateId: templateId };
@@ -244,7 +253,8 @@ export class AnalyzeService {
     // A new product the user turned down is a signal about the product; skipping a menu product's card is not a
     // verdict on its suggestions (it usually means "later"), so it teaches nothing.
     if (card.section === 'new_product') {
-      await recordFeedback(this.deps.db, { userId, card, rows: [{ kind: 'product', value: card.name, action: 'removed' }] });
+      const cuisineId = await this.deps.store.runCuisineId(card.runId);
+      await recordFeedback(this.deps.db, { userId, card, cuisineId, rows: [{ kind: 'product', value: card.name, action: 'removed' }] });
     }
     return card;
   }

@@ -1,6 +1,7 @@
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import type { TemplateOptionGroup } from '../../domain/template.js';
 import { menuCategories } from './categories.js';
+import { cuisines } from './cuisines.js';
 import { suggestionItems, suggestionRuns } from './suggestions.js';
 import { users } from './users.js';
 
@@ -42,12 +43,20 @@ export const suggestionFeedback = pgTable(
     runId: uuid('run_id').references(() => suggestionRuns.id, { onDelete: 'set null' }),
     cardId: uuid('card_id').references(() => suggestionItems.id, { onDelete: 'set null' }),
     productType: text('product_type'),
+    /** The cuisine the card was suggested for: a turned-down product is a verdict about that kitchen (D-194). */
+    cuisineId: uuid('cuisine_id').references(() => cuisines.id, { onDelete: 'set null' }),
     /** product | option_group | removable | extra | description */
     kind: text('kind').notNull(),
     value: text('value').notNull(),
     /** accepted | removed | edited */
     action: text('action').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    /** "Geri al" in the app: the row stays, the learning loop stops counting it (D-194). */
+    ignoredAt: timestamp('ignored_at', { withTimezone: true }),
+    ignoredBy: uuid('ignored_by').references(() => users.id, { onDelete: 'set null' }),
   },
-  (t) => [index('suggestion_feedback_type_idx').on(t.productType, t.kind, t.value)],
+  (t) => [
+    index('suggestion_feedback_type_idx').on(t.productType, t.kind, t.value),
+    index('suggestion_feedback_cuisine_idx').on(t.cuisineId, t.kind),
+  ],
 );

@@ -13,6 +13,8 @@ export const suggestionRuns = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     cuisineId: uuid('cuisine_id').references(() => cuisines.id, { onDelete: 'set null' }),
     mode: runMode('mode').notNull().default('suggest'),
+    /** "quick" or "full" (the button on the home screen); null for runs made before it was stored (D-193). */
+    analysisMode: text('analysis_mode'),
     promptText: text('prompt_text'),
     imageHashes: jsonb('image_hashes').$type<string[]>().notNull().default([]),
     /** Provider/model of the last successful LLM call in the run (null when served from DB/cache only). */
@@ -44,6 +46,7 @@ export const suggestionRuns = pgTable(
   (t) => [
     index('suggestion_runs_created_at_idx').on(t.createdAt),
     index('suggestion_runs_user_created_idx').on(t.userId, t.createdAt),
+    index('suggestion_runs_user_mode_idx').on(t.userId, t.analysisMode, t.createdAt),
   ],
 );
 

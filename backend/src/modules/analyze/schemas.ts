@@ -172,6 +172,51 @@ export const analyzeResultSchema = z.object({
 });
 export type AnalyzeResult = z.infer<typeof analyzeResultSchema>;
 
+/**
+ * The analysis history (D-193): the user's runs, newest first, with what the list shows and what it filters on.
+ * Paged by the creation time of the last row (`before`), never by offset, so a run started meanwhile does not
+ * shift the next page.
+ */
+export const historyQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+  before: z.iso.datetime({ offset: true }).optional(),
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+  cuisineId: z.uuid().optional(),
+  mode: z.enum(ANALYSIS_MODES).optional(),
+  /** A product name or a cuisine, case-insensitive. */
+  q: z.string().trim().min(1).max(80).optional(),
+});
+export type HistoryQuery = z.infer<typeof historyQuerySchema>;
+
+export const historyItemSchema = z.object({
+  runId: z.uuid(),
+  createdAt: z.string(),
+  finishedAt: z.string().nullable(),
+  status: z.enum(['running', 'completed', 'partial', 'failed', 'cancelled']),
+  /** Null for runs made before the mode was stored. */
+  mode: z.enum(ANALYSIS_MODES).nullable(),
+  cuisineId: z.uuid().nullable(),
+  cuisineName: z.string().nullable(),
+  /** The first products of the menu, for the row's title. */
+  productNames: z.array(z.string()),
+  menuCount: z.number().int(),
+  newProducts: z.number().int(),
+  menuCards: z.number().int(),
+  accepted: z.number().int(),
+  skipped: z.number().int(),
+  current: z.number().int().nullable(),
+  target: z.number().int().nullable(),
+});
+export type HistoryItem = z.infer<typeof historyItemSchema>;
+
+export const historyResultSchema = z.object({
+  items: z.array(historyItemSchema),
+  /** Pass as `before` for the next page; null on the last one. */
+  nextBefore: z.string().nullable(),
+});
+export type HistoryResult = z.infer<typeof historyResultSchema>;
+
 export const traceResultSchema = z.object({
   runId: z.uuid(),
   steps: z.array(traceStepSchema),

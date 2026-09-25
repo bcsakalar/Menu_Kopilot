@@ -37,7 +37,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v5: write Turkish characters; a card the expert reads out loud should not say "Karisik Atistirmalik".
   // v6: 6–8 word descriptions; only PACKAGED drinks are plain rows, prepared ones get options (D-178, D-179).
   'agent.recommend.system': 6,
-  'agent.recommend.user': 2,
+  // v3: the products the team kept turning down for this cuisine are named, so they are not proposed (D-194).
+  'agent.recommend.user': 3,
   // v2: an unknown option set is not a reason to stay silent — answer for every product that was asked about.
   // v3: drinks never reach this agent.
   // v4: four sections per product (options, removable, extras, 6–8 word description), grounded in the product-type

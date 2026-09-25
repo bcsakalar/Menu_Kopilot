@@ -37,6 +37,14 @@ describe('migrations', () => {
     expect(tables).toEqual(expect.arrayContaining(['product_types', 'suggestion_feedback']));
     expect(tables).toContain('menu_items');
     expect(tables).toContain('item_embeddings');
+    // 0005: the history's mode filter and the learning loop's cuisine and "Geri al" columns.
+    const columns = await executeRows(
+      handle.db,
+      sql`select table_name, column_name from information_schema.columns where table_schema = 'public'
+          and (table_name, column_name) in (('suggestion_runs', 'analysis_mode'), ('suggestion_feedback', 'cuisine_id'),
+                                            ('suggestion_feedback', 'ignored_at'), ('suggestion_feedback', 'ignored_by'))`,
+    );
+    expect(columns).toHaveLength(4);
     expect(await extensions(handle)).toEqual(expect.arrayContaining(['pg_trgm', 'vector']));
   });
 
@@ -53,8 +61,9 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003 and 0004 sit on top of 0002, so all three come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 3)).map((r) => r.tag)).toEqual([
+    // 0003, 0004 and 0005 sit on top of 0002, so all four come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 4)).map((r) => r.tag)).toEqual([
+      '0005_learning_history',
       '0004_product_types',
       '0003_agents_categories',
       '0002_vision_routes',
@@ -74,7 +83,8 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 3)).map((r) => r.tag)).toEqual([
+    expect((await rollbackMigrations(handle.db, 4)).map((r) => r.tag)).toEqual([
+      '0005_learning_history',
       '0004_product_types',
       '0003_agents_categories',
       '0002_vision_routes',
@@ -89,6 +99,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
+    // 0005 only adds columns.
+    const history = await rollbackMigrations(handle.db, 1);
+    expect(history.map((r) => r.tag)).toEqual(['0005_learning_history']);
+    expect(await publicTables(handle)).toHaveLength(19);
+
     // 0004 takes its two tables with it.
     const knowledge = await rollbackMigrations(handle.db, 1);
     expect(knowledge.map((r) => r.tag)).toEqual(['0004_product_types']);
