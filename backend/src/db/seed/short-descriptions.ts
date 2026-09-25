@@ -37,7 +37,7 @@ export const SHORT_DESCRIPTIONS: Readonly<Record<string, string>> = {
   'ev-yemekleri|Tereyağlı Pirinç Pilavı': 'Tereyağında şehriyeyle kavrulmuş tane tane pirinç pilavı.',
   'manti-hamur-isleri|Kayseri Mantısı': 'Minik kıymalı mantı, sarımsaklı yoğurt ve tereyağlı sosla.',
   'manti-hamur-isleri|Su Böreği': 'Haşlanmış yufka katları arasında peynirli, tereyağlı börek.',
-  'manti-hamur-isleri|Gözleme': 'Sacda tereyağıyla pişen, seçilen harçlı ince gözleme.',
+  'manti-hamur-isleri|Gözleme': 'Sacda tereyağıyla pişen ince hamurlu el açması gözleme.',
   'tatli|Künefe': 'Peynirli tel kadayıf, sıcak şerbet ve Antep fıstığıyla.',
   'tatli|Fıstıklı Baklava': 'İnce yufka katları arasında bol Antep fıstığı, şerbetli.',
   'tatli|Fırın Sütlaç': 'Üzeri fırında kızartılmış sütlü pirinç tatlısı, soğuk servis.',

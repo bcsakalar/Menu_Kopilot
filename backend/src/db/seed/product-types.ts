@@ -30,7 +30,7 @@ import {
  * that never fit the type — the validator deletes them no matter who proposed them. Keywords are plain Turkish;
  * they are normalized when the index is built.
  */
-export const PRODUCT_TYPES_VERSION = 2;
+export const PRODUCT_TYPES_VERSION = 3;
 
 // Shared forbidden sets — a dish never gets a coffee's groups, a drink never gets a dish's.
 const NOT_FOR_FOOD = ['Süt Seçimi', 'Süt Tercihi', 'Süt Türü', 'Şurup', 'Shot', 'Espresso', 'Buz', 'Şeker'];
@@ -142,6 +142,26 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     fallbackDescription: 'Tereyağlı pilav üzerinde, turşu ve biberle servis edilir.',
     cuisines: ['doner', 'ev-yemekleri', 'sokak-lezzetleri', 'tantuni'],
     priority: 5,
+  },
+  {
+    // Meat or köfte on matchstick potatoes with yoghurt: the pot-dish type gave it a pilaf choice and a line about
+    // slow cooking in a pot (D-191).
+    key: 'cokertme',
+    label: 'Çökertme (kibrit patates, yoğurt)',
+    categoryKey: 'ana-yemek',
+    keywords: ['çökertme', 'çökertme kebabı', 'çökertme köfte'],
+    plain: false,
+    optionGroups: [
+      porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0),
+      single('Yoğurt', ['Sarımsaklı Yoğurt', 'Sade Yoğurt'], { required: true, defaultIndex: 0 }),
+      single('Sos', ['Tereyağlı Salça', 'Tereyağlı Pul Biber', 'Sossuz'], { required: true, defaultIndex: 0 }),
+    ],
+    removable: ['Sarımsak', 'Maydanoz'],
+    extras: ['Ekstra Et', 'Ekstra Yoğurt', 'Ekstra Patates'],
+    forbiddenGroups: [...NOT_FOR_GRILL, 'Pilav', 'Lavaş', 'Pişirme Derecesi', 'Pişme Derecesi', 'Ekmek Seçimi'],
+    fallbackDescription: 'Kibrit patates üzerinde yoğurt ve tereyağlı sosla.',
+    cuisines: ['steak', 'kofte', 'kebap-izgara'],
+    priority: 2,
   },
   {
     key: 'kofte-porsiyon',
@@ -306,7 +326,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     key: 'et-yemegi',
     label: 'Tencere / ev yemeği',
     categoryKey: 'ana-yemek',
-    keywords: ['sote', 'tas kebabı', 'orman kebabı', 'hünkar beğendi', 'musakka', 'karnıyarık', 'kuru fasulye', 'nohut', 'türlü', 'izmir köfte', 'güveç', 'yahni', 'kaburga dolması', 'taze fasulye', 'etli', 'çökertme', 'kavurma', 'dolma'],
+    keywords: ['sote', 'tas kebabı', 'orman kebabı', 'hünkar beğendi', 'musakka', 'karnıyarık', 'kuru fasulye', 'nohut', 'türlü', 'izmir köfte', 'güveç', 'yahni', 'kaburga dolması', 'taze fasulye', 'etli', 'kavurma', 'dolma'],
     plain: false,
     optionGroups: [
       porsiyon(['Yarım Porsiyon', '1 Porsiyon', '1,5 Porsiyon'], 1),
@@ -403,7 +423,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     removable: ['Maydanoz', 'Tereyağı', 'Susam'],
     extras: ['Ekstra Peynir', 'Kaşar', 'Ekstra Tereyağı', 'Yumurta'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Lavaş', 'Pilav'],
-    fallbackDescription: 'İnce yufkayla hazırlanan, seçilen harçlı sıcak börek.',
+    fallbackDescription: 'İnce hamurla hazırlanan, sıcak servis edilen hamur işi.',
     cuisines: ['borek', 'manti-hamur-isleri', 'kahvalti', 'pastane-firin'],
   },
   {
@@ -545,7 +565,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     key: 'ara-sicak',
     label: 'Ara sıcak',
     categoryKey: 'ara-sicak',
-    keywords: ['sigara böreği', 'içli köfte', 'mücver', 'çıtır mantar', 'kaşarlı mantar', 'arnavut ciğeri', 'paçanga', 'mozzarella stick', 'soğan halkası', 'gyoza', 'bahar rulosu', 'nachos', 'sosis tava', 'bruschetta', 'arancini'],
+    keywords: ['sigara böreği', 'içli köfte', 'mücver', 'çıtır mantar', 'kaşarlı mantar', 'arnavut ciğeri', 'paçanga', 'mozzarella stick', 'soğan halkası', 'gyoza', 'bahar rulosu', 'spring roll', 'nachos', 'sosis tava', 'bruschetta', 'arancini'],
     plain: false,
     optionGroups: [
       adet(['4 Adet', '6 Adet', '10 Adet'], 1),
@@ -758,23 +778,44 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     extras: ['Ekstra Shot', 'Krem Şanti', 'Tarçın Tozu', 'Ekstra Süt'],
     forbiddenGroups: NOT_FOR_DRINK,
     forbiddenIngredients: SAVORY,
-    fallbackDescription: 'Taze demlenen sıcak içecek, isteğe göre sütlü.',
+    fallbackDescription: 'Siparişle taze hazırlanan, sıcak servis edilen içecek.',
     cuisines: ['kafe-icecek', 'tatli', 'kahvalti', 'pastane-firin'],
     priority: 2,
   },
   {
-    key: 'soguk-icecek',
-    label: 'Hazırlanan soğuk içecek (soğuk kahve, milkshake, limonata…)',
+    key: 'soguk-kahve',
+    label: 'Soğuk kahve / milkshake',
     categoryKey: 'icecek',
-    keywords: ['ice latte', 'buzlu', 'frappe', 'soğuk kahve', 'cold brew', 'milkshake', 'smoothie', 'limonata', 'taze sıkma', 'portakal suyu', 'mojito', 'kokteyl', 'frozen', 'bubble tea', 'soğuk çay', 'iced'],
+    keywords: [
+      'ice latte', 'iced latte', 'buzlu latte', 'ice americano', 'iced americano', 'ice mocha', 'iced mocha', 'frappe',
+      'frappuccino', 'soğuk kahve', 'buzlu kahve', 'cold brew', 'milkshake',
+    ],
+    plain: false,
+    optionGroups: [
+      boy(['Küçük', 'Orta', 'Büyük'], 1),
+      sutSecimi(),
+      surupSecimi(),
+    ],
+    removable: ['Şeker', 'Krema'],
+    extras: ['Ekstra Shot', 'Krem Şanti', 'Ekstra Süt'],
+    forbiddenGroups: NOT_FOR_DRINK,
+    forbiddenIngredients: SAVORY,
+    fallbackDescription: 'Siparişle hazırlanan buzlu içecek, isteğe göre sütlü.',
+    cuisines: ['kafe-icecek', 'dondurma', 'burger'],
+    priority: 4,
+  },
+  {
+    key: 'soguk-icecek',
+    label: 'Hazırlanan soğuk içecek (limonata, soğuk çay, smoothie…)',
+    categoryKey: 'icecek',
+    keywords: ['buzlu', 'smoothie', 'limonata', 'taze sıkma', 'portakal suyu', 'mojito', 'kokteyl', 'frozen', 'bubble tea', 'soğuk çay', 'iced'],
     plain: false,
     optionGroups: [
       boy(['Küçük', 'Orta', 'Büyük'], 1),
       single('Buz', ['Normal Buz', 'Az Buzlu', 'Buzsuz'], { required: true, defaultIndex: 0 }),
-      surupSecimi(),
     ],
-    removable: ['Şeker', 'Krema', 'Nane'],
-    extras: ['Ekstra Shot', 'Krem Şanti', 'Taze Nane', 'Ekstra Meyve'],
+    removable: ['Nane', 'Limon'],
+    extras: ['Taze Nane', 'Ekstra Meyve', 'Bal'],
     forbiddenGroups: NOT_FOR_DRINK,
     forbiddenIngredients: SAVORY,
     fallbackDescription: 'Siparişle hazırlanan soğuk içecek, buzla servis edilir.',
