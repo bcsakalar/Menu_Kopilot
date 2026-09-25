@@ -1,0 +1,2182 @@
+{
+ "case": {
+  "id": "pide-lahmacun__photo__full",
+  "slug": "pide-lahmacun",
+  "kind": "photo",
+  "mode": "full",
+  "image": "tests/ai_eval/images/pide-lahmacun.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 6554,
+ "runId": "185a1559-37b8-4b18-9e62-4a536f50a379",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Menüdeki tüm ürünler Pide ve Lahmacun olduğu için sokak lezzetleri kategorisine ait.",
+  "cuisineId": "4d2351ba-797a-47bf-b4fc-e9a7abb6a03a",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Pide & Lahmacun",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "4d2351ba-797a-47bf-b4fc-e9a7abb6a03a",
+  "suggestedCuisineName": "Pide & Lahmacun"
+ },
+ "counts": {
+  "target": 10,
+  "current": 7,
+  "missing": 3,
+  "cuisineId": "4d2351ba-797a-47bf-b4fc-e9a7abb6a03a",
+  "categories": [
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 0,
+    "present": 6,
+    "minItems": 6
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Pide & Lahmacun",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 2,
+  "tokensIn": 776,
+  "latencyMs": 6540,
+  "menuItems": 7,
+  "tokensOut": 152,
+  "imagesRead": 1,
+  "newProducts": 8,
+  "optionCards": 6,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kıymalı Pide",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kaşarlı Pide",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kuşbaşılı Pide",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Karışık Pide",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Sucuklu Yumurtalı Pide",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Lahmacun",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Adana Kebap",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Zırhla çekilmiş acılı kuzu kıyma şişte közde pişirilir; lavaş, közlenmiş domates-biber ve sumaklı soğanla servis edilir.",
+   "portionInfo": "1 porsiyon ~180 g et (2 şiş)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Servis Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Porsiyon (Tabakta)",
+       "free"
+      ],
+      [
+       "Dürüm",
+       "free"
+      ],
+      [
+       "Ekmek Arası",
+       "free"
+      ],
+      [
+       "Pilav Üstü",
+       "surcharge"
+      ],
+      [
+       "Yoğurtlu",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tırnaklı Pide",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Közlenmiş Domates",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Sumaklı Soğan",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "surcharge"
+      ],
+      [
+       "Pirinç Pilavı",
+       "surcharge"
+      ],
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Sumak",
+    "Maydanoz",
+    "Domates",
+    "Biber",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Ekstra Közlenmiş Biber",
+    "Cacık",
+    "Acılı Ezme",
+    "Ekstra Et (Yarım Porsiyon)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini genişletir (Kebap & Izgara)"
+  },
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Kebaptan önce gelen klasik başlangıç; süzme kırmızı mercimek, limon ve pul biberle.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba kategorisini kapatır (Kebap & Izgara)"
+  },
+  {
+   "section": "new_product",
+   "name": "Piyaz",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış kuru fasulye, soğan, maydanoz ve haşlanmış yumurta; zeytinyağlı-sirkeli ya da tahinli sosla hazırlanır.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Piyaz Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağlı Sirkeli",
+       "free"
+      ],
+      [
+       "Tahinli (Antalya Usulü)",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Yumurta",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Yumurta",
+    "Zeytin"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Meze kategorisini kapatır (Köfte)"
+  },
+  {
+   "section": "new_product",
+   "name": "Fıstıklı Baklava",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Antep fıstıklı, tereyağlı baklava; porsiyon olarak servis edilir.",
+   "portionInfo": "4 dilim",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "6 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Kaymak",
+       "free"
+      ],
+      [
+       "Dondurma",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Kaymak",
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Kebap & Izgara)"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Kebap & Izgara)"
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Döner Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lavaşa sarılmış marine tavuk döner; domates, turşu, marul ve tercihe göre sosla hazırlanır, sıcak servis edilir.",
+   "portionInfo": "1 adet ~100 g tavuk (Standart)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~150 g)",
+       "sets_base"
+      ],
+      [
+       "Dev Boy (~200 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Yoğurtlu Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Dürüm",
+       "free"
+      ],
+      [
+       "Patates + Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Kola ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Şalgam ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Turşu",
+    "Marul",
+    "Sos",
+    "Patates"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Kaşar",
+    "Ekstra Sos",
+    "Patates (Dürüm İçine)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini genişletir (Döner)"
+  },
+  {
+   "section": "new_product",
+   "name": "Et Döner Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lavaşa sarılmış yaprak et döner; domates, soğan, maydanoz ve tercihe göre sosla hazırlanır, sıcak servis edilir.",
+   "portionInfo": "1 adet ~100 g döner (Standart)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~150 g)",
+       "sets_base"
+      ],
+      [
+       "Dev Boy (~200 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Yoğurtlu Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Dürüm",
+       "free"
+      ],
+      [
+       "Patates + Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Kola ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Şalgam ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Maydanoz",
+    "Turşu",
+    "Sos",
+    "Marul"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Ekstra Sos",
+    "Patates (Dürüm İçine)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini genişletir (Döner)"
+  },
+  {
+   "section": "new_product",
+   "name": "Izgara Köfte",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Dana kıymadan hazırlanan köfteler ızgarada pişirilir; piyaz, közlenmiş biber-domates ve pilavla servis edilir.",
+   "portionInfo": "1 porsiyon ~200 g (8–10 adet)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Servis Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Porsiyon (Tabakta)",
+       "free"
+      ],
+      [
+       "Ekmek Arası",
+       "free"
+      ],
+      [
+       "Dürüm",
+       "free"
+      ],
+      [
+       "Pilav Üstü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Piyaz",
+       "free"
+      ],
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Közlenmiş Domates",
+       "free"
+      ],
+      [
+       "Sumaklı Soğan",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Biber",
+    "Maydanoz",
+    "Piyaz"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte (4 adet)",
+    "Kaşar",
+    "Ekstra Piyaz",
+    "Cacık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini genişletir (Kebap & Izgara)"
+  },
+  {
+   "section": "option",
+   "name": "Kıymalı Pide",
+   "targetName": "Kıymalı Pide",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Yumurta, Tereyağı, Pişirme, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yumurtasız",
+       "free"
+      ],
+      [
+       "Yumurtalı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Kıtır (Çok Pişmiş)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Yeşillik",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Domates",
+    "Maydanoz",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Yumurta",
+    "Ekstra Kıyma",
+    "Sucuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kaşarlı Pide",
+   "targetName": "Kaşarlı Pide",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Yumurta, Tereyağı, Pişirme, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yumurtasız",
+       "free"
+      ],
+      [
+       "Yumurtalı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Kıtır (Çok Pişmiş)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Yeşillik",
+       "free"
+      ],
+      [
+       "Domates",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Zeytin",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Susam",
+    "Çörek Otu"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Pastırma",
+    "Yumurta",
+    "Kıyma"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kuşbaşılı Pide",
+   "targetName": "Kuşbaşılı Pide",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Et Tercihi, Kaşar, Tereyağı, Pişirme, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Et Tercihi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Dana",
+       "free"
+      ],
+      [
+       "Kuzu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kaşar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaşarsız",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Kıtır (Çok Pişmiş)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Yeşillik",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Biber",
+    "Domates",
+    "Soğan",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Yumurta",
+    "Ekstra Kuşbaşı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Karışık Pide",
+   "targetName": "Karışık Pide",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Yumurta, Tereyağı, Pişirme, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yumurtasız",
+       "free"
+      ],
+      [
+       "Yumurtalı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Kıtır (Çok Pişmiş)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Yeşillik",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sucuk",
+    "Kaşar",
+    "Biber",
+    "Domates",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Yumurta",
+    "Pastırma",
+    "Ekstra Sucuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Sucuklu Yumurtalı Pide",
+   "targetName": "Sucuklu Yumurtalı Pide",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Yumurta Kıvamı, Tereyağı, Pişirme, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta Kıvamı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Akışkan",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Tam Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Kıtır (Çok Pişmiş)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Yeşillik",
+       "free"
+      ],
+      [
+       "Domates",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Zeytin",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kaşar",
+    "Tereyağı",
+    "Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Sucuk",
+    "Ekstra Kaşar",
+    "Ekstra Yumurta",
+    "Pastırma"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Lahmacun",
+   "targetName": "Lahmacun",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Acı Seviyesi, Hamur, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fındık (Küçük)",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "İnce",
+       "free"
+      ],
+      [
+       "Kıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Limon",
+    "Marul",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Kıyma",
+    "Ekstra Yeşillik Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kıymalı Pide",
+     "Kaşarlı Pide",
+     "Kuşbaşılı Pide",
+     "Karışık Pide",
+     "Sucuklu Yumurtalı Pide",
+     "Lahmacun",
+     "Ayran"
+    ],
+    "unique": 7,
+    "extractedRaw": 7,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6503,
+   "llmCalls": 2,
+   "tokensIn": 776,
+   "tokensOut": 152,
+   "error": null,
+   "output": {
+    "resolved": "pide-lahmacun",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "pide-lahmacun",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 7,
+    "missing": 3,
+    "needFixes": 0,
+    "categories": [
+     "corba 0/1",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "icecek 1/2",
+     "ana-yemek 6/6"
+    ],
+    "needOptions": 6
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Adana Kebap",
+     "Mercimek Çorbası",
+     "Piyaz",
+     "Fıstıklı Baklava",
+     "Şalgam Suyu",
+     "Tavuk Döner Dürüm",
+     "Et Döner Dürüm",
+     "Izgara Köfte"
+    ],
+    "fromAi": 0,
+    "fromDb": 8
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kıymalı Pide",
+     "Kaşarlı Pide",
+     "Kuşbaşılı Pide",
+     "Karışık Pide",
+     "Sucuklu Yumurtalı Pide",
+     "Lahmacun"
+    ],
+    "fromAi": 0,
+    "fromDb": 6
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 6,
+    "reasons": [],
+    "reachable": 15
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 525,
+   "tokensOut": 0,
+   "latencyMs": 5998
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 776,
+   "tokensOut": 152,
+   "latencyMs": 498
+  }
+ ],
+ "providerTrouble": false
+}

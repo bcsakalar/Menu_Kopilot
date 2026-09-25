@@ -1,0 +1,1611 @@
+{
+ "case": {
+  "id": "pizza__photo__full",
+  "slug": "pizza",
+  "kind": "photo",
+  "mode": "full",
+  "image": "tests/ai_eval/images/pizza.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 5453,
+ "runId": "10fef0f3-6d1a-451f-8f2d-65ffc0f3d99f",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Menüde Margherita, Karışık Pizza, Sucuklu Pizza, Tavuklu Pizza ve Sarımsaklı Ekmek bulunuyor, bu da pizza odaklı bir menüyü gösteriyor.",
+  "cuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Pizza",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "suggestedCuisineName": "Pizza"
+ },
+ "counts": {
+  "target": 10,
+  "current": 6,
+  "missing": 4,
+  "cuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 2,
+    "present": 4,
+    "minItems": 6
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 0,
+    "present": 1,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Pizza",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 2,
+  "llmCalls": 2,
+  "tokensIn": 3121,
+  "latencyMs": 5442,
+  "menuItems": 6,
+  "tokensOut": 1947,
+  "imagesRead": 1,
+  "newProducts": 8,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Margherita Pizza",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Karışık Pizza",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Sucuklu Pizza",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuklu Pizza",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Sarımsaklı Ekmek",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kutu İçecek",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Pepperoni Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Domates sosu ve bol mozzarella üzerinde baharatlı dana pepperoni dilimleri; ince ya da klasik hamurda.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kekik"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Litrelik İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~1 L",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Dört Peynirli Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Mozzarella, cheddar, parmesan ve rokfor ile hazırlanan yoğun peynirli beyaz ya da domates soslu pizza.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Taban Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Domates Sosu",
+       "free"
+      ],
+      [
+       "Kremalı Beyaz Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Rokfor",
+    "Cheddar"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Ceviz",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Vejetaryen Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Mantar, biber, domates, mısır, siyah zeytin ve soğanla mozzarella üzerinde hazırlanan sebzeli pizza.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Biber",
+    "Soğan",
+    "Zeytin",
+    "Mısır"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Roka",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Barbekü Tavuklu Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Barbekü sosu tabanında tavuk parçaları, mozzarella, kırmızı soğan ve mısırla hazırlanan pizza.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Mısır"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Mantarlı Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Domates sosu, mozzarella ve bol taze kültür mantarıyla hazırlanan, kekikle tatlandırılan pizza.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kekik"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Kızartması",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "ai",
+   "shortDescription": "Çıtır çıtır kızartılmış patates; parmak ya da elma dilim kesim, tuz ve isteğe göre baharatla.",
+   "portionInfo": "Orta boy ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Parmak",
+       "free"
+      ],
+      [
+       "Elma Dilim",
+       "free"
+      ],
+      [
+       "Kıvırcık",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "surcharge"
+      ],
+      [
+       "Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos",
+    "Ekstra Ketçap"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Müşterilerin pizza öncesi tercih ettiği hafif ve doyurucu bir atıştırmalık."
+  },
+  {
+   "section": "new_product",
+   "name": "Tiramisu",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Kahveye batırılmış kedi dili bisküviler ve mascarpone kreması kat kat dizilir; kakao serpilerek servis edilir.",
+   "portionInfo": "1 porsiyon ~180 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Porsiyon)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kakao"
+   ],
+   "extraIngredients": [
+    "Ekstra Kakao"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza sonrası hafif ve aromatik bir tatlı, menüyü tamamlar."
+  },
+  {
+   "section": "option",
+   "name": "Margherita Pizza",
+   "targetName": "Margherita",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Hamur, Kenar, Ekstra Malzeme, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ],
+      [
+       "Glutensiz",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekstra Malzeme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mantar",
+       "surcharge"
+      ],
+      [
+       "Zeytin",
+       "surcharge"
+      ],
+      [
+       "Sucuk",
+       "surcharge"
+      ],
+      [
+       "Mısır",
+       "surcharge"
+      ],
+      [
+       "Biber",
+       "surcharge"
+      ],
+      [
+       "Jalapeno",
+       "surcharge"
+      ],
+      [
+       "Ekstra Mozzarella",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fesleğen",
+    "Kekik",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Ekstra Domates Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Karışık Pizza",
+   "targetName": "Karışık Pizza",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Hamur Seçimi, Kenar, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Biber",
+    "Mısır",
+    "Zeytin",
+    "Salam",
+    "Sucuk"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Sucuklu Pizza",
+   "targetName": "Sucuklu Pizza",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Hamur Seçimi, Kenar, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Biber",
+    "Mısır",
+    "Kekik"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tavuklu Pizza",
+   "targetName": "Tavuklu Pizza",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Hamur Seçimi, Kenar, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Mısır",
+    "Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Sucuk",
+    "Mantar",
+    "Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Sarımsaklı Ekmek",
+   "targetName": "Sarımsaklı Ekmek",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Porsiyon, Peynir",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "6 Dilim",
+       "sets_base"
+      ],
+      [
+       "8 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirsiz",
+       "surcharge"
+      ],
+      [
+       "Mozzarellalı",
+       "surcharge"
+      ],
+      [
+       "Cheddarlı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ranch Sos",
+    "Marinara Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Margherita Pizza",
+   "targetName": "Margherita",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Margherita Pizza",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Margherita",
+   "suggestedValue": "Margherita Pizza",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Kutu İçecek",
+   "targetName": "Kola",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Kutu İçecek",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Kola",
+   "suggestedValue": "Kutu İçecek",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Margherita",
+     "Karışık Pizza",
+     "Sucuklu Pizza",
+     "Tavuklu Pizza",
+     "Sarımsaklı Ekmek",
+     "Kola"
+    ],
+    "unique": 6,
+    "extractedRaw": 6,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 1086,
+   "llmCalls": 1,
+   "tokensIn": 764,
+   "tokensOut": 112,
+   "error": null,
+   "output": {
+    "resolved": "pizza",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "pizza",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 6,
+    "missing": 4,
+    "needFixes": 2,
+    "categories": [
+     "ana-yemek 4/6",
+     "ara-sicak 0/1",
+     "tatli 0/1",
+     "icecek 1/2",
+     "salata-meze 1/1"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 4318,
+   "llmCalls": 1,
+   "tokensIn": 2357,
+   "tokensOut": 1835,
+   "error": null,
+   "output": {
+    "names": [
+     "Pepperoni Pizza",
+     "Litrelik İçecek",
+     "Dört Peynirli Pizza",
+     "Vejetaryen Pizza",
+     "Barbekü Tavuklu Pizza",
+     "Mantarlı Pizza",
+     "Patates Kızartması",
+     "Tiramisu"
+    ],
+    "cached": false,
+    "fromAi": 2,
+    "fromDb": 6,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Margherita Pizza",
+     "Karışık Pizza",
+     "Sucuklu Pizza",
+     "Tavuklu Pizza",
+     "Sarımsaklı Ekmek"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "reachable": 14
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 764,
+   "tokensOut": 112,
+   "latencyMs": 1042
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2357,
+   "tokensOut": 1835,
+   "latencyMs": 4307
+  }
+ ],
+ "providerTrouble": false
+}

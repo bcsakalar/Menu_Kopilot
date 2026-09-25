@@ -1,0 +1,10 @@
+# Evaluation-only override: the matrix makes several hundred model calls in one sitting, far above the per-user
+# daily quota a real account has (300 calls). This lifts the quota for the local stack only; the provider-side
+# rate limits still apply, which is what run.mjs throttles for. Never used in production.
+#
+#   docker compose -f docker-compose.yml -f tests/ai_eval/docker-compose.eval.yml up -d --build api
+services:
+  api:
+    environment:
+      DAILY_LLM_CALL_QUOTA: '100000'
+      DAILY_TOKEN_QUOTA: '200000000'

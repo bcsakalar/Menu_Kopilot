@@ -1,0 +1,649 @@
+{
+ "case": {
+  "id": "tantuni__single",
+  "slug": "tantuni",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "menuText": "Kaşarlı Tavuk Tantuni"
+ },
+ "httpStatus": 200,
+ "latencyMs": 10993,
+ "runId": "97b84bbf-38ec-4891-8f9b-2aa1658a41d9",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 5/10 ürün olur — hedefe 5 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Tek ürün olan Kaşarlı Tavuk Tantuni, sokak lezzetleri kategorisine ait, orta fiyat segmenti",
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "disagrees": false,
+  "confidence": 1,
+  "cuisineName": "Tantuni",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "suggestedCuisineName": "Tantuni"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 3,
+    "present": 1,
+    "minItems": 4
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Tantuni",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 1,
+  "llmCalls": 3,
+  "tokensIn": 3019,
+  "latencyMs": 10938,
+  "menuItems": 1,
+  "tokensOut": 1444,
+  "imagesRead": 0,
+  "newProducts": 4,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kaşarlı Tantuni",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Et Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış dana eti pamuk yağında sacda pişer; domates, soğan ve maydanozla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~100 g et",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Waffle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Sıcak waffle hamuru seçilen meyveler, çikolata sosları ve kuruyemişlerle kaplanarak servis edilir.",
+   "portionInfo": "1 adet (~20 cm)",
+   "optionGroups": [
+    {
+     "name": "Meyve Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Muz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Kivi",
+       "free"
+      ],
+      [
+       "Ananas",
+       "free"
+      ],
+      [
+       "Böğürtlen",
+       "free"
+      ],
+      [
+       "Portakal",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sütlü Çikolata",
+       "free"
+      ],
+      [
+       "Beyaz Çikolata",
+       "free"
+      ],
+      [
+       "Fındık Kreması",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Fıstık Kreması",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Lotus Bisküvi",
+       "free"
+      ],
+      [
+       "Renkli Şeker",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Meyve",
+    "Top Dondurma",
+    "Ekstra Çikolata"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Çoban Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "ai",
+   "shortDescription": "Doğranmış domates, salatalık, biber, soğan ve maydanoz; zeytinyağı, limon ve sumakla hazırlanır.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Kişilik",
+       "sets_base"
+      ],
+      [
+       "İki Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz",
+    "Sumak",
+    "Salatalık"
+   ],
+   "extraIngredients": [
+    "Beyaz Peynir",
+    "Zeytin",
+    "Ekstra Nar Ekşisi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni yanında hafif ve ferahlatıcı bir yan ürün, lezzet dengesini tamamlar."
+  },
+  {
+   "section": "option",
+   "name": "Kaşarlı Tantuni",
+   "targetName": "Kaşarlı Tavuk Tantuni",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lavaş, Acı Seviyesi, Menü",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Et"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Kaşarlı Tantuni",
+   "targetName": "Kaşarlı Tavuk Tantuni",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kaşarlı Tantuni",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Kaşarlı Tavuk Tantuni",
+   "suggestedValue": "Kaşarlı Tantuni",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaşarlı Tavuk Tantuni"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6701,
+   "llmCalls": 2,
+   "tokensIn": 742,
+   "tokensOut": 94,
+   "error": null,
+   "output": {
+    "resolved": "tantuni",
+    "disagrees": false,
+    "confidence": 1,
+    "cuisineSlug": "tantuni",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 1,
+    "categories": [
+     "ana-yemek 1/4",
+     "icecek 0/2",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "menu-kampanya 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 4213,
+   "llmCalls": 1,
+   "tokensIn": 2277,
+   "tokensOut": 1350,
+   "error": null,
+   "output": {
+    "names": [
+     "Et Tantuni Dürüm",
+     "Ayran",
+     "Waffle",
+     "Çoban Salata"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 3,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaşarlı Tantuni"
+    ],
+    "fromAi": 0,
+    "fromDb": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 4,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 5
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 503,
+   "tokensOut": 0,
+   "latencyMs": 6001
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 742,
+   "tokensOut": 94,
+   "latencyMs": 694
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2277,
+   "tokensOut": 1350,
+   "latencyMs": 4164
+  }
+ ],
+ "providerTrouble": false
+}

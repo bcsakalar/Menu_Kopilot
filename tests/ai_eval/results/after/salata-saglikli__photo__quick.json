@@ -1,0 +1,1163 @@
+{
+ "case": {
+  "id": "salata-saglikli__photo__quick",
+  "slug": "salata-saglikli",
+  "kind": "photo",
+  "mode": "quick",
+  "image": "tests/ai_eval/images/salata-saglikli.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 80,
+ "runId": "304ee163-ddc6-4b06-abce-9b3a4bb00c1f",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 11/12 ürün olur — hedefe 1 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Salata & Sağlıklı",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 12,
+  "current": 5,
+  "missing": 7,
+  "cuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 2,
+    "present": 4,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 12,
+  "cuisineName": "Salata & Sağlıklı",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 0,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 59,
+  "menuItems": 5,
+  "tokensOut": 0,
+  "imagesRead": 1,
+  "newProducts": 6,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Sezar Salata",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuklu Bowl",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Ton Balıklı Salata",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kinoalı Salata",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Taze Portakal Suyu",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Somonlu Bowl",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Marine somon, pirinç, avokado ve edamameyle poke kase.",
+   "portionInfo": "1 kase ~400 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Taban",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Suşi Pirinci",
+       "free"
+      ],
+      [
+       "Esmer Pirinç",
+       "free"
+      ],
+      [
+       "Kinoa",
+       "free"
+      ],
+      [
+       "Yeşillik (Tahılsız)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Susamlı Soya",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ],
+      [
+       "Teriyaki",
+       "free"
+      ],
+      [
+       "Ponzu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Edamame",
+    "Susam",
+    "Salatalık"
+   ],
+   "extraIngredients": [
+    "Ekstra Somon",
+    "Avokado"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "bowl",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Çoban Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Domates, salatalık, biber ve soğan; zeytinyağı ve limonla.",
+   "portionInfo": "Normal porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Hardallı Ballı",
+       "free"
+      ],
+      [
+       "Yoğurtlu",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Proteinsiz",
+       "free"
+      ],
+      [
+       "Izgara Tavuk",
+       "surcharge"
+      ],
+      [
+       "Ton Balığı",
+       "surcharge"
+      ],
+      [
+       "Hellim",
+       "surcharge"
+      ],
+      [
+       "Falafel",
+       "surcharge"
+      ],
+      [
+       "Haşlanmış Yumurta",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Beyaz Peynir",
+    "Zeytin"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Su",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "500 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Yoğurtlu Granola Kase",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, ev yapımı granola, meyve ve bal.",
+   "portionInfo": "1 kase ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Meyve",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Muz",
+       "free"
+      ],
+      [
+       "Yaban Mersini",
+       "free"
+      ],
+      [
+       "Kivi",
+       "free"
+      ],
+      [
+       "Nar",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Taban",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Süzme Yoğurt",
+       "free"
+      ],
+      [
+       "Bitkisel Yoğurt",
+       "free"
+      ],
+      [
+       "Kefir",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Bal",
+    "Chia"
+   ],
+   "extraIngredients": [
+    "Fıstık Ezmesi",
+    "Ekstra Granola"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "bowl",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Mevsim Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Mevsim yeşillikleri, havuç, mısır ve domatesle limonlu salata.",
+   "portionInfo": "Normal porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Hardallı Ballı",
+       "free"
+      ],
+      [
+       "Yoğurtlu",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Proteinsiz",
+       "free"
+      ],
+      [
+       "Izgara Tavuk",
+       "surcharge"
+      ],
+      [
+       "Ton Balığı",
+       "surcharge"
+      ],
+      [
+       "Hellim",
+       "surcharge"
+      ],
+      [
+       "Falafel",
+       "surcharge"
+      ],
+      [
+       "Haşlanmış Yumurta",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mısır",
+    "Havuç",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Beyaz Peynir",
+    "Ceviz",
+    "Nar Taneleri"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Humus",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Nohut, tahin, sarımsak ve limonla ezilen kremsi meze.",
+   "portionInfo": "Orta porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Kavurmalı",
+       "surcharge"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Közlenmiş Biberli",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Kırmızı Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Zeytinyağı",
+    "Çam Fıstığı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sağlıklı mutfaklarda popüler ve doyurucu bir atıştırmalık alternatifi.",
+   "productType": "meze",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Sezar Salata",
+   "targetName": "Sezar Salata",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Göbek marul, kruton, parmesan ve sezar sosuyla salata.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Izgara Tavuk",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Karides",
+       "surcharge"
+      ],
+      [
+       "Somon",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kruton",
+    "Parmesan",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Haşlanmış Yumurta",
+    "Avokado"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Tavuklu Bowl",
+   "targetName": "Tavuklu Bowl",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Izgara tavuk, esmer pirinç ve avokadoyla dengeli kase.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Taban",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Esmer Pirinç",
+       "free"
+      ],
+      [
+       "Kinoa",
+       "free"
+      ],
+      [
+       "Bulgur",
+       "free"
+      ],
+      [
+       "Yeşillik (Tahılsız)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yoğurtlu Nane",
+       "free"
+      ],
+      [
+       "Susamlı Soya",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ],
+      [
+       "Limonlu Tahin",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mısır",
+    "Fasulye",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Avokado",
+    "Haşlanmış Yumurta"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "bowl",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Ton Balıklı Salata",
+   "targetName": "Ton Balıklı Salata",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Marul, ton balığı, mısır, yumurta ve kırmızı soğanla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Hardallı Ballı",
+       "free"
+      ],
+      [
+       "Yoğurtlu",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Mısır",
+    "Yumurta"
+   ],
+   "extraIngredients": [
+    "Ekstra Ton Balığı",
+    "Avokado"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Kinoalı Salata",
+   "targetName": "Kinoalı Salata",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Kinoa, nar, nane ve cevizle nar ekşili salata.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Hardallı Ballı",
+       "free"
+      ],
+      [
+       "Yoğurtlu",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Proteinsiz",
+       "free"
+      ],
+      [
+       "Izgara Tavuk",
+       "surcharge"
+      ],
+      [
+       "Ton Balığı",
+       "surcharge"
+      ],
+      [
+       "Hellim",
+       "surcharge"
+      ],
+      [
+       "Falafel",
+       "surcharge"
+      ],
+      [
+       "Haşlanmış Yumurta",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Ceviz",
+    "Nar",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Avokado",
+    "Beyaz Peynir"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Taze Portakal Suyu",
+   "targetName": "Taze Portakal Suyu",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Sipariş üzerine sıkılan taze portakal suyu.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Karışım",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade Portakal",
+       "free"
+      ],
+      [
+       "Portakal-Havuç",
+       "free"
+      ],
+      [
+       "Portakal-Nar",
+       "free"
+      ],
+      [
+       "Portakal-Greyfurt",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Buz"
+   ],
+   "extraIngredients": [
+    "Taze Nane",
+    "Ekstra Meyve",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "soguk-icecek",
+   "confidence": 88
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Sezar Salata",
+     "Tavuklu Bowl",
+     "Ton Balıklı Salata",
+     "Kinoalı Salata",
+     "Taze Portakal Suyu"
+    ],
+    "unique": 5,
+    "extractedRaw": 5,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 12,
+    "current": 5,
+    "missing": 7,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 0/2",
+     "salata-meze 4/6",
+     "icecek 1/2",
+     "atistirmalik 0/1"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Somonlu Bowl",
+     "Çoban Salata",
+     "Su",
+     "Yoğurtlu Granola Kase",
+     "Mevsim Salata",
+     "Humus"
+    ],
+    "cached": true,
+    "fromAi": 1,
+    "fromDb": 5,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Sezar Salata",
+     "Tavuklu Bowl",
+     "Ton Balıklı Salata",
+     "Kinoalı Salata",
+     "Taze Portakal Suyu"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 20,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 12,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "grounding": [],
+    "reachable": 11,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": false
+}

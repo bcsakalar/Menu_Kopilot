@@ -1,0 +1,1341 @@
+{
+ "case": {
+  "id": "tantuni__text__full",
+  "slug": "tantuni",
+  "kind": "text",
+  "mode": "full",
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "menuText": "Et Tantuni Dürüm, Tavuk Tantuni Dürüm, Tantuni Tabak, Ayran"
+ },
+ "httpStatus": 200,
+ "latencyMs": 8493,
+ "runId": "5e2dc0ff-3afa-4694-b15f-0b689b4cfa18",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Et ve tavuk tantuni dürüm ile tabak tantuni çeşitlerine dayanarak tantuni mutfağı olarak belirlenmiştir.",
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "disagrees": false,
+  "confidence": 1,
+  "cuisineName": "Tantuni",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "suggestedCuisineName": "Tantuni"
+ },
+ "counts": {
+  "target": 10,
+  "current": 4,
+  "missing": 6,
+  "cuisineId": "8a7bd12a-3fc4-4c71-a107-3aa97d575764",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 1,
+    "present": 3,
+    "minItems": 4
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Tantuni",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 2,
+  "tokensIn": 2863,
+  "latencyMs": 8442,
+  "menuItems": 4,
+  "tokensOut": 1512,
+  "imagesRead": 0,
+  "newProducts": 8,
+  "optionCards": 3,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Et Tantuni Dürüm",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Tavuk Tantuni Dürüm",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Tantuni Tabak",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kumpir",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Fırında pişen iri patatesin içi tereyağı ve kaşarla ezilir; seçilen garnitür ve soslarla doldurularak servis edilir.",
+   "portionInfo": "1 adet iri patates (~400 g)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Çift Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Kaşarsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mısır",
+       "free"
+      ],
+      [
+       "Bezelye",
+       "free"
+      ],
+      [
+       "Rus Salatası",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Zeytin",
+       "free"
+      ],
+      [
+       "Sosis",
+       "free"
+      ],
+      [
+       "Mantar",
+       "free"
+      ],
+      [
+       "Kısır",
+       "free"
+      ],
+      [
+       "Jalapeno",
+       "free"
+      ],
+      [
+       "Havuç Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ranch",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Kaşar"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Tavuk Parçaları",
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Waffle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Sıcak waffle hamuru seçilen meyveler, çikolata sosları ve kuruyemişlerle kaplanarak servis edilir.",
+   "portionInfo": "1 adet (~20 cm)",
+   "optionGroups": [
+    {
+     "name": "Meyve Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Muz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Kivi",
+       "free"
+      ],
+      [
+       "Ananas",
+       "free"
+      ],
+      [
+       "Böğürtlen",
+       "free"
+      ],
+      [
+       "Portakal",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sütlü Çikolata",
+       "free"
+      ],
+      [
+       "Beyaz Çikolata",
+       "free"
+      ],
+      [
+       "Fındık Kreması",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Fıstık Kreması",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Lotus Bisküvi",
+       "free"
+      ],
+      [
+       "Renkli Şeker",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Meyve",
+    "Top Dondurma",
+    "Ekstra Çikolata"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Tantuni Menü",
+   "targetName": null,
+   "categoryKey": "menu-kampanya",
+   "source": "db",
+   "shortDescription": "Tantuni dürüm ya da tabak, yanında turşu, közlenmiş biber ve içecek.",
+   "portionInfo": "1 kişilik",
+   "optionGroups": [
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Dürüm + İçecek",
+       "sets_base"
+      ],
+      [
+       "Çift Dürüm + İçecek",
+       "sets_base"
+      ],
+      [
+       "Tabak + İçecek",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Acı"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni menülerinde sık bulunur — Menü & Kampanya eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Ciğer Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tavada kavrulmuş ciğer, lavaşa sarılır; soğan, maydanoz ve sumakla.",
+   "portionInfo": "1 dürüm",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Ciğer",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Tantuni",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış haşlanmış dana eti sacda kavrulur; domates, soğan, maydanoz ve sumakla lavaşa sarılarak servis edilir.",
+   "portionInfo": "1 dürüm (~120 g et)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Duble",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Et Tercihi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Dana",
+       "free"
+      ],
+      [
+       "Tavuk",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Dürüm",
+       "free"
+      ],
+      [
+       "Ekmek Arası",
+       "free"
+      ],
+      [
+       "Porsiyon (Tabakta)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Maydanoz",
+    "Sumak",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Turşu Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Kokoreç",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kuzu bağırsağı şişe sarılıp közde pişirilir, doğranıp domates ve biberle sacda çevrilir; ekmek arası servis edilir.",
+   "portionInfo": "Yarım ekmek (~150 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Yarım Ekmek",
+       "sets_base"
+      ],
+      [
+       "Üç Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Tam Ekmek",
+       "sets_base"
+      ],
+      [
+       "Porsiyon (Tabakta)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Baharat",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Bol Kekikli",
+       "free"
+      ],
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Baharatsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates",
+       "free"
+      ],
+      [
+       "Biber",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Biber",
+    "Kekik",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Kokoreç",
+    "Turşu Paketi",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Sokak Lezzetleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Çoban Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "ai",
+   "shortDescription": "Doğranmış domates, salatalık, biber, soğan ve maydanoz; zeytinyağı, limon ve sumakla hazırlanır.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Kişilik",
+       "sets_base"
+      ],
+      [
+       "İki Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz",
+    "Sumak",
+    "Salatalık"
+   ],
+   "extraIngredients": [
+    "Beyaz Peynir",
+    "Zeytin",
+    "Ekstra Nar Ekşisi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tantuni yanında ferahlatıcı ve hafif bir seçenek sunar."
+  },
+  {
+   "section": "option",
+   "name": "Et Tantuni Dürüm",
+   "targetName": "Et Tantuni Dürüm",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lavaş, Acı Seviyesi, Menü",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tavuk Tantuni Dürüm",
+   "targetName": "Tavuk Tantuni Dürüm",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lavaş, Acı Seviyesi, Menü",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tantuni Tabak",
+   "targetName": "Tantuni Tabak",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Porsiyon, Acı Seviyesi, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Kaşar",
+    "Közlenmiş Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Et Tantuni Dürüm",
+     "Tavuk Tantuni Dürüm",
+     "Tantuni Tabak",
+     "Ayran"
+    ],
+    "unique": 4,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 4968,
+   "llmCalls": 1,
+   "tokensIn": 550,
+   "tokensOut": 67,
+   "error": null,
+   "output": {
+    "resolved": "tantuni",
+    "disagrees": false,
+    "confidence": 1,
+    "cuisineSlug": "tantuni",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 4,
+    "missing": 6,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 3/4",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "icecek 1/2",
+     "menu-kampanya 0/1"
+    ],
+    "needOptions": 3
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 3447,
+   "llmCalls": 1,
+   "tokensIn": 2313,
+   "tokensOut": 1445,
+   "error": null,
+   "output": {
+    "names": [
+     "Kumpir",
+     "Waffle",
+     "Şalgam Suyu",
+     "Tantuni Menü",
+     "Ciğer Tantuni Dürüm",
+     "Tantuni",
+     "Kokoreç",
+     "Çoban Salata"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 7,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Et Tantuni Dürüm",
+     "Tavuk Tantuni Dürüm",
+     "Tantuni Tabak"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 3,
+    "reasons": [],
+    "reachable": 12
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 550,
+   "tokensOut": 67,
+   "latencyMs": 4964
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2313,
+   "tokensOut": 1445,
+   "latencyMs": 3437
+  }
+ ],
+ "providerTrouble": false
+}

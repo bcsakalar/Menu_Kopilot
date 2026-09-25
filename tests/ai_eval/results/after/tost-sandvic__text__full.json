@@ -1,0 +1,1472 @@
+{
+ "case": {
+  "id": "tost-sandvic__text__full",
+  "slug": "tost-sandvic",
+  "kind": "text",
+  "mode": "full",
+  "cuisineId": "f75934a3-1dc4-40eb-a60f-bf1c69a163ca",
+  "menuText": "Kaşarlı Tost, Karışık Tost, Sucuklu Kaşarlı Tost, Ayvalık Tostu, Ayran, Çay"
+ },
+ "httpStatus": 200,
+ "latencyMs": 142,
+ "runId": "03c68f3f-8d4e-41b0-b2a7-b5f8280a9bac",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "recommend_failed",
+   "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "f75934a3-1dc4-40eb-a60f-bf1c69a163ca",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Tost & Sandviç",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 12,
+  "current": 6,
+  "missing": 6,
+  "cuisineId": "f75934a3-1dc4-40eb-a60f-bf1c69a163ca",
+  "categories": [
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 3,
+    "present": 3,
+    "minItems": 6
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 2,
+    "minItems": 3
+   }
+  ],
+  "cuisineMin": 12,
+  "cuisineName": "Tost & Sandviç",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 1,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 82,
+  "menuItems": 6,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Karışık Tost",
+   "categoryKey": "atistirmalik",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Sucuklu Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayvalık Tostu",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çay",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kumru",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Susamlı kumru ekmeğinde sucuk, kaşar ve domates.",
+   "portionInfo": "1 adet",
+   "optionGroups": [
+    {
+     "name": "Kumru Çeşidi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik (Sucuklu Kaşarlı)",
+       "free"
+      ],
+      [
+       "Karışık",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Tavuklu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Biber",
+    "Sucuk"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Sucuk",
+    "Salam",
+    "Ekstra Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde sık bulunur — Atıştırmalık eksik",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Taze Sıkma Portakal Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Sipariş üzerine sıkılan taze portakal suyu.",
+   "portionInfo": "250 ml",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Buz",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Buz",
+       "free"
+      ],
+      [
+       "Az Buzlu",
+       "free"
+      ],
+      [
+       "Buzsuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Taze Nane",
+    "Ekstra Meyve",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Kahvaltı)",
+   "productType": "soguk-icecek",
+   "confidence": 80
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuklu Sandviç",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Izgara tavuk, cheddar ve ballı hardal sosla ciabattada.",
+   "portionInfo": "1 adet, ~120 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ciabatta",
+       "free"
+      ],
+      [
+       "Baget",
+       "free"
+      ],
+      [
+       "Tam Buğday",
+       "free"
+      ],
+      [
+       "Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Cheddar",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Avokado",
+    "Ekstra Cheddar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde sık bulunur — Atıştırmalık eksik",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde neredeyse her zaman bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Club Sandviç",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Üç kat ekmekte tavuk, hindi füme ve yumurta.",
+   "portionInfo": "1 adet (4 parça)",
+   "optionGroups": [
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Mevsim Salata",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Yumurta",
+    "Marul",
+    "Domates",
+    "Hindi Füme"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Ekstra Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde sık bulunur — Atıştırmalık eksik",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Bazlama Tost",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Köy bazlamasında kaşar ve seçilen malzemelerle kızarmış tost.",
+   "portionInfo": "1 adet",
+   "optionGroups": [
+    {
+     "name": "İç Malzeme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Sucuklu Kaşarlı",
+       "free"
+      ],
+      [
+       "Karışık",
+       "free"
+      ],
+      [
+       "Beyaz Peynirli",
+       "free"
+      ],
+      [
+       "Kavurmalı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde sık bulunur — Atıştırmalık eksik",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Ton Balıklı Sandviç",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Mayonezli ton balığı, mısır ve marulla soğuk sandviç.",
+   "portionInfo": "1 adet",
+   "optionGroups": [
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Baget",
+       "free"
+      ],
+      [
+       "Tam Buğday",
+       "free"
+      ],
+      [
+       "Ciabatta",
+       "free"
+      ],
+      [
+       "Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mısır",
+    "Marul",
+    "Domates",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Ekstra Ton Balığı",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tost & Sandviç menülerinde sık bulunur — Atıştırmalık eksik",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Kaşarlı Tost",
+   "targetName": "Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Bol kaşarla bastırılan klasik tost, turşu ve domatesle.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tost Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Karışık Tost",
+   "targetName": "Karışık Tost",
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Kaşar, sucuk, salam ve domatesle bastırılan doyurucu tost.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tost Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sucuk",
+    "Salam",
+    "Domates"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Sucuk",
+    "Ekstra Salam",
+    "Ekstra Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Sucuklu Kaşarlı Tost",
+   "targetName": "Sucuklu Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Kasap sucuğu ve kaşarla bastırılan tost, turşuyla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tost Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Ayvalık Tostu",
+   "targetName": "Ayvalık Tostu",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Somun ekmekte kaşar, sucuk, salam, turşu ve soslar.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Somun",
+       "sets_base"
+      ],
+      [
+       "Tam Somun",
+       "sets_base"
+      ],
+      [
+       "Duble",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sucuk",
+    "Salam"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Sucuk",
+    "Ekstra Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tost-sandvic",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Çay",
+   "targetName": "Çay",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Taze demlenmiş sıcak çay, bardakta servis edilir.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Bardak",
+       "sets_base"
+      ],
+      [
+       "Büyük Bardak",
+       "sets_base"
+      ],
+      [
+       "Fincan",
+       "sets_base"
+      ],
+      [
+       "Demlik (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Şeker",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Şekersiz",
+       "free"
+      ],
+      [
+       "Şekerli",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Bal",
+    "Tatlandırıcı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "cay",
+   "confidence": 70
+  },
+  {
+   "section": "fix",
+   "name": "Çay",
+   "targetName": "Çay",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Çay",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çay",
+   "suggestedValue": null,
+   "reason": "Ad kısaltma gibi görünüyor, satıcıya tam adını sor",
+   "productType": "cay",
+   "confidence": null
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaşarlı Tost",
+     "Karışık Tost",
+     "Sucuklu Kaşarlı Tost",
+     "Ayvalık Tostu",
+     "Ayran",
+     "Çay"
+    ],
+    "unique": 6,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 12,
+    "current": 6,
+    "missing": 6,
+    "needFixes": 1,
+    "categories": [
+     "atistirmalik 3/6",
+     "ara-sicak 0/1",
+     "icecek 2/3"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 7,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "names": [
+     "Kumru",
+     "Taze Sıkma Portakal Suyu",
+     "Tavuklu Sandviç",
+     "Kutu İçecek",
+     "Club Sandviç",
+     "Bazlama Tost",
+     "Ton Balıklı Sandviç"
+    ],
+    "fromAi": 0,
+    "fromDb": 7
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 8,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 4
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 31,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 12,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "grounding": [
+     "Bazlama Tost: Turşu malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Ton Balıklı Sandviç: Turşu malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Kaşarlı Tost: Turşu malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Karışık Tost: Turşu malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Sucuklu Kaşarlı Tost: Sucuk çıkarılabilirden çıkarıldı: ürün adını ondan alıyor",
+     "Sucuklu Kaşarlı Tost: Turşu malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Ayvalık Tostu: Turşu, Ketçap, Mayonez malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 13,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": true
+}

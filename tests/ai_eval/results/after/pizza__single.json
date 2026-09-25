@@ -1,0 +1,822 @@
+{
+ "case": {
+  "id": "pizza__single",
+  "slug": "pizza",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "menuText": "Füme Etli Pizza"
+ },
+ "httpStatus": 200,
+ "latencyMs": 63,
+ "runId": "4241a8d6-8551-4526-b01a-111711562f37",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 8/18 ürün olur — hedefe 10 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Pizza",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 18,
+  "current": 1,
+  "missing": 17,
+  "cuisineId": "1eaf40c1-3d7a-46e7-88e3-1e8767170bed",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 5,
+    "present": 1,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 18,
+  "cuisineName": "Pizza",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 0,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 44,
+  "menuItems": 1,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Füme Etli Pizza",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Karışık Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Sucuk, salam, mantar, biber ve mısırlı zengin pizza.",
+   "portionInfo": "Orta boy 6 dilim (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Biber",
+    "Mısır",
+    "Zeytin",
+    "Salam",
+    "Sucuk"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Ekstra Sucuk",
+    "Ekstra Mantar",
+    "Ekstra Mısır",
+    "Siyah Zeytin",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "pizza",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Litrelik İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~1 L",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Sarımsaklı Ekmek",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Sarımsaklı tereyağı ve maydanozla fırınlanmış çıtır ekmek.",
+   "portionInfo": "6 dilim",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "6 Dilim",
+       "sets_base"
+      ],
+      [
+       "8 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirsiz",
+       "free"
+      ],
+      [
+       "Mozzarellalı",
+       "surcharge"
+      ],
+      [
+       "Cheddarlı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ranch Sos",
+    "Marinara Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "garnitur",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Margherita Pizza",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Domates sosu, mozzarella ve fesleğenle taş fırında pişer.",
+   "portionInfo": "Orta boy (~28 cm, 6 dilim)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (~28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~33 cm)",
+       "sets_base"
+      ],
+      [
+       "Maxi (~40 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ],
+      [
+       "Glutensiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Kenar",
+       "free"
+      ],
+      [
+       "Peynir Dolgulu Kenar",
+       "surcharge"
+      ],
+      [
+       "Sucuk Dolgulu Kenar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fesleğen",
+    "Kekik",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Mantar",
+    "Zeytin",
+    "Sucuk",
+    "Mısır",
+    "Biber",
+    "Jalapeno",
+    "Ekstra Mozzarella",
+    "Ekstra Domates Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "pizza",
+   "confidence": 89
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "ai",
+   "shortDescription": "",
+   "portionInfo": "1 adet (~300 ml)",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza yanında en çok tercih edilen soğuk içecektir.",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Kızartması",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "ai",
+   "shortDescription": "Çıtır kızarmış patates, parmak ya da elma dilim.",
+   "portionInfo": "Orta boy ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Parmak",
+       "free"
+      ],
+      [
+       "Elma Dilim",
+       "free"
+      ],
+      [
+       "Kıvırcık",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "surcharge"
+      ],
+      [
+       "Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Ketçap"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza yanına en popüler tamamlayıcı ara sıcaktır.",
+   "productType": "yan-urun",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tiramisu",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Kahveli kedi dili bisküvi ve mascarpone kremalı, kakaolu.",
+   "portionInfo": "1 porsiyon ~180 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Porsiyon)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kakao"
+   ],
+   "extraIngredients": [
+    "Ekstra Kakao"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pizza konseptine en uygun klasik tatlı seçeneğidir.",
+   "productType": "tatli-pasta",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Füme Etli Pizza",
+   "targetName": "Füme Etli Pizza",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Domates sosu ve mozzarellayla taş fırında pişen pizza.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (22 cm)",
+       "sets_base"
+      ],
+      [
+       "Orta (28 cm)",
+       "sets_base"
+      ],
+      [
+       "Büyük (34 cm)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "İnce Hamur",
+       "free"
+      ],
+      [
+       "Klasik Hamur",
+       "free"
+      ],
+      [
+       "Kalın Hamur",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Kenar",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Kenar",
+       "free"
+      ],
+      [
+       "Peynirli Kenar",
+       "surcharge"
+      ],
+      [
+       "Sosisli Kenar",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Mantar",
+    "Zeytin",
+    "Biber",
+    "Mısır"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Ekstra Sucuk",
+    "Ekstra Mantar",
+    "Jalapeño",
+    "Ranch Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "pizza",
+   "confidence": 70
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Füme Etli Pizza"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 18,
+    "current": 1,
+    "missing": 17,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/6",
+     "icecek 0/2",
+     "ara-sicak 0/1",
+     "salata-meze 0/1",
+     "tatli 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 6,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Karışık Pizza",
+     "Litrelik İçecek",
+     "Sarımsaklı Ekmek",
+     "Margherita Pizza",
+     "Ayran",
+     "Patates Kızartması",
+     "Tiramisu"
+    ],
+    "cached": true,
+    "fromAi": 3,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 11,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 18,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "grounding": [
+     "Margherita Pizza: \"Ekstra Malzeme\" ekstra malzemelere taşındı",
+     "Patates Kızartması: Cheddar Sos malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 8,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": true
+}

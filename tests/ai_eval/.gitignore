@@ -1,0 +1,17 @@
+# Build and container logs are local noise; the run logs stay as evidence.
+rebuild.log
+apk-debug-build.log
+
+# Intermediate "after" iterations are kept as their summaries only (their per-case results were superseded).
+results/after-v1/*
+!results/after-v1/summary.md
+results/after-v2/*
+!results/after-v2/summary.md
+results/after-v3/*
+!results/after-v3/summary.md
+results/after-v4/*
+!results/after-v4/summary.md
+!results/after-v4/sample.md
+results/after-v5/*
+!results/after-v5/summary.md
+!results/after-v5/sample.md

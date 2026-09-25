@@ -1,0 +1,1607 @@
+{
+ "case": {
+  "id": "burger__photo__full",
+  "slug": "burger",
+  "kind": "photo",
+  "mode": "full",
+  "image": "tests/ai_eval/images/burger.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 2974,
+ "runId": "29551dc8-f595-4fa3-89c2-c2bf12d16756",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Menüde burger ve klasik fast‑food yan ürünleri var.",
+  "cuisineId": "42cde602-08c3-4a50-a738-187bae7e7962",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Burger",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "42cde602-08c3-4a50-a738-187bae7e7962",
+  "suggestedCuisineName": "Burger"
+ },
+ "counts": {
+  "target": 10,
+  "current": 6,
+  "missing": 4,
+  "cuisineId": "42cde602-08c3-4a50-a738-187bae7e7962",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 2,
+    "present": 3,
+    "minItems": 5
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 0,
+    "present": 2,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Burger",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 2,
+  "llmCalls": 2,
+  "tokensIn": 3080,
+  "latencyMs": 2923,
+  "menuItems": 6,
+  "tokensOut": 958,
+  "imagesRead": 1,
+  "newProducts": 8,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Klasik Hamburger",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Cheeseburger",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuk Burger",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Patates Kızartması",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Soğan Halkası",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kutu İçecek",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Double Cheeseburger",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İki ızgara dana köfte, iki kat cheddar, turşu, soğan ve özel sosla brioche ekmekte doyurucu burger.",
+   "portionInfo": "1 adet, ~240 g köfte",
+   "optionGroups": [
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Burger Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Turşu",
+    "Domates",
+    "Marul",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar",
+    "Karamelize Soğan",
+    "Jalapeño Biber",
+    "Kızarmış Yumurta",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Milkshake",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "Orta boy ~400 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "İkili Burger Menüsü",
+   "targetName": null,
+   "categoryKey": "menu-kampanya",
+   "source": "db",
+   "shortDescription": "İki burger, iki orta boy patates ve iki içecekten oluşan paylaşımlık menü.",
+   "portionInfo": "2 kişilik",
+   "optionGroups": [
+    {
+     "name": "Burger Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2x Cheeseburger",
+       "free"
+      ],
+      [
+       "2x Tavuk Burger",
+       "free"
+      ],
+      [
+       "Cheeseburger + Tavuk Burger",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Soda",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yan Ürün Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Soğan Halkası",
+       "surcharge"
+      ],
+      [
+       "Çıtır Mantar",
+       "surcharge"
+      ],
+      [
+       "Nugget",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Turşu",
+    "Soğan",
+    "Domates"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — Menü & Kampanya eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çıtır Mantar",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Galeta ununa bulanıp kızartılmış mantar; ranch ya da barbekü sosla verilir.",
+   "portionInfo": "1 porsiyon ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — Ara Sıcak tarafını güçlendirir"
+  },
+  {
+   "section": "new_product",
+   "name": "Smash Burger",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Sıcak sacda ezilerek çıtır kenarlı pişirilen ince köfteler, cheddar, karamelize soğan ve özel sosla.",
+   "portionInfo": "1 adet, 2 × ~70 g köfte",
+   "optionGroups": [
+    {
+     "name": "Köfte",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Duble Smash (2 Köfte)",
+       "sets_base"
+      ],
+      [
+       "Triple Smash (3 Köfte)",
+       "sets_base"
+      ],
+      [
+       "Tekli Smash (1 Köfte)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Burger Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Karamelize Soğan",
+    "Turşu",
+    "Sos",
+    "Cheddar"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar",
+    "Karamelize Soğan",
+    "Jalapeño Biber",
+    "Kızarmış Yumurta",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Barbekü Burger",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Izgara dana köfte, füme etli barbekü sos, cheddar, çıtır soğan halkası ve marulla brioche ekmekte.",
+   "portionInfo": "1 adet, ~150 g köfte",
+   "optionGroups": [
+    {
+     "name": "Köfte",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Köfte (~120 g)",
+       "sets_base"
+      ],
+      [
+       "Duble Köfte (~240 g)",
+       "sets_base"
+      ],
+      [
+       "Üç Köfte (~360 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan Halkası",
+    "Marul",
+    "Barbekü Sos",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar",
+    "Karamelize Soğan",
+    "Jalapeño Biber",
+    "Kızarmış Yumurta",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Mantarlı Burger",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Izgara dana köfte, tereyağında sotelenmiş mantar, eritilmiş peynir ve kremalı sosla brioche ekmekte.",
+   "portionInfo": "1 adet, ~150 g köfte",
+   "optionGroups": [
+    {
+     "name": "Köfte",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Köfte (~120 g)",
+       "sets_base"
+      ],
+      [
+       "Duble Köfte (~240 g)",
+       "sets_base"
+      ],
+      [
+       "Üç Köfte (~360 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Soğan",
+    "Sos",
+    "Marul"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar",
+    "Karamelize Soğan",
+    "Jalapeño Biber",
+    "Kızarmış Yumurta",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burger menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Coleslaw",
+   "targetName": null,
+   "categoryKey": "yan-urun",
+   "source": "ai",
+   "shortDescription": "İnce kıyılmış beyaz lahana ve havucun hafif ekşi, kremalı sosla karıştırıldığı soğuk yan salata.",
+   "portionInfo": "1 kase ~120 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Orta Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Havuç"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burgerlerin yanında ferahlatıcı ve hafif bir yan ürün olarak tercih edilir."
+  },
+  {
+   "section": "option",
+   "name": "Klasik Hamburger",
+   "targetName": "Klasik Burger",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Köfte, Pişirme Derecesi, Peynir, Ekmek, Sos Seçimi, Menü",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Köfte",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Köfte (~120 g)",
+       "sets_base"
+      ],
+      [
+       "Duble Köfte (~240 g)",
+       "sets_base"
+      ],
+      [
+       "Üç Köfte (~360 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirsiz",
+       "free"
+      ],
+      [
+       "Cheddar",
+       "surcharge"
+      ],
+      [
+       "Kaşar",
+       "surcharge"
+      ],
+      [
+       "Çift Cheddar",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Brioche",
+       "free"
+      ],
+      [
+       "Susamlı",
+       "free"
+      ],
+      [
+       "Tam Buğday",
+       "free"
+      ],
+      [
+       "Glutensiz",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Burger Sos",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Ranch",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Turşu",
+    "Soğan",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Cheddar",
+    "Dana Füme",
+    "Jalapeno",
+    "Karamelize Soğan",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Cheeseburger",
+   "targetName": "Cheeseburger",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Köfte, Menü, Pişirme Derecesi, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Köfte",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Köfte (~120 g)",
+       "sets_base"
+      ],
+      [
+       "Duble Köfte (~240 g)",
+       "sets_base"
+      ],
+      [
+       "Üç Köfte (~360 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Burger Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Turşu",
+    "Domates",
+    "Marul",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Ekstra Cheddar",
+    "Karamelize Soğan",
+    "Jalapeño Biber",
+    "Kızarmış Yumurta",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tavuk Burger",
+   "targetName": "Tavuk Burger",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tavuk, Menü, Peynir, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Tavuk",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çıtır",
+       "free"
+      ],
+      [
+       "Izgara",
+       "free"
+      ],
+      [
+       "Acılı Çıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Burger Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Turşu",
+    "Mayonez"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Ekstra Cheddar",
+    "Jalapeño Biber",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Patates Kızartması",
+   "targetName": "Patates Kızartması",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Boy, Kesim, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Parmak",
+       "free"
+      ],
+      [
+       "Elma Dilim",
+       "free"
+      ],
+      [
+       "Kıvırcık",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "surcharge"
+      ],
+      [
+       "Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos",
+    "Ekstra Ketçap"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Soğan Halkası",
+   "targetName": "Soğan Halkası",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Adet, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ],
+      [
+       "16 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Klasik Hamburger",
+   "targetName": "Klasik Burger",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Klasik Hamburger",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Klasik Burger",
+   "suggestedValue": "Klasik Hamburger",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Kutu İçecek",
+   "targetName": "Kutu Kola",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Kutu İçecek",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Kutu Kola",
+   "suggestedValue": "Kutu İçecek",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Klasik Burger",
+     "Cheeseburger",
+     "Tavuk Burger",
+     "Patates Kızartması",
+     "Soğan Halkası",
+     "Kutu Kola"
+    ],
+    "unique": 6,
+    "extractedRaw": 6,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 400,
+   "llmCalls": 1,
+   "tokensIn": 762,
+   "tokensOut": 57,
+   "error": null,
+   "output": {
+    "resolved": "burger",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "burger",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 6,
+    "missing": 4,
+    "needFixes": 2,
+    "categories": [
+     "ana-yemek 3/5",
+     "yan-urun 0/1",
+     "icecek 1/2",
+     "menu-kampanya 0/1",
+     "ara-sicak 2/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2490,
+   "llmCalls": 1,
+   "tokensIn": 2318,
+   "tokensOut": 901,
+   "error": null,
+   "output": {
+    "names": [
+     "Double Cheeseburger",
+     "Milkshake",
+     "İkili Burger Menüsü",
+     "Çıtır Mantar",
+     "Smash Burger",
+     "Barbekü Burger",
+     "Mantarlı Burger",
+     "Coleslaw"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 7,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Klasik Hamburger",
+     "Cheeseburger",
+     "Tavuk Burger",
+     "Patates Kızartması",
+     "Soğan Halkası"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "reachable": 14
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 762,
+   "tokensOut": 57,
+   "latencyMs": 350
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2318,
+   "tokensOut": 901,
+   "latencyMs": 2478
+  }
+ ],
+ "providerTrouble": false
+}

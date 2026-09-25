@@ -1,0 +1,1012 @@
+{
+ "case": {
+  "id": "steak__photo__quick",
+  "slug": "steak",
+  "kind": "photo",
+  "mode": "quick",
+  "image": "tests/ai_eval/images/steak.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 115,
+ "runId": "910781c1-07d9-4846-9c7b-b0161c9b976a",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "recommend_failed",
+   "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 11/14 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "a24c5a66-31f7-4f42-b15a-07df08151b2e",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Steak & Et",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 14,
+  "current": 5,
+  "missing": 9,
+  "cuisineId": "a24c5a66-31f7-4f42-b15a-07df08151b2e",
+  "categories": [
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 1,
+    "present": 4,
+    "minItems": 5
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 14,
+  "cuisineName": "Steak & Et",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 1,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 56,
+  "menuItems": 5,
+  "tokensOut": 0,
+  "imagesRead": 1,
+  "newProducts": 6,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Dallas Steak",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Bonfile",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Antrikot",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Dana Kaburga",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Patates Püresi",
+   "categoryKey": "yan-urun",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Maden Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "200 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Külbastı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce dövülmüş dana eti ızgarada, garnitürle servis.",
+   "portionInfo": "1 porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "200 g",
+       "sets_base"
+      ],
+      [
+       "300 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yan Ürün Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Patates Püresi",
+       "surcharge"
+      ],
+      [
+       "Mantar Sote",
+       "surcharge"
+      ],
+      [
+       "Izgara Sebze",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Bonfileli Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Izgara bonfile dilimleri ve mevsim yeşillikleri, hardal soslu.",
+   "portionInfo": "1 porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Hardal Sos",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Zeytinyağı-Limon",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Kuru Domates"
+   ],
+   "extraIngredients": [
+    "Ekstra Et"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "salata",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Mantar Sote",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tereyağında sarımsakla sotelenmiş mantar, etin yanına.",
+   "portionInfo": "1 porsiyon ~150 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Tereyağı",
+    "Kaşar Rendesi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "garnitur",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Çökertme Kebabı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kibrit patates üzerinde yoğurt ve sotelenmiş dana şeritleri.",
+   "portionInfo": "1 porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurt Ayrı Kapta",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Tereyağlı Sos",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Ekstra Patates"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "cokertme",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Dallas Steak",
+   "targetName": "Dallas Steak",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kemikli antrikottan kalın kesim Dallas steak, ızgarada.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "~400 g",
+       "sets_base"
+      ],
+      [
+       "~500 g",
+       "sets_base"
+      ],
+      [
+       "~600 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Roka Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Steak Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Mantar Sosu",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sosu",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Demi-Glace",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Biberiye"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür",
+    "Kremalı Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Bonfile",
+   "targetName": "Bonfile",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İstenen pişme derecesinde ızgara dana bonfile, garnitürle.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "~180 g",
+       "sets_base"
+      ],
+      [
+       "~250 g",
+       "sets_base"
+      ],
+      [
+       "~300 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Roka Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Steak Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Mantar Sosu",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sosu",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Demi-Glace",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Biberiye",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür",
+    "Kremalı Mantar",
+    "Izgara Sebze"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Antrikot",
+   "targetName": "Antrikot",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Mermer dokulu dana antrikot ızgarada, garnitür ve sosla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "~200 g",
+       "sets_base"
+      ],
+      [
+       "~250 g",
+       "sets_base"
+      ],
+      [
+       "~350 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Roka Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Steak Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Mantar Sosu",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sosu",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Demi-Glace",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Biberiye",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür",
+    "Kremalı Mantar",
+    "Izgara Sebze"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Dana Kaburga",
+   "targetName": "Dana Kaburga",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Saatlerce fırında pişen, kemikten ayrılan yumuşak dana kaburga.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Garnitürsüz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Biberiye"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Patates Püresi",
+   "targetName": "Patates Püresi",
+   "categoryKey": "yan-urun",
+   "source": "db",
+   "shortDescription": "Tereyağlı pürüzsüz patates püresi, etin yanına garnitür.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Trüf Yağı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "garnitur",
+   "confidence": 92
+  },
+  {
+   "section": "fix",
+   "name": "Patates Püresi",
+   "targetName": "Patates Püresi",
+   "categoryKey": "yan-urun",
+   "source": "db",
+   "shortDescription": "Yan Ürün → Ara Sıcak",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "wrong_category",
+   "currentValue": "Yan Ürün",
+   "suggestedValue": "Ara Sıcak",
+   "reason": "Ürün adı başka bir kategoriye işaret ediyor; panelde doğru bölümde mi, sor",
+   "productType": "garnitur",
+   "confidence": null
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Dallas Steak",
+     "Bonfile",
+     "Antrikot",
+     "Dana Kaburga",
+     "Patates Püresi"
+    ],
+    "unique": 5,
+    "extractedRaw": 5,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 14,
+    "current": 5,
+    "missing": 9,
+    "needFixes": 1,
+    "categories": [
+     "icecek 0/2",
+     "ana-yemek 4/5",
+     "ara-sicak 0/1",
+     "salata-meze 0/1",
+     "yan-urun 1/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "names": [
+     "Maden Suyu",
+     "Külbastı",
+     "Bonfileli Salata",
+     "Şalgam Suyu",
+     "Mantar Sote",
+     "Çökertme Kebabı"
+    ],
+    "fromAi": 0,
+    "fromDb": 6
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Dallas Steak",
+     "Bonfile",
+     "Antrikot",
+     "Dana Kaburga",
+     "Patates Püresi"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 13,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 14,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "grounding": [],
+    "reachable": 11,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": true
+}

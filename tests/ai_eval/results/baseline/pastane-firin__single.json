@@ -1,0 +1,659 @@
+{
+ "case": {
+  "id": "pastane-firin__single",
+  "slug": "pastane-firin",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "286da398-2d8a-4475-b3aa-adc8d9a417a8",
+  "menuText": "Kakaolu Çörek"
+ },
+ "httpStatus": 200,
+ "latencyMs": 11690,
+ "runId": "9dac5d17-9184-43c8-8d5e-77cd621d3e16",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Sadece kakaolu çörek var, pastane & fırın kategorisine ait.",
+  "cuisineId": "286da398-2d8a-4475-b3aa-adc8d9a417a8",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Pastane & Fırın",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "286da398-2d8a-4475-b3aa-adc8d9a417a8",
+  "suggestedCuisineName": "Pastane & Fırın"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "286da398-2d8a-4475-b3aa-adc8d9a417a8",
+  "categories": [
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 5,
+    "present": 0,
+    "minItems": 5
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 4,
+    "present": 0,
+    "minItems": 4
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Pastane & Fırın",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 1,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 4,
+  "tokensIn": 3712,
+  "latencyMs": 11635,
+  "menuItems": 1,
+  "tokensOut": 1287,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kakaolu Çörek",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Simit",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Pekmeze batırılıp susama bulanan, fırında çıtır pişen halka simit; peynir ya da çayla servis edilir.",
+   "portionInfo": "1 adet ~100 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "5 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "surcharge"
+      ],
+      [
+       "Beyaz Peynirli",
+       "surcharge"
+      ],
+      [
+       "Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Nutellalı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Krem Peynir",
+    "Tereyağı",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pastane & Fırın menülerinde neredeyse her zaman bulunur — Atıştırmalık eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Pasta Dilimi",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Günlük hazırlanan yaş pastadan dilim; çikolatalı, frambuazlı, muzlu ya da karışık meyveli çeşitlerle.",
+   "portionInfo": "1 dilim ~150 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Dilim",
+       "sets_base"
+      ],
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "4 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çikolatalı",
+       "free"
+      ],
+      [
+       "Frambuazlı",
+       "free"
+      ],
+      [
+       "Muzlu",
+       "free"
+      ],
+      [
+       "Karışık Meyveli",
+       "free"
+      ],
+      [
+       "Profiterollü",
+       "free"
+      ],
+      [
+       "Antep Fıstıklı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pastane & Fırın menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çay",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pastane & Fırın menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Poğaça",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Tereyağlı yumuşak hamurdan fırında pişen poğaça; peynirli, zeytinli, patatesli ya da sade çeşitlerle.",
+   "portionInfo": "1 adet ~80 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Zeytinli",
+       "free"
+      ],
+      [
+       "Patatesli",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Dereotlu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pastane & Fırın menülerinde neredeyse her zaman bulunur — Atıştırmalık eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Yaş Pasta",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Kişi sayısına göre hazırlanan bütün yaş pasta; çeşit, yazı ve mum isteğine göre süslenir.",
+   "portionInfo": "8–10 kişilik",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4–6 Kişilik",
+       "sets_base"
+      ],
+      [
+       "8–10 Kişilik",
+       "sets_base"
+      ],
+      [
+       "12–14 Kişilik",
+       "sets_base"
+      ],
+      [
+       "16–20 Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çikolatalı",
+       "free"
+      ],
+      [
+       "Frambuazlı",
+       "free"
+      ],
+      [
+       "Muzlu",
+       "free"
+      ],
+      [
+       "Karışık Meyveli",
+       "free"
+      ],
+      [
+       "Profiterollü",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yazı & Mum",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yok",
+       "free"
+      ],
+      [
+       "Yazılı",
+       "free"
+      ],
+      [
+       "Mumlu",
+       "free"
+      ],
+      [
+       "Yazılı + Mumlu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Maket Bıçak",
+    "Ekstra Mum"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Pastane & Fırın menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "option",
+   "name": "Kakaolu Çörek",
+   "targetName": "Kakaolu Çörek",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Adet, Yanında, Ekstra Malzeme",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "5 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Nutellalı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekstra Malzeme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekstra Çikolata",
+       "surcharge"
+      ],
+      [
+       "Fındık Parçacığı",
+       "surcharge"
+      ],
+      [
+       "Krem Şanti",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Şeker"
+   ],
+   "extraIngredients": [
+    "Ekstra Çikolata",
+    "Fındık Parçacığı",
+    "Krem Şanti"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Adet, yanında sunulacaklar ve ekstra tatlandırıcılara yönelik opsiyonlar müşteri deneyimi için gereklidir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kakaolu Çörek"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6968,
+   "llmCalls": 2,
+   "tokensIn": 747,
+   "tokensOut": 116,
+   "error": null,
+   "output": {
+    "resolved": "pastane-firin",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "pastane-firin",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "atistirmalik 0/5",
+     "tatli 0/4",
+     "icecek 0/2"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Simit",
+     "Pasta Dilimi",
+     "Çay",
+     "Poğaça",
+     "Yaş Pasta",
+     "Çay"
+    ],
+    "fromAi": 0,
+    "fromDb": 6
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 4641,
+   "llmCalls": 2,
+   "tokensIn": 2965,
+   "tokensOut": 1171,
+   "error": null,
+   "output": {
+    "names": [
+     "Kakaolu Çörek"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 1,
+    "options": 1,
+    "reasons": [
+     {
+      "card": "Çay",
+      "reason": "menüde zaten var"
+     }
+    ],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 505,
+   "tokensOut": 0,
+   "latencyMs": 6000
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 747,
+   "tokensOut": 116,
+   "latencyMs": 896
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": false,
+   "error": "invalid_output",
+   "tokensIn": 1382,
+   "tokensOut": 638,
+   "latencyMs": 1642
+  },
+  {
+   "task": "agent.validate",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1583,
+   "tokensOut": 533,
+   "latencyMs": 2987
+  }
+ ],
+ "providerTrouble": false
+}

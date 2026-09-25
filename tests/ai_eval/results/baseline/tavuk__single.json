@@ -1,0 +1,724 @@
+{
+ "case": {
+  "id": "tavuk__single",
+  "slug": "tavuk",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "menuText": "Acılı Tavuk Burger"
+ },
+ "httpStatus": 200,
+ "latencyMs": 12930,
+ "runId": "a7a1c83b-57d7-4226-838f-d7abc52a86c7",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 5/10 ürün olur — hedefe 5 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Acılı Tavuk Burger, tek ürünle tavuk ağırlıklı menü.",
+  "cuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Tavuk",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "suggestedCuisineName": "Tavuk"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Tavuk",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 4,
+  "tokensIn": 4602,
+  "latencyMs": 12856,
+  "menuItems": 1,
+  "tokensOut": 2680,
+  "imagesRead": 0,
+  "newProducts": 4,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Acılı Tavuk Burger",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Tavuk Şiş",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Yoğurtlu sosla marine edilen tavuk göğsü küpleri şişte ızgara edilir; pilav, közlenmiş biber ve lavaşla.",
+   "portionInfo": "1 porsiyon ~200 g (2 şiş)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Cacık",
+    "Közlenmiş Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çıtır Tavuk Parçaları",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Baharatlı unla kaplanıp kızartılan kemikli tavuk parçaları; klasik ya da acılı tarifle, sosla servis edilir.",
+   "portionInfo": "5 parça ~500 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "3 Parça",
+       "sets_base"
+      ],
+      [
+       "5 Parça",
+       "sets_base"
+      ],
+      [
+       "8 Parça",
+       "sets_base"
+      ],
+      [
+       "12 Parça",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Coleslaw",
+    "Mısır"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde neredeyse her zaman bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Kızartması",
+   "targetName": null,
+   "categoryKey": "yan-urun",
+   "source": "ai",
+   "shortDescription": "Çıtır çıtır kızartılmış patates; sade ya da baharatlı, seçilen sosla servis edilir.",
+   "portionInfo": "Orta boy ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tarif",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ],
+      [
+       "Cheddarlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk yemeklerinin yanına çıtır ve doyurucu bir eşlikçi sağlar."
+  },
+  {
+   "section": "option",
+   "name": "Acılı Tavuk Burger",
+   "targetName": "Acılı Tavuk Burger",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Boy, Ekmek Seçimi, Acı Seviyesi, Menü, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Çift Katman",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Susamlı Brioche",
+       "free"
+      ],
+      [
+       "Tam Buğday",
+       "free"
+      ],
+      [
+       "Glutensiz",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acı",
+       "free"
+      ],
+      [
+       "Çok Acı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek",
+       "free"
+      ],
+      [
+       "Patates + Coleslaw + İçecek",
+       "free"
+      ],
+      [
+       "Büyük Menü (Patates + Coleslaw + İçecek + Tatlı)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Bal Hardal",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Marul",
+    "Turşu",
+    "Acı Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Tavuk Eti",
+    "Ekstra Bacon",
+    "Ekstra Jalapeno"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Burgerin temel boyutu, ekmek tipi, acı seviyesi ve menü seçenekleri müşterinin tercihlerine göre özelleştirilmeli; sos seçimi ve ekstra malzemeler de sık kullanılan opsiyonlardır."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Acılı Tavuk Burger"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 7181,
+   "llmCalls": 2,
+   "tokensIn": 740,
+   "tokensOut": 60,
+   "error": null,
+   "output": {
+    "resolved": "tavuk",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "tavuk",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "ara-sicak 0/2",
+     "icecek 0/2",
+     "yan-urun 0/1",
+     "menu-kampanya 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 5648,
+   "llmCalls": 1,
+   "tokensIn": 2282,
+   "tokensOut": 1653,
+   "error": null,
+   "output": {
+    "names": [
+     "Tavuk Şiş",
+     "Çıtır Tavuk Parçaları",
+     "Kutu İçecek",
+     "Patates Kızartması"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 3,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 4176,
+   "llmCalls": 1,
+   "tokensIn": 1580,
+   "tokensOut": 967,
+   "error": null,
+   "output": {
+    "names": [
+     "Acılı Tavuk Burger"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 4,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 5
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 500,
+   "tokensOut": 0,
+   "latencyMs": 6000
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 740,
+   "tokensOut": 60,
+   "latencyMs": 1127
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1580,
+   "tokensOut": 967,
+   "latencyMs": 4127
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2282,
+   "tokensOut": 1653,
+   "latencyMs": 5637
+  }
+ ],
+ "providerTrouble": false
+}

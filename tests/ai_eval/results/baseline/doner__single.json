@@ -1,0 +1,740 @@
+{
+ "case": {
+  "id": "doner__single",
+  "slug": "doner",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "87ccc7a0-d14a-462a-89e4-a49684111e30",
+  "menuText": "Tombik Döner"
+ },
+ "httpStatus": 200,
+ "latencyMs": 587,
+ "runId": "a4c530a2-fac1-47fe-aae4-e565aba06ac1",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Tombik Döner tek ürünle döner kategorisini gösteriyor, fiyat aralığı düşük.",
+  "cuisineId": "87ccc7a0-d14a-462a-89e4-a49684111e30",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Döner",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "87ccc7a0-d14a-462a-89e4-a49684111e30",
+  "suggestedCuisineName": "Döner"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "87ccc7a0-d14a-462a-89e4-a49684111e30",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 5,
+    "present": 1,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Döner",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 1,
+  "llmCalls": 1,
+  "tokensIn": 740,
+  "latencyMs": 577,
+  "menuItems": 1,
+  "tokensOut": 65,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Tombik Et Döner",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Lahmacun",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce açılmış hamura baharatlı kıymalı harç sürülüp taş fırında pişirilir; limon, maydanoz ve yeşillikle servis edilir.",
+   "portionInfo": "1 adet (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fındık (Küçük)",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "İnce",
+       "free"
+      ],
+      [
+       "Kıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Limon",
+    "Marul",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Kıyma",
+    "Ekstra Yeşillik Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Pide & Lahmacun)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~200–300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Kebap & Izgara)"
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Kızartması",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır çıtır kızartılmış parmak patates; tuz ve isteğe göre baharatla, sosu ayrı servis edilir.",
+   "portionInfo": "Orta boy ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos",
+    "Ekstra Ketçap",
+    "Ekstra Mayonez"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Döner menülerinde neredeyse her zaman bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Piyaz",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış kuru fasulye, soğan, maydanoz ve haşlanmış yumurta; zeytinyağlı-sirkeli ya da tahinli sosla hazırlanır.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Piyaz Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağlı Sirkeli",
+       "free"
+      ],
+      [
+       "Tahinli (Antalya Usulü)",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Yumurta",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Yumurta",
+    "Zeytin"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Meze kategorisini kapatır (Köfte)"
+  },
+  {
+   "section": "new_product",
+   "name": "Köfte Ekmek",
+   "targetName": null,
+   "categoryKey": "yan-urun",
+   "source": "db",
+   "shortDescription": "Izgara köfteler taze ekmek arasında domates, soğan ve maydanozla; isteğe göre közlenmiş biber ve turşu eklenir.",
+   "portionInfo": "Yarım ekmekte 4–5 köfte (~120 g)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Yarım Ekmek",
+       "sets_base"
+      ],
+      [
+       "Tam Ekmek",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ],
+      [
+       "Piyaz + Ayran ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Maydanoz",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Kaşar",
+    "Közlenmiş Biber",
+    "Piyaz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Yan Ürün kategorisini kapatır (Köfte)"
+  },
+  {
+   "section": "option",
+   "name": "Tombik Et Döner",
+   "targetName": "Tombik Döner",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Menü, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Kola ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Şalgam ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Yoğurtlu Sos",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Marul",
+    "Turşu",
+    "Soğan",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Patates (içine)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Tombik Et Döner",
+   "targetName": "Tombik Döner",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tombik Et Döner",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Tombik Döner",
+   "suggestedValue": "Tombik Et Döner",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Tombik Döner"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 553,
+   "llmCalls": 1,
+   "tokensIn": 740,
+   "tokensOut": 65,
+   "error": null,
+   "output": {
+    "resolved": "doner",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "doner",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 1,
+    "categories": [
+     "ana-yemek 1/6",
+     "icecek 0/2",
+     "ara-sicak 0/1",
+     "salata-meze 0/1",
+     "yan-urun 0/1",
+     "menu-kampanya 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Lahmacun",
+     "Ayran",
+     "Patates Kızartması",
+     "Piyaz",
+     "Köfte Ekmek"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Tombik Et Döner"
+    ],
+    "fromAi": 0,
+    "fromDb": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 740,
+   "tokensOut": 65,
+   "latencyMs": 543
+  }
+ ],
+ "providerTrouble": false
+}

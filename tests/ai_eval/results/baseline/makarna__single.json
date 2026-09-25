@@ -1,0 +1,686 @@
+{
+ "case": {
+  "id": "makarna__single",
+  "slug": "makarna",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "menuText": "Kremalı Somonlu Makarna"
+ },
+ "httpStatus": 200,
+ "latencyMs": 4965,
+ "runId": "bea8996b-dc5f-44f3-a10f-047ed4c0a303",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 7/10 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Kremalı Somonlu Makarna, tipik İtalyan makarna yemeği",
+  "cuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Makarna & İtalyan",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "suggestedCuisineName": "Makarna & İtalyan"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 5,
+    "present": 1,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Makarna & İtalyan",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 4,
+  "tokensIn": 6805,
+  "latencyMs": 4954,
+  "menuItems": 1,
+  "tokensOut": 2441,
+  "imagesRead": 0,
+  "newProducts": 6,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kremalı Somonlu Makarna",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Spagetti Bolonez",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Dana kıyma, domates ve sebzelerle ağır ateşte pişen bolonez sos; al dente spagetti ve parmesanla.",
+   "portionInfo": "1 porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Makarna Türü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Spagetti",
+       "free"
+      ],
+      [
+       "Penne",
+       "free"
+      ],
+      [
+       "Fettuccine",
+       "free"
+      ],
+      [
+       "Burgu",
+       "free"
+      ],
+      [
+       "Glutensiz Penne",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Fesleğen"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Tavuk",
+    "Mantar",
+    "Siyah Zeytin",
+    "Pul Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Sarımsaklı Ekmek",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Fırınlanmış sarımsaklı ekmek dilimleri; makarnanın yanında sıcak olarak verilir.",
+   "portionInfo": "4 dilim",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "8 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Kaşar Rendesi",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Spagetti Karbonara",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Yumurta, parmesan ve füme etle hazırlanan kremasız klasik karbonara.",
+   "portionInfo": "1 porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Makarna Türü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Spagetti",
+       "free"
+      ],
+      [
+       "Penne",
+       "free"
+      ],
+      [
+       "Fettuccine",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Tavuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Maden Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "200 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Tiramisu",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Kahveye batırılmış kedi dili bisküviler ve mascarpone kreması kat kat dizilir; kakao serpilerek servis edilir.",
+   "portionInfo": "1 porsiyon ~180 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Porsiyon)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kakao"
+   ],
+   "extraIngredients": [
+    "Ekstra Kakao"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İtalyan mutfağının klasik tatlısı, makarna menüsüyle uyumlu bir kapanış sağlar."
+  },
+  {
+   "section": "option",
+   "name": "Kremalı Somonlu Makarna",
+   "targetName": "Kremalı Somonlu Makarna",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Porsiyon, Makarna Türü, Acı Seviyesi, Ekstra Protein",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Makarna Türü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Spagetti",
+       "free"
+      ],
+      [
+       "Penne",
+       "free"
+      ],
+      [
+       "Fettuccine",
+       "free"
+      ],
+      [
+       "Burgu",
+       "free"
+      ],
+      [
+       "Glutensiz Penne",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekstra Protein",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekstra Somon",
+       "surcharge"
+      ],
+      [
+       "Ekstra Tavuk",
+       "surcharge"
+      ],
+      [
+       "Ekstra Mantarlı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Sarımsak",
+    "Maydanoz",
+    "Limon Dilimi"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Krema",
+    "Ekstra Kapari"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna ve sos temelli yemek için porsiyon, makarna tipi, acı seviyesi ve ek protein seçenekleri sunar; yaygın çıkarılabilir malzemeler ve ücretli eklemeler eklenebilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kremalı Somonlu Makarna"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 405,
+   "llmCalls": 1,
+   "tokensIn": 750,
+   "tokensOut": 65,
+   "error": null,
+   "output": {
+    "resolved": "makarna",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "makarna",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/6",
+     "icecek 0/2",
+     "salata-meze 0/1",
+     "tatli 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2512,
+   "llmCalls": 1,
+   "tokensIn": 2303,
+   "tokensOut": 1087,
+   "error": null,
+   "output": {
+    "names": [
+     "Spagetti Bolonez",
+     "Kutu İçecek",
+     "Sarımsaklı Ekmek",
+     "Spagetti Karbonara",
+     "Maden Suyu",
+     "Tiramisu"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 5,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 4524,
+   "llmCalls": 2,
+   "tokensIn": 3752,
+   "tokensOut": 1289,
+   "error": null,
+   "output": {
+    "names": [
+     "Kremalı Somonlu Makarna"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 7
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 750,
+   "tokensOut": 65,
+   "latencyMs": 351
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2303,
+   "tokensOut": 1087,
+   "latencyMs": 2503
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": false,
+   "error": "invalid_output",
+   "tokensIn": 1496,
+   "tokensOut": 836,
+   "latencyMs": 3607
+  },
+  {
+   "task": "agent.validate",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2256,
+   "tokensOut": 453,
+   "latencyMs": 907
+  }
+ ],
+ "providerTrouble": false
+}

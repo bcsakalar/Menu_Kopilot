@@ -1,0 +1,675 @@
+{
+ "case": {
+  "id": "meze__single",
+  "slug": "meze",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "menuText": "Girit Ezmesi"
+ },
+ "httpStatus": 200,
+ "latencyMs": 3517,
+ "runId": "df7f61e1-eaa8-4a4a-a3c1-bda53f3e0d0a",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 7/10 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Menüde yer alan Girit ezmesi ürünü doğrudan meze mutfağına işaret etmektedir.",
+  "cuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "disagrees": false,
+  "confidence": 0.8,
+  "cuisineName": "Meze",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "suggestedCuisineName": "Meze"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "categories": [
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 6,
+    "present": 1,
+    "minItems": 7
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Meze",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 2,
+  "tokensIn": 1992,
+  "latencyMs": 3467,
+  "menuItems": 1,
+  "tokensOut": 853,
+  "imagesRead": 0,
+  "newProducts": 6,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Girit Ezmesi",
+   "categoryKey": "salata-meze",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Haydari",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, beyaz peynir, sarımsak, dereotu ve naneyle hazırlanan koyu kıvamlı soğuk meze.",
+   "portionInfo": "Orta porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Dereotu",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde neredeyse her zaman bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kalamar Tava",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Halka kalamarlar çıtır kaplamayla kızartılır; tarator ya da sarımsaklı sosla ve limonla servis edilir.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~250 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~375 g)",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (~500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tarator",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Roka Salatası"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ara Sıcak kategorisini kapatır (Balık & Deniz Ürünleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Balık & Deniz Ürünleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Humus",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış nohut, tahin, sarımsak ve limonla ezilen kremsi meze; zeytinyağı ve kırmızı toz biberle.",
+   "portionInfo": "Orta porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "surcharge"
+      ],
+      [
+       "Kavurmalı",
+       "surcharge"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Közlenmiş Biberli",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Kırmızı Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Zeytinyağı",
+    "Çam Fıstığı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "İçli Köfte",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "İnce bulgur kabuğun içine cevizli, baharatlı kıyma harcı doldurulur; kızartılarak ya da haşlanarak servis edilir.",
+   "portionInfo": "2 adet ~180 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Adet",
+       "sets_base"
+      ],
+      [
+       "4 Adet",
+       "sets_base"
+      ],
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kızartma",
+       "free"
+      ],
+      [
+       "Haşlama",
+       "free"
+      ],
+      [
+       "Fırında",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Yoğurt"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "option",
+   "name": "Girit Ezmesi",
+   "targetName": "Girit Ezmesi",
+   "categoryKey": "salata-meze",
+   "source": "ai",
+   "shortDescription": "Porsiyon, Üzeri, Ekmek/Lavaş, Yanında Gelen",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ],
+      [
+       "Aile (500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Zeytinli",
+       "free"
+      ],
+      [
+       "Fesleğenli",
+       "free"
+      ],
+      [
+       "Közlenmiş Biberli",
+       "free"
+      ],
+      [
+       "Kavrulmuş Cevizli",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek/Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Gelen",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon Dilimleri",
+       "free"
+      ],
+      [
+       "Yoğurt",
+       "free"
+      ],
+      [
+       "Zeytinyağı",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Turşu",
+    "Acı Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Feta Peyniri",
+    "Ekstra Zeytin",
+    "Ekstra Közlenmiş Biber",
+    "Ekstra Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Girit Ezmesi bir meze dipidir; porsiyon, üst süsleme, ekmek seçimi ve yanında gelen eklemeler müşterinin tercihlerine göre özelleştirilebilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Girit Ezmesi"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1340,
+   "llmCalls": 1,
+   "tokensIn": 532,
+   "tokensOut": 59,
+   "error": null,
+   "output": {
+    "resolved": "meze",
+    "disagrees": false,
+    "confidence": 0.8,
+    "cuisineSlug": "meze",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "salata-meze 1/7",
+     "ara-sicak 0/2",
+     "icecek 0/2"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Haydari",
+     "Kalamar Tava",
+     "Ayran",
+     "Humus",
+     "İçli Köfte",
+     "Şalgam Suyu"
+    ],
+    "fromAi": 0,
+    "fromDb": 6
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2103,
+   "llmCalls": 1,
+   "tokensIn": 1460,
+   "tokensOut": 794,
+   "error": null,
+   "output": {
+    "names": [
+     "Girit Ezmesi"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 7
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 532,
+   "tokensOut": 59,
+   "latencyMs": 1291
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1460,
+   "tokensOut": 794,
+   "latencyMs": 2095
+  }
+ ],
+ "providerTrouble": false
+}

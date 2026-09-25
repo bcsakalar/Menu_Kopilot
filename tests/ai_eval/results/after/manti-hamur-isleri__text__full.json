@@ -1,0 +1,1562 @@
+{
+ "case": {
+  "id": "manti-hamur-isleri__text__full",
+  "slug": "manti-hamur-isleri",
+  "kind": "text",
+  "mode": "full",
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "menuText": "Kayseri Mantısı, Çıtır Mantı, Peynirli Gözleme, Patatesli Gözleme, Ayran"
+ },
+ "httpStatus": 200,
+ "latencyMs": 85,
+ "runId": "0b7721eb-bbfa-4d00-ac28-ce068ee01eac",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Mantı & Hamur İşleri",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 12,
+  "current": 5,
+  "missing": 7,
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 12,
+  "cuisineName": "Mantı & Hamur İşleri",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 0,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 66,
+  "menuItems": 5,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 9,
+  "optionCards": 4,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kayseri Mantısı",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çıtır Mantı",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Peynirli Gözleme",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Patatesli Gözleme",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kuru Fasulye",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Salçalı, etli kuru fasulye; pilav ve turşuyla.",
+   "portionInfo": "1 porsiyon (~300 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Etli (Kuşbaşı)",
+       "free"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Sucuklu",
+       "surcharge"
+      ],
+      [
+       "Etsiz (Zeytinyağlı)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Pilav",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Yeşil Biber",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Pilav",
+    "Ekstra Turşu",
+    "Cacık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "et-yemegi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Süzme kırmızı mercimek çorbası, limon ve pul biberle.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Termos (1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kruton",
+       "free"
+      ],
+      [
+       "Tereyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba kategorisini kapatır (Çorba)",
+   "productType": "corba",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Cacık",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, salatalık, sarımsak ve naneyle hazırlanan cacık.",
+   "portionInfo": "1 kase ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Paket (~500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Zeytinyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ekstra Salatalık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Meze kategorisini kapatır (Ev Yemekleri)",
+   "productType": "meze",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Fırın Sütlaç",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Üzeri fırında kızartılmış sütlü pirinç tatlısı, soğuk servis.",
+   "portionInfo": "1 kase ~180 g",
+   "optionGroups": [
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Soğuk",
+       "free"
+      ],
+      [
+       "Ilık",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Tarçın",
+       "free"
+      ],
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Hindistan Cevizi"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Ev Yemekleri)",
+   "productType": "tatli-sutlu",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Çay",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Taze demlenmiş siyah çay, ince belli bardakta.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Bardak",
+       "sets_base"
+      ],
+      [
+       "Büyük Bardak",
+       "sets_base"
+      ],
+      [
+       "Fincan",
+       "sets_base"
+      ],
+      [
+       "Demlik (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Şeker",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Şekersiz",
+       "free"
+      ],
+      [
+       "Şekerli",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Bal",
+    "Tatlandırıcı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Mantı & Hamur İşleri menülerinde sık bulunur — İçecek eksik",
+   "productType": "cay",
+   "confidence": 84
+  },
+  {
+   "section": "new_product",
+   "name": "Fırın Mantı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Fırında kızarıp et suyuyla pişen mantı, yoğurtla.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Tereyağlı Salça",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Mantı & Hamur İşleri menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "manti",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Etli Nohut",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kuşbaşı etle salçalı sosta pişmiş nohut, pilavla.",
+   "portionInfo": "1 porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Şehriyeli Pilav",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Cacık",
+       "surcharge"
+      ],
+      [
+       "Yoğurt",
+       "surcharge"
+      ],
+      [
+       "Mevsim Salata",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Tereyağı",
+    "Ekstra Pilav"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "et-yemegi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Sote",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Biber, domates ve mantarla sotelenmiş kuşbaşı tavuk göğsü.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Cacık",
+       "surcharge"
+      ],
+      [
+       "Yoğurt",
+       "surcharge"
+      ],
+      [
+       "Mevsim Salata",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Biber",
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Tavuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "et-yemegi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "İzmir Köfte",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Patates ve biberle domates soslu fırında pişmiş köfte.",
+   "portionInfo": "1 porsiyon ~300 g (4–5 köfte + patates)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Cacık",
+       "surcharge"
+      ],
+      [
+       "Yoğurt",
+       "surcharge"
+      ],
+      [
+       "Mevsim Salata",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Biber",
+    "Domates",
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "et-yemegi",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Kayseri Mantısı",
+   "targetName": "Kayseri Mantısı",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Minik kıymalı mantı, sarımsaklı yoğurt ve tereyağlı sosla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurtsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Domatesli Tereyağı",
+       "free"
+      ],
+      [
+       "Naneli Tereyağı",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Haşlama",
+       "free"
+      ],
+      [
+       "Çıtır (Kızarmış)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sumak",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Toz Kırmızı Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt",
+    "Ekstra Sos",
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "manti",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Çıtır Mantı",
+   "targetName": "Çıtır Mantı",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Kızartılmış çıtır mantı, sarımsaklı yoğurt ve tereyağlı sosla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurt Ayrı Kapta",
+       "free"
+      ],
+      [
+       "Yoğurtsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Domatesli Tereyağı",
+       "free"
+      ],
+      [
+       "Naneli Tereyağı",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sumak",
+    "Nane",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt",
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "manti",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Gözleme",
+   "targetName": "Peynirli Gözleme",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Sacda tereyağıyla pişen ince hamurlu el açması gözleme.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Pul Biber",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Peynir",
+    "Sucuk",
+    "Yumurta"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "borek-gozleme",
+   "confidence": 86
+  },
+  {
+   "section": "option",
+   "name": "Gözleme",
+   "targetName": "Patatesli Gözleme",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Sacda tereyağıyla pişen ince hamurlu el açması gözleme.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı",
+       "free"
+      ],
+      [
+       "Az Tereyağlı",
+       "free"
+      ],
+      [
+       "Tereyağsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Pul Biber",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Peynir",
+    "Sucuk",
+    "Yumurta"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "borek-gozleme",
+   "confidence": 86
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kayseri Mantısı",
+     "Çıtır Mantı",
+     "Peynirli Gözleme",
+     "Patatesli Gözleme",
+     "Ayran"
+    ],
+    "unique": 5,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 12,
+    "current": 5,
+    "missing": 7,
+    "needFixes": 2,
+    "categories": [
+     "ana-yemek 1/5",
+     "corba 0/1",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "icecek 1/2"
+    ],
+    "needOptions": 4
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kuru Fasulye",
+     "Mercimek Çorbası",
+     "Cacık",
+     "Fırın Sütlaç",
+     "Çay",
+     "Fırın Mantı",
+     "Etli Nohut",
+     "Tavuk Sote",
+     "İzmir Köfte"
+    ],
+    "fromAi": 0,
+    "fromDb": 9
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kayseri Mantısı",
+     "Çıtır Mantı",
+     "Gözleme",
+     "Gözleme"
+    ],
+    "fromAi": 0,
+    "fromDb": 4
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 27,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 9,
+    "target": 12,
+    "dropped": 0,
+    "options": 4,
+    "reasons": [],
+    "grounding": [
+     "Kuru Fasulye: Soğan, Turşu, Ekmek malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Mercimek Çorbası: Pul Biber, Tereyağı malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Cacık: Zeytinyağı malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Fırın Sütlaç: Tarçın malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Fırın Mantı: Nane, Pul Biber malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Etli Nohut: Et çıkarılabilirden çıkarıldı: ürün adını ondan alıyor",
+     "Etli Nohut: Soğan malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Tavuk Sote: Soğan, Yoğurt malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "İzmir Köfte: Yoğurt malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Kayseri Mantısı: Pul Biber, Sumak, Nane malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Gözleme: \"İç Harç\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor",
+     "Gözleme: \"İç Harç\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor"
+    ],
+    "reachable": 14,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": false
+}

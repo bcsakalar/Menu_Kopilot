@@ -1,0 +1,1765 @@
+{
+ "case": {
+  "id": "tavuk__photo__full",
+  "slug": "tavuk",
+  "kind": "photo",
+  "mode": "full",
+  "image": "tests/ai_eval/images/tavuk.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 135,
+ "runId": "897eed4f-079a-453a-b4f8-1716ebded221",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Tavuk",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 16,
+  "current": 6,
+  "missing": 10,
+  "cuisineId": "15b0cc24-0a9d-4a8e-8c65-bdb58af6978d",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 0,
+    "present": 4,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 16,
+  "cuisineName": "Tavuk",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 3,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 75,
+  "menuItems": 6,
+  "tokensOut": 0,
+  "imagesRead": 1,
+  "newProducts": 10,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Çıtır Tavuk Parçaları",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuk Kanat",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuk Nugget",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Patates Kızartması",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Coleslaw",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kutu İçecek",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Tavuk Şiş",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Yoğurtlu marine tavuk göğsü şişte, pilav ve lavaşla.",
+   "portionInfo": "1 porsiyon ~200 g (2 şiş)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Cacık",
+    "Közlenmiş Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "tavuk-izgara",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Çıtır Kanat",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır kızarmış tavuk kanatları, seçilen sosla kaplanır.",
+   "portionInfo": "6 adet ~300 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ],
+      [
+       "16 Adet",
+       "sets_base"
+      ],
+      [
+       "24 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Kaplama",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Buffalo (Acılı)",
+       "free"
+      ],
+      [
+       "Bal Hardal",
+       "free"
+      ],
+      [
+       "Teriyaki",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ranch Sos",
+    "Havuç-Kereviz Çubukları",
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde neredeyse her zaman bulunur — Ara Sıcak tarafını güçlendirir",
+   "productType": "tavuk-citir",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Aile Tavuk Paketi",
+   "targetName": null,
+   "categoryKey": "menu-kampanya",
+   "source": "db",
+   "shortDescription": "Çıtır parça, kanat, patates ve coleslawlı aile paketi.",
+   "portionInfo": "4 kişilik",
+   "optionGroups": [
+    {
+     "name": "Kişi Sayısı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Kişilik",
+       "sets_base"
+      ],
+      [
+       "4 Kişilik",
+       "sets_base"
+      ],
+      [
+       "6 Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Kola 1 L",
+       "surcharge"
+      ],
+      [
+       "Ayran (4 adet)",
+       "surcharge"
+      ],
+      [
+       "Soda (4 adet)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yan Ürün Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Coleslaw",
+       "surcharge"
+      ],
+      [
+       "Patates",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası",
+       "surcharge"
+      ],
+      [
+       "Sos Seti",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Acı Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Kanat",
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Menü & Kampanya eksik",
+   "productType": "menu-kampanya",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Kova",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Çıtır parça, kanat ve bonfileli paylaşım kovası, patatesli.",
+   "portionInfo": "12 parça, 3–4 kişilik",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "8 Parça (2 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "12 Parça (3–4 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "16 Parça (4–5 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "24 Parça (6–8 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Kova",
+       "free"
+      ],
+      [
+       "Büyük Patates + Litrelik İçecek ile",
+       "surcharge"
+      ],
+      [
+       "Büyük Patates + Coleslaw + Litrelik İçecek ile",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Ekstra Patates",
+    "Coleslaw"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "tavuk-citir",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Çıtır Tavuk Bonfile",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Tavuk göğsünden çıtır kaplamalı uzun bonfileler, soslu.",
+   "portionInfo": "4 adet ~200 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "5 Adet",
+       "sets_base"
+      ],
+      [
+       "8 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Coleslaw"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ara Sıcak tarafını güçlendirir",
+   "productType": "tavuk-citir",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Izgara Tavuk Dürümü",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Izgara tavuk, marul ve sarımsaklı sosla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~130 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Turşu",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Tavuk",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "tavuk-izgara",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Pirzola",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Marine kemiksiz tavuk but ızgarada pişer, pilavla.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Pirzola",
+    "Cacık",
+    "Közlenmiş Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "tavuk-izgara",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Izgara Tavuk Göğsü",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Baharatla marine tavuk göğsü ızgarada, sebze ve bulgurla.",
+   "portionInfo": "1 porsiyon ~200 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Duble (~350 g)",
+       "sets_base"
+      ],
+      [
+       "Hafif (~150 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Haşlanmış Sebze",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Mevsim Salata",
+       "free"
+      ],
+      [
+       "Patates Püresi",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Yoğurt",
+    "Ekstra Tavuk",
+    "Avokado"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "tavuk-izgara",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Burger",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Çıtır tavuk göğsü, marul, turşu ve mayonezli sosla.",
+   "portionInfo": "1 adet, ~130 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Tavuk",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çıtır",
+       "free"
+      ],
+      [
+       "Izgara",
+       "free"
+      ],
+      [
+       "Acılı Çıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Burger",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü (Büyük Patates + Büyük İçecek)",
+       "surcharge"
+      ],
+      [
+       "Soğan Halkası + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Cheddar",
+       "free"
+      ],
+      [
+       "Kaşar",
+       "free"
+      ],
+      [
+       "Füme Peynir",
+       "free"
+      ],
+      [
+       "Peynirsiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Barbekü Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Burger Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Ekstra Cheddar",
+    "Jalapeño Biber",
+    "Dana Füme"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tavuk menülerinde en çok tercih edilen ana yemeklerden biridir.",
+   "productType": "burger",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Çıtır Tavuk Parçaları",
+   "targetName": "Çıtır Tavuk",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Baharatlı unla kaplanıp kızartılan kemikli çıtır tavuk parçaları.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "3 Parça",
+       "sets_base"
+      ],
+      [
+       "5 Parça",
+       "sets_base"
+      ],
+      [
+       "8 Parça",
+       "sets_base"
+      ],
+      [
+       "12 Parça",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız (Klasik)",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Coleslaw",
+    "Mısır"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tavuk-citir",
+   "confidence": 88
+  },
+  {
+   "section": "option",
+   "name": "Tavuk Kanat",
+   "targetName": "Tavuk Kanat",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Baharatlı marine tavuk kanatları mangalda çıtır çıtır pişer.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tırnaklı Pide",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Közlenmiş Domates",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Sumaklı Soğan",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "surcharge"
+      ],
+      [
+       "Pirinç Pilavı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Barbekü Sos",
+    "Sarımsaklı Yoğurt",
+    "Patates Kızartması"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tavuk-izgara",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Tavuk Nugget",
+   "targetName": "Tavuk Nugget",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır kaplamalı lokmalık tavuk göğsü parçaları, soslu.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "9 Adet",
+       "sets_base"
+      ],
+      [
+       "12 Adet",
+       "sets_base"
+      ],
+      [
+       "20 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Patates + Coleslaw + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Büyük Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tavuk-citir",
+   "confidence": 88
+  },
+  {
+   "section": "option",
+   "name": "Patates Kızartması",
+   "targetName": "Patates",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır kızarmış patates, sade ya da baharatlı.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tarif",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ],
+      [
+       "Cheddarlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Bal Hardal",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ketçap",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "yan-urun",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Coleslaw",
+   "targetName": "Coleslaw",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Lahana ve havuçlu, kremalı sosla soğuk yan salata.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Orta Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Havuç"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "tavuk-citir",
+   "confidence": 80
+  },
+  {
+   "section": "fix",
+   "name": "Çıtır Tavuk Parçaları",
+   "targetName": "Çıtır Tavuk",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır Tavuk Parçaları",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çıtır Tavuk",
+   "suggestedValue": "Çıtır Tavuk Parçaları",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir",
+   "productType": "tavuk-citir",
+   "confidence": null
+  },
+  {
+   "section": "fix",
+   "name": "Patates Kızartması",
+   "targetName": "Patates",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Patates Kızartması",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Patates",
+   "suggestedValue": "Patates Kızartması",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir",
+   "productType": "yan-urun",
+   "confidence": null
+  },
+  {
+   "section": "fix",
+   "name": "Kutu İçecek",
+   "targetName": "Kola",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Kutu İçecek",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Kola",
+   "suggestedValue": "Kutu İçecek",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir",
+   "productType": "mesrubat",
+   "confidence": null
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Çıtır Tavuk",
+     "Tavuk Kanat",
+     "Tavuk Nugget",
+     "Patates",
+     "Coleslaw",
+     "Kola"
+    ],
+    "unique": 6,
+    "extractedRaw": 6,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 16,
+    "current": 6,
+    "missing": 10,
+    "needFixes": 3,
+    "categories": [
+     "ana-yemek 1/5",
+     "yan-urun 0/1",
+     "icecek 1/2",
+     "menu-kampanya 0/1",
+     "ara-sicak 4/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 6,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Tavuk Şiş",
+     "Ayran",
+     "Çıtır Kanat",
+     "Aile Tavuk Paketi",
+     "Tavuk Kova",
+     "Çıtır Tavuk Bonfile",
+     "Izgara Tavuk Dürümü",
+     "Tavuk Pirzola",
+     "Izgara Tavuk Göğsü",
+     "Tavuk Burger"
+    ],
+    "cached": true,
+    "fromAi": 1,
+    "fromDb": 9,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Çıtır Tavuk Parçaları",
+     "Tavuk Kanat",
+     "Tavuk Nugget",
+     "Patates Kızartması",
+     "Coleslaw"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 26,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 10,
+    "target": 16,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "grounding": [
+     "Tavuk Burger: Mayonez malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Tavuk Kanat: Maydanoz malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 16,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": false
+}

@@ -1,0 +1,981 @@
+{
+ "case": {
+  "id": "kofte__single",
+  "slug": "kofte",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "8be8b522-47fe-40f5-92f6-ad7ff1bb9b25",
+  "menuText": "Çökertme Köfte"
+ },
+ "httpStatus": 200,
+ "latencyMs": 621,
+ "runId": "3edcd376-0bd8-496f-a678-e9ad98b3c375",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 8/14 ürün olur — hedefe 6 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "8be8b522-47fe-40f5-92f6-ad7ff1bb9b25",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Köfte",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 14,
+  "current": 1,
+  "missing": 13,
+  "cuisineId": "8be8b522-47fe-40f5-92f6-ad7ff1bb9b25",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 14,
+  "cuisineName": "Köfte",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 1,
+  "tokensIn": 0,
+  "latencyMs": 562,
+  "menuItems": 1,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Çökertme Köfte",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Lahmacun",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce hamurda baharatlı kıymalı harç, limon ve yeşillikle.",
+   "portionInfo": "1 adet (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fındık (Küçük)",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "İnce",
+       "free"
+      ],
+      [
+       "Kıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Kıyma",
+    "Ekstra Yeşillik Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Pide & Lahmacun)",
+   "productType": "lahmacun",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Piyaz",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış fasulye, soğan, maydanoz ve yumurtalı sirkeli piyaz.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Piyaz Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağlı Sirkeli",
+       "free"
+      ],
+      [
+       "Tahinli (Antalya Usulü)",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Yumurta",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Yumurta",
+    "Zeytin"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Köfte menülerinde neredeyse her zaman bulunur — Salata & Meze eksik",
+   "productType": "salata",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~200–300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Kebap & Izgara)",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Süzme kırmızı mercimek çorbası, limon ve pul biberle.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Nane",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Ekmek",
+    "Kruton",
+    "Ekstra Limon",
+    "Tereyağlı Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba kategorisini kapatır (Kebap & Izgara)",
+   "productType": "corba",
+   "confidence": 84
+  },
+  {
+   "section": "new_product",
+   "name": "Köfte Ekmek",
+   "targetName": null,
+   "categoryKey": "yan-urun",
+   "source": "db",
+   "shortDescription": "Izgara köfte, domates, soğan ve maydanozla ekmek arası.",
+   "portionInfo": "Yarım ekmekte 4–5 köfte (~120 g)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Yarım Ekmek",
+       "sets_base"
+      ],
+      [
+       "Tam Ekmek",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ],
+      [
+       "Piyaz + Ayran ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Maydanoz",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Köfte",
+    "Kaşar",
+    "Közlenmiş Biber",
+    "Piyaz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Köfte menülerinde neredeyse her zaman bulunur — Yan Ürün eksik",
+   "productType": "ekmek-arasi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Fıstıklı Baklava",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "İnce yufka katları arasında bol Antep fıstığı, şerbetli.",
+   "portionInfo": "4 dilim",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "6 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Kaymak",
+       "free"
+      ],
+      [
+       "Dondurma",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Ceviz",
+    "Şerbet"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Kebap & Izgara)",
+   "productType": "tatli-serbetli",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Adana Kebap",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Acılı zırh kıyması közde pişer, lavaşla servis edilir.",
+   "portionInfo": "1 porsiyon ~180 g et (2 şiş)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Servis Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Porsiyon (Tabakta)",
+       "free"
+      ],
+      [
+       "Dürüm",
+       "free"
+      ],
+      [
+       "Ekmek Arası",
+       "free"
+      ],
+      [
+       "Pilav Üstü",
+       "surcharge"
+      ],
+      [
+       "Yoğurtlu",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tırnaklı Pide",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Közlenmiş Domates",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Sumaklı Soğan",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "surcharge"
+      ],
+      [
+       "Pirinç Pilavı",
+       "surcharge"
+      ],
+      [
+       "Patates Kızartması",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Sumak",
+    "Domates",
+    "Biber",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Ekstra Közlenmiş Biber",
+    "Cacık",
+    "Acılı Ezme",
+    "Ekstra Et (Yarım Porsiyon)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Kebap & Izgara)",
+   "productType": "kebap-porsiyon",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Çökertme Köfte",
+   "targetName": "Çökertme Köfte",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kibrit patates üzerinde yoğurt ve tereyağlı sosla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sade Yoğurt",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Salça",
+       "free"
+      ],
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Ekstra Yoğurt",
+    "Ekstra Patates"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "cokertme",
+   "confidence": 70
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Çökertme Köfte"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 14,
+    "current": 1,
+    "missing": 13,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "salata-meze 0/2",
+     "icecek 0/2",
+     "corba 0/1",
+     "yan-urun 0/1",
+     "tatli 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Lahmacun",
+     "Piyaz",
+     "Ayran",
+     "Mercimek Çorbası",
+     "Köfte Ekmek",
+     "Fıstıklı Baklava",
+     "Adana Kebap"
+    ],
+    "fromAi": 0,
+    "fromDb": 7
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 516,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "rate_limited: 429 Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 42s or upgrade your tier at https://ai.dev/rate-limit.",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 20,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 14,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "grounding": [
+     "Lahmacun: Soğan, Maydanoz, Limon, Marul malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Mercimek Çorbası: Pul Biber malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Fıstıklı Baklava: Kaymak malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Adana Kebap: Maydanoz malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 8,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 1398,
+   "tokensOut": 0,
+   "latencyMs": 468
+  }
+ ],
+ "providerTrouble": true
+}

@@ -1,0 +1,758 @@
+{
+ "case": {
+  "id": "cigkofte__single",
+  "slug": "cigkofte",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "menuText": "Çiğ Köfte Wrap"
+ },
+ "httpStatus": 200,
+ "latencyMs": 4554,
+ "runId": "4bd3454e-cc64-49e0-beba-fdfca82f588f",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 5/10 ürün olur — hedefe 5 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Çiğ Köfte Wrap ürününden dolayı çiğ köfte kategorisindedir ve hızlı tüketim için ekonomiktir.",
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "disagrees": false,
+  "confidence": 0.95,
+  "cuisineName": "Çiğ Köfte",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "suggestedCuisineName": "Çiğ Köfte"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 0,
+    "minItems": 4
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Çiğ Köfte",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 3,
+  "tokensIn": 4440,
+  "latencyMs": 4498,
+  "menuItems": 1,
+  "tokensOut": 2175,
+  "imagesRead": 0,
+  "newProducts": 4,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Çiğ Köfte Wrap",
+   "categoryKey": "atistirmalik",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Çiğ Köfte Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Etsiz ince bulgurlu çiğ köfte lavaşa marul, domates, nane ve limonla sarılır; nar ekşisiyle servis edilir.",
+   "portionInfo": "1 adet (~120 g çiğ köfte, Standart)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Dev Boy",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Marul Yaprağı (Lavaşsız)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Limon Sosu",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Dürüm",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Nane",
+    "Maydanoz",
+    "Turşu",
+    "Limon",
+    "Nar Ekşisi"
+   ],
+   "extraIngredients": [
+    "Ekstra Çiğ Köfte",
+    "Ekstra Nar Ekşisi",
+    "Ekstra Acı Sos",
+    "Turşu Paketi",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çikolatalı Sufle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "İçi akışkan bitter çikolatalı sıcak sufle; çiğ köfte menülerinin yanında tatlı olarak sunulur.",
+   "portionInfo": "1 adet ~120 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "2 Adet",
+       "sets_base"
+      ],
+      [
+       "4 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pudra Şekeri"
+   ],
+   "extraIngredients": [
+    "Ekstra Çikolata Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Acılı Ezme",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "ai",
+   "shortDescription": "İnce kıyılmış domates, biber, soğan ve maydanoz; biber salçası, nar ekşisi ve pul biberle hazırlanan acılı meze.",
+   "portionInfo": "1 porsiyon ~150 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Nane",
+    "Ceviz"
+   ],
+   "extraIngredients": [
+    "Ekstra Nar Ekşisi",
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ köfte yanında hafif ve ferahlatıcı bir meze, lezzet dengesini tamamlar."
+  },
+  {
+   "section": "option",
+   "name": "Çiğ Köfte Wrap",
+   "targetName": "Çiğ Köfte Wrap",
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Boy, Acı Seviyesi, Lavaş / Sarma Seçimi, Sos Seçimi, Menü, Yanında Gelen",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Dev Boy",
+       "sets_base"
+      ],
+      [
+       "Mini",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş / Sarma Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Marul Yaprağı (Lavaşsız)",
+       "free"
+      ],
+      [
+       "Nohut Unu Tortilla",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Limon Sosu",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ],
+      [
+       "Yoğurtlu Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Wrap",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "free"
+      ],
+      [
+       "Şalgam ile Menü",
+       "free"
+      ],
+      [
+       "Kola ile Menü",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Gelen",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Limon Dilimi",
+       "free"
+      ],
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Turşu",
+    "Acı Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Et",
+    "Ekstra Nane",
+    "Ekstra Limon Suyu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Wrap ürününde boy, acı seviyesi, lavaş seçimi, sos, menü ve yanında gelen seçenekler müşterinin tercihlerine göre özelleştirilebilir; çıkarılabilir ve ekstra malzemeler de talep edilebilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Çiğ Köfte Wrap"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1655,
+   "llmCalls": 1,
+   "tokensIn": 539,
+   "tokensOut": 69,
+   "error": null,
+   "output": {
+    "resolved": "cigkofte",
+    "disagrees": false,
+    "confidence": 0.95,
+    "cuisineSlug": "cigkofte",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 0/4",
+     "icecek 0/2",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "menu-kampanya 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2705,
+   "llmCalls": 1,
+   "tokensIn": 2291,
+   "tokensOut": 1023,
+   "error": null,
+   "output": {
+    "names": [
+     "Çiğ Köfte Dürüm",
+     "Şalgam Suyu",
+     "Çikolatalı Sufle",
+     "Acılı Ezme"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 3,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2809,
+   "llmCalls": 1,
+   "tokensIn": 1610,
+   "tokensOut": 1083,
+   "error": null,
+   "output": {
+    "names": [
+     "Çiğ Köfte Wrap"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 4,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 5
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 539,
+   "tokensOut": 69,
+   "latencyMs": 1610
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2291,
+   "tokensOut": 1023,
+   "latencyMs": 2693
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1610,
+   "tokensOut": 1083,
+   "latencyMs": 2798
+  }
+ ],
+ "retried": true,
+ "firstAttempt": {
+  "status": "partial",
+  "warnings": [
+   {
+    "code": "options_failed",
+    "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+   },
+   {
+    "code": "target_unreachable",
+    "message": "Öneriler kabul edilse bile 5/10 ürün olur — hedefe 5 ürün kalıyor."
+   }
+  ],
+  "httpStatus": 200
+ },
+ "providerTrouble": false
+}

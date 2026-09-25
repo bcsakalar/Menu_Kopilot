@@ -1,0 +1,636 @@
+{
+ "case": {
+  "id": "balik-deniz__single",
+  "slug": "balik-deniz",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "fcf10efe-47aa-4160-804e-74368a1c12fa",
+  "menuText": "Levrek Buğulama"
+ },
+ "httpStatus": 200,
+ "latencyMs": 3723,
+ "runId": "70572592-4086-4971-be05-b04ab08ee186",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Menüde sadece levrek buğulama yer alması nedeniyle balık ve deniz ürünleri mutfağı olarak belirlendi.",
+  "cuisineId": "fcf10efe-47aa-4160-804e-74368a1c12fa",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Balık & Deniz Ürünleri",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "fcf10efe-47aa-4160-804e-74368a1c12fa",
+  "suggestedCuisineName": "Balık & Deniz Ürünleri"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "fcf10efe-47aa-4160-804e-74368a1c12fa",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 3,
+    "present": 0,
+    "minItems": 3
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Balık & Deniz Ürünleri",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 1,
+  "llmCalls": 2,
+  "tokensIn": 2823,
+  "latencyMs": 3671,
+  "menuItems": 1,
+  "tokensOut": 1000,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Levrek Izgara",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Çipura Izgara",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Bütün çipura ızgarada, fırında ya da buğulama olarak pişirilir; roka, soğan ve limonla servis edilir.",
+   "portionInfo": "1 adet ~350–400 g (bütün)",
+   "optionGroups": [
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Bütün",
+       "free"
+      ],
+      [
+       "Fileto",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Izgara",
+       "free"
+      ],
+      [
+       "Fırında",
+       "free"
+      ],
+      [
+       "Buğulama",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Roka Salatası",
+       "free"
+      ],
+      [
+       "Mevsim Salata",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "free"
+      ],
+      [
+       "Pilav",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Roka"
+   ],
+   "extraIngredients": [
+    "Ekstra Roka Salatası",
+    "Tarator"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Balık & Deniz Ürünleri menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Haydari",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, beyaz peynir, sarımsak, dereotu ve naneyle hazırlanan koyu kıvamlı soğuk meze.",
+   "portionInfo": "Orta porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Dereotu",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Meze kategorisini kapatır (Meze)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Balık & Deniz Ürünleri menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kalamar Tava",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Halka kalamarlar çıtır kaplamayla kızartılır; tarator ya da sarımsaklı sosla ve limonla servis edilir.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~250 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~375 g)",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (~500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tarator",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Roka Salatası"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Balık & Deniz Ürünleri menülerinde sık bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Balık Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "ai",
+   "shortDescription": "Taze balık eti, domates ve sebzelerle kaynatılan hafif çorba, yanında limon dilimi.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekstra Malzeme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekstra Karides",
+       "surcharge"
+      ],
+      [
+       "Ekstra Mısır",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Limon",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Karides",
+    "Ekstra Mısır"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Balık çorbası, deniz ürünleri menüsüne hafif bir başlangıç sağlar."
+  },
+  {
+   "section": "option",
+   "name": "Levrek Izgara",
+   "targetName": "Levrek Buğulama",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kesim, Pişirme Şekli, Garnitür",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Bütün",
+       "free"
+      ],
+      [
+       "Fileto",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Şekli",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Izgara",
+       "free"
+      ],
+      [
+       "Fırında",
+       "free"
+      ],
+      [
+       "Buğulama",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Roka Salatası",
+       "free"
+      ],
+      [
+       "Mevsim Salata",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "free"
+      ],
+      [
+       "Pilav",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Roka"
+   ],
+   "extraIngredients": [
+    "Ekstra Roka Salatası",
+    "Tarator",
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Levrek Izgara",
+   "targetName": "Levrek Buğulama",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Levrek Izgara",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Levrek Buğulama",
+   "suggestedValue": "Levrek Izgara",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Levrek Buğulama"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1143,
+   "llmCalls": 1,
+   "tokensIn": 541,
+   "tokensOut": 67,
+   "error": null,
+   "output": {
+    "resolved": "balik-deniz",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "balik-deniz",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 1,
+    "categories": [
+     "ana-yemek 1/5",
+     "salata-meze 0/3",
+     "icecek 0/2",
+     "corba 0/1",
+     "ara-sicak 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2507,
+   "llmCalls": 1,
+   "tokensIn": 2282,
+   "tokensOut": 933,
+   "error": null,
+   "output": {
+    "names": [
+     "Çipura Izgara",
+     "Haydari",
+     "Ayran",
+     "Kalamar Tava",
+     "Balık Çorbası"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Levrek Izgara"
+    ],
+    "fromAi": 0,
+    "fromDb": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 541,
+   "tokensOut": 67,
+   "latencyMs": 1141
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2282,
+   "tokensOut": 933,
+   "latencyMs": 2492
+  }
+ ],
+ "providerTrouble": false
+}

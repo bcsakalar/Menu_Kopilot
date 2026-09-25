@@ -1,0 +1,855 @@
+{
+ "case": {
+  "id": "manti-hamur-isleri__single",
+  "slug": "manti-hamur-isleri",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "menuText": "Yaprak Mantı"
+ },
+ "httpStatus": 200,
+ "latencyMs": 521,
+ "runId": "ab783ea5-a7fa-4702-94d1-df5b5c494768",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 8/12 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Mantı & Hamur İşleri",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 12,
+  "current": 1,
+  "missing": 11,
+  "cuisineId": "ea4ed5f6-a38a-4fc8-aca6-758e8569021b",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 12,
+  "cuisineName": "Mantı & Hamur İşleri",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 1,
+  "tokensIn": 0,
+  "latencyMs": 463,
+  "menuItems": 1,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Yaprak Mantı",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kayseri Mantısı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Minik kıymalı mantı, sarımsaklı yoğurt ve tereyağlı sosla.",
+   "portionInfo": "1 porsiyon (~300 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurtsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Domatesli Tereyağı",
+       "free"
+      ],
+      [
+       "Naneli Tereyağı",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Haşlama",
+       "free"
+      ],
+      [
+       "Çıtır (Kızarmış)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sumak",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Toz Kırmızı Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt",
+    "Ekstra Sos",
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Mantı & Hamur İşleri menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "manti",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~200–300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Süzme kırmızı mercimek çorbası, limon ve pul biberle.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Termos (1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kruton",
+       "free"
+      ],
+      [
+       "Tereyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba kategorisini kapatır (Çorba)",
+   "productType": "corba",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Cacık",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, salatalık, sarımsak ve naneyle hazırlanan cacık.",
+   "portionInfo": "1 kase ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Paket (~500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Zeytinyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ekstra Salatalık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Meze kategorisini kapatır (Ev Yemekleri)",
+   "productType": "meze",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Fırın Sütlaç",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Üzeri fırında kızartılmış sütlü pirinç tatlısı, soğuk servis.",
+   "portionInfo": "1 kase ~180 g",
+   "optionGroups": [
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Soğuk",
+       "free"
+      ],
+      [
+       "Ilık",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Tarçın",
+       "free"
+      ],
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Hindistan Cevizi"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Ev Yemekleri)",
+   "productType": "tatli-sutlu",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Kuru Fasulye",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Salçalı, etli kuru fasulye; pilav ve turşuyla.",
+   "portionInfo": "1 porsiyon (~300 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Etli (Kuşbaşı)",
+       "free"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Sucuklu",
+       "surcharge"
+      ],
+      [
+       "Etsiz (Zeytinyağlı)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Pilav",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Yeşil Biber",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Pilav",
+    "Ekstra Turşu",
+    "Cacık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)",
+   "productType": "et-yemegi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Çay",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Taze demlenmiş siyah çay, ince belli bardakta.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Bardak",
+       "sets_base"
+      ],
+      [
+       "Büyük Bardak",
+       "sets_base"
+      ],
+      [
+       "Fincan",
+       "sets_base"
+      ],
+      [
+       "Demlik (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Şeker",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Şekersiz",
+       "free"
+      ],
+      [
+       "Şekerli",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Bal",
+    "Tatlandırıcı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Mantı & Hamur İşleri menülerinde sık bulunur — İçecek eksik",
+   "productType": "cay",
+   "confidence": 84
+  },
+  {
+   "section": "option",
+   "name": "Yaprak Mantı",
+   "targetName": "Yaprak Mantı",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kıymalı mantı, sarımsaklı yoğurt ve tereyağlı sosla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurtsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Nane",
+    "Pul Biber",
+    "Yoğurt"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt",
+    "Tereyağlı Sos",
+    "Ekstra Kıyma"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "manti",
+   "confidence": 70
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Yaprak Mantı"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 12,
+    "current": 1,
+    "missing": 11,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "icecek 0/2",
+     "corba 0/1",
+     "salata-meze 0/1",
+     "tatli 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kayseri Mantısı",
+     "Ayran",
+     "Mercimek Çorbası",
+     "Cacık",
+     "Fırın Sütlaç",
+     "Kuru Fasulye",
+     "Çay"
+    ],
+    "fromAi": 0,
+    "fromDb": 7
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 423,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "rate_limited: 429 Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 51s or upgrade your tier at https://ai.dev/rate-limit.",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 11,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 12,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "grounding": [
+     "Kayseri Mantısı: Pul Biber, Sumak, Nane malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Mercimek Çorbası: Pul Biber, Tereyağı malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Cacık: Zeytinyağı malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Fırın Sütlaç: Tarçın malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Kuru Fasulye: Soğan, Turşu, Ekmek malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 8,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 1480,
+   "tokensOut": 0,
+   "latencyMs": 415
+  }
+ ],
+ "providerTrouble": true
+}

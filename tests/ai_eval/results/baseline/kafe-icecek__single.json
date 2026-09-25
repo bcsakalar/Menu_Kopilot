@@ -1,0 +1,481 @@
+{
+ "case": {
+  "id": "kafe-icecek__single",
+  "slug": "kafe-icecek",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "menuText": "Pumpkin Spice Latte"
+ },
+ "httpStatus": 200,
+ "latencyMs": 4138,
+ "runId": "e71e3ac1-f8a6-4f1a-9354-d9e7a45ecb2f",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 7/10 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Pumpkin Spice Latte ürününün menüde yer alması bu işletmenin bir kafe olduğunu gösterir.",
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "disagrees": false,
+  "confidence": 0.95,
+  "cuisineName": "Kafe & İçecek",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "suggestedCuisineName": "Kafe & İçecek"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "categories": [
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 7,
+    "present": 1,
+    "minItems": 8
+   },
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 3,
+    "present": 0,
+    "minItems": 3
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Kafe & İçecek",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 2,
+  "tokensIn": 2823,
+  "latencyMs": 4129,
+  "menuItems": 1,
+  "tokensOut": 1241,
+  "imagesRead": 0,
+  "newProducts": 6,
+  "optionCards": 0,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Pumpkin Spice Latte",
+   "categoryKey": "icecek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 adet (~300 ml)",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Meyveli Cheesecake",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Labne peynirli cheesecake; frambuaz ya da çilek sosuyla soğuk servis edilir.",
+   "portionInfo": "1 dilim ~120 g",
+   "optionGroups": [
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Frambuaz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Orman Meyveli",
+       "free"
+      ],
+      [
+       "Soszuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çay",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~100 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çikolatalı Brownie",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Yoğun çikolatalı kek; sıcak olarak, dondurma ve çikolata sosuyla servis edilir.",
+   "portionInfo": "1 dilim ~120 g",
+   "optionGroups": [
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurma",
+       "free"
+      ],
+      [
+       "Çikolata Sosu",
+       "free"
+      ],
+      [
+       "Fındık",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fındık"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Simit",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Pekmeze batırılıp susama bulanan, fırında çıtır pişen halka simit; peynir ya da çayla servis edilir.",
+   "portionInfo": "1 adet ~100 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "5 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "surcharge"
+      ],
+      [
+       "Beyaz Peynirli",
+       "surcharge"
+      ],
+      [
+       "Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Nutellalı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Krem Peynir",
+    "Tereyağı",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahveyle birlikte klasik bir atıştırmalık, müşterilerin sık sık tercih ettiği bir ürün."
+  },
+  {
+   "section": "new_product",
+   "name": "Poğaça",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Tereyağlı yumuşak hamurdan fırında pişen poğaça; peynirli, zeytinli, patatesli ya da sade çeşitlerle.",
+   "portionInfo": "1 adet ~80 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Zeytinli",
+       "free"
+      ],
+      [
+       "Patatesli",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Dereotlu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahveyle uyumlu, doyurucu bir atıştırmalık, sabah ve öğle arasında tercih edilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Pumpkin Spice Latte"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1222,
+   "llmCalls": 1,
+   "tokensIn": 538,
+   "tokensOut": 63,
+   "error": null,
+   "output": {
+    "resolved": "kafe-icecek",
+    "disagrees": false,
+    "confidence": 0.95,
+    "cuisineSlug": "kafe-icecek",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "icecek 1/8",
+     "atistirmalik 0/3",
+     "tatli 0/2"
+    ],
+    "needOptions": 0
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2887,
+   "llmCalls": 1,
+   "tokensIn": 2285,
+   "tokensOut": 1178,
+   "error": null,
+   "output": {
+    "names": [
+     "Ayran",
+     "Meyveli Cheesecake",
+     "Çay",
+     "Çikolatalı Brownie",
+     "Simit",
+     "Poğaça"
+    ],
+    "cached": false,
+    "fromAi": 2,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "skipped",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "opsiyonu eksik ürün yok",
+   "output": null
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 0,
+    "reasons": [],
+    "reachable": 7
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 538,
+   "tokensOut": 63,
+   "latencyMs": 1215
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2285,
+   "tokensOut": 1178,
+   "latencyMs": 2878
+  }
+ ],
+ "providerTrouble": false
+}

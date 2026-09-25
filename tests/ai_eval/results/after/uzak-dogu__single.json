@@ -1,0 +1,811 @@
+{
+ "case": {
+  "id": "uzak-dogu__single",
+  "slug": "uzak-dogu",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "ba0304ba-7e7e-47d3-8bc8-c29d16e4d83b",
+  "menuText": "Ramen"
+ },
+ "httpStatus": 200,
+ "latencyMs": 107,
+ "runId": "40b3db5c-15e9-4838-b6f1-13d5d4ff6f5f",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "recommend_failed",
+   "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 8/20 ürün olur — hedefe 12 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "ba0304ba-7e7e-47d3-8bc8-c29d16e4d83b",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Uzak Doğu & Sushi",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 20,
+  "current": 1,
+  "missing": 19,
+  "cuisineId": "ba0304ba-7e7e-47d3-8bc8-c29d16e4d83b",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 5,
+    "present": 1,
+    "minItems": 6
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 20,
+  "cuisineName": "Uzak Doğu & Sushi",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 0,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 48,
+  "menuItems": 1,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Ramen",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "California Roll",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Yengeç, avokado ve salatalıklı, susam kaplı ters roll.",
+   "portionInfo": "8 parça",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Parça",
+       "sets_base"
+      ],
+      [
+       "8 Parça",
+       "sets_base"
+      ],
+      [
+       "12 Parça",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Soya Sosu",
+       "free"
+      ],
+      [
+       "Wasabi",
+       "free"
+      ],
+      [
+       "Zencefil Turşusu",
+       "free"
+      ],
+      [
+       "Teriyaki Sos",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Susam",
+    "Avokado"
+   ],
+   "extraIngredients": [
+    "Ekstra Soya Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "sushi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuklu Noodle",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Wokta tavuk ve sebzelerle soya soslu noodle, susamlı.",
+   "portionInfo": "Normal porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Noodle",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yumurtalı Noodle",
+       "free"
+      ],
+      [
+       "Pirinç Noodle",
+       "free"
+      ],
+      [
+       "Udon",
+       "free"
+      ],
+      [
+       "Glutensiz Pirinç Noodle",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Susam",
+    "Mantar"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Fıstık",
+    "Kişniş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "wok",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Yasemin Çayı",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Yasemin çiçeğiyle demlenen hafif ve kokulu yeşil çay.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Bardak",
+       "sets_base"
+      ],
+      [
+       "Büyük Bardak",
+       "sets_base"
+      ],
+      [
+       "Fincan",
+       "sets_base"
+      ],
+      [
+       "Demlik (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Şeker",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Şekersiz",
+       "free"
+      ],
+      [
+       "Şekerli",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Bal",
+    "Tatlandırıcı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde sık bulunur — İçecek eksik",
+   "productType": "cay",
+   "confidence": 84
+  },
+  {
+   "section": "new_product",
+   "name": "Philadelphia Roll",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Somon, krem peynir ve salatalıklı kremsi sushi roll.",
+   "portionInfo": "8 parça",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Parça",
+       "sets_base"
+      ],
+      [
+       "8 Parça",
+       "sets_base"
+      ],
+      [
+       "12 Parça",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Soya Sosu",
+       "free"
+      ],
+      [
+       "Wasabi",
+       "free"
+      ],
+      [
+       "Zencefil Turşusu",
+       "free"
+      ],
+      [
+       "Teriyaki Sos",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Salatalık",
+    "Susam"
+   ],
+   "extraIngredients": [
+    "Ekstra Soya Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "sushi",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Teriyaki Tavuk",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Teriyaki sosla karamelize tavuk, susam ve pilavla.",
+   "portionInfo": "Normal porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade Pilav",
+       "free"
+      ],
+      [
+       "Sebzeli Wok Pilav",
+       "free"
+      ],
+      [
+       "Noodle",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Susam",
+    "Yeşil Soğan"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Ekstra Tavuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "wok",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Tempura Karides Roll",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tempura karides, avokado ve acı mayonezli çıtır roll.",
+   "portionInfo": "8 parça",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Parça",
+       "sets_base"
+      ],
+      [
+       "8 Parça",
+       "sets_base"
+      ],
+      [
+       "12 Parça",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Soya Sosu",
+       "free"
+      ],
+      [
+       "Wasabi",
+       "free"
+      ],
+      [
+       "Zencefil Turşusu",
+       "free"
+      ],
+      [
+       "Teriyaki Sos",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Acılı Mayonezli",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Avokado"
+   ],
+   "extraIngredients": [
+    "Ekstra Teriyaki"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Uzak Doğu & Sushi menülerinde sık bulunur — Ana Yemek eksik",
+   "productType": "sushi",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Ramen",
+   "targetName": "Ramen",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Wokta yüksek ateşte sotelenen, soslu Uzak Doğu tabağı.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tavuk",
+       "free"
+      ],
+      [
+       "Et",
+       "surcharge"
+      ],
+      [
+       "Karides",
+       "surcharge"
+      ],
+      [
+       "Tofu",
+       "free"
+      ],
+      [
+       "Sebze",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Büyük Porsiyon",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Yer Fıstığı",
+    "Yeşil Soğan",
+    "Susam",
+    "Kişniş"
+   ],
+   "extraIngredients": [
+    "Ekstra Protein",
+    "Yumurta",
+    "Ekstra Sos",
+    "Ekstra Sebze"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "wok",
+   "confidence": 70
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Ramen"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 20,
+    "current": 1,
+    "missing": 19,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/6",
+     "ara-sicak 0/2",
+     "icecek 0/2",
+     "salata-meze 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "names": [
+     "California Roll",
+     "Kutu İçecek",
+     "Tavuklu Noodle",
+     "Yasemin Çayı",
+     "Philadelphia Roll",
+     "Teriyaki Tavuk",
+     "Tempura Karides Roll"
+    ],
+    "fromAi": 0,
+    "fromDb": 7
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 10,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 20,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "grounding": [
+     "California Roll: Acı Mayonez malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Philadelphia Roll: Teriyaki Sos malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Tempura Karides Roll: Acı Mayonez malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 8,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": true
+}

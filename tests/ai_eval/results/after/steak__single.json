@@ -1,0 +1,827 @@
+{
+ "case": {
+  "id": "steak__single",
+  "slug": "steak",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "a24c5a66-31f7-4f42-b15a-07df08151b2e",
+  "menuText": "Tomahawk Steak"
+ },
+ "httpStatus": 200,
+ "latencyMs": 1502,
+ "runId": "9c008b2c-89fb-4bff-a6d4-cb7390533e5c",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "recommend_failed",
+   "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "options_failed",
+   "message": "Opsiyon önerisi alınamadı; kalan bölümler gösteriliyor."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 8/14 ürün olur — hedefe 6 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (rate_limited)",
+  "cuisineId": "a24c5a66-31f7-4f42-b15a-07df08151b2e",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Steak & Et",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 14,
+  "current": 1,
+  "missing": 13,
+  "cuisineId": "a24c5a66-31f7-4f42-b15a-07df08151b2e",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 14,
+  "cuisineName": "Steak & Et",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 3,
+  "tokensIn": 0,
+  "latencyMs": 1444,
+  "menuItems": 1,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 7,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Tomahawk Steak",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Bonfile",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İstenen pişme derecesinde ızgara dana bonfile, garnitürle.",
+   "portionInfo": "1 porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "~180 g",
+       "sets_base"
+      ],
+      [
+       "~250 g",
+       "sets_base"
+      ],
+      [
+       "~300 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Roka Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Steak Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Mantar Sosu",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sosu",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Demi-Glace",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Biberiye",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür",
+    "Kremalı Mantar",
+    "Izgara Sebze"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Maden Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "200 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Püresi",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Tereyağlı pürüzsüz patates püresi, etin yanına garnitür.",
+   "portionInfo": "1 porsiyon ~180 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Trüf Yağı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — Ara Sıcak eksik",
+   "productType": "garnitur",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Bonfileli Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Izgara bonfile dilimleri ve mevsim yeşillikleri, hardal soslu.",
+   "portionInfo": "1 porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Hardal Sos",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Zeytinyağı-Limon",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Kuru Domates"
+   ],
+   "extraIngredients": [
+    "Ekstra Et"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "salata",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Antrikot",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Mermer dokulu dana antrikot ızgarada, garnitür ve sosla.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "~200 g",
+       "sets_base"
+      ],
+      [
+       "~250 g",
+       "sets_base"
+      ],
+      [
+       "~350 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Közlenmiş Sebze",
+       "free"
+      ],
+      [
+       "Parmak Patates",
+       "free"
+      ],
+      [
+       "Tereyağlı Pilav",
+       "free"
+      ],
+      [
+       "Roka Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Steak Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "free"
+      ],
+      [
+       "Mantar Sosu",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sosu",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Demi-Glace",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Biberiye",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür",
+    "Kremalı Mantar",
+    "Izgara Sebze"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Külbastı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce dövülmüş dana eti ızgarada, garnitürle servis.",
+   "portionInfo": "1 porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "200 g",
+       "sets_base"
+      ],
+      [
+       "300 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yan Ürün Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Patates Püresi",
+       "surcharge"
+      ],
+      [
+       "Mantar Sote",
+       "surcharge"
+      ],
+      [
+       "Izgara Sebze",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "steak",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Steak & Et menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "option",
+   "name": "Tomahawk Steak",
+   "targetName": "Tomahawk Steak",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İstenen pişme derecesinde ızgara et, garnitürle servis.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "200 g",
+       "sets_base"
+      ],
+      [
+       "250 g",
+       "sets_base"
+      ],
+      [
+       "300 g",
+       "sets_base"
+      ],
+      [
+       "400 g",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme Derecesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Az Pişmiş",
+       "free"
+      ],
+      [
+       "Orta Az",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "Orta İyi",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Püresi",
+       "free"
+      ],
+      [
+       "Patates Kızartması",
+       "free"
+      ],
+      [
+       "Izgara Sebze",
+       "free"
+      ],
+      [
+       "Pilav",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mantar Sos",
+       "surcharge"
+      ],
+      [
+       "Karabiber Sos",
+       "surcharge"
+      ],
+      [
+       "Chimichurri",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Tereyağı",
+    "Roka",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Mantar Sote",
+    "Ekstra Garnitür",
+    "Trüf Yağı",
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu tür ürünlerde standart olan opsiyon ve malzemeler",
+   "productType": "steak",
+   "confidence": 70
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Tomahawk Steak"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 890,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "rate_limited: 429 Rate limit exceeded for model gemini-3.5-flash-lite (limit: 500 requests per day on Free Tier). Please retry in 58s or upgrade your tier at https://ai.dev/rate-limit.",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 14,
+    "current": 1,
+    "missing": 13,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "yan-urun 0/2",
+     "icecek 0/2",
+     "ara-sicak 0/1",
+     "salata-meze 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 518,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "rate_limited: 429 Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 57s or upgrade your tier at https://ai.dev/rate-limit.",
+   "output": {
+    "names": [
+     "Bonfile",
+     "Maden Suyu",
+     "Patates Püresi",
+     "Bonfileli Salata",
+     "Antrikot",
+     "Külbastı",
+     "Şalgam Suyu"
+    ],
+    "fromAi": 0,
+    "fromDb": 7
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 516,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "rate_limited: 429 Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 57s or upgrade your tier at https://ai.dev/rate-limit.",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 12,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 7,
+    "target": 14,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "grounding": [],
+    "reachable": 8,
+    "completedFromKnowledge": 1
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 501,
+   "tokensOut": 0,
+   "latencyMs": 846
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 1704,
+   "tokensOut": 0,
+   "latencyMs": 505
+  },
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 1565,
+   "tokensOut": 0,
+   "latencyMs": 503
+  }
+ ],
+ "providerTrouble": true
+}

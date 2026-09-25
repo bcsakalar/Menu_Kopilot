@@ -1,0 +1,1449 @@
+{
+ "case": {
+  "id": "dunya-mutfagi__photo__full",
+  "slug": "dunya-mutfagi",
+  "kind": "photo",
+  "mode": "full",
+  "image": "tests/ai_eval/images/dunya-mutfagi.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 13102,
+ "runId": "206e134f-2017-4873-b319-18fb5f639a0a",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Burrito, Tacos, Quesadilla ve Nachos gibi sokak tarzı, orta fiyatlı ürünler.",
+  "cuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "disagrees": false,
+  "confidence": 0.7,
+  "cuisineName": "Sokak Lezzetleri",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "suggestedCuisineName": "Sokak Lezzetleri"
+ },
+ "counts": {
+  "target": 10,
+  "current": 5,
+  "missing": 5,
+  "cuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "categories": [
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 1,
+    "present": 4,
+    "minItems": 5
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Sokak Lezzetleri",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 4,
+  "tokensIn": 1799,
+  "latencyMs": 13088,
+  "menuItems": 5,
+  "tokensOut": 1086,
+  "imagesRead": 1,
+  "newProducts": 8,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Burrito",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tacos (3lü)",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": false
+  },
+  {
+   "name": "Quesadilla",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Nachos",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Tavuk Fajita",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Et Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış dana eti pamuk yağında sacda pişer; domates, soğan ve maydanozla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~100 g et",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Midye Dolma",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Baharatlı iç pilavla doldurulmuş midyeler buharda pişirilir; limonla servis edilir.",
+   "portionInfo": "10 adet ~250 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "10 Adet",
+       "sets_base"
+      ],
+      [
+       "20 Adet",
+       "sets_base"
+      ],
+      [
+       "30 Adet",
+       "sets_base"
+      ],
+      [
+       "50 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Limon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Limonlu",
+       "free"
+      ],
+      [
+       "Limon Ayrı Pakette",
+       "free"
+      ],
+      [
+       "Limonsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde neredeyse her zaman bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Waffle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Sıcak waffle hamuru seçilen meyveler, çikolata sosları ve kuruyemişlerle kaplanarak servis edilir.",
+   "portionInfo": "1 adet (~20 cm)",
+   "optionGroups": [
+    {
+     "name": "Meyve Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Muz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Kivi",
+       "free"
+      ],
+      [
+       "Ananas",
+       "free"
+      ],
+      [
+       "Böğürtlen",
+       "free"
+      ],
+      [
+       "Portakal",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sütlü Çikolata",
+       "free"
+      ],
+      [
+       "Beyaz Çikolata",
+       "free"
+      ],
+      [
+       "Fındık Kreması",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Fıstık Kreması",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Lotus Bisküvi",
+       "free"
+      ],
+      [
+       "Renkli Şeker",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Meyve",
+    "Top Dondurma",
+    "Ekstra Çikolata"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kumpir",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Fırında pişen iri patatesin içi tereyağı ve kaşarla ezilir; seçilen garnitür ve soslarla doldurularak servis edilir.",
+   "portionInfo": "1 adet iri patates (~400 g)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Çift Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Kaşarsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mısır",
+       "free"
+      ],
+      [
+       "Bezelye",
+       "free"
+      ],
+      [
+       "Rus Salatası",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Zeytin",
+       "free"
+      ],
+      [
+       "Sosis",
+       "free"
+      ],
+      [
+       "Mantar",
+       "free"
+      ],
+      [
+       "Kısır",
+       "free"
+      ],
+      [
+       "Jalapeno",
+       "free"
+      ],
+      [
+       "Havuç Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ranch",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Kaşar"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Tavuk Parçaları",
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 şişe ~300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış tavuk eti sacda baharatla pişer; domates, soğan ve maydanozla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~110 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ciğer Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tavada kavrulmuş ciğer, lavaşa sarılır; soğan, maydanoz ve sumakla.",
+   "portionInfo": "1 dürüm",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Ciğer",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "option",
+   "name": "Burrito",
+   "targetName": "Burrito",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Protein, Menü, Acı Seviyesi, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tavuk",
+       "free"
+      ],
+      [
+       "Dana Et",
+       "free"
+      ],
+      [
+       "Kıyma",
+       "free"
+      ],
+      [
+       "Sebzeli (Vejetaryen)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Nachos + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa",
+       "surcharge"
+      ],
+      [
+       "Guacamole",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fasulye",
+    "Pilav",
+    "Ekşi Krema",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Guacamole",
+    "Ekstra Cheddar",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Quesadilla",
+   "targetName": "Quesadilla",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Protein, Menü, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tavuk",
+       "free"
+      ],
+      [
+       "Dana Et",
+       "free"
+      ],
+      [
+       "Kıyma",
+       "free"
+      ],
+      [
+       "Sebzeli (Vejetaryen)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Patates + İçecek ile Menü",
+       "surcharge"
+      ],
+      [
+       "Nachos + İçecek ile Menü",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa",
+       "surcharge"
+      ],
+      [
+       "Guacamole",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Biber",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Guacamole",
+    "Ekstra Peynir",
+    "Jalapeño Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Nachos",
+   "targetName": "Nachos",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Porsiyon, Üzeri, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Paylaşım",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Kıymalı",
+       "surcharge"
+      ],
+      [
+       "Tavuklu",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa",
+       "surcharge"
+      ],
+      [
+       "Guacamole",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Jalapeño Biber",
+    "Ekşi Krema"
+   ],
+   "extraIngredients": [
+    "Guacamole",
+    "Ekstra Cheddar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tavuk Fajita",
+   "targetName": "Tavuk Fajita",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Porsiyon, Acı Seviyesi, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Paylaşım",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa",
+       "surcharge"
+      ],
+      [
+       "Guacamole",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber"
+   ],
+   "extraIngredients": [
+    "Guacamole",
+    "Ekstra Tortilla"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Tacos (3lü)",
+   "targetName": "Tacos (3lü)",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Et / Tavuk Seçimi, Tortilla Tipi, Acı Seviyesi, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Et / Tavuk Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Dana Barbacoa",
+       "sets_base"
+      ],
+      [
+       "Tavuk Pollo",
+       "sets_base"
+      ],
+      [
+       "Kıyma (Ground Beef)",
+       "sets_base"
+      ],
+      [
+       "Sebzeli / Vegan",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tortilla Tipi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yumuşak Mısır Tortillası",
+       "free"
+      ],
+      [
+       "Yumuşak Un Tortillası",
+       "free"
+      ],
+      [
+       "Çıtır Taco Kabuğu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Hafif Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa Roja",
+       "free"
+      ],
+      [
+       "Salsa Verde",
+       "free"
+      ],
+      [
+       "Guacamole Sos",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema (Sour Cream)",
+       "surcharge"
+      ],
+      [
+       "Chipotle Mayo",
+       "free"
+      ],
+      [
+       "Limon Dilimi",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Kişniş",
+    "Muz Biberi",
+    "Meksika Fasulyesi",
+    "Peynir Kırıntısı"
+   ],
+   "extraIngredients": [
+    "Ekstra Guacamole",
+    "Ekstra Ekşi Krema",
+    "Ekstra Cheddar Peyniri",
+    "Jalapeno Turşusu",
+    "Ekstra Et",
+    "Ekstra Tavuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Müşterilerin et tercihini, tortilla ve acı seviyesini seçebilmesi, ayrıca istenmeyen garnitürleri çıkarıp ekstra sos ekleyebilmesi için gereklidir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Burrito",
+     "Tacos (3lü)",
+     "Quesadilla",
+     "Nachos",
+     "Tavuk Fajita"
+    ],
+    "unique": 5,
+    "extractedRaw": 5,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6642,
+   "llmCalls": 2,
+   "tokensIn": 755,
+   "tokensOut": 170,
+   "error": null,
+   "output": {
+    "resolved": "sokak-lezzetleri",
+    "disagrees": false,
+    "confidence": 0.7,
+    "cuisineSlug": "sokak-lezzetleri",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 5,
+    "missing": 5,
+    "needFixes": 0,
+    "categories": [
+     "icecek 0/2",
+     "ana-yemek 4/5",
+     "ara-sicak 1/2",
+     "tatli 0/1"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Et Tantuni Dürüm",
+     "Ayran",
+     "Midye Dolma",
+     "Waffle",
+     "Kumpir",
+     "Şalgam Suyu",
+     "Tavuk Tantuni Dürüm",
+     "Ciğer Tantuni Dürüm"
+    ],
+    "fromAi": 0,
+    "fromDb": 8
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 6406,
+   "llmCalls": 2,
+   "tokensIn": 1044,
+   "tokensOut": 916,
+   "error": null,
+   "output": {
+    "names": [
+     "Burrito",
+     "Quesadilla",
+     "Nachos",
+     "Tavuk Fajita",
+     "Tacos (3lü)"
+    ],
+    "fromAi": 1,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "reachable": 13
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 511,
+   "tokensOut": 0,
+   "latencyMs": 6001
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 755,
+   "tokensOut": 170,
+   "latencyMs": 636
+  },
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "rate_limited",
+   "tokensIn": 1026,
+   "tokensOut": 0,
+   "latencyMs": 349
+  },
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1044,
+   "tokensOut": 916,
+   "latencyMs": 6041
+  }
+ ],
+ "providerTrouble": false
+}

@@ -1,0 +1,853 @@
+{
+ "case": {
+  "id": "borek__text__quick",
+  "slug": "borek",
+  "kind": "text",
+  "mode": "quick",
+  "cuisineId": "5d393604-270b-49a9-a53d-d33f7053d4cb",
+  "menuText": "Su Böreği, Ispanaklı Kol Böreği, Kıymalı Börek, Peynirli Börek, Çay, Ayran"
+ },
+ "httpStatus": 200,
+ "latencyMs": 3026,
+ "runId": "cadba443-013e-4904-9f9b-21f5d2c357db",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Su böreği, kol böreği ve çeşitleri gibi hamur işi ürünlerine dayanmaktadır.",
+  "cuisineId": "5d393604-270b-49a9-a53d-d33f7053d4cb",
+  "disagrees": false,
+  "confidence": 1,
+  "cuisineName": "Börek",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "5d393604-270b-49a9-a53d-d33f7053d4cb",
+  "suggestedCuisineName": "Börek"
+ },
+ "counts": {
+  "target": 10,
+  "current": 6,
+  "missing": 4,
+  "cuisineId": "5d393604-270b-49a9-a53d-d33f7053d4cb",
+  "categories": [
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 5,
+    "present": 0,
+    "minItems": 5
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 2,
+    "minItems": 3
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Börek",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 2,
+  "llmCalls": 2,
+  "tokensIn": 2861,
+  "latencyMs": 3016,
+  "menuItems": 6,
+  "tokensOut": 803,
+  "imagesRead": 0,
+  "newProducts": 6,
+  "optionCards": 3,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Su Böreği",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Kol Böreği",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Kıymalı Börek",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Peynirli Börek",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çay",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Simit",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Pekmeze batırılıp susama bulanan, fırında çıtır pişen halka simit; peynir ya da çayla servis edilir.",
+   "portionInfo": "1 adet ~100 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "5 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "surcharge"
+      ],
+      [
+       "Beyaz Peynirli",
+       "surcharge"
+      ],
+      [
+       "Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Nutellalı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Krem Peynir",
+    "Tereyağı",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Atıştırmalık kategorisini kapatır (Pastane & Fırın)"
+  },
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Böreğin yanında sabahtan akşama giden süzme mercimek çorbası.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Börek menülerinde sık bulunur — Çorba eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Pasta Dilimi",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Günlük hazırlanan yaş pastadan dilim; çikolatalı, frambuazlı, muzlu ya da karışık meyveli çeşitlerle.",
+   "portionInfo": "1 dilim ~150 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Dilim",
+       "sets_base"
+      ],
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "4 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çikolatalı",
+       "free"
+      ],
+      [
+       "Frambuazlı",
+       "free"
+      ],
+      [
+       "Muzlu",
+       "free"
+      ],
+      [
+       "Karışık Meyveli",
+       "free"
+      ],
+      [
+       "Profiterollü",
+       "free"
+      ],
+      [
+       "Antep Fıstıklı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Pastane & Fırın)"
+  },
+  {
+   "section": "new_product",
+   "name": "Poğaça",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Tereyağlı yumuşak hamurdan fırında pişen poğaça; peynirli, zeytinli, patatesli ya da sade çeşitlerle.",
+   "portionInfo": "1 adet ~80 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "3 Adet",
+       "sets_base"
+      ],
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Zeytinli",
+       "free"
+      ],
+      [
+       "Patatesli",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Dereotlu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Atıştırmalık kategorisini kapatır (Pastane & Fırın)"
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "ai",
+   "shortDescription": "",
+   "portionInfo": "1 kutu ~330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Soğuk içecek, yemek yanında ferahlatıcı seçenek."
+  },
+  {
+   "section": "new_product",
+   "name": "Maden Su",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "ai",
+   "shortDescription": "",
+   "portionInfo": "500 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Gazlı su, hafif bir içecek olarak tercih edilebilir."
+  },
+  {
+   "section": "option",
+   "name": "Su Böreği",
+   "targetName": "Su Böreği",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Porsiyon, İç Harç, Servis, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~200 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~300 g)",
+       "sets_base"
+      ],
+      [
+       "Yarım Kg",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "İç Harç",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Kıymalı",
+       "free"
+      ],
+      [
+       "Karışık",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sıcak",
+       "free"
+      ],
+      [
+       "Oda Sıcaklığında",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Türk Kahvesi",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kol Böreği",
+   "targetName": "Ispanaklı Kol Böreği",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Porsiyon, İç Harç, Servis",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~200 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~300 g)",
+       "sets_base"
+      ],
+      [
+       "Yarım Kg",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "İç Harç",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Peynirli",
+       "free"
+      ],
+      [
+       "Kıymalı",
+       "free"
+      ],
+      [
+       "Ispanaklı",
+       "free"
+      ],
+      [
+       "Patatesli",
+       "free"
+      ],
+      [
+       "Pırasalı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sıcak",
+       "free"
+      ],
+      [
+       "Oda Sıcaklığında",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Susam",
+    "Çörek Otu"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kıymalı Börek",
+   "targetName": "Kıymalı Börek",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Porsiyon, Servis, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~200 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~300 g)",
+       "sets_base"
+      ],
+      [
+       "Yarım Kg",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sıcak",
+       "free"
+      ],
+      [
+       "Oda Sıcaklığında",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Türk Kahvesi",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Susam"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Kol Böreği",
+   "targetName": "Ispanaklı Kol Böreği",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Kol Böreği",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Ispanaklı Kol Böreği",
+   "suggestedValue": "Kol Böreği",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Çay",
+   "targetName": "Çay",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Çay",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çay",
+   "suggestedValue": null,
+   "reason": "Ad kısaltma gibi görünüyor, satıcıya tam adını sor"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Su Böreği",
+     "Ispanaklı Kol Böreği",
+     "Kıymalı Börek",
+     "Peynirli Börek",
+     "Çay",
+     "Ayran"
+    ],
+    "unique": 6,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1273,
+   "llmCalls": 1,
+   "tokensIn": 559,
+   "tokensOut": 62,
+   "error": null,
+   "output": {
+    "resolved": "borek",
+    "disagrees": false,
+    "confidence": 1,
+    "cuisineSlug": "borek",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 6,
+    "missing": 4,
+    "needFixes": 2,
+    "categories": [
+     "atistirmalik 0/5",
+     "corba 0/1",
+     "tatli 0/1",
+     "icecek 2/3"
+    ],
+    "needOptions": 4
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 1713,
+   "llmCalls": 1,
+   "tokensIn": 2302,
+   "tokensOut": 741,
+   "error": null,
+   "output": {
+    "names": [
+     "Simit",
+     "Mercimek Çorbası",
+     "Pasta Dilimi",
+     "Poğaça",
+     "Kutu İçecek",
+     "Maden Su"
+    ],
+    "cached": false,
+    "fromAi": 2,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Su Böreği",
+     "Kol Böreği",
+     "Kıymalı Börek"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 3,
+    "reasons": [],
+    "reachable": 12
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 559,
+   "tokensOut": 62,
+   "latencyMs": 1231
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2302,
+   "tokensOut": 741,
+   "latencyMs": 1691
+  }
+ ],
+ "providerTrouble": false
+}

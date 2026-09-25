@@ -1,0 +1,1215 @@
+{
+ "case": {
+  "id": "sokak-lezzetleri__photo__quick",
+  "slug": "sokak-lezzetleri",
+  "kind": "photo",
+  "mode": "quick",
+  "image": "tests/ai_eval/images/sokak-lezzetleri.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 3219,
+ "runId": "f2bd9702-b37c-4330-ba5b-78e5df67dc4b",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Yarım ve çeyrek kokoreç, kumpir ve islak hamburger gibi sokak lezzetleri menüsünü oluşturuyor.",
+  "cuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "disagrees": false,
+  "confidence": 0.8,
+  "cuisineName": "Sokak Lezzetleri",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "suggestedCuisineName": "Sokak Lezzetleri"
+ },
+ "counts": {
+  "target": 10,
+  "current": 6,
+  "missing": 4,
+  "cuisineId": "15609736-6edc-4d11-9b84-1f47a0c2db41",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 1,
+    "present": 4,
+    "minItems": 5
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Sokak Lezzetleri",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 2,
+  "llmCalls": 2,
+  "tokensIn": 3089,
+  "latencyMs": 3169,
+  "menuItems": 6,
+  "tokensOut": 571,
+  "imagesRead": 1,
+  "newProducts": 6,
+  "optionCards": 3,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Yarım Kokoreç",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": false
+  },
+  {
+   "name": "Kokoreç",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Midye Dolma",
+   "categoryKey": "ara-sicak",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kumpir",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Islak Hamburger",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Şalgam Suyu",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Et Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış dana eti pamuk yağında sacda pişer; domates, soğan ve maydanozla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~100 g et",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Midye Tava",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Unlanıp çıtır kızartılan midyeler tarator sosuyla servis edilir; porsiyon ya da ekmek arası olarak.",
+   "portionInfo": "1 porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Porsiyon (Tabakta)",
+       "sets_base"
+      ],
+      [
+       "Ekmek Arası",
+       "sets_base"
+      ],
+      [
+       "Duble Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tarator",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Ekstra Tarator",
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde sık bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Waffle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Sıcak waffle hamuru seçilen meyveler, çikolata sosları ve kuruyemişlerle kaplanarak servis edilir.",
+   "portionInfo": "1 adet (~20 cm)",
+   "optionGroups": [
+    {
+     "name": "Meyve Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Muz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Kivi",
+       "free"
+      ],
+      [
+       "Ananas",
+       "free"
+      ],
+      [
+       "Böğürtlen",
+       "free"
+      ],
+      [
+       "Portakal",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sütlü Çikolata",
+       "free"
+      ],
+      [
+       "Beyaz Çikolata",
+       "free"
+      ],
+      [
+       "Fındık Kreması",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Fıstık Kreması",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Lotus Bisküvi",
+       "free"
+      ],
+      [
+       "Renkli Şeker",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Meyve",
+    "Top Dondurma",
+    "Ekstra Çikolata"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak Lezzetleri menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuk Tantuni Dürüm",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce doğranmış tavuk eti sacda baharatla pişer; domates, soğan ve maydanozla lavaşa sarılır.",
+   "portionInfo": "1 adet, ~110 g tavuk",
+   "optionGroups": [
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Lavaş",
+       "free"
+      ],
+      [
+       "Çift Lavaş (Mega)",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Soğan",
+    "Maydanoz",
+    "Pul Biber",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Kaşar",
+    "Ekstra Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Tantuni)"
+  },
+  {
+   "section": "new_product",
+   "name": "Lahmacun",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "ai",
+   "shortDescription": "İnce açılmış hamura baharatlı kıymalı harç sürülüp taş fırında pişirilir; limon, maydanoz ve yeşillikle servis edilir.",
+   "portionInfo": "1 adet (~28 cm)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fındık (Küçük)",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Hamur",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "İnce",
+       "free"
+      ],
+      [
+       "Kıtır",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Kola Zero",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Maden Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Maydanoz",
+    "Limon",
+    "Marul",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Kaşar",
+    "Ekstra Kıyma",
+    "Ekstra Yeşillik Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sokak lezzetlerinin klasiklerinden, hızlı ve doyurucu bir seçenek olarak menüyü tamamlar."
+  },
+  {
+   "section": "option",
+   "name": "Kokoreç",
+   "targetName": "Çeyrek Kokoreç",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Porsiyon, Acı Seviyesi, Baharat, Yanında, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Yarım Ekmek",
+       "sets_base"
+      ],
+      [
+       "Üç Çeyrek Ekmek",
+       "sets_base"
+      ],
+      [
+       "Tam Ekmek",
+       "sets_base"
+      ],
+      [
+       "Porsiyon (Tabakta)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Baharat",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Bol Kekikli",
+       "free"
+      ],
+      [
+       "Normal",
+       "free"
+      ],
+      [
+       "Baharatsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates",
+       "free"
+      ],
+      [
+       "Biber",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Biber",
+    "Kekik",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Kokoreç",
+    "Turşu Paketi",
+    "Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Midye Dolma",
+   "targetName": "Midye Dolma",
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Adet, Limon, Acı Seviyesi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "10 Adet",
+       "sets_base"
+      ],
+      [
+       "20 Adet",
+       "sets_base"
+      ],
+      [
+       "30 Adet",
+       "sets_base"
+      ],
+      [
+       "50 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Limon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Limonlu",
+       "free"
+      ],
+      [
+       "Limon Ayrı Pakette",
+       "free"
+      ],
+      [
+       "Limonsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kumpir",
+   "targetName": "Kumpir",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Boy, Peynir, Garnitür, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Peynir",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaşarlı",
+       "free"
+      ],
+      [
+       "Çift Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Kaşarsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Garnitür",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Mısır",
+       "free"
+      ],
+      [
+       "Bezelye",
+       "free"
+      ],
+      [
+       "Rus Salatası",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Zeytin",
+       "free"
+      ],
+      [
+       "Sosis",
+       "free"
+      ],
+      [
+       "Mantar",
+       "free"
+      ],
+      [
+       "Kısır",
+       "free"
+      ],
+      [
+       "Jalapeno",
+       "free"
+      ],
+      [
+       "Havuç Salatası",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Ranch",
+       "free"
+      ],
+      [
+       "Barbekü",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Kaşar"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Tavuk Parçaları",
+    "Ekstra Garnitür"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Kokoreç",
+   "targetName": "Çeyrek Kokoreç",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kokoreç",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çeyrek Kokoreç",
+   "suggestedValue": "Kokoreç",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Şalgam Suyu",
+   "targetName": "Şalgam",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Şalgam Suyu",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Şalgam",
+   "suggestedValue": "Şalgam Suyu",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": "groq",
+   "model": "qwen/qwen3.8-27b",
+   "durationMs": 2206,
+   "llmCalls": 1,
+   "tokensIn": 2327,
+   "tokensOut": 426,
+   "error": null,
+   "output": {
+    "names": [
+     "Yarım Kokoreç",
+     "Çeyrek Kokoreç",
+     "Midye Dolma",
+     "Kumpir",
+     "Islak Hamburger",
+     "Şalgam"
+    ],
+    "unique": 6,
+    "extractedRaw": 6,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 916,
+   "llmCalls": 1,
+   "tokensIn": 762,
+   "tokensOut": 145,
+   "error": null,
+   "output": {
+    "resolved": "sokak-lezzetleri",
+    "disagrees": false,
+    "confidence": 0.8,
+    "cuisineSlug": "sokak-lezzetleri",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 6,
+    "missing": 4,
+    "needFixes": 2,
+    "categories": [
+     "ana-yemek 4/5",
+     "ara-sicak 1/2",
+     "tatli 0/1",
+     "icecek 1/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Et Tantuni Dürüm",
+     "Midye Tava",
+     "Waffle",
+     "Ayran",
+     "Tavuk Tantuni Dürüm",
+     "Lahmacun"
+    ],
+    "cached": true,
+    "fromAi": 1,
+    "fromDb": 5,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kokoreç",
+     "Midye Dolma",
+     "Kumpir"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 3,
+    "reasons": [],
+    "reachable": 12
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.extract",
+   "provider": "groq",
+   "model": "qwen/qwen3.8-27b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2327,
+   "tokensOut": 426,
+   "latencyMs": 2195
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 762,
+   "tokensOut": 145,
+   "latencyMs": 872
+  }
+ ],
+ "providerTrouble": false
+}

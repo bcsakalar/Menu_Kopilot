@@ -1,0 +1,933 @@
+{
+ "case": {
+  "id": "meze__photo__quick",
+  "slug": "meze",
+  "kind": "photo",
+  "mode": "quick",
+  "image": "tests/ai_eval/images/meze.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 8767,
+ "runId": "d4074241-c3c4-4713-a6de-08bcf605833e",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Haydari, humus, fava ve şakşuka gibi meze çeşitleri ağırlıklı olduğu için bu kategori seçilmiştir.",
+  "cuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "disagrees": false,
+  "confidence": 0.95,
+  "cuisineName": "Meze",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "suggestedCuisineName": "Meze"
+ },
+ "counts": {
+  "target": 10,
+  "current": 7,
+  "missing": 3,
+  "cuisineId": "61ac8a8f-f198-462c-998d-375d923bb89e",
+  "categories": [
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 0,
+    "present": 7,
+    "minItems": 7
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Meze",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 8,
+  "llmCalls": 2,
+  "tokensIn": 2113,
+  "latencyMs": 8757,
+  "menuItems": 7,
+  "tokensOut": 746,
+  "imagesRead": 1,
+  "newProducts": 6,
+  "optionCards": 3,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Haydari",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Humus",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Fava",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Acılı Ezme",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Şakşuka",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Patlıcan Salatası",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Rus Salatası",
+   "categoryKey": "salata-meze",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kalamar Tava",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Halka kalamarlar çıtır kaplamayla kızartılır; tarator ya da sarımsaklı sosla ve limonla servis edilir.",
+   "portionInfo": "1 porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~250 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~375 g)",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (~500 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tarator",
+       "free"
+      ],
+      [
+       "Sarımsaklı Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Roka Salatası"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ara Sıcak kategorisini kapatır (Balık & Deniz Ürünleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Balık & Deniz Ürünleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Zeytinyağlı Yaprak Sarma",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Asma yaprağına pirinç, soğan, kuş üzümü ve baharatlı iç harç sarılıp zeytinyağında pişirilir.",
+   "portionInfo": "10 adet ~200 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ],
+      [
+       "20 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Yoğurt",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kuş Üzümü",
+    "Dolmalık Fıstık"
+   ],
+   "extraIngredients": [
+    "Yoğurt"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — Salata & Meze tarafını güçlendirir"
+  },
+  {
+   "section": "new_product",
+   "name": "İçli Köfte",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "İnce bulgur kabuğun içine cevizli, baharatlı kıyma harcı doldurulur; kızartılarak ya da haşlanarak servis edilir.",
+   "portionInfo": "2 adet ~180 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Adet",
+       "sets_base"
+      ],
+      [
+       "4 Adet",
+       "sets_base"
+      ],
+      [
+       "6 Adet",
+       "sets_base"
+      ],
+      [
+       "10 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kızartma",
+       "free"
+      ],
+      [
+       "Haşlama",
+       "free"
+      ],
+      [
+       "Fırında",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Limon",
+    "Yoğurt"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Şalgam Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Karışık Meze Tabağı",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haydari, humus, acılı ezme, patlıcan salatası ve zeytinyağlılardan seçilmiş paylaşımlık soğuk meze tabağı.",
+   "portionInfo": "4 çeşit, 2 kişilik",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Çeşit (2 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "6 Çeşit (3–4 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "8 Çeşit (4–6 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Meze Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Haydari",
+       "free"
+      ],
+      [
+       "Humus",
+       "free"
+      ],
+      [
+       "Acılı Ezme",
+       "free"
+      ],
+      [
+       "Patlıcan Salatası",
+       "free"
+      ],
+      [
+       "Şakşuka",
+       "free"
+      ],
+      [
+       "Rus Salatası",
+       "free"
+      ],
+      [
+       "Fava",
+       "free"
+      ],
+      [
+       "Yaprak Sarma",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Ekmek"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Meze menülerinde sık bulunur — Salata & Meze tarafını güçlendirir"
+  },
+  {
+   "section": "option",
+   "name": "Haydari",
+   "targetName": "Haydari",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Porsiyon, Ekmek",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Dereotu",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Humus",
+   "targetName": "Humus",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Porsiyon, Üzeri, Ekmek",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "surcharge"
+      ],
+      [
+       "Kavurmalı",
+       "surcharge"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Közlenmiş Biberli",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Kırmızı Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Zeytinyağı",
+    "Çam Fıstığı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Fava",
+   "targetName": "Fava",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Porsiyon, Ekmek",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (~100 g)",
+       "sets_base"
+      ],
+      [
+       "Orta (~200 g)",
+       "sets_base"
+      ],
+      [
+       "Büyük (~350 g)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Ekmek İstemiyorum",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Pide",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Dereotu",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Ekstra Zeytinyağı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Haydari",
+   "targetName": "Haydari",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Süzme yoğurt, beyaz peynir, sarımsak, dereotu ve naneyle hazırlanan koyu kıvamlı soğuk meze.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Süzme yoğurt, beyaz peynir, sarımsak, dereotu ve naneyle hazırlanan koyu kıvamlı soğuk meze.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Humus",
+   "targetName": "Humus",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış nohut, tahin, sarımsak ve limonla ezilen kremsi meze; zeytinyağı ve kırmızı toz biberle.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Haşlanmış nohut, tahin, sarımsak ve limonla ezilen kremsi meze; zeytinyağı ve kırmızı toz biberle.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Fava",
+   "targetName": "Fava",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Fava",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Fava",
+   "suggestedValue": null,
+   "reason": "Ad kısaltma gibi görünüyor, satıcıya tam adını sor"
+  },
+  {
+   "section": "fix",
+   "name": "Fava",
+   "targetName": "Fava",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Kuru bakla zeytinyağı ve soğanla pişirilip ezilir, soğuyunca kalıptan çıkar; dereotu ve zeytinyağıyla.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Kuru bakla zeytinyağı ve soğanla pişirilip ezilir, soğuyunca kalıptan çıkar; dereotu ve zeytinyağıyla.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Acılı Ezme",
+   "targetName": "Acılı Ezme",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "İnce kıyılmış domates, biber, soğan ve maydanoz; biber salçası, nar ekşisi ve pul biberle hazırlanır.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "İnce kıyılmış domates, biber, soğan ve maydanoz; biber salçası, nar ekşisi ve pul biberle hazırlanır.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Şakşuka",
+   "targetName": "Şakşuka",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Kızartılmış patlıcan, kabak ve biber domates sosuyla karıştırılır; isteğe göre sarımsaklı yoğurtla.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Kızartılmış patlıcan, kabak ve biber domates sosuyla karıştırılır; isteğe göre sarımsaklı yoğurtla.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Patlıcan Salatası",
+   "targetName": "Patlıcan Salatası",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Közlenmiş patlıcan sarımsak, zeytinyağı ve limonla ezilir; isteğe göre yoğurtlu olarak hazırlanır.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Közlenmiş patlıcan sarımsak, zeytinyağı ve limonla ezilir; isteğe göre yoğurtlu olarak hazırlanır.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  },
+  {
+   "section": "fix",
+   "name": "Rus Salatası",
+   "targetName": "Rus Salatası",
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Haşlanmış patates, havuç, bezelye ve turşu mayonezle karıştırılır; soğuk meze olarak servis edilir.",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "empty_description",
+   "currentValue": null,
+   "suggestedValue": "Haşlanmış patates, havuç, bezelye ve turşu mayonezle karıştırılır; soğuk meze olarak servis edilir.",
+   "reason": "Panelde açıklama boş; havuzdaki onaylı açıklama önerildi"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 7560,
+   "llmCalls": 1,
+   "tokensIn": 1559,
+   "tokensOut": 681,
+   "error": null,
+   "output": {
+    "names": [
+     "Haydari",
+     "Humus",
+     "Fava",
+     "Acılı Ezme",
+     "Şakşuka",
+     "Patlıcan Salatası",
+     "Rus Salatası"
+    ],
+    "unique": 7,
+    "extractedRaw": 7,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 1151,
+   "llmCalls": 1,
+   "tokensIn": 554,
+   "tokensOut": 65,
+   "error": null,
+   "output": {
+    "resolved": "meze",
+    "disagrees": false,
+    "confidence": 0.95,
+    "cuisineSlug": "meze",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 7,
+    "missing": 3,
+    "needFixes": 7,
+    "categories": [
+     "ara-sicak 0/2",
+     "icecek 0/2",
+     "salata-meze 7/7"
+    ],
+    "needOptions": 7
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kalamar Tava",
+     "Ayran",
+     "Zeytinyağlı Yaprak Sarma",
+     "İçli Köfte",
+     "Şalgam Suyu",
+     "Karışık Meze Tabağı"
+    ],
+    "fromAi": 0,
+    "fromDb": 6
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Haydari",
+     "Humus",
+     "Fava"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 3,
+    "reasons": [],
+    "reachable": 13
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.extract",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1559,
+   "tokensOut": 681,
+   "latencyMs": 7555
+  },
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 554,
+   "tokensOut": 65,
+   "latencyMs": 1147
+  }
+ ],
+ "providerTrouble": false
+}

@@ -1,0 +1,1078 @@
+{
+ "case": {
+  "id": "cigkofte__text__full",
+  "slug": "cigkofte",
+  "kind": "text",
+  "mode": "full",
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "menuText": "cig kofte durum, mega durum, cig kofte porsiyon, cig kofte kase, ayran, salgam"
+ },
+ "httpStatus": 200,
+ "latencyMs": 118,
+ "runId": "5e397adc-66e1-4887-9d59-18546e4d79fe",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "recommend_failed",
+   "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 9/12 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Çiğ Köfte",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 12,
+  "current": 6,
+  "missing": 6,
+  "cuisineId": "7f9b643c-4880-4133-a216-8c537dfbdd57",
+  "categories": [
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "menu-kampanya",
+    "label": "Menü & Kampanya",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 0,
+    "present": 4,
+    "minItems": 4
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 0,
+    "present": 2,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 12,
+  "cuisineName": "Çiğ Köfte",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 2,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 59,
+  "menuItems": 6,
+  "tokensOut": 0,
+  "imagesRead": 0,
+  "newProducts": 3,
+  "optionCards": 4,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Çiğ Köfte Dürüm",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Mega Çiğ Köfte Dürüm",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çiğ Köfte Porsiyon",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çiğ Köfte Kase",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Şalgam Suyu",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Çiğ Köfte Paketi",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kilo ile çiğ köfte, lavaş, marul ve limonla.",
+   "portionInfo": "1 kg",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "500 g",
+       "sets_base"
+      ],
+      [
+       "1 kg",
+       "sets_base"
+      ],
+      [
+       "2 kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran (4 adet)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (4 adet)",
+       "surcharge"
+      ],
+      [
+       "Limonata 1 L",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yan Ürün Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Lavaş",
+       "surcharge"
+      ],
+      [
+       "Marul",
+       "surcharge"
+      ],
+      [
+       "Limon",
+       "surcharge"
+      ],
+      [
+       "Turşu",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Acı",
+    "Isot"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Nar Ekşisi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde sık bulunur — Ana Yemek tarafını güçlendirir",
+   "productType": "menu-kampanya",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Çikolatalı Sufle",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "İçi akışkan bitter çikolatalı sıcak sufle.",
+   "portionInfo": "1 adet ~120 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Adet",
+       "sets_base"
+      ],
+      [
+       "2 Adet",
+       "sets_base"
+      ],
+      [
+       "4 Adet",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pudra Şekeri"
+   ],
+   "extraIngredients": [
+    "Ekstra Çikolata Sosu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde sık bulunur — Tatlı eksik",
+   "productType": "tatli-pasta",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Limonata",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Taze sıkılmış limonla hazırlanan ev yapımı limonata.",
+   "portionInfo": "300 ml",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Buz",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Buz",
+       "free"
+      ],
+      [
+       "Az Buzlu",
+       "free"
+      ],
+      [
+       "Buzsuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Taze Nane",
+    "Ekstra Meyve",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çiğ Köfte menülerinde sık bulunur — İçecek tarafını güçlendirir",
+   "productType": "soguk-icecek",
+   "confidence": 80
+  },
+  {
+   "section": "option",
+   "name": "Çiğ Köfte Dürüm",
+   "targetName": "Cig Kofte Durum",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Etsiz çiğ köfte, marul ve limonla lavaşa sarılır.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Dev Boy",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Lavaş",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Tam Buğday Lavaş",
+       "free"
+      ],
+      [
+       "Marul Yaprağı (Lavaşsız)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Limon Sosu",
+       "free"
+      ],
+      [
+       "Sarımsaklı Sos",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Dürüm",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul",
+    "Domates",
+    "Nane",
+    "Maydanoz",
+    "Turşu",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Ekstra Çiğ Köfte",
+    "Ekstra Nar Ekşisi",
+    "Ekstra Acı Sos",
+    "Turşu Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "cig-kofte",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Mega Çiğ Köfte Dürüm",
+   "targetName": "Mega Durum",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Çift lavaşta bol çiğ köfteli büyük boy dürüm.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yeşillik",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Göbek Marul",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Limon Sosu",
+       "free"
+      ],
+      [
+       "Ekşi Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Menü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sadece Ürün",
+       "free"
+      ],
+      [
+       "Ayran ile Menü",
+       "surcharge"
+      ],
+      [
+       "Şalgam ile Menü",
+       "surcharge"
+      ],
+      [
+       "Kola ile Menü",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul"
+   ],
+   "extraIngredients": [
+    "Ekstra Çiğ Köfte",
+    "Ekstra Nar Ekşisi",
+    "Lavaş"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "cig-kofte",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Çiğ Köfte Porsiyon",
+   "targetName": "Cig Kofte Porsiyon",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Etsiz çiğ köfte, marul, lavaş ve nar ekşisiyle.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Gramaj",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "250 g",
+       "sets_base"
+      ],
+      [
+       "500 g",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ],
+      [
+       "2 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Şekil",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sıkma (El Şekli)",
+       "free"
+      ],
+      [
+       "Top Top",
+       "free"
+      ],
+      [
+       "Blok",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Marul",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acılı)",
+       "surcharge"
+      ],
+      [
+       "Şalgam (Acısız)",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Maydanoz",
+    "Roka"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Ekstra Marul",
+    "Ekstra Nar Ekşisi",
+    "Turşu Paketi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "cig-kofte",
+   "confidence": 88
+  },
+  {
+   "section": "option",
+   "name": "Çiğ Köfte Kase",
+   "targetName": "Cig Kofte Kase",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kasede çiğ köfte, marul, roka ve nar ekşisi.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Paylaşım Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yeşillik",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Göbek Marul",
+       "free"
+      ],
+      [
+       "Roka",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Nar Ekşisi",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Limon Sosu",
+       "free"
+      ],
+      [
+       "Ekşi Sos",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Marul"
+   ],
+   "extraIngredients": [
+    "Ekstra Lavaş",
+    "Ekstra Çiğ Köfte"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "cig-kofte",
+   "confidence": 88
+  },
+  {
+   "section": "fix",
+   "name": "Mega Çiğ Köfte Dürüm",
+   "targetName": "Mega Durum",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Mega Çiğ Köfte Dürüm",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Mega Durum",
+   "suggestedValue": "Mega Çiğ Köfte Dürüm",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir",
+   "productType": "cig-kofte",
+   "confidence": null
+  },
+  {
+   "section": "fix",
+   "name": "Şalgam Suyu",
+   "targetName": "Salgam",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Şalgam Suyu",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Salgam",
+   "suggestedValue": "Şalgam Suyu",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir",
+   "productType": "mesrubat",
+   "confidence": null
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Cig Kofte Durum",
+     "Mega Durum",
+     "Cig Kofte Porsiyon",
+     "Cig Kofte Kase",
+     "Ayran",
+     "Salgam"
+    ],
+    "unique": 6,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 12,
+    "current": 6,
+    "missing": 6,
+    "needFixes": 5,
+    "categories": [
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "menu-kampanya 0/1",
+     "ana-yemek 4/4",
+     "icecek 2/2"
+    ],
+    "needOptions": 4
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 6,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": {
+    "names": [
+     "Çiğ Köfte Paketi",
+     "Çikolatalı Sufle",
+     "Limonata"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Çiğ Köfte Dürüm",
+     "Mega Çiğ Köfte Dürüm",
+     "Çiğ Köfte Porsiyon",
+     "Çiğ Köfte Kase"
+    ],
+    "fromAi": 0,
+    "fromDb": 4
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 19,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 3,
+    "target": 12,
+    "dropped": 0,
+    "options": 4,
+    "reasons": [],
+    "grounding": [
+     "Çiğ Köfte Dürüm: Nar Ekşisi malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Mega Çiğ Köfte Dürüm: Turşu, Maydanoz, Nane malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Çiğ Köfte Porsiyon: Nar Ekşisi, Acı Sos, Limon, Nane malzeme listesinden çıkarıldı: bir grupta zaten seçenek",
+     "Çiğ Köfte Kase: Turşu, Roka, Nane malzeme listesinden çıkarıldı: bir grupta zaten seçenek"
+    ],
+    "reachable": 9,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": true
+}

@@ -1,0 +1,662 @@
+{
+ "case": {
+  "id": "dunya-mutfagi__single",
+  "slug": "dunya-mutfagi",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "ac8d2fe8-20d4-4f4e-be55-70ecec094ee5",
+  "menuText": "Shawarma Tabağı"
+ },
+ "httpStatus": 200,
+ "latencyMs": 9228,
+ "runId": "8c683708-d076-47ea-baa3-bebac0ee6021",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Shawarma tabağı odaklı sunumuyla dünya mutfağı ve sokak lezzetleri kategorisine uygundur.",
+  "cuisineId": "ac8d2fe8-20d4-4f4e-be55-70ecec094ee5",
+  "disagrees": false,
+  "confidence": 0.6,
+  "cuisineName": "Dünya Mutfağı",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "ac8d2fe8-20d4-4f4e-be55-70ecec094ee5",
+  "suggestedCuisineName": "Dünya Mutfağı"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "ac8d2fe8-20d4-4f4e-be55-70ecec094ee5",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Dünya Mutfağı",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 3,
+  "tokensIn": 3074,
+  "latencyMs": 9216,
+  "menuItems": 1,
+  "tokensOut": 1062,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Shawarma Tabağı",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Gyros",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Pide ekmeğinde döner eti, tzatziki sosu, domates ve patates; sıcak servis edilir.",
+   "portionInfo": "1 adet",
+   "optionGroups": [
+    {
+     "name": "Et Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tavuk",
+       "free"
+      ],
+      [
+       "Dana",
+       "free"
+      ],
+      [
+       "Karışık",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Tzatziki",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Domates",
+    "Patates"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Peynir"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dünya Mutfağı menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Nachos",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "db",
+   "shortDescription": "Çıtır mısır cipsi üzerinde cheddar sosu, jalapeño, salsa ve ekşi krema; paylaşımlık atıştırmalık.",
+   "portionInfo": "Orta porsiyon ~250 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Paylaşım",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Kıymalı",
+       "surcharge"
+      ],
+      [
+       "Tavuklu",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Salsa",
+       "surcharge"
+      ],
+      [
+       "Guacamole",
+       "surcharge"
+      ],
+      [
+       "Ekşi Krema",
+       "surcharge"
+      ],
+      [
+       "Acı Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Jalapeño Biber",
+    "Ekşi Krema"
+   ],
+   "extraIngredients": [
+    "Guacamole",
+    "Ekstra Cheddar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dünya Mutfağı menülerinde sık bulunur — Ara Sıcak eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dünya Mutfağı menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Humus Tabağı",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Nohut ezmesi, tahin ve zeytinyağıyla hazırlanır; pita ekmeğiyle soğuk verilir.",
+   "portionInfo": "1 tabak ~200 g",
+   "optionGroups": [
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Pita",
+       "free"
+      ],
+      [
+       "Lavaş",
+       "free"
+      ],
+      [
+       "Turşu",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Üzeri",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı",
+       "free"
+      ],
+      [
+       "Pastırma",
+       "free"
+      ],
+      [
+       "Köfte",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [
+    "Ekstra Pita"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dünya Mutfağı menülerinde sık bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "San Sebastian Cheesecake",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Üstü yüksek ısıda karamelize edilen, içi kremsi kalan yanık cheesecake; isteğe göre çikolata sosuyla.",
+   "portionInfo": "1 dilim ~150 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Dilim",
+       "sets_base"
+      ],
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "Bütün (8 Dilim)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sossuz",
+       "surcharge"
+      ],
+      [
+       "Çikolata Sosu",
+       "surcharge"
+      ],
+      [
+       "Frambuaz Sos",
+       "surcharge"
+      ],
+      [
+       "Lotus Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Sos",
+    "Dondurma"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dünya mutfağı konseptli restoranlarda en çok tercih edilen popüler tatlı seçeneğidir."
+  },
+  {
+   "section": "option",
+   "name": "Shawarma Tabağı",
+   "targetName": "Shawarma Tabağı",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Porsiyon Boyu, Et Seçimi, Yanında Gelen, Sos Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon Boyu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Standart Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Büyük Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Duble Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Et Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tavuk Shawarma",
+       "free"
+      ],
+      [
+       "Et Shawarma",
+       "surcharge"
+      ],
+      [
+       "Karışık Shawarma (Et & Tavuk)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Gelen",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Patates Kızartması ile",
+       "free"
+      ],
+      [
+       "Pilav ile",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı ile",
+       "free"
+      ],
+      [
+       "Half & Half (Patates & Pilav)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sarımsaklı Sos (Toum)",
+       "free"
+      ],
+      [
+       "Tahin Sos",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Yoğurtlu Nane Sos",
+       "free"
+      ],
+      [
+       "Ekstra Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Domates",
+    "Turşu",
+    "Maydanoz",
+    "Soğan",
+    "Patates Kızartması"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Ekstra Tavuk",
+    "Ekstra Kaşar",
+    "Ekstra Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Shawarma tabağı et tercihi, yan ürün uyarlamaları, zengin sos ve malzeme çıkarımları ile müşteriye özelleştirilebilir bir deneyim sunar."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Shawarma Tabağı"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 4982,
+   "llmCalls": 1,
+   "tokensIn": 539,
+   "tokensOut": 67,
+   "error": null,
+   "output": {
+    "resolved": "dunya-mutfagi",
+    "disagrees": false,
+    "confidence": 0.6,
+    "cuisineSlug": "dunya-mutfagi",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "ara-sicak 0/2",
+     "icecek 0/2",
+     "salata-meze 0/1",
+     "tatli 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 4209,
+   "llmCalls": 1,
+   "tokensIn": 1536,
+   "tokensOut": 161,
+   "error": null,
+   "output": {
+    "names": [
+     "Gyros",
+     "Nachos",
+     "Kutu İçecek",
+     "Humus Tabağı",
+     "San Sebastian Cheesecake"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 3004,
+   "llmCalls": 1,
+   "tokensIn": 999,
+   "tokensOut": 834,
+   "error": null,
+   "output": {
+    "names": [
+     "Shawarma Tabağı"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 539,
+   "tokensOut": 67,
+   "latencyMs": 4978
+  },
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 999,
+   "tokensOut": 834,
+   "latencyMs": 2996
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1536,
+   "tokensOut": 161,
+   "latencyMs": 4199
+  }
+ ],
+ "providerTrouble": false
+}

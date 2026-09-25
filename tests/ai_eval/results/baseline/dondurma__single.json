@@ -1,0 +1,644 @@
+{
+ "case": {
+  "id": "dondurma__single",
+  "slug": "dondurma",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "76a48292-ddd1-48be-86df-97d5645f2844",
+  "menuText": "Dondurmalı Künefe"
+ },
+ "httpStatus": 200,
+ "latencyMs": 8675,
+ "runId": "b3049a10-c070-4133-8751-ab1777107290",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 5/10 ürün olur — hedefe 5 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Menüde tek bir dondurmalı künefe var, tatlı ve dondurma kategorisine ait, orta fiyat segmenti uygun görünüyor.",
+  "cuisineId": "76a48292-ddd1-48be-86df-97d5645f2844",
+  "disagrees": false,
+  "confidence": 0.8,
+  "cuisineName": "Dondurma",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "76a48292-ddd1-48be-86df-97d5645f2844",
+  "suggestedCuisineName": "Dondurma"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "76a48292-ddd1-48be-86df-97d5645f2844",
+  "categories": [
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 5,
+    "present": 1,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 3,
+    "present": 0,
+    "minItems": 3
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Dondurma",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 3,
+  "tokensIn": 2298,
+  "latencyMs": 8666,
+  "menuItems": 1,
+  "tokensOut": 921,
+  "imagesRead": 0,
+  "newProducts": 4,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Dondurmalı Künefe",
+   "categoryKey": "tatli",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Künefe",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Tel kadayıf arasına tuzsuz künefe peyniri konur, tereyağıyla tepside pişirilir; şerbet ve Antep fıstığıyla servis edilir.",
+   "portionInfo": "1 porsiyon (~200 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Kişilik",
+       "sets_base"
+      ],
+      [
+       "1,5 Kişilik",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Fıstık",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fıstıklı",
+       "free"
+      ],
+      [
+       "Bol Fıstıklı",
+       "surcharge"
+      ],
+      [
+       "Fıstıksız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Kaymak",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaymaksız",
+       "free"
+      ],
+      [
+       "Kaymaklı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Şerbet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Şerbet",
+       "free"
+      ],
+      [
+       "Az Şerbetli",
+       "free"
+      ],
+      [
+       "Şerbeti Ayrı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fıstık",
+    "Şerbet"
+   ],
+   "extraIngredients": [
+    "Kaymak",
+    "Dondurma",
+    "Ekstra Fıstık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Tatlı & Künefe)"
+  },
+  {
+   "section": "new_product",
+   "name": "Limonata",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dondurma menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Top Dondurma",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Seçilen aromalarda top dondurma; kasede ya da külahta, isteğe göre sos ve süslemeyle servis edilir.",
+   "portionInfo": "Top başına ~60 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Top",
+       "sets_base"
+      ],
+      [
+       "2 Top",
+       "sets_base"
+      ],
+      [
+       "3 Top",
+       "sets_base"
+      ],
+      [
+       "4 Top",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Aroma Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sade (Vanilya)",
+       "free"
+      ],
+      [
+       "Çikolata",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Frambuaz",
+       "free"
+      ],
+      [
+       "Kavun",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "free"
+      ],
+      [
+       "Külah",
+       "free"
+      ],
+      [
+       "Waffle Külah",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos & Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Çikolata Sosu",
+       "surcharge"
+      ],
+      [
+       "Karamel Sos",
+       "surcharge"
+      ],
+      [
+       "Frambuaz Sos",
+       "surcharge"
+      ],
+      [
+       "Fındık Kırığı",
+       "surcharge"
+      ],
+      [
+       "Antep Fıstığı",
+       "surcharge"
+      ],
+      [
+       "Hindistan Cevizi",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Top",
+    "Çikolata Sosu",
+    "Fındık Kırığı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dondurma menülerinde neredeyse her zaman bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Milkshake",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "Orta boy ~400 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Dondurma menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "option",
+   "name": "Dondurmalı Künefe",
+   "targetName": "Dondurmalı Künefe",
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Porsiyon, Dondurma Aroması, Sos & Süsleme, Ekstra Malzemeler",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma Aroması",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Vanilya",
+       "free"
+      ],
+      [
+       "Çikolata",
+       "free"
+      ],
+      [
+       "Fıstık",
+       "free"
+      ],
+      [
+       "Meyve (Çilek)",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos & Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Çikolata Sosu",
+       "free"
+      ],
+      [
+       "Karamel Sosu",
+       "free"
+      ],
+      [
+       "Fındık Kırığı",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Meyve Dilimleri",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekstra Malzemeler",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ekstra Kaymak",
+       "surcharge"
+      ],
+      [
+       "Ekstra Dondurma Topu",
+       "surcharge"
+      ],
+      [
+       "Çikolata Parçacıkları",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Şerbet",
+    "Peynir"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaymak",
+    "Ekstra Dondurma Topu",
+    "Çikolata Parçacıkları"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Künefeye dondurma eklenmesi, porsiyon boyutu, dondurma aroması, sos/süsleme ve ekstra malzemeler müşterinin tercihlerine göre özelleştirilebilir; şerbet ve peynir gibi temel malzemeler çıkarılabilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Dondurmalı Künefe"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6547,
+   "llmCalls": 2,
+   "tokensIn": 744,
+   "tokensOut": 108,
+   "error": null,
+   "output": {
+    "resolved": "dondurma",
+    "disagrees": false,
+    "confidence": 0.8,
+    "cuisineSlug": "dondurma",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "tatli 1/6",
+     "icecek 0/3"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Künefe",
+     "Limonata",
+     "Top Dondurma",
+     "Milkshake"
+    ],
+    "fromAi": 0,
+    "fromDb": 4
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2097,
+   "llmCalls": 1,
+   "tokensIn": 1554,
+   "tokensOut": 813,
+   "error": null,
+   "output": {
+    "names": [
+     "Dondurmalı Künefe"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 4,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 5
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 502,
+   "tokensOut": 0,
+   "latencyMs": 6000
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 744,
+   "tokensOut": 108,
+   "latencyMs": 500
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 1554,
+   "tokensOut": 813,
+   "latencyMs": 2049
+  }
+ ],
+ "providerTrouble": false
+}

@@ -1,0 +1,709 @@
+{
+ "case": {
+  "id": "kafe-icecek__text__quick",
+  "slug": "kafe-icecek",
+  "kind": "text",
+  "mode": "quick",
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "menuText": "Türk Kahvesi, Filtre Kahve, Latte, Americano, Çay, Limonata, Kaşarlı Tost"
+ },
+ "httpStatus": 200,
+ "latencyMs": 7872,
+ "runId": "eca96d50-647b-4513-82a4-c68e5e584908",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Latte, filtre kahve ve Türk kahvesi gibi sıcak içecekler ile tost ürünlerine dayanmaktadır.",
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "disagrees": false,
+  "confidence": 0.95,
+  "cuisineName": "Kafe & İçecek",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "suggestedCuisineName": "Kafe & İçecek"
+ },
+ "counts": {
+  "target": 10,
+  "current": 7,
+  "missing": 3,
+  "cuisineId": "e66c0ab9-76e2-48a3-b41d-6ada5ffa0c17",
+  "categories": [
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 6,
+    "minItems": 8
+   },
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 2,
+    "present": 1,
+    "minItems": 3
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Kafe & İçecek",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 1,
+  "llmCalls": 2,
+  "tokensIn": 2871,
+  "latencyMs": 7863,
+  "menuItems": 7,
+  "tokensOut": 2289,
+  "imagesRead": 0,
+  "newProducts": 6,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Türk Kahvesi",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Filtre Kahve",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Latte",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Americano",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Çay",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Limonata",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Meyveli Cheesecake",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Labne peynirli cheesecake; frambuaz ya da çilek sosuyla soğuk servis edilir.",
+   "portionInfo": "1 dilim ~120 g",
+   "optionGroups": [
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Frambuaz",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Orman Meyveli",
+       "free"
+      ],
+      [
+       "Soszuz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 adet (~300 ml)",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çikolatalı Brownie",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Yoğun çikolatalı kek; sıcak olarak, dondurma ve çikolata sosuyla servis edilir.",
+   "portionInfo": "1 dilim ~120 g",
+   "optionGroups": [
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurma",
+       "free"
+      ],
+      [
+       "Çikolata Sosu",
+       "free"
+      ],
+      [
+       "Fındık",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fındık"
+   ],
+   "extraIngredients": [
+    "Dondurma Topu"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde sık bulunur — Tatlı eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Cappuccino",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "Orta boy ~300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kafe & İçecek menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Patates Kızartması",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Çıtır çıtır kızartılmış patates; parmak ya da elma dilim kesim, tuz ve isteğe göre baharatla.",
+   "portionInfo": "Orta boy ~150 g",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Kesim",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Parmak",
+       "free"
+      ],
+      [
+       "Elma Dilim",
+       "free"
+      ],
+      [
+       "Kıvırcık",
+       "free"
+      ],
+      [
+       "Baharatlı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "surcharge"
+      ],
+      [
+       "Mayonez",
+       "surcharge"
+      ],
+      [
+       "Ranch Sos",
+       "surcharge"
+      ],
+      [
+       "Barbekü Sos",
+       "surcharge"
+      ],
+      [
+       "Cheddar Sos",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tuz",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Cheddar Sos",
+    "Ekstra Ketçap"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahve yanında hafif ve doyurucu bir atıştırmalık, müşterilerin sık tercih ettiği bir ürün."
+  },
+  {
+   "section": "new_product",
+   "name": "Kıymalı Börek",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "ai",
+   "shortDescription": "Soğanla kavrulmuş kıymalı harçla yufka katları arasında pişen börek; sıcak servis edilir.",
+   "portionInfo": "1 porsiyon ~200 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (~200 g)",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon (~300 g)",
+       "sets_base"
+      ],
+      [
+       "Yarım Kg",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sıcak",
+       "free"
+      ],
+      [
+       "Oda Sıcaklığında",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Türk Kahvesi",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Susam"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Sıcak ve doyurucu bir atıştırmalık, kahve ve çay ile iyi eşleşir."
+  },
+  {
+   "section": "option",
+   "name": "Kaşarlı Tost",
+   "targetName": "Kaşarlı Tost",
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Ekmek Seçimi, Yanında, Sos Seçimi, İçecek Seçimi",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tost Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Çay",
+   "targetName": "Çay",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Çay",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çay",
+   "suggestedValue": null,
+   "reason": "Ad kısaltma gibi görünüyor, satıcıya tam adını sor"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Türk Kahvesi",
+     "Filtre Kahve",
+     "Latte",
+     "Americano",
+     "Çay",
+     "Limonata",
+     "Kaşarlı Tost"
+    ],
+    "unique": 7,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 2426,
+   "llmCalls": 1,
+   "tokensIn": 562,
+   "tokensOut": 65,
+   "error": null,
+   "output": {
+    "resolved": "kafe-icecek",
+    "disagrees": false,
+    "confidence": 0.95,
+    "cuisineSlug": "kafe-icecek",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 7,
+    "missing": 3,
+    "needFixes": 1,
+    "categories": [
+     "tatli 0/2",
+     "icecek 6/8",
+     "atistirmalik 1/3"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 5413,
+   "llmCalls": 1,
+   "tokensIn": 2309,
+   "tokensOut": 2224,
+   "error": null,
+   "output": {
+    "names": [
+     "Meyveli Cheesecake",
+     "Ayran",
+     "Çikolatalı Brownie",
+     "Cappuccino",
+     "Patates Kızartması",
+     "Kıymalı Börek"
+    ],
+    "cached": false,
+    "fromAi": 2,
+    "fromDb": 4,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaşarlı Tost"
+    ],
+    "fromAi": 0,
+    "fromDb": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 10,
+    "dropped": 0,
+    "options": 1,
+    "reasons": [],
+    "reachable": 13
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 562,
+   "tokensOut": 65,
+   "latencyMs": 2383
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2309,
+   "tokensOut": 2224,
+   "latencyMs": 5403
+  }
+ ],
+ "providerTrouble": false
+}

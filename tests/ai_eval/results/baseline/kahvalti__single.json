@@ -1,0 +1,956 @@
+{
+ "case": {
+  "id": "kahvalti__single",
+  "slug": "kahvalti",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "e7a93932-e48f-4342-be60-cebc02fdb8c3",
+  "menuText": "Kaygana"
+ },
+ "httpStatus": 200,
+ "latencyMs": 10673,
+ "runId": "12a488a8-5197-4f09-bd8f-e9fefd137003",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Menüde kahvaltı ürünleri baskın, orta fiyat aralığına uygundur.",
+  "cuisineId": "e7a93932-e48f-4342-be60-cebc02fdb8c3",
+  "disagrees": false,
+  "confidence": 0.8,
+  "cuisineName": "Kahvaltı",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "e7a93932-e48f-4342-be60-cebc02fdb8c3",
+  "suggestedCuisineName": "Kahvaltı"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "e7a93932-e48f-4342-be60-cebc02fdb8c3",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 4,
+    "present": 1,
+    "minItems": 5
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 3,
+    "present": 0,
+    "minItems": 3
+   },
+   {
+    "key": "ara-sicak",
+    "label": "Ara Sıcak",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Kahvaltı",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 1,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 5,
+  "tokensIn": 7064,
+  "latencyMs": 10622,
+  "menuItems": 1,
+  "tokensOut": 2453,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 1,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Kaygana",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Kahvaltı Tabağı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Beyaz peynir, kaşar, zeytin, domates, salatalık, haşlanmış yumurta, bal, tereyağı ve reçelle tek kişilik tabak.",
+   "portionInfo": "1 kişilik",
+   "optionGroups": [
+    {
+     "name": "Kişilik",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Kişilik",
+       "sets_base"
+      ],
+      [
+       "2 Kişilik",
+       "sets_base"
+      ],
+      [
+       "3 Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Haşlanmış (Kayısı)",
+       "free"
+      ],
+      [
+       "Haşlanmış (Katı)",
+       "free"
+      ],
+      [
+       "Sahanda",
+       "free"
+      ],
+      [
+       "Omlet",
+       "free"
+      ],
+      [
+       "Yumurtasız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Köy Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Simit",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Çay",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Çaysız",
+       "surcharge"
+      ],
+      [
+       "Bardak Çay",
+       "surcharge"
+      ],
+      [
+       "Demlik Çay (2–3 Kişilik)",
+       "surcharge"
+      ],
+      [
+       "Demlik Çay (4–5 Kişilik)",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Zeytin",
+    "Bal",
+    "Reçel",
+    "Tereyağı",
+    "Salatalık",
+    "Domates"
+   ],
+   "extraIngredients": [
+    "Sucuk",
+    "Sigara Böreği",
+    "Patates Kızartması",
+    "Ekstra Peynir",
+    "Kaymak"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahvaltı menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çay",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~100 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahvaltı menülerinde neredeyse her zaman bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kaşarlı Tost",
+   "targetName": null,
+   "categoryKey": "atistirmalik",
+   "source": "db",
+   "shortDescription": "Bol kaşarla tost ekmeğinde ya da somunda bastırılan klasik tost; turşu ve domatesle servis edilir.",
+   "portionInfo": "1 adet",
+   "optionGroups": [
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tost Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Çavdar Ekmeği",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Domates-Salatalık",
+       "free"
+      ],
+      [
+       "Patates Cips",
+       "free"
+      ],
+      [
+       "Yansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Ketçap",
+       "free"
+      ],
+      [
+       "Mayonez",
+       "free"
+      ],
+      [
+       "Acı Sos",
+       "free"
+      ],
+      [
+       "Hardal",
+       "free"
+      ],
+      [
+       "Ranch Sos",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Çay",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Soğuk Çay",
+       "surcharge"
+      ],
+      [
+       "Taze Portakal Suyu",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Turşu"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Sucuk",
+    "Salam",
+    "Domates",
+    "Közlenmiş Biber",
+    "Mantar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Atıştırmalık kategorisini kapatır (Tost & Sandviç)"
+  },
+  {
+   "section": "new_product",
+   "name": "Serpme Kahvaltı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Peynir çeşitleri, zeytinler, reçeller, kaymak, bal, sıcaklar ve yumurtayla paylaşımlık zengin kahvaltı.",
+   "portionInfo": "2 kişilik",
+   "optionGroups": [
+    {
+     "name": "Kişilik",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "2 Kişilik",
+       "sets_base"
+      ],
+      [
+       "3 Kişilik",
+       "sets_base"
+      ],
+      [
+       "4 Kişilik",
+       "sets_base"
+      ],
+      [
+       "5 Kişilik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sahanda",
+       "free"
+      ],
+      [
+       "Menemen",
+       "free"
+      ],
+      [
+       "Sucuklu Yumurta",
+       "free"
+      ],
+      [
+       "Haşlanmış",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Köy Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Simit",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Çay",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Çaysız",
+       "surcharge"
+      ],
+      [
+       "Bardak Çay",
+       "surcharge"
+      ],
+      [
+       "Demlik Çay (2–3 Kişilik)",
+       "surcharge"
+      ],
+      [
+       "Demlik Çay (4–5 Kişilik)",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Zeytin",
+    "Bal",
+    "Reçel",
+    "Tereyağı",
+    "Kaymak"
+   ],
+   "extraIngredients": [
+    "Ekstra Sigara Böreği",
+    "Ekstra Patates",
+    "Ekstra Kaymak",
+    "Pişi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahvaltı menülerinde neredeyse her zaman bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Menemen",
+   "targetName": null,
+   "categoryKey": "ara-sicak",
+   "source": "ai",
+   "shortDescription": "Domates, yeşil biber ve yumurta tereyağında sahanda pişirilir; tercihe göre kaşar veya sucukla, ekmekle servis edilir.",
+   "portionInfo": "1 porsiyon (2 yumurta)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (2 Yumurta)",
+       "sets_base"
+      ],
+      [
+       "Duble (4 Yumurta)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Soğan",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Soğanlı",
+       "free"
+      ],
+      [
+       "Soğansız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Kaşarlı",
+       "surcharge"
+      ],
+      [
+       "Sucuklu",
+       "surcharge"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Beyaz Peynirli",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yumurta Kıvamı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sulu",
+       "free"
+      ],
+      [
+       "Orta",
+       "free"
+      ],
+      [
+       "İyi Pişmiş",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Köy Ekmeği",
+       "free"
+      ],
+      [
+       "Simit",
+       "surcharge"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Yumurta",
+    "Kaşar",
+    "Sucuk",
+    "Ekstra Ekmek"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kahvaltı menüsüne sıcak, protein ve sebze içeren klasik bir ara sıcak ekler"
+  },
+  {
+   "section": "option",
+   "name": "Kaygana",
+   "targetName": "Kaygana",
+   "categoryKey": "ana-yemek",
+   "source": "ai",
+   "shortDescription": "Boy / Porsiyon, Ekmek Seçimi, Acı Seviyesi, Yanında Gelen",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy / Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük (1 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "Orta (2 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "Büyük (3 Kişilik)",
+       "sets_base"
+      ],
+      [
+       "Aile (4 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Köy Ekmeği",
+       "free"
+      ],
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Tam Buğday Ekmeği",
+       "free"
+      ],
+      [
+       "Simit",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acı",
+       "free"
+      ],
+      [
+       "Orta Acı",
+       "free"
+      ],
+      [
+       "Çok Acı",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Gelen",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Zeytin",
+       "free"
+      ],
+      [
+       "Beyaz Peynir",
+       "free"
+      ],
+      [
+       "Domates",
+       "free"
+      ],
+      [
+       "Salatalık",
+       "free"
+      ],
+      [
+       "Tereyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar",
+    "Ekstra Sucuk",
+    "Ekstra Yumurta"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Kaygana için porsiyon, ekmek, acı seviyesi ve yan ürünler önerilir; ayrıca çıkarılabilir ve ekstra malzemeler eklenebilir."
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaygana"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 1128,
+   "llmCalls": 1,
+   "tokensIn": 740,
+   "tokensOut": 84,
+   "error": null,
+   "output": {
+    "resolved": "kahvalti",
+    "disagrees": false,
+    "confidence": 0.8,
+    "cuisineSlug": "kahvalti",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 1/5",
+     "icecek 0/3",
+     "ara-sicak 0/2",
+     "atistirmalik 0/2"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "durationMs": 2440,
+   "llmCalls": 1,
+   "tokensIn": 2289,
+   "tokensOut": 1023,
+   "error": null,
+   "output": {
+    "names": [
+     "Kahvaltı Tabağı",
+     "Çay",
+     "Kaşarlı Tost",
+     "Serpme Kahvaltı",
+     "Çay",
+     "Menemen"
+    ],
+    "cached": false,
+    "fromAi": 1,
+    "fromDb": 5,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 9466,
+   "llmCalls": 3,
+   "tokensIn": 4035,
+   "tokensOut": 1346,
+   "error": null,
+   "output": {
+    "names": [
+     "Kaygana"
+    ],
+    "fromAi": 1,
+    "fromDb": 0,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 1,
+    "options": 1,
+    "reasons": [
+     {
+      "card": "Çay",
+      "reason": "menüde zaten var"
+     }
+    ],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 740,
+   "tokensOut": 84,
+   "latencyMs": 1084
+  },
+  {
+   "task": "agent.options",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": false,
+   "error": "invalid_output",
+   "tokensIn": 1618,
+   "tokensOut": 865,
+   "latencyMs": 2384
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "groq",
+   "model": "openai/gpt-oss-120b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2289,
+   "tokensOut": 1023,
+   "latencyMs": 2419
+  },
+  {
+   "task": "agent.validate",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 1991,
+   "tokensOut": 0,
+   "latencyMs": 6001
+  },
+  {
+   "task": "agent.validate",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2417,
+   "tokensOut": 481,
+   "latencyMs": 1026
+  }
+ ],
+ "providerTrouble": false
+}

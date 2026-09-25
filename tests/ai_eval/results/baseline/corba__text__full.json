@@ -1,0 +1,1424 @@
+{
+ "case": {
+  "id": "corba__text__full",
+  "slug": "corba",
+  "kind": "text",
+  "mode": "full",
+  "cuisineId": "1ce160d2-c1af-40c5-ade1-a3378863ece7",
+  "menuText": "mercimek, ezogelin, iskembe, kelle paca, yayla, tavuk suyu"
+ },
+ "httpStatus": 200,
+ "latencyMs": 4499,
+ "runId": "47f644b2-165a-422c-827c-71346ec5abe1",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Menüde mercimek, ezogelin, işkembe ve kelle paça gibi çeşitli çorba çeşitlerinin bulunması.",
+  "cuisineId": "1ce160d2-c1af-40c5-ade1-a3378863ece7",
+  "disagrees": false,
+  "confidence": 0.95,
+  "cuisineName": "Çorba",
+  "priceSegment": "ekonomik",
+  "suggestedCuisineId": "1ce160d2-c1af-40c5-ade1-a3378863ece7",
+  "suggestedCuisineName": "Çorba"
+ },
+ "counts": {
+  "target": 10,
+  "current": 6,
+  "missing": 4,
+  "cuisineId": "1ce160d2-c1af-40c5-ade1-a3378863ece7",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "corba",
+    "label": "Çorba",
+    "missing": 1,
+    "present": 5,
+    "minItems": 6
+   },
+   {
+    "key": "yan-urun",
+    "label": "Yan Ürün",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Çorba",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 6,
+  "llmCalls": 1,
+  "tokensIn": 552,
+  "latencyMs": 4488,
+  "menuItems": 6,
+  "tokensOut": 68,
+  "imagesRead": 0,
+  "newProducts": 8,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Mercimek Çorbası",
+   "categoryKey": "corba",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Ezogelin Çorbası",
+   "categoryKey": "corba",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "İşkembe Çorbası",
+   "categoryKey": "corba",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Kelle Paça Çorbası",
+   "categoryKey": "corba",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Yayla Çorbası",
+   "categoryKey": "corba",
+   "matched": true,
+   "typed": true
+  },
+  {
+   "name": "Tavuk Suyu Çorbası",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Mercimek Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Kırmızı mercimek, soğan ve havuçla pişirilip süzülür; üzerine tereyağlı pul biber gezdirilir, limonla servis edilir.",
+   "portionInfo": "1 kase (~300 ml)",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~200 ml)",
+       "sets_base"
+      ],
+      [
+       "Normal Kase (~300 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~450 ml)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Tereyağı Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Naneli Tereyağı",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Ekmek Seçimi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Somun Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Bazlama",
+       "free"
+      ],
+      [
+       "Ekmeksiz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Kimyon",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Pul Biber",
+    "Limon"
+   ],
+   "extraIngredients": [
+    "Kıtır Ekmek",
+    "Ekstra Limon",
+    "Kaşar Rendesi"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba kategorisini kapatır (Ev Yemekleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Kayseri Mantısı",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "İnce hamur kıymalı harçla küçük bohçalar halinde kapatılıp haşlanır; sarımsaklı yoğurt ve tereyağlı sosla servis edilir.",
+   "portionInfo": "1 porsiyon (~300 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yoğurt",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Yoğurt",
+       "free"
+      ],
+      [
+       "Sarımsaksız Yoğurt",
+       "free"
+      ],
+      [
+       "Yoğurtsuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tereyağlı Pul Biber",
+       "free"
+      ],
+      [
+       "Domatesli Tereyağı",
+       "free"
+      ],
+      [
+       "Naneli Tereyağı",
+       "free"
+      ],
+      [
+       "Sossuz",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Pişirme",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Haşlama",
+       "free"
+      ],
+      [
+       "Çıtır (Kızarmış)",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sumak",
+       "free"
+      ],
+      [
+       "Nane",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Toz Kırmızı Biber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak",
+    "Tereyağı",
+    "Pul Biber",
+    "Sumak",
+    "Nane"
+   ],
+   "extraIngredients": [
+    "Ekstra Yoğurt",
+    "Ekstra Sos",
+    "Ceviz"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Mantı & Hamur İşleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Tereyağlı Pirinç Pilavı",
+   "targetName": null,
+   "categoryKey": "yan-urun",
+   "source": "db",
+   "shortDescription": "Tereyağında kavrulan şehriye ve baldo pirinç tavuk suyuyla demlenerek pişirilir; tane tane, sıcak servis edilir.",
+   "portionInfo": "1 porsiyon (~200 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Pilav Çeşidi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Şehriyeli",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Nohutlu",
+       "free"
+      ],
+      [
+       "Etli (Kuşbaşı)",
+       "surcharge"
+      ],
+      [
+       "Tavuklu",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Üzerine",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Kuru Fasulye",
+       "surcharge"
+      ],
+      [
+       "Nohut",
+       "surcharge"
+      ],
+      [
+       "Tavuk Döner",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Közlenmiş Biber",
+       "free"
+      ],
+      [
+       "Yoğurt",
+       "surcharge"
+      ],
+      [
+       "Cacık",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Şehriye",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Yoğurt",
+    "Cacık",
+    "Turşu",
+    "Ekstra Tereyağı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Yan Ürün kategorisini kapatır (Ev Yemekleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Ayran",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "1 bardak ~200–300 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini kapatır (Ev Yemekleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Şehriye Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Tavuk suyunda pişirilen tel şehriye çorbası; hafif, sade ve limonla servis edilir.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Karabiber",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Karabiber"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba menülerinde neredeyse her zaman bulunur — Çorba eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Kuru Fasulye",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Kuru fasulye soğan, salça ve tercihe göre kuşbaşı etle ağır ateşte pişirilir; pirinç pilavı ve turşuyla servis edilir.",
+   "portionInfo": "1 porsiyon (~300 g)",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Etli (Kuşbaşı)",
+       "free"
+      ],
+      [
+       "Pastırmalı",
+       "surcharge"
+      ],
+      [
+       "Sucuklu",
+       "surcharge"
+      ],
+      [
+       "Etsiz (Zeytinyağlı)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında Pilav",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Pirinç Pilavı",
+       "free"
+      ],
+      [
+       "Bulgur Pilavı",
+       "free"
+      ],
+      [
+       "Pilavsız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Turşu",
+       "free"
+      ],
+      [
+       "Soğan",
+       "free"
+      ],
+      [
+       "Yeşil Biber",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "İçecek Seçimi",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Ayran",
+       "surcharge"
+      ],
+      [
+       "Kola",
+       "surcharge"
+      ],
+      [
+       "Gazoz",
+       "surcharge"
+      ],
+      [
+       "Su",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Turşu",
+    "Pul Biber"
+   ],
+   "extraIngredients": [
+    "Ekstra Pilav",
+    "Turşu",
+    "Cacık",
+    "Ekmek"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Ana Yemek kategorisini kapatır (Ev Yemekleri)"
+  },
+  {
+   "section": "new_product",
+   "name": "Lebeniye Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Yoğurtlu, nohutlu ve nane ile tatlandırılan Antep çorbası; sıcak servis edilir.",
+   "portionInfo": "1 kase ~350 ml",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sarımsaklı Sirke",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Sarımsak"
+   ],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba menülerinde sık bulunur — Çorba eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Domates Çorbası",
+   "targetName": null,
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Taze domates ve biraz unla pişirilip süzülen kremsi çorba; üzerine rendelenmiş kaşar eklenebilir.",
+   "portionInfo": "1 kase ~300 ml",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~250 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~400 ml)",
+       "sets_base"
+      ],
+      [
+       "Paket (~1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kekik",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kaşar",
+    "Krema",
+    "Fesleğen"
+   ],
+   "extraIngredients": [
+    "Kaşar Rendesi",
+    "Kıtır Ekmek"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Çorba menülerinde sık bulunur — Çorba eksik"
+  },
+  {
+   "section": "option",
+   "name": "Mercimek Çorbası",
+   "targetName": "Mercimek",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Porsiyon, Yanında",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ],
+      [
+       "Termos (1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kruton",
+       "free"
+      ],
+      [
+       "Tereyağı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Pul Biber",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Ezogelin Çorbası",
+   "targetName": "Ezogelin",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Boy, Yanında",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~250 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~400 ml)",
+       "sets_base"
+      ],
+      [
+       "Paket (~1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kekik",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Pul Biber",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Kıtır Ekmek",
+    "Ekstra Limon",
+    "Tereyağlı Sos"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "İşkembe Çorbası",
+   "targetName": "İskembe",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Boy, Sarımsak & Sirke, Yanında",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~250 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~400 ml)",
+       "sets_base"
+      ],
+      [
+       "Paket (~1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sarımsak & Sirke",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Sirkeli",
+       "free"
+      ],
+      [
+       "Sadece Sarımsaklı",
+       "free"
+      ],
+      [
+       "Sadece Sirkeli",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kekik",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağlı Sos",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra İşkembe",
+    "Ekstra Sarımsak",
+    "Ekstra Limon"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Kelle Paça Çorbası",
+   "targetName": "Kelle Paca",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Boy, Sarımsak & Sirke, Yanında",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~250 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~400 ml)",
+       "sets_base"
+      ],
+      [
+       "Paket (~1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Sarımsak & Sirke",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sarımsaklı Sirkeli",
+       "free"
+      ],
+      [
+       "Sadece Sarımsaklı",
+       "free"
+      ],
+      [
+       "Sadece Sirkeli",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kekik",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağlı Sos",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Et",
+    "Ekstra Sarımsak",
+    "Beyin (varsa)"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Yayla Çorbası",
+   "targetName": "Yayla",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Boy, Yanında",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük Kase (~250 ml)",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase (~400 ml)",
+       "sets_base"
+      ],
+      [
+       "Paket (~1 L)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Ekmek",
+       "free"
+      ],
+      [
+       "Kıtır Ekmek",
+       "free"
+      ],
+      [
+       "Pul Biber",
+       "free"
+      ],
+      [
+       "Kekik",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Nane",
+    "Tereyağı"
+   ],
+   "extraIngredients": [
+    "Kıtır Ekmek",
+    "Naneli Tereyağı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Mercimek Çorbası",
+   "targetName": "Mercimek",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Mercimek Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Mercimek",
+   "suggestedValue": "Mercimek Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Ezogelin Çorbası",
+   "targetName": "Ezogelin",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Ezogelin Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Ezogelin",
+   "suggestedValue": "Ezogelin Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "İşkembe Çorbası",
+   "targetName": "İskembe",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "İşkembe Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "İskembe",
+   "suggestedValue": "İşkembe Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Kelle Paça Çorbası",
+   "targetName": "Kelle Paca",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Kelle Paça Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Kelle Paca",
+   "suggestedValue": "Kelle Paça Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Yayla Çorbası",
+   "targetName": "Yayla",
+   "categoryKey": "corba",
+   "source": "db",
+   "shortDescription": "Yayla Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Yayla",
+   "suggestedValue": "Yayla Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  },
+  {
+   "section": "fix",
+   "name": "Tavuk Suyu Çorbası",
+   "targetName": "Tavuk Suyu",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Tavuk Suyu Çorbası",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Tavuk Suyu",
+   "suggestedValue": "Tavuk Suyu Çorbası",
+   "reason": "Havuzdaki kanonik ada göre düzeltilebilir"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Mercimek",
+     "Ezogelin",
+     "İskembe",
+     "Kelle Paca",
+     "Yayla",
+     "Tavuk Suyu"
+    ],
+    "unique": 6,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "durationMs": 4430,
+   "llmCalls": 1,
+   "tokensIn": 552,
+   "tokensOut": 68,
+   "error": null,
+   "output": {
+    "resolved": "corba",
+    "disagrees": false,
+    "confidence": 0.95,
+    "cuisineSlug": "corba",
+    "priceSegment": "ekonomik"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 6,
+    "missing": 4,
+    "needFixes": 6,
+    "categories": [
+     "ana-yemek 0/2",
+     "corba 5/6",
+     "yan-urun 0/1",
+     "icecek 1/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Mercimek Çorbası",
+     "Kayseri Mantısı",
+     "Tereyağlı Pirinç Pilavı",
+     "Ayran",
+     "Şehriye Çorbası",
+     "Kuru Fasulye",
+     "Lebeniye Çorbası",
+     "Domates Çorbası"
+    ],
+    "fromAi": 0,
+    "fromDb": 8
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Mercimek Çorbası",
+     "Ezogelin Çorbası",
+     "İşkembe Çorbası",
+     "Kelle Paça Çorbası",
+     "Yayla Çorbası"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 8,
+    "target": 10,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "reachable": 14
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": true,
+   "error": null,
+   "tokensIn": 552,
+   "tokensOut": 68,
+   "latencyMs": 4385
+  }
+ ],
+ "providerTrouble": false
+}

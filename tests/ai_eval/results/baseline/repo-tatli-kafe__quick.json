@@ -1,0 +1,874 @@
+{
+ "case": {
+  "id": "repo-tatli-kafe__quick",
+  "slug": "tatli",
+  "kind": "repo",
+  "mode": "quick",
+  "image": "backend/test/fixtures/images/menu-tatli-kafe.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 2435,
+ "runId": "a5a4956d-9840-462c-8b56-c8e4ea8feda4",
+ "status": "completed",
+ "warnings": [],
+ "classification": {
+  "reason": "Menüde sadece tatlı ve kahve/çay gibi içecekler var, bu yüzden Tatlı & Künefe kategorisi en uygun.",
+  "cuisineId": "9fbe3c30-61f5-4fb2-a69c-e373886f0a4a",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Tatlı & Künefe",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "9fbe3c30-61f5-4fb2-a69c-e373886f0a4a",
+  "suggestedCuisineName": "Tatlı & Künefe"
+ },
+ "counts": {
+  "target": 10,
+  "current": 9,
+  "missing": 1,
+  "cuisineId": "9fbe3c30-61f5-4fb2-a69c-e373886f0a4a",
+  "categories": [
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 2,
+    "present": 5,
+    "minItems": 7
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 0,
+    "present": 4,
+    "minItems": 3
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Tatlı & Künefe",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 1,
+  "llmCalls": 2,
+  "tokensIn": 3101,
+  "latencyMs": 2426,
+  "menuItems": 9,
+  "tokensOut": 763,
+  "imagesRead": 1,
+  "newProducts": 4,
+  "optionCards": 3,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Künefe",
+   "categoryKey": "tatli",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Fıstıklı Baklava",
+   "categoryKey": "tatli",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Fırın Sütlaç",
+   "categoryKey": "tatli",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Kazandibi",
+   "categoryKey": "tatli",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Trileçe",
+   "categoryKey": "tatli",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Türk Kahvesi",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Çay",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Limonata",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Ayran",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Top Dondurma",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Seçilen aromalarda top dondurma; kasede ya da külahta, isteğe göre sos ve süslemeyle servis edilir.",
+   "portionInfo": "Top başına ~60 g",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Top",
+       "sets_base"
+      ],
+      [
+       "2 Top",
+       "sets_base"
+      ],
+      [
+       "3 Top",
+       "sets_base"
+      ],
+      [
+       "4 Top",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Aroma Seçimi",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sade (Vanilya)",
+       "free"
+      ],
+      [
+       "Çikolata",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ],
+      [
+       "Frambuaz",
+       "free"
+      ],
+      [
+       "Kavun",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kase",
+       "free"
+      ],
+      [
+       "Külah",
+       "free"
+      ],
+      [
+       "Waffle Külah",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Sos & Süsleme",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Çikolata Sosu",
+       "surcharge"
+      ],
+      [
+       "Karamel Sos",
+       "surcharge"
+      ],
+      [
+       "Frambuaz Sos",
+       "surcharge"
+      ],
+      [
+       "Fındık Kırığı",
+       "surcharge"
+      ],
+      [
+       "Antep Fıstığı",
+       "surcharge"
+      ],
+      [
+       "Hindistan Cevizi",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Ekstra Top",
+    "Çikolata Sosu",
+    "Fındık Kırığı"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Dondurma)"
+  },
+  {
+   "section": "new_product",
+   "name": "Milkshake",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "Orta boy ~400 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini genişletir (Dondurma)"
+  },
+  {
+   "section": "new_product",
+   "name": "Külahta Dondurma",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Külahta top dondurma; istenen çeşitlerden seçilir, üzerine sos eklenebilir.",
+   "portionInfo": "1–3 top",
+   "optionGroups": [
+    {
+     "name": "Top Sayısı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Top",
+       "sets_base"
+      ],
+      [
+       "2 Top",
+       "sets_base"
+      ],
+      [
+       "3 Top",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Sade (Kaymak)",
+       "free"
+      ],
+      [
+       "Çikolata",
+       "free"
+      ],
+      [
+       "Çilek",
+       "free"
+      ],
+      [
+       "Limon",
+       "free"
+      ],
+      [
+       "Fıstık",
+       "free"
+      ],
+      [
+       "Vişne",
+       "free"
+      ],
+      [
+       "Karamel",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [],
+   "extraIngredients": [
+    "Çikolata Sosu",
+    "Fındık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Tatlı kategorisini kapatır (Dondurma)"
+  },
+  {
+   "section": "new_product",
+   "name": "Su",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "500 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İçecek kategorisini genişletir (Dondurma)"
+  },
+  {
+   "section": "option",
+   "name": "Künefe",
+   "targetName": "Künefe",
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Porsiyon, Fıstık, Dondurma, Kaymak, Şerbet",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Tek Kişilik",
+       "sets_base"
+      ],
+      [
+       "1,5 Kişilik",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Fıstık",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Fıstıklı",
+       "free"
+      ],
+      [
+       "Bol Fıstıklı",
+       "surcharge"
+      ],
+      [
+       "Fıstıksız",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Kaymak",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaymaksız",
+       "free"
+      ],
+      [
+       "Kaymaklı",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Şerbet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Şerbet",
+       "free"
+      ],
+      [
+       "Az Şerbetli",
+       "free"
+      ],
+      [
+       "Şerbeti Ayrı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Fıstık",
+    "Şerbet"
+   ],
+   "extraIngredients": [
+    "Kaymak",
+    "Dondurma",
+    "Ekstra Fıstık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Fıstıklı Baklava",
+   "targetName": "Fıstıklı Baklava",
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Porsiyon, Çeşit, Dondurma, Kaymak",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon (4 Dilim)",
+       "sets_base"
+      ],
+      [
+       "2 Porsiyon (8 Dilim)",
+       "sets_base"
+      ],
+      [
+       "Yarım Kg",
+       "sets_base"
+      ],
+      [
+       "1 Kg",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik Fıstıklı",
+       "free"
+      ],
+      [
+       "Havuç Dilimi",
+       "free"
+      ],
+      [
+       "Şöbiyet",
+       "free"
+      ],
+      [
+       "Kuru Baklava",
+       "free"
+      ],
+      [
+       "Midye Baklava",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Kaymak",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kaymaksız",
+       "free"
+      ],
+      [
+       "Kaymaklı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Toz Fıstık"
+   ],
+   "extraIngredients": [
+    "Kaymak",
+    "Dondurma",
+    "Ekstra Fıstık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "option",
+   "name": "Fırın Sütlaç",
+   "targetName": "Fırın Sütlaç",
+   "categoryKey": "tatli",
+   "source": "db",
+   "shortDescription": "Boy, Üzerine, Servis, Dondurma",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal Kase",
+       "sets_base"
+      ],
+      [
+       "Büyük Kase",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Üzerine",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Tarçın",
+       "free"
+      ],
+      [
+       "Fındık",
+       "free"
+      ],
+      [
+       "Antep Fıstığı",
+       "surcharge"
+      ],
+      [
+       "Hindistan Cevizi",
+       "free"
+      ],
+      [
+       "Kakao",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Servis",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Soğuk",
+       "free"
+      ],
+      [
+       "Oda Sıcaklığında",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tarçın",
+    "Fındık"
+   ],
+   "extraIngredients": [
+    "Dondurma",
+    "Kaymak",
+    "Ekstra Fındık"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Havuzdaki onaylı karttan alındı"
+  },
+  {
+   "section": "fix",
+   "name": "Çay",
+   "targetName": "Çay",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Çay",
+   "portionInfo": "",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": "bad_name",
+   "currentValue": "Çay",
+   "suggestedValue": null,
+   "reason": "Ad kısaltma gibi görünüyor, satıcıya tam adını sor"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": "groq",
+   "model": "qwen/qwen3.8-27b",
+   "durationMs": 2119,
+   "llmCalls": 1,
+   "tokensIn": 2327,
+   "tokensOut": 643,
+   "error": null,
+   "output": {
+    "names": [
+     "Künefe",
+     "Fıstıklı Baklava",
+     "Fırın Sütlaç",
+     "Kazandibi",
+     "Trileçe",
+     "Türk Kahvesi",
+     "Çay",
+     "Limonata",
+     "Ayran"
+    ],
+    "unique": 9,
+    "extractedRaw": 9,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 279,
+   "llmCalls": 1,
+   "tokensIn": 774,
+   "tokensOut": 120,
+   "error": null,
+   "output": {
+    "resolved": "tatli",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "tatli",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 9,
+    "missing": 1,
+    "needFixes": 1,
+    "categories": [
+     "tatli 5/7",
+     "icecek 4/3"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 4,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Top Dondurma",
+     "Milkshake",
+     "Külahta Dondurma",
+     "Su"
+    ],
+    "fromAi": 0,
+    "fromDb": 4
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 3,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Künefe",
+     "Fıstıklı Baklava",
+     "Fırın Sütlaç"
+    ],
+    "fromAi": 0,
+    "fromDb": 3
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 4,
+    "target": 10,
+    "dropped": 0,
+    "options": 3,
+    "reasons": [],
+    "reachable": 13
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.extract",
+   "provider": "groq",
+   "model": "qwen/qwen3.8-27b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 2327,
+   "tokensOut": 643,
+   "latencyMs": 2112
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 774,
+   "tokensOut": 120,
+   "latencyMs": 276
+  }
+ ],
+ "providerTrouble": false
+}

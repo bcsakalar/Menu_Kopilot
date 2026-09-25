@@ -1,0 +1,919 @@
+{
+ "case": {
+  "id": "makarna__photo__quick",
+  "slug": "makarna",
+  "kind": "photo",
+  "mode": "quick",
+  "image": "tests/ai_eval/images/makarna.jpg"
+ },
+ "httpStatus": 200,
+ "latencyMs": 64,
+ "runId": "3c74a008-6258-468a-be21-8a77c2ddd525",
+ "status": "completed",
+ "warnings": [
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 11/14 ürün olur — hedefe 3 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "sınıflandırma başarısız (unavailable)",
+  "cuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "disagrees": false,
+  "confidence": 0,
+  "cuisineName": "Makarna & İtalyan",
+  "priceSegment": "orta",
+  "suggestedCuisineId": null,
+  "suggestedCuisineName": null
+ },
+ "counts": {
+  "target": 14,
+  "current": 5,
+  "missing": 9,
+  "cuisineId": "25d57106-48e1-49a7-bcb2-ada9ed904a62",
+  "categories": [
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 2,
+    "present": 4,
+    "minItems": 6
+   },
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "tatli",
+    "label": "Tatlı",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   }
+  ],
+  "cuisineMin": 14,
+  "cuisineName": "Makarna & İtalyan",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": true,
+  "fixCards": 0,
+  "llmCalls": 0,
+  "tokensIn": 0,
+  "latencyMs": 46,
+  "menuItems": 5,
+  "tokensOut": 0,
+  "imagesRead": 1,
+  "newProducts": 6,
+  "optionCards": 5,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Spagetti Bolonez",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Fettuccine Alfredo",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Penne Arrabbiata",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Lazanya",
+   "categoryKey": "ana-yemek",
+   "matched": true,
+   "typed": false
+  },
+  {
+   "name": "Limonata",
+   "categoryKey": "icecek",
+   "matched": true,
+   "typed": false
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Spagetti Karbonara",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Yumurta, parmesan ve füme etle kremasız klasik karbonara.",
+   "portionInfo": "1 porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yarım Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Tavuk"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "makarna",
+   "confidence": 82
+  },
+  {
+   "section": "new_product",
+   "name": "Kutu İçecek",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "330 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Sarımsaklı Ekmek",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Fırınlanmış sarımsaklı ekmek dilimleri, sıcak servis.",
+   "portionInfo": "4 dilim",
+   "optionGroups": [
+    {
+     "name": "Adet",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "4 Dilim",
+       "sets_base"
+      ],
+      [
+       "8 Dilim",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Yanında",
+     "selectionType": "multi",
+     "isRequired": false,
+     "options": [
+      [
+       "Kaşar Rendesi",
+       "free"
+      ],
+      [
+       "Maydanoz",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Tereyağı",
+    "Baharat"
+   ],
+   "extraIngredients": [
+    "Ekstra Kaşar"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — Salata & Meze eksik",
+   "productType": "garnitur",
+   "confidence": 88
+  },
+  {
+   "section": "new_product",
+   "name": "Kremalı Tavuklu Makarna",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Sotelenmiş tavuk ve mantarlı kremalı sosla makarna.",
+   "portionInfo": "1 porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Makarna Türü",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Spagetti",
+       "free"
+      ],
+      [
+       "Penne",
+       "free"
+      ],
+      [
+       "Fettuccine",
+       "free"
+      ],
+      [
+       "Burgu",
+       "free"
+      ],
+      [
+       "Glutensiz Penne",
+       "surcharge"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mantar",
+    "Parmesan",
+    "Karabiber"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Tavuk",
+    "Ekstra Mantar",
+    "Siyah Zeytin",
+    "Pul Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde neredeyse her zaman bulunur — Ana Yemek eksik",
+   "productType": "makarna",
+   "confidence": 92
+  },
+  {
+   "section": "new_product",
+   "name": "Maden Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "200 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Makarna & İtalyan menülerinde sık bulunur — İçecek eksik",
+   "productType": "mesrubat",
+   "confidence": 95
+  },
+  {
+   "section": "new_product",
+   "name": "Tiramisu",
+   "targetName": null,
+   "categoryKey": "tatli",
+   "source": "ai",
+   "shortDescription": "Kahveli kedi dili bisküvi ve mascarpone kremalı, kakaolu.",
+   "portionInfo": "1 porsiyon ~180 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "1,5 Porsiyon",
+       "sets_base"
+      ],
+      [
+       "Duble (2 Porsiyon)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Dondurma",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Dondurmasız",
+       "free"
+      ],
+      [
+       "Sade Dondurma",
+       "surcharge"
+      ],
+      [
+       "Kaymaklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Fıstıklı Dondurma",
+       "surcharge"
+      ],
+      [
+       "Çikolatalı Dondurma",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kakao"
+   ],
+   "extraIngredients": [
+    "Ekstra Kakao"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "İtalyan mutfağının en popüler ve vazgeçilmez klasik tatlısıdır.",
+   "productType": "tatli-pasta",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Spagetti Bolonez",
+   "targetName": "Spagetti Bolonez",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Dana kıymalı bolonez soslu spagetti, parmesanla servis edilir.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Fesleğen"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Tavuk",
+    "Mantar",
+    "Siyah Zeytin",
+    "Pul Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "makarna",
+   "confidence": 86
+  },
+  {
+   "section": "option",
+   "name": "Fettuccine Alfredo",
+   "targetName": "Fettuccine Alfredo",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Tereyağı, krema ve parmesanlı kremsi soslu fettuccine.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Tavuklu",
+       "surcharge"
+      ],
+      [
+       "Mantarlı",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Karabiber",
+    "Maydanoz"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Tavuk",
+    "Mantar",
+    "Siyah Zeytin",
+    "Pul Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "makarna",
+   "confidence": 86
+  },
+  {
+   "section": "option",
+   "name": "Penne Arrabbiata",
+   "targetName": "Penne Arrabbiata",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Sarımsaklı, acılı domates sosunda penne, fesleğen ve parmesanla.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Paylaşım (2 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Acı Seviyesi",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Acısız",
+       "free"
+      ],
+      [
+       "Az Acılı",
+       "free"
+      ],
+      [
+       "Orta Acılı",
+       "free"
+      ],
+      [
+       "Acılı",
+       "free"
+      ],
+      [
+       "Çok Acılı",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Parmesan",
+    "Sarımsak",
+    "Fesleğen"
+   ],
+   "extraIngredients": [
+    "Ekstra Parmesan",
+    "Ekstra Tavuk",
+    "Mantar",
+    "Siyah Zeytin",
+    "Pul Biber"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "makarna",
+   "confidence": 86
+  },
+  {
+   "section": "option",
+   "name": "Lazanya",
+   "targetName": "Lazanya",
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Bolonez sos, beşamel ve mozzarella kat kat fırında.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "1 Dilim",
+       "sets_base"
+      ],
+      [
+       "2 Dilim",
+       "sets_base"
+      ],
+      [
+       "Tepsi (4 Kişilik)",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Kıymalı (Bolonez)",
+       "free"
+      ],
+      [
+       "Sebzeli",
+       "free"
+      ],
+      [
+       "Tavuklu",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mozzarella"
+   ],
+   "extraIngredients": [
+    "Ekstra Mozzarella",
+    "Ekstra Parmesan"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "makarna",
+   "confidence": 92
+  },
+  {
+   "section": "option",
+   "name": "Limonata",
+   "targetName": "Limonata",
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "Taze sıkılmış limonla hazırlanan ev yapımı limonata.",
+   "portionInfo": "",
+   "optionGroups": [
+    {
+     "name": "Boy",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Orta",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ],
+      [
+       "Litrelik",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Çeşit",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Klasik",
+       "free"
+      ],
+      [
+       "Naneli",
+       "free"
+      ],
+      [
+       "Çilekli",
+       "free"
+      ],
+      [
+       "Zencefilli",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Buz (az buzlu)",
+    "Şeker (az şekerli)"
+   ],
+   "extraIngredients": [
+    "Taze Nane",
+    "Ekstra Meyve",
+    "Bal"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Bu ürün için kayıtlı kart",
+   "productType": "soguk-icecek",
+   "confidence": 88
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Spagetti Bolonez",
+     "Fettuccine Alfredo",
+     "Penne Arrabbiata",
+     "Lazanya",
+     "Limonata"
+    ],
+    "unique": 5,
+    "extractedRaw": 5,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "unavailable: Bu görev için kullanılabilir sağlayıcı yok (limit/devre)",
+   "output": null
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 1,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 14,
+    "current": 5,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "ana-yemek 4/6",
+     "salata-meze 0/1",
+     "tatli 0/1",
+     "icecek 1/2"
+    ],
+    "needOptions": 5
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 5,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Spagetti Karbonara",
+     "Kutu İçecek",
+     "Sarımsaklı Ekmek",
+     "Kremalı Tavuklu Makarna",
+     "Maden Suyu",
+     "Tiramisu"
+    ],
+    "cached": true,
+    "fromAi": 1,
+    "fromDb": 5,
+    "batches": 1
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 2,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Spagetti Bolonez",
+     "Fettuccine Alfredo",
+     "Penne Arrabbiata",
+     "Lazanya",
+     "Limonata"
+    ],
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 13,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 6,
+    "target": 14,
+    "dropped": 0,
+    "options": 5,
+    "reasons": [],
+    "grounding": [
+     "Spagetti Karbonara: \"Makarna Türü\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor",
+     "Sarımsaklı Ekmek: Sarımsak çıkarılabilirden çıkarıldı: ürün adını ondan alıyor",
+     "Spagetti Bolonez: \"Makarna Türü\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor",
+     "Fettuccine Alfredo: \"Makarna Türü\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor",
+     "Penne Arrabbiata: \"Makarna Türü\" çıkarıldı: ürünün adı bu seçimi zaten yapıyor"
+    ],
+    "reachable": 11,
+    "completedFromKnowledge": 0
+   }
+  }
+ ],
+ "usage": [],
+ "providerTrouble": false
+}

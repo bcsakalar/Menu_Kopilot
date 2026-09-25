@@ -1,0 +1,572 @@
+{
+ "case": {
+  "id": "salata-saglikli__single",
+  "slug": "salata-saglikli",
+  "kind": "single",
+  "mode": "quick",
+  "cuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "menuText": "Avokadolu Somon Bowl"
+ },
+ "httpStatus": 200,
+ "latencyMs": 17602,
+ "runId": "80fa4181-7f91-4341-b687-f8dcbc66cfb1",
+ "status": "partial",
+ "warnings": [
+  {
+   "code": "slow_providers",
+   "message": "AI sağlayıcıları 11 sn içinde cevap vermedi; veritabanı önerileriyle devam edildi."
+  },
+  {
+   "code": "target_unreachable",
+   "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+  }
+ ],
+ "classification": {
+  "reason": "Avokadolu Somon Bowl, a healthy bowl, points to Salata & Sağlıklı.",
+  "cuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "disagrees": false,
+  "confidence": 0.9,
+  "cuisineName": "Salata & Sağlıklı",
+  "priceSegment": "orta",
+  "suggestedCuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "suggestedCuisineName": "Salata & Sağlıklı"
+ },
+ "counts": {
+  "target": 10,
+  "current": 1,
+  "missing": 9,
+  "cuisineId": "7cc2e561-820f-4db6-9a81-95ce64f0afbf",
+  "categories": [
+   {
+    "key": "salata-meze",
+    "label": "Salata & Meze",
+    "missing": 6,
+    "present": 0,
+    "minItems": 6
+   },
+   {
+    "key": "icecek",
+    "label": "İçecek",
+    "missing": 2,
+    "present": 0,
+    "minItems": 2
+   },
+   {
+    "key": "ana-yemek",
+    "label": "Ana Yemek",
+    "missing": 1,
+    "present": 1,
+    "minItems": 2
+   },
+   {
+    "key": "atistirmalik",
+    "label": "Atıştırmalık",
+    "missing": 1,
+    "present": 0,
+    "minItems": 1
+   }
+  ],
+  "cuisineMin": 10,
+  "cuisineName": "Salata & Sağlıklı",
+  "hardMinimum": 10
+ },
+ "stats": {
+  "dropped": 0,
+  "cacheHit": false,
+  "fixCards": 0,
+  "llmCalls": 5,
+  "tokensIn": 749,
+  "latencyMs": 17591,
+  "menuItems": 1,
+  "tokensOut": 130,
+  "imagesRead": 0,
+  "newProducts": 5,
+  "optionCards": 0,
+  "imagesFailed": 0
+ },
+ "menu": [
+  {
+   "name": "Avokadolu Somon Bowl",
+   "categoryKey": "ana-yemek",
+   "matched": false,
+   "typed": true
+  }
+ ],
+ "cards": [
+  {
+   "section": "new_product",
+   "name": "Sezar Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Göbek marul, kruton, parmesan ve sezar sosu; ızgara tavuk ya da karides eklenerek doyurucu ana öğün.",
+   "portionInfo": "Normal porsiyon ~350 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Izgara Tavuk",
+       "free"
+      ],
+      [
+       "Sade",
+       "free"
+      ],
+      [
+       "Karides",
+       "surcharge"
+      ],
+      [
+       "Somon",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Kruton",
+    "Parmesan",
+    "Sos"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Haşlanmış Yumurta",
+    "Avokado"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde neredeyse her zaman bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Taze Sıkma Portakal Suyu",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "250 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — İçecek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Tavuklu Bowl",
+   "targetName": null,
+   "categoryKey": "ana-yemek",
+   "source": "db",
+   "shortDescription": "Izgara tavuk, esmer pirinç ya da kinoa, avokado, mısır, fasulye ve yeşilliklerle dengeli kase.",
+   "portionInfo": "1 kase ~400 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Taban",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Esmer Pirinç",
+       "free"
+      ],
+      [
+       "Kinoa",
+       "free"
+      ],
+      [
+       "Bulgur",
+       "free"
+      ],
+      [
+       "Yeşillik (Tahılsız)",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Sos",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Yoğurtlu Nane",
+       "free"
+      ],
+      [
+       "Susamlı Soya",
+       "free"
+      ],
+      [
+       "Acı Mayonez",
+       "free"
+      ],
+      [
+       "Limonlu Tahin",
+       "free"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Mısır",
+    "Fasulye",
+    "Soğan"
+   ],
+   "extraIngredients": [
+    "Ekstra Tavuk",
+    "Avokado",
+    "Haşlanmış Yumurta"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Ana Yemek eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Çoban Salata",
+   "targetName": null,
+   "categoryKey": "salata-meze",
+   "source": "db",
+   "shortDescription": "Doğranmış domates, salatalık, biber, soğan ve maydanoz; zeytinyağı, limon ve sumakla hazırlanır.",
+   "portionInfo": "Normal porsiyon ~300 g",
+   "optionGroups": [
+    {
+     "name": "Porsiyon",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Küçük",
+       "sets_base"
+      ],
+      [
+       "Normal",
+       "sets_base"
+      ],
+      [
+       "Büyük",
+       "sets_base"
+      ]
+     ]
+    },
+    {
+     "name": "Salata Sosu",
+     "selectionType": "single",
+     "isRequired": true,
+     "options": [
+      [
+       "Zeytinyağı & Limon",
+       "free"
+      ],
+      [
+       "Nar Ekşili",
+       "free"
+      ],
+      [
+       "Balzamik",
+       "free"
+      ],
+      [
+       "Hardallı Ballı",
+       "free"
+      ],
+      [
+       "Yoğurtlu",
+       "free"
+      ],
+      [
+       "Sos Ayrı Kapta",
+       "free"
+      ]
+     ]
+    },
+    {
+     "name": "Protein",
+     "selectionType": "single",
+     "isRequired": false,
+     "options": [
+      [
+       "Proteinsiz",
+       "free"
+      ],
+      [
+       "Izgara Tavuk",
+       "surcharge"
+      ],
+      [
+       "Ton Balığı",
+       "surcharge"
+      ],
+      [
+       "Hellim",
+       "surcharge"
+      ],
+      [
+       "Falafel",
+       "surcharge"
+      ],
+      [
+       "Haşlanmış Yumurta",
+       "surcharge"
+      ]
+     ]
+    }
+   ],
+   "removableIngredients": [
+    "Soğan",
+    "Biber",
+    "Maydanoz",
+    "Sumak"
+   ],
+   "extraIngredients": [
+    "Beyaz Peynir",
+    "Zeytin"
+   ],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — Salata & Meze eksik"
+  },
+  {
+   "section": "new_product",
+   "name": "Su",
+   "targetName": null,
+   "categoryKey": "icecek",
+   "source": "db",
+   "shortDescription": "",
+   "portionInfo": "500 ml",
+   "optionGroups": [],
+   "removableIngredients": [],
+   "extraIngredients": [],
+   "fixKind": null,
+   "currentValue": null,
+   "suggestedValue": null,
+   "reason": "Salata & Sağlıklı menülerinde sık bulunur — İçecek eksik"
+  }
+ ],
+ "trace": [
+  {
+   "agent": "extractor",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "names": [
+     "Avokadolu Somon Bowl"
+    ],
+    "unique": 1,
+    "extractedRaw": 0,
+    "imagesFailed": 0
+   }
+  },
+  {
+   "agent": "classifier",
+   "status": "ok",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "durationMs": 6564,
+   "llmCalls": 2,
+   "tokensIn": 749,
+   "tokensOut": 130,
+   "error": null,
+   "output": {
+    "resolved": "salata-saglikli",
+    "disagrees": false,
+    "confidence": 0.9,
+    "cuisineSlug": "salata-saglikli",
+    "priceSegment": "orta"
+   }
+  },
+  {
+   "agent": "gap_analyst",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "target": 10,
+    "current": 1,
+    "missing": 9,
+    "needFixes": 0,
+    "categories": [
+     "salata-meze 0/6",
+     "icecek 0/2",
+     "ana-yemek 1/2",
+     "atistirmalik 0/1"
+    ],
+    "needOptions": 1
+   }
+  },
+  {
+   "agent": "product_recommender",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 11005,
+   "llmCalls": 2,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "aborted: Request timed out: TimeoutError: The operation was aborted due to timeout",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 5
+   }
+  },
+  {
+   "agent": "option_modifier",
+   "status": "failed",
+   "provider": null,
+   "model": null,
+   "durationMs": 6013,
+   "llmCalls": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": "timeout: Request timed out: TimeoutError: The operation was aborted due to timeout",
+   "output": {
+    "fromAi": 0,
+    "fromDb": 0
+   }
+  },
+  {
+   "agent": "validator",
+   "status": "ok",
+   "provider": null,
+   "model": null,
+   "durationMs": 0,
+   "llmCalls": 0,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "error": null,
+   "output": {
+    "kept": 5,
+    "target": 10,
+    "dropped": 0,
+    "options": 0,
+    "reasons": [],
+    "reachable": 6
+   }
+  }
+ ],
+ "usage": [
+  {
+   "task": "agent.classify",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 508,
+   "tokensOut": 0,
+   "latencyMs": 6001
+  },
+  {
+   "task": "agent.classify",
+   "provider": "groq",
+   "model": "openai/gpt-oss-20b",
+   "ok": true,
+   "error": null,
+   "tokensIn": 749,
+   "tokensOut": 130,
+   "latencyMs": 475
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 1542,
+   "tokensOut": 0,
+   "latencyMs": 5999
+  },
+  {
+   "task": "agent.options",
+   "provider": "gemini",
+   "model": "gemini-3.8-flash",
+   "ok": false,
+   "error": "timeout",
+   "tokensIn": 1043,
+   "tokensOut": 0,
+   "latencyMs": 5999
+  },
+  {
+   "task": "agent.recommend",
+   "provider": "gemini",
+   "model": "gemini-3.5-flash-lite",
+   "ok": false,
+   "error": "aborted",
+   "tokensIn": 1542,
+   "tokensOut": 0,
+   "latencyMs": 4992
+  }
+ ],
+ "retried": true,
+ "firstAttempt": {
+  "status": "partial",
+  "warnings": [
+   {
+    "code": "recommend_failed",
+    "message": "Yeni ürün önerisi alınamadı; veritabanı önerileriyle devam edildi."
+   },
+   {
+    "code": "target_unreachable",
+    "message": "Öneriler kabul edilse bile 6/10 ürün olur — hedefe 4 ürün kalıyor."
+   }
+  ],
+  "httpStatus": 200
+ },
+ "providerTrouble": true
+}
