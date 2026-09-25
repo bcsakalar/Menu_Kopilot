@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { asRemovable, acceptableDescription, ground, type RawOptionGroup } from '../../src/agents/grounding.js';
 import { FeedbackIndex } from '../../src/agents/knowledge.js';
+import { guessCuisine } from '../../src/agents/classifier.js';
 import { splitBatches } from '../../src/agents/option-modifier.js';
 import { CUISINE_SLUGS } from '../../src/db/seed/cuisines.js';
 import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
@@ -319,6 +320,16 @@ describe('grounding a suggestion in the product type', () => {
     expect(cake.extras).toContain('Ekstra Mum');
   });
 
+  it('sees an on/off toggle once the "Ekstra …" answer is out of the group', () => {
+    const result = ground(
+      { optionGroups: [group('Yoğurt', ['Yoğurtlu', 'Yoğurtsuz', 'Ekstra Yoğurtlu'])], removable: [], extras: [], description: null },
+      { productName: 'İskender Kebap', type: type('doner-porsiyon'), byName: true, source: 'pool', want },
+    );
+    expect(result.optionGroups.map((g) => g.name)).not.toContain('Yoğurt');
+    expect(result.removable).toContain('Yoğurt');
+    expect(result.extras).toContain('Ekstra Yoğurtlu');
+  });
+
   it('reads the "…sız" options a customer ticks as the ingredient itself', () => {
     expect(asRemovable('Soğansız')).toBe('Soğan');
     expect(asRemovable('Domatessiz')).toBe('Domates');
@@ -373,6 +384,25 @@ describe('understanding — same product or another one', () => {
     // The restaurant's own heading still wins, and a category the drink/dessert confusion does not touch stays.
     expect(reconcileCategory('icecek', true, soup, known)).toBe('icecek');
     expect(reconcileCategory('ara-sicak', false, index.resolve('Mercimek Çorbası'), known)).toBe('ara-sicak');
+  });
+});
+
+describe('cuisine without a model', () => {
+  const options = [
+    { id: '1', slug: 'kebap-izgara', name: 'Kebap & Izgara' },
+    { id: '2', slug: 'pizza', name: 'Pizza' },
+    { id: '3', slug: 'corba', name: 'Çorba' },
+    { id: '4', slug: 'tatli', name: 'Tatlı & Künefe' },
+  ];
+
+  it('reads the cuisine off the product types instead of taking the first cuisine in the list', () => {
+    expect(guessCuisine(['Margherita', 'Karışık Pizza', 'Sucuklu Pizza', 'Kola'], index, options)?.slug).toBe('pizza');
+    expect(guessCuisine(['Mercimek Çorbası', 'Ezogelin', 'İşkembe Çorbası', 'Ayran'], index, options)?.slug).toBe('corba');
+    expect(guessCuisine(['Künefe', 'Fıstıklı Baklava', 'Sütlaç'], index, options)?.slug).toBe('tatli');
+  });
+
+  it('says nothing when nothing on the menu identifies a type', () => {
+    expect(guessCuisine(['Günün Menüsü', 'Özel'], index, options)).toBeUndefined();
   });
 });
 

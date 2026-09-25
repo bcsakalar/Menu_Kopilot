@@ -268,18 +268,6 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
       moved += 1;
       continue;
     }
-    // "Soğan: Soğanlı / Soğansız", "Yumurta: Yumurtalı (+ücret) / Yumurtasız" — an ingredient toggle, not a choice.
-    // Free both ways, the ingredient is in the product: a removable. Paid to have, it is an add-on: an extra.
-    const without = group.options.filter((o) => isWithoutName(o.name));
-    if (!PREFERENCE_GROUP.test(n) && without.length > 0 && without.length * 2 >= group.options.length) {
-      const ingredients = without.map((o) => asRemovable(o.name));
-      const paid = group.options.some((o) => !isWithoutName(o.name) && o.priceMode === 'surcharge');
-      if (paid) extras.push(...ingredients);
-      else removable.push(...ingredients);
-      notes.push(`"${group.name}" bir malzeme aç/kapa seçimiydi, ${paid ? 'ekstra' : 'çıkarılabilir'} malzemelere taşındı`);
-      moved += 1;
-      continue;
-    }
     if (EXTRA_GROUP.test(n)) {
       extras.push(...group.options.map((o) => o.name));
       notes.push(`"${group.name}" ekstra malzemelere taşındı`);
@@ -292,7 +280,21 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
       extras.push(...extraOptions.map((o) => o.name));
       moved += 1;
     }
-    groups.push({ ...group, options: group.options.filter((o) => !isExtraName(o.name)) });
+    const options = group.options.filter((o) => !isExtraName(o.name));
+    // "Soğan: Soğanlı / Soğansız", "Yumurta: Yumurtalı (+ücret) / Yumurtasız" — an ingredient toggle, not a choice.
+    // Judged on what is left once the "Ekstra …" answers are out ("Yoğurt: Yoğurtlu / Yoğurtsuz / Ekstra Yoğurtlu").
+    // Free both ways, the ingredient is in the product: a removable. Paid to have, it is an add-on: an extra.
+    const without = options.filter((o) => isWithoutName(o.name));
+    if (!PREFERENCE_GROUP.test(n) && without.length > 0 && without.length * 2 >= options.length) {
+      const ingredients = without.map((o) => asRemovable(o.name));
+      const paid = options.some((o) => !isWithoutName(o.name) && o.priceMode === 'surcharge');
+      if (paid) extras.push(...ingredients);
+      else removable.push(...ingredients);
+      notes.push(`"${group.name}" bir malzeme aç/kapa seçimiydi, ${paid ? 'ekstra' : 'çıkarılabilir'} malzemelere taşındı`);
+      moved += 1;
+      continue;
+    }
+    groups.push({ ...group, options });
   }
   const removableOut: string[] = [];
   for (const item of removable) {

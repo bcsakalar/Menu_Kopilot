@@ -1,4 +1,5 @@
 import type { AttemptRecord } from '../ai/router.js';
+import type { ProductTypeIndex } from '../domain/product-type.js';
 import { CLASSIFIER_SCHEMA_NAME, classifierSchema, type PriceSegment } from './schemas/classifier.js';
 import { countCalls, type AgentDeps, type AgentRunContext } from './types.js';
 import { generateChecked } from './validator.js';
@@ -22,6 +23,37 @@ export interface ClassifierInput {
   options: readonly CuisineOption[];
   /** The cuisine the user picked, if any. */
   selected: CuisineOption | undefined;
+  /** The cuisine the menu's product types point at (`guessCuisine`) — the answer when the model has none. */
+  guess?: CuisineOption | undefined;
+}
+
+/**
+ * The cuisine read off the menu without a model (D-187): every product whose NAME identifies its type votes for the
+ * cuisines that type is typical of — a full vote for the first (its home cuisine), a third for the others. Before this, a run whose
+ * classifier could not answer (providers down, a low-confidence guess) fell back to the first cuisine in the list —
+ * kebap — and a pizzeria was offered lahmacun. Undefined when nothing on the menu says anything.
+ */
+export function guessCuisine(
+  itemNames: readonly string[],
+  productTypes: Pick<ProductTypeIndex, 'resolve'>,
+  options: readonly CuisineOption[],
+): CuisineOption | undefined {
+  const votes = new Map<string, number>();
+  for (const name of itemNames) {
+    const { type, byName } = productTypes.resolve(name);
+    if (!byName || type.cuisines.length === 0) continue;
+    type.cuisines.forEach((slug, index) => votes.set(slug, (votes.get(slug) ?? 0) + (index === 0 ? 1 : 0.3)));
+  }
+  let best: CuisineOption | undefined;
+  let bestVotes = 0;
+  for (const option of options) {
+    const count = votes.get(option.slug) ?? 0;
+    if (count > bestVotes) {
+      best = option;
+      bestVotes = count;
+    }
+  }
+  return best;
 }
 
 export interface ClassifierResult {
@@ -46,7 +78,7 @@ export async function runClassifier(
   run: AgentRunContext,
 ): Promise<ClassifierResult> {
   const fallback = (reason: string): ClassifierResult => ({
-    cuisine: input.selected ?? input.options[0]!,
+    cuisine: input.selected ?? input.guess ?? input.options[0]!,
     priceSegment: 'orta',
     confidence: 0,
     reason,
@@ -92,7 +124,7 @@ export async function runClassifier(
       // A slug outside the offered list is a hallucination: drop it rather than guessing what was meant.
       const proposed = input.options.find((c) => c.slug === result.value.cuisineSlug) ?? null;
       const trusted = proposed !== null && result.value.confidence >= MIN_CONFIDENCE;
-      const cuisine = input.selected ?? (trusted ? proposed : input.options[0]!);
+      const cuisine = input.selected ?? (trusted ? proposed : (input.guess ?? input.options[0]!));
       const disagrees = trusted && input.selected !== undefined && proposed.id !== input.selected.id;
 
       return {

@@ -8,7 +8,7 @@ import type { AnalyzeEvent, CardDto, CountsDto, MenuItemDto } from '../modules/a
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { variantConflict } from '../lib/same-product.js';
 import { reconcileCategory } from '../domain/product-type.js';
-import { runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
+import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, type MergedItem } from './dedupe.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
@@ -178,9 +178,11 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   const selectedOption = input.selectedCuisine
     ? { id: input.selectedCuisine.id, slug: input.selectedCuisine.slug, name: input.selectedCuisine.name }
     : undefined;
-  /** The user's pick, or the first cuisine when there is none — used whenever the Classifier cannot answer. */
+  // What the menu's product types say, without a model: the answer whenever the Classifier has none (D-187).
+  const guess = guessCuisine(merged.map((i) => i.name), deps.productTypes, input.cuisineOptions);
+  /** The user's pick, or the menu's own guess, or the first cuisine — used whenever the Classifier cannot answer. */
   const keepSelection = (reason: string): ClassifierResult => ({
-    cuisine: selectedOption ?? input.cuisineOptions[0]!,
+    cuisine: selectedOption ?? guess ?? input.cuisineOptions[0]!,
     priceSegment: 'orta',
     confidence: 0,
     reason,
@@ -193,7 +195,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     aiUsable && merged.length > 0
       ? await safely(
           'classifier',
-          () => runClassifier(deps, { itemNames: merged.map((i) => i.name), options: input.cuisineOptions, selected: selectedOption }, run),
+          () => runClassifier(deps, { itemNames: merged.map((i) => i.name), options: input.cuisineOptions, selected: selectedOption, guess }, run),
           () => keepSelection('sınıflandırma hata verdi'),
         )
       : keepSelection(aiUsable ? 'menüde ürün yok' : 'AI kapalı');
