@@ -323,7 +323,7 @@ EOF
 
 ```powershell
 cd mobile
-flutter build apk --debug                       # quick test build
+flutter build apk --debug                       # quick test build — installs next to the release app as "Kopilot TEST"
 flutter build apk --release                     # fat APK (all ABIs, ~65 MB)
 flutter build apk --release --split-per-abi     # smaller per-ABI APKs; most phones need app-arm64-v8a-release.apk
 # the office build: arm64 only, production server prefilled, signed with the release key
@@ -361,17 +361,21 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 ## Tests
 
-- Backend: `cd backend; pnpm test` — ~530 tests: Turkish normalization, price guard, env, seed data, JSON-schema
+- Backend: `cd backend; pnpm test` — ~700 tests: Turkish normalization, price guard, env, seed data, JSON-schema
   conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
   → up, the agents one by one (dedupe across screenshots, category classification and gaps, name cleaning, option
   merge on accept) and end-to-end runs of the pipeline against recorded fixtures: three sections, no new product
   that is already on the menu, category quotas, a failing agent → partial result, re-run with another cuisine without
-  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, voice notes. Fixtures are hand-written
-  stand-ins; see `backend/test/fixtures/llm/README.md`.
-- Mobile: `cd mobile; flutter analyze; flutter test` — ~55 tests: SSE parser, models, error texts, HTTPS rule,
+  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, voice notes, the product-type knowledge base
+  and grounding (absurd groups removed, ingredients separated from options, 6–8 word descriptions, coverage), the
+  matching guard and the learning loop. Fixtures are hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
+- Mobile: `cd mobile; flutter analyze; flutter test` — ~60 tests: SSE parser, models, error texts, HTTPS rule,
   offline queue (re-runs, requests queued by older versions), template pool cache, photo limits, and widget tests
-  (result screen: pinned counter, sections, filters, bulk select, live counter, cuisine re-run; category settings;
-  voice note button; sharing into the app).
+  (result screen: pinned counter, the two tabs, the four sections of a product card, one-tap removal and "kabul et"
+  sending only what was kept, per-section copy, notes, live counter, cuisine re-run; category settings; voice note
+  button; sharing into the app).
+- AI quality: `tests/ai_eval/` — 141 scenarios over all 27 cuisines, scored by independent rules
+  ([`tests/ai_eval/README.md`](tests/ai_eval/README.md); reports in [`docs/ai-eval/`](docs/ai-eval/)).
 - Live: `cd backend; pnpm live:check` against the running stack (see Backend commands).
 - Acceptance criteria and what still needs a real device / real keys: [`PROGRESS.md`](PROGRESS.md).
 

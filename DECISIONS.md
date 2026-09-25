@@ -720,3 +720,110 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   and costs no model call, so every gap the pool can close is one the model does not have to invent. Side effect
   on the tests: a five-product menu is now often filled from templates alone, so the three e2e tests that need a
   model call empty or trim the pool first, on purpose.
+- **D-177** — 2026-09-24 (user: "mutfak türü bazında minimum hedef … araştır, config/DB'de tutulsun"): **realistic
+  opening targets per cuisine.** Researched from published delivery menus and menu-engineering guidance
+  (`docs/ai-eval/cuisine-targets.md`): each cuisine now has a realistic product count (`cuisines.typical_item_count`),
+  an opening target (`min_item_count`, never below the 10-product rule) and the reason (`target_note`), seeded from
+  `db/seed/cuisine-targets.ts` (kebap 35/20, kafe 42/25, çorba 14/10, tantuni 14/10 …). A target typed in the app sets
+  `min_item_count_edited_by_user` and is never replaced by a seed; migration 0004 treats every value that is not the
+  old default 10 as the user's. Consequence: "tam" mode now fills to 20 on a kebab menu instead of 10.
+- **D-178** — **Every product description is 6–8 natural Turkish words** (user rule), except packaged drinks, which
+  have none. All 424 pool templates got a hand-written 6–8 word description (`db/seed/short-descriptions.ts`); the
+  recommender prompt (v6) asks for 6–8 words instead of "60–140 characters"; the option agent (prompt v4) writes the
+  description of a menu product in the same answer as its options; `fitDescription` cuts a long one at a clause
+  boundary and `acceptableDescription` refuses English, ASCII-folded Turkish and ad language, falling back to the
+  product type's own line. A menu product's description now travels on its own card, so the separate
+  "açıklama boş" fix card is gone.
+- **D-179** — **Product-type knowledge base and grounding.** Baseline: options came from a pool template or from the
+  model and nothing checked them against what the product is (a soup's "Pişirme Derecesi", "Makarna Türü" on a
+  "Penne Arrabbiata", "Ekstra Et" on a meatless çiğ köfte). `product_types` (45 rows, seeded, versioned, a row the
+  user edits is theirs) holds per type: identifying keywords, plain row or not, typical option groups, typical
+  removable and extra ingredients, groups and ingredients that never apply, a fallback description. It is given to
+  the option agent as a per-batch type guide, and `agents/grounding.ts` applies it to every card from every source:
+  separation (ingredient lists and on/off toggles out of the options), fit (forbidden groups, choices the name already
+  made, forbidden ingredients, non-food), canonical shape ("Sossuz" is never charged), completion of empty sections
+  from the type, the 6–8 word description, and a 0–100 confidence per card (below 60 the phone says "Kontrol et").
+  The Validator also guarantees coverage: every product the plan promised a card gets one, from the knowledge base
+  when the model skipped it. D-175's category rule is replaced by a type rule: packaged drinks (kola, ayran, su) are
+  plain rows; prepared drinks (Türk kahvesi, latte, limonata, milkshake) get options and a description.
+- **D-180** — **Learning loop.** The phone sends a card back as the user kept it (suggestions tapped away are missing);
+  the server records one `suggestion_feedback` row per suggested group, ingredient and description (accepted / removed
+  / edited, with the product type). A suggestion removed at least 3 times and in at least 70 % of the cases for a type
+  is no longer offered (grounding drops it, the prompt lists it as "ekibin sürekli sildiği"). The accepted card is
+  written to the template pool, grounded version included, so the product comes back without a model call.
+- **D-181** — **Coverage per mode.** Both modes give every menu product that is not a packaged drink its four
+  sections (up to 40). The mode decides how many of them the MODEL is asked about: quick 7 (two parallel calls), full
+  30 (five); the rest come from the pool and the knowledge base at no model cost. Quick mode on a menu of 1–3
+  products (the "ürün ekle" case) suggests 7 new products and may take two from a category.
+- **D-182** — **Matching guard and wrong aliases.** Six seeded aliases named another dish ("Levrek Buğulama" →
+  Levrek Izgara, "Ciğer Dürüm" → Ciğer Şiş, "Sucuklu Kaşarlı Pide" → Sucuklu Yumurtalı Pide …): a steamed sea bass got
+  grill options and a wrong rename card. They are gone from the seed and migration 0004 deletes the copies earlier
+  seeds left. A fuzzy (trigram/vector) match is now also refused when the two names carry different words of one
+  family — cooking, filling/meat, form — or only one is a "dolma" (`lib/same-product.ts`). The duplicate check of new
+  products also knows the pool's spelling of a menu product ("Mercimek" is on the menu as "Mercimek Çorbası"), a
+  longer spelling that only adds a generic word ("Taze Sıkma Portakal Suyu"), and a bare product line next to a
+  variant of it ("Tantuni" next to "Et Tantuni Dürüm").
+- **D-183** — **Category reconciled with the product type.** The keyword index filed "Tavuk Suyu Çorbası" as a drink
+  ("su") and "Tatlı Ekşi Soslu Tavuk" as a dessert ("tatlı"). When the restaurant's heading did not decide and the
+  name identified the type, the type's category wins — only for drink/dessert confusions, so every other category's
+  gap count is exactly what the keyword table says.
+- **D-184** — **Result screen for the whole operations team** (user: sadelik önce). Two big tabs, "Yeni ürünler" and
+  "Menüdeki ürünler", each with one card per product and the same four sections: Opsiyonlar, Çıkarılabilir
+  malzemeler, Ekstra malzemeler, Açıklama. Every suggestion is a chip kept until tapped; a whole group comes off with
+  one tap; "Hepsini kabul et" (or "Seçilenleri kabul et") saves what is left; every section has its own "Kopyala". A
+  rename or a wrong section is a note inside the product's card with "Tamam". Gone: the filter chips, bulk selection
+  and bulk copy, the source badges ("DB'den", "AI"), AI call counts, the debug screen and its bug icon, the
+  "Ayrıntılı kayıt" switch; technical server notices are hidden (the cards are complete anyway); the note field on the
+  home screen is folded; an error screen has a "Tekrar dene" button. A debug build now installs next to the release
+  app ("Kopilot TEST", `.debug` id), so testing never replaces the app in use.
+- **D-185** — The classifier's per-attempt timeout is 3 s (was 6 s). Measured: its first (Gemini) attempt timed out in
+  49 of 91 baseline runs and Groq answered in ~0.5 s after it — six wasted seconds on every such analysis.
+- **D-186** — **Evaluation harness** `tests/ai_eval/`: 27 hand-written Turkish menus, rendered to photos in five
+  styles (print, handwriting, board, blurred, skewed low-quality) plus the three repository photos; 141 cases (every
+  cuisine × text/photo × quick/full, a single typed product per cuisine, repository photos in both modes); scoring by
+  hand-written rules independent of the backend's own validation, refined only for judge defects found on manual
+  review and always applied to both runs; a seeded random sample for manual review. Reports:
+  `docs/ai-eval/baseline-report.md`, `docs/ai-eval/after-report.md`.
+- **D-187** — **The cuisine is read off the menu when the model cannot.** With the providers rate-limited, the
+  classifier had no answer and the run took the first cuisine in the list: a pizzeria photo became a kebab house and
+  was offered lahmacun (evaluation: cuisine accuracy 45 %, 36 alien products). A low-confidence model guess took the
+  same fallback. Now every product whose name identifies its type votes for the type's home cuisine (full vote) and
+  the other cuisines it is typical of (a third); that guess is the answer whenever the model has none. 26 of the 27
+  evaluation menus are read correctly this way without a model call (the miss: tantuni → döner, which share a type).
+- **D-188** — **Four rules from the final manual sample** (4 of 40 products still had a misfit item; baseline 10 of
+  40). (1) The name decides the filling: a product whose name carries a filling ("Kakaolu Çörek", "Peynirli
+  Gözleme") is not asked a filling/variety group ("Çeşit", "İç Harç") whose answers are fillings; a menu product is
+  grounded on the restaurant's own name, with the pool's name ("Gözleme") alongside. (2) Nothing is asked twice: an
+  answer in a group is not also a removable or an extra — the group is the choice, the ingredient leaves its list
+  (before completion, so an emptied list is filled from the type); 25 such repeats inside the knowledge base itself
+  were cleaned, and a test keeps every type free of them. (3) The ingredient a product is named after is not
+  removable ("Kaşar" of a "Kaşarlı Pide", "Antep Fıstığı" of a "Fıstıklı Kadayıf Dolması", "Soğan" of a "Soğan
+  Halkası"). (4) A sweet name ("Kakaolu", "Çikolatalı", "Çilekli"…) forbids the savory list whatever the type.
+  Knowledge base v2: fried rice is a wok dish ("Sebzeli Kızarmış Pilav" was a pilaf garnish with grated kaşar), a
+  coleslaw no longer resolves to the salad type (it was offered Sezar dressing and grilled chicken). A variant is no
+  longer "renamed" to the pool product it is a variant of ("Peynirli Gözleme" and "Patatesli Gözleme" would both have
+  become "Gözleme").
+- **D-189** — **Quick mode keeps its promise of six.** Measured without a model (providers out of quota), quick
+  runs came back with 3–5 new products in several kitchens, for three reasons: one (or two) products per category
+  capped a cuisine with five usable categories (döner) at five and an ice-cream shop with two at four; the pool picked a product seeded in several related cuisines
+  twice ("Ayran" of kebap and of çorba) and the copy was then dropped; and a category with nothing left in the pool
+  (ev yemekleri's salads) kept its slot empty. Now the plan hands out the missing slots again, round by round, once
+  every category has its share (open gaps first, then the categories the cuisine leans on most, one more per category
+  per round — an ice-cream shop with two categories gets three and three); the pool never
+  picks the same product twice; and a quick run left short by the pool and the model is filled with more pool
+  products of the other open categories, past their quota — the Validator lets such a fill-up through, never past
+  the run's total. Full mode is unchanged. A kitchen whose whole pool is on the menu (a çiğ köfte shop) can still be
+  short without a model; with one, the model fills the rest.
+- **D-190** — **Two duplicates the final run still let through.** "Tacos" was suggested to a menu listing "Tacos
+  (3'lü)": the pack size is now left out when two names are compared. "Künefe" was suggested next to "Dondurmalı
+  Künefe": a bare product name is the product line of a longer name that only adds a "-li" word (what is added or
+  inside), as it already was for a meat, cooking or form word. "Barbekü Tavuklu Pizza" next to "Tavuklu Pizza"
+  stays a different product.
+- **D-191** — **Knowledge base v3, from the second final sample** (3 of 40 products with a misfit). A spring roll
+  resolved to sushi through the word "roll" and was offered wasabi and pickled ginger: "spring roll" is now a hot
+  starter keyword. Iced coffee and lemonade shared one type, so an iced tea was offered an espresso shot and whipped
+  cream: the type is split into `soguk-kahve` (ice latte, frappe, cold brew, milkshake — size, milk, syrup, shot) and
+  `soguk-icecek` (lemonade, iced tea, smoothie — size, ice). Çökertme was filed as a pot dish, with a pilaf choice and
+  a line about slow cooking: it has its own type (portion, yoghurt, butter sauce). Two fallback lines that were
+  wrong for part of their type were replaced: "seçilen harçlı" for a börek or gözleme whose name fixes the filling,
+  "isteğe göre sütlü" for a latte. 46 → 48 types.

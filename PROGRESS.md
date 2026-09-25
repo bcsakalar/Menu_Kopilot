@@ -1,9 +1,9 @@
 # PROGRESS
 
-Last update: 2026-09-22 — the suggestion engine reworked after the user's phone test (D-171…D-173): two modes
-("öneri versen yeter" / "hakikaten işimizi yapalım"), recommendations that fill up to the cuisine's minimum
-instead of stopping at the category gaps, option and ingredient suggestions for every product — the ones read from
-a photo included — and new products that carry their own options. Backend 545 tests, mobile 58, both clean.
+Last update: 2026-09-25 — Onboarding Copilot: the AI menu assistant measured (141-case harness, baseline
+report), rebuilt as a layered hybrid (product-type knowledge base, grounding of every card, coverage guarantee,
+learning from what the team keeps) and re-measured (after report); one simple card per product on the phone
+(D-177…D-191). Backend 696 tests, mobile 60, both clean.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -34,9 +34,37 @@ a photo included — and new products that carry their own options. Backend 545 
       editable from the app, before/after measurement, report (`docs/FAZ3_RAPOR.md`)
 - [ ] **FAZ 0–3 follow-up (user)** — compile + test the app (CI on a PR or a machine with Flutter), device walk-through
       with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
+- [x] **Onboarding Copilot — AI menu assistant (2026-09-24/25)** — evaluation harness (141 cases) and baseline
+      report, realistic cuisine targets, product-type knowledge base + grounding + coverage guarantee + learning loop,
+      one simple card per product on the phone, after report (D-177…D-190)
+- [ ] **AI menu assistant follow-up (user)** — device screenshots (phone locked / not attached during the work),
+      push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
-**2026-09-22 — suggestion engine rework (D-171…D-173).** The user's complaint on the 1.1.0 build was reproduced
+**2026-09-25 — Onboarding Copilot: AI menu assistant (D-177…D-191).** Task in five stages; all done except the
+device walk-through.
+- Harness `tests/ai_eval/` (27 hand-written menus, photos in five styles incl. blurred/skewed, 3 repository photos,
+  141 cases; scoring independent of the backend; seeded manual sample). Baseline `docs/ai-eval/baseline-report.md`:
+  0.1 complete products per case, 0 % of cases with ≥ 6, 202 option/ingredient mix-ups, 130 prepared drinks without
+  a description, 10 of 40 sampled products with a wrong item.
+- Realistic cuisine targets in Postgres (`docs/ai-eval/cuisine-targets.md`, D-177). Algorithm
+  (`docs/ai-eval/algorithm.md`): product-type knowledge base (48 types, versioned, editable), grounding of every card
+  (separation, fit, shape, completion, 6–8 word description, confidence), coverage guarantee (every menu product gets
+  a card; quick = 6 new products, full = up to the cuisine target), cuisine read off the menu when the model cannot,
+  learning from accept/remove (`suggestion_feedback`). Mobile: one card per product with the four sections, one tap
+  per suggestion, "Hepsini kabul et", "Kopyala" per section; debug screen, badges and filters removed; debug build
+  "Kopilot TEST" installs next to the release app.
+- After `docs/ai-eval/after-report.md` (final code `9612d30`, providers out of free-tier quota → fallback path):
+  10.8 complete products per case, 98.6 % of cases with ≥ 6, 0 mix-ups, 99.8 % with a 6–8 word description,
+  0 prepared drinks without one, quick mode exactly 6 new products in 52 of 54 cases, manual sample 0 of 40 wrong.
+  A model-path subset (54 text cases, fresh model answers) runs when the Gemini quota resets (07:10 UTC) and is added
+  to the report.
+- Commits `ba111ce` … `9612d30` (+ harness and docs); not pushed, not deployed.
+- Open (user): connect and unlock the phone, log in to "Kopilot TEST" (server `http://127.0.0.1:3030`,
+  `adb reverse tcp:3030 tcp:3030`) for the screenshots of the old and the new app; push; deploy (migration 0004 runs
+  on start); a release APK.
+
+**Before that — 2026-09-22 — suggestion engine rework (D-171…D-173).** The user's complaint on the 1.1.0 build was reproduced
 first (local stack, real keys) and then fixed:
 
 | Senaryo | Önce | Sonra |
@@ -250,7 +278,7 @@ Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ✅ release APK (debug-signed) exercised on a Galaxy S23 FE / Android 16 (all tabs); the newest build (icon, sharing, typed products) still to be installed; own signing key optional |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-164 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-190 |
 | 15 | FAZ 1: new products never already on the menu; sections A/B/C; pinned counter; < 15 s | ✅ backend (e2e + live: 0/26 duplicates, ~3 s cold); ◐ app screens checked statically, not yet compiled (D-162) |
 
 ## Pending verification by the user
