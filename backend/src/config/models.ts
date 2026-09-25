@@ -275,7 +275,9 @@ export const TASK_TIMEOUT_MS: Readonly<Record<TaskKey, number>> = {
   // ceiling only cuts off a provider that is already failing and leaves the pipeline deadline (RECOMMEND_DEADLINE_MS,
   // 11 s over both recommendation agents) room for one fallback.
   'agent.extract': 18_000,
-  'agent.classify': 6_000,
+  // D-185. Measured on the eval matrix: the first (Gemini) attempt at classification timed out at 6 s in 49 of 91 runs and
+  // the Groq fallback answered in ~0.5 s. A healthy Flash-Lite answers a classification well inside 3 s.
+  'agent.classify': 3_000,
   'agent.recommend': 6_000,
   'agent.options': 6_000,
   'agent.validate': 8_000,
