@@ -205,6 +205,27 @@ describe('run plan — how many products and from which categories', () => {
     expect(['ana-yemek', 'ara-sicak', 'salata-meze', 'yan-urun', 'icecek'].every((key) => (plan.quota.get(key) ?? 0) >= 1)).toBe(true);
   });
 
+  it('quick mode gives six to a kitchen with only two categories', () => {
+    // An ice-cream shop: desserts and drinks, nothing else.
+    const icecream = categoryGaps(
+      [
+        { key: 'tatli', label: 'Tatlı', minItems: 6, sortOrder: 1 },
+        { key: 'icecek', label: 'İçecek', minItems: 3, sortOrder: 2 },
+      ],
+      new Map([
+        ['tatli', 3],
+        ['icecek', 1],
+      ]),
+    );
+    const plan = planRun({ mode: 'quick', categories: icecream, current: 4, missing: 5, needOptions: 3 });
+    expect(plan.products).toBe(6);
+    expect(plan.quota.get('tatli')).toBe(3);
+    expect(plan.quota.get('icecek')).toBe(3);
+    // A kitchen with nothing but combos to offer gets none: the loop ends instead of spinning.
+    const combos = categoryGaps([{ key: 'menu-kampanya', label: 'Menü & Kampanya', minItems: 1, sortOrder: 1 }], new Map());
+    expect(planRun({ mode: 'quick', categories: combos, current: 4, missing: 1, needOptions: 0 }).products).toBe(0);
+  });
+
   it('quick mode on a one-product menu ("ürün ekle"): seven suggestions, a category may give two', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 1, missing: 19, needOptions: 1 });
     expect(plan.products).toBe(7);
