@@ -434,6 +434,11 @@ describe('understanding — same product or another one', () => {
   it('a bare product name already on the menu is not suggested again', () => {
     expect(sameProductName(n('Et Tantuni Dürüm'), n('Tantuni'))).toBe(true);
     expect(sameProductName(n('Peynirli Poğaça'), n('Poğaça'))).toBe(true);
+    // The pack size is not part of the name; an added filling does not make another product line (D-190).
+    expect(sameProductName(n("Tacos (3'lü)"), n('Tacos'))).toBe(true);
+    expect(sameProductName(n('Dondurmalı Künefe'), n('Künefe'))).toBe(true);
+    // …while a word that changes what is sold still keeps two products apart.
+    expect(sameProductName(n('Tavuklu Pizza'), n('Barbekü Tavuklu Pizza'))).toBe(false);
   });
 
   it('refuses a close match that is another dish: another cooking, filling, meat or form', () => {

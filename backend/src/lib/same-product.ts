@@ -81,19 +81,30 @@ export function variantConflict(a: string, b: string): boolean {
   return PRESENCE_WORDS.some((word) => wordsA.has(word) !== wordsB.has(word));
 }
 
+/** "3 lu", "2li", "6": how many come in the pack ("Tacos (3'lü)") — never what the product is. */
+const QUANTITY = /(^| )\d+ ?(li|lu|lik|luk)?(?= |$)/gu;
+/** "Dondurmalı", "Peynirli": a word that only says what is added or inside. */
+const isFillingWord = (word: string): boolean => word.length > 4 && /(li|lu)$/u.test(word);
+
 export function sameProductName(a: string, b: string): boolean {
   if (a === b) return true;
-  const wordsA = a.split(' ').filter(Boolean).map((word) => SYNONYMS[word] ?? word);
-  const wordsB = b.split(' ').filter(Boolean).map((word) => SYNONYMS[word] ?? word);
+  const wordsA = a.replace(QUANTITY, ' ').split(' ').filter(Boolean).map((word) => SYNONYMS[word] ?? word);
+  const wordsB = b.replace(QUANTITY, ' ').split(' ').filter(Boolean).map((word) => SYNONYMS[word] ?? word);
+  if (wordsA.length > 0 && wordsA.join(' ') === wordsB.join(' ')) return true;
   const [short, long] = wordsA.length <= wordsB.length ? [wordsA, wordsB] : [wordsB, wordsA];
   if (short.length === 0 || short.length === long.length) return false;
   const shortSet = new Set(short);
   if (!short.every((word) => long.includes(word))) return false;
   const extra = long.filter((word) => !shortSet.has(word));
   if (extra.every((word) => GENERIC_WORDS.has(word))) return true;
-  // A bare name ("Tantuni", "Poğaça") is the product line of a longer name that only adds its meat, filling, cooking
-  // or form ("Et Tantuni Dürüm", "Peynirli Poğaça") — suggesting it next to that is suggesting the same thing.
-  return short.length === 1 && (short[0]?.length ?? 0) >= 4 && extra.every((word) => GENERIC_WORDS.has(word) || SLOT_WORDS.has(baseWord(word)));
+  // A bare name ("Tantuni", "Poğaça", "Künefe") is the product line of a longer name that only adds its meat, filling,
+  // cooking or form ("Et Tantuni Dürüm", "Peynirli Poğaça", "Dondurmalı Künefe") — suggesting it next to that is
+  // suggesting the same thing.
+  return (
+    short.length === 1 &&
+    (short[0]?.length ?? 0) >= 4 &&
+    extra.every((word) => GENERIC_WORDS.has(word) || SLOT_WORDS.has(baseWord(word)) || isFillingWord(word))
+  );
 }
 
 const SLOT_WORDS = new Set(DISTINGUISHING_SLOTS.flat());
