@@ -132,7 +132,12 @@ describe('accepting a card never thins out the template pool', () => {
     // is the 6–8 word panel line, and what the card shows is exactly what accepting writes.
     const groupNames = (payload: { optionGroups: { name: string }[] } | undefined) => payload?.optionGroups.map((g) => g.name) ?? [];
     expect(groupNames(card!.payload!)).toEqual(expect.arrayContaining(groupNames(before?.payload)));
-    expect(card!.payload!.removableIngredients).toEqual(expect.arrayContaining(before?.payload.removableIngredients ?? []));
+    // Every ingredient is still there — in its list, or as the group answer it repeated ("Yanında: Limon", D-188).
+    const kept = new Set([
+      ...card!.payload!.removableIngredients,
+      ...card!.payload!.optionGroups.flatMap((g) => g.options.map((o) => o.name)),
+    ]);
+    for (const item of before?.payload.removableIngredients ?? []) expect(kept.has(item), item).toBe(true);
 
     await accept(h, card!);
     const after = await getTemplate(h.ctx.db.db, card!.matchedTemplateId!);

@@ -8,7 +8,7 @@ import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 import { countWords, fitDescription, isForbiddenGroup, ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
-import { sameProductName, variantConflict } from '../../src/lib/same-product.js';
+import { namesVariant, sameProductName, variantConflict } from '../../src/lib/same-product.js';
 import { templateOptionGroupSchema } from '../../src/domain/template.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
 import { diffFeedback } from '../../src/modules/analyze/feedback.js';
@@ -46,6 +46,9 @@ describe('knowledge base — product types', () => {
       // A type never forbids a group it opens with itself.
       for (const g of t.optionGroups) expect(isForbiddenGroup(index.get(t.key)!, g.name), `${t.key} / ${g.name}`).toBe(false);
       expect(t.removable.length + t.extras.length, t.key).toBeGreaterThan(0);
+      // A type never asks one thing twice: an answer in its groups is not also one of its ingredients (D-188).
+      const answers = new Set(t.optionGroups.flatMap((g) => g.options.map((o) => normalizeTr(o.name))));
+      for (const item of [...t.removable, ...t.extras]) expect(answers.has(normalizeTr(item)), `${t.key} / ${item}`).toBe(false);
     }
     expect(new Set(SEED_PRODUCT_TYPES.map((t) => t.key)).size).toBe(SEED_PRODUCT_TYPES.length);
   });
@@ -337,6 +340,83 @@ describe('grounding a suggestion in the product type', () => {
     expect(asRemovable('Turşu olmasın')).toBe('Turşu');
     expect(asRemovable('Maydanoz')).toBe('Maydanoz');
   });
+
+  // The four misfits of the final manual sample (D-188).
+  it('lets a filling in the name decide the filling group, and keeps savory add-ons off a sweet name', () => {
+    const empty = { optionGroups: [], removable: [], extras: [], description: null };
+    const cocoa = ground(empty, { productName: 'Kakaolu Çörek', type: type('firin'), byName: true, source: 'kb', want });
+    expect(cocoa.optionGroups.map((g) => g.name)).not.toContain('Çeşit');
+    expect(cocoa.optionGroups.map((g) => g.name)).toContain('Adet');
+    expect(cocoa.extras).not.toContain('Kaşar');
+    expect(cocoa.extras).toContain('Bal');
+    // The menu's own name decides, even when the pool knows the product by its bare name.
+    const harc = group('İç Harç', ['Peynirli', 'Patatesli', 'Kıymalı', 'Ispanaklı', 'Karışık', 'Kaşarlı Sucuklu']);
+    const gozleme = ground(
+      { optionGroups: [harc, group('Boy', ['Normal', 'Büyük'])], removable: [], extras: [], description: null },
+      { productName: 'Peynirli Gözleme', alsoNamed: 'Gözleme', type: type('borek-gozleme'), byName: true, source: 'pool', want },
+    );
+    expect(gozleme.optionGroups.map((g) => g.name)).not.toContain('İç Harç');
+    // No filling in the name: the filling is still the customer's choice. A sauce group is not a filling group.
+    const arnavut = ground(
+      { optionGroups: [harc], removable: [], extras: [], description: null },
+      { productName: 'Arnavut Böreği', type: type('borek-gozleme'), byName: true, source: 'pool', want },
+    );
+    expect(arnavut.optionGroups.map((g) => g.name)).toContain('İç Harç');
+    const wrap = ground(
+      { optionGroups: [group('Sos Seçimi', ['Sarımsaklı Mayonez', 'Acılı Sos', 'Ballı Hardallı'])], removable: [], extras: [], description: null },
+      { productName: 'Tavuklu Wrap', type: type('durum'), byName: true, source: 'model', want },
+    );
+    expect(wrap.optionGroups.map((g) => g.name)).toContain('Sos Seçimi');
+  });
+
+  it('never offers to take out the ingredient the product is named after', () => {
+    const removable = (productName: string, key: string, items: string[]) =>
+      ground({ optionGroups: [], removable: items, extras: [], description: null }, { productName, type: type(key), byName: true, source: 'model', want })
+        .removable;
+    expect(removable('Kavurmalı Kaşarlı Pide', 'pide', ['Kaşar', 'Susam'])).toEqual(['Susam']);
+    expect(removable('Fıstıklı Kadayıf Dolması', 'tatli-serbetli', ['Antep Fıstığı', 'Ceviz'])).toEqual(['Ceviz']);
+    expect(removable('Soğan Halkası', 'ara-sicak', ['Soğan', 'Maydanoz'])).toEqual(['Maydanoz']);
+    // Chili flakes are not the pepper a dolma is made of.
+    expect(removable('Biber Dolması', 'et-yemegi', ['Pul Biber', 'Nane'])).toEqual(['Pul Biber', 'Nane']);
+  });
+
+  it('asks nothing twice: an answer in a group is not also listed as an ingredient', () => {
+    // The group is the choice; the ingredient list lets the repeated answers go.
+    const manti = ground(
+      {
+        optionGroups: [group('Yanında', ['Sumak', 'Nane', 'Pul Biber', 'Toz Kırmızı Biber'], { selectionType: 'multi', maxSelect: 4 })],
+        removable: ['Sarımsak', 'Pul Biber', 'Sumak', 'Nane'],
+        extras: ['Ekstra Yoğurt'],
+        description: null,
+      },
+      { productName: 'Kayseri Mantısı', type: type('manti'), byName: true, source: 'model', want },
+    );
+    expect(manti.optionGroups.map((g) => g.name)).toContain('Yanında');
+    expect(manti.removable).toEqual(['Sarımsak']);
+    const toppings = group('Üzeri', ['Çikolata Sosu', 'Fındık', 'Hindistan Cevizi', 'Meyve'], { selectionType: 'multi', maxSelect: 4 });
+    const icecream = ground(
+      { optionGroups: [{ ...toppings, options: toppings.options.map((o) => ({ ...o, priceMode: 'surcharge' as const })) }], removable: ['Sos', 'Fındık'], extras: [], description: null },
+      { productName: 'Kasede Dondurma', type: type('dondurma'), byName: true, source: 'model', want },
+    );
+    expect(icecream.optionGroups.map((g) => g.name)).toContain('Üzeri');
+    expect(icecream.removable).not.toContain('Fındık');
+    for (const card of [manti, icecream]) {
+      const answers = new Set(card.optionGroups.flatMap((g) => g.options.map((o) => normalizeTr(o.name))));
+      for (const item of [...card.removable, ...card.extras]) expect(answers.has(normalizeTr(item)), item).toBe(false);
+    }
+  });
+
+  it('files fried rice as a wok dish and leaves a coleslaw without a salad type', () => {
+    expect(index.classify('Sebzeli Kızarmış Pilav').key).toBe('wok');
+    expect(index.resolve('Coleslaw').byName).toBe(false);
+    const rice = ground(
+      { optionGroups: [], removable: [], extras: [], description: null },
+      { productName: 'Sebzeli Kızarmış Pilav', type: type('wok'), byName: true, source: 'kb', want },
+    );
+    // The name already says vegetables: no protein choice.
+    expect(rice.optionGroups.map((g) => g.name)).not.toContain('Protein');
+    expect(rice.extras).not.toContain('Kaşar Rendesi');
+  });
 });
 
 describe('understanding — same product or another one', () => {
@@ -362,6 +442,15 @@ describe('understanding — same product or another one', () => {
     expect(variantConflict(n('Tavuk Döner Dürüm'), n('Et Döner Dürüm'))).toBe(true);
     expect(variantConflict(n('Çiğ Köfte Kase'), n('Çiğ Köfte Dürüm'))).toBe(true);
     expect(variantConflict(n('Fıstıklı Kadayıf Dolması'), n('Tel Kadayıf'))).toBe(true);
+  });
+
+  it('does not rename a variant to the pool product it is a variant of', () => {
+    expect(namesVariant(n('Peynirli Gözleme'), n('Gözleme'))).toBe(true);
+    expect(namesVariant(n('Karışık Pizza Menü'), n('Karışık Pizza'))).toBe(true);
+    // The same product written longer or shorter is still worth the rename.
+    expect(namesVariant(n('Gözleme Porsiyon'), n('Gözleme'))).toBe(false);
+    expect(namesVariant(n('Adana'), n('Adana Kebap'))).toBe(false);
+    expect(namesVariant(n('Special Pizza'), n('Karışık Pizza'))).toBe(false);
   });
 
   it('accepts the everyday short and long names of one product', () => {

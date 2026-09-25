@@ -308,7 +308,10 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
             description: card.description ?? null,
           },
           {
-            productName,
+            // The restaurant's own name says what the product is ("Peynirli Gözleme"); the pool's name ("Gözleme")
+            // is kept alongside so a choice either of them makes is not asked again.
+            productName: item.rawName,
+            alsoNamed: item.canonicalName,
             type,
             byName: resolved.byName && resolved.type.key === type.key,
             source,

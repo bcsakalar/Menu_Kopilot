@@ -1,4 +1,4 @@
-import type { ProductTypeDef } from '../../domain/product-type.js';
+import { SAVORY_INGREDIENTS, type ProductTypeDef } from '../../domain/product-type.js';
 import {
   aciSeviyesi,
   adet,
@@ -30,7 +30,7 @@ import {
  * that never fit the type — the validator deletes them no matter who proposed them. Keywords are plain Turkish;
  * they are normalized when the index is built.
  */
-export const PRODUCT_TYPES_VERSION = 1;
+export const PRODUCT_TYPES_VERSION = 2;
 
 // Shared forbidden sets — a dish never gets a coffee's groups, a drink never gets a dish's.
 const NOT_FOR_FOOD = ['Süt Seçimi', 'Süt Tercihi', 'Süt Türü', 'Şurup', 'Shot', 'Espresso', 'Buz', 'Şeker'];
@@ -41,7 +41,7 @@ const NOT_FOR_GRILL = [...NOT_FOR_FOOD, 'Hamur'];
 
 // Ingredients a type never has: a dessert or a drink is never served with onion, pickles or bread; a çiğ köfte is
 // meatless by definition, so "Ekstra Et" or "Ekstra Kaşar" on one is nonsense (seen in the baseline).
-const SAVORY = ['Soğan', 'Sarımsak', 'Acı Sos', 'Turşu', 'Ketçap', 'Mayonez', 'Domates', 'Biber', 'Maydanoz', 'Lavaş', 'Pilav', 'Patates', 'Ekmek', 'Köfte', 'Et', 'Sucuk', 'Kaşar', 'Kıyma'];
+const SAVORY = [...SAVORY_INGREDIENTS];
 const ANIMAL = ['Et', 'Kıyma', 'Tavuk', 'Sucuk', 'Kaşar', 'Peynir', 'Yumurta', 'Tereyağı', 'Pastırma', 'Kavurma'];
 
 const menuUpsell = (label = 'Sadece Ürün') =>
@@ -64,7 +64,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       single('Servis Şekli', ['Lavaşlı', 'Pirinç Pilavlı', 'Bulgur Pilavlı', { name: 'Dürüm Olarak', mode: 'free' }], { required: true, defaultIndex: 0 }),
       yanindaGelen(['Közlenmiş Domates', 'Közlenmiş Biber', 'Sumaklı Soğan', 'Maydanoz', 'Lavaş'], 5),
     ],
-    removable: ['Soğan', 'Sumaklı Soğan', 'Maydanoz', 'Közlenmiş Biber', 'Domates'],
+    removable: ['Soğan', 'Domates', 'Tereyağı', 'Pul Biber'],
     extras: ['Ekstra Lavaş', 'Ekstra Et', 'Yoğurt', 'Acılı Ezme', 'Ekstra Közlenmiş Biber'],
     forbiddenGroups: NOT_FOR_GRILL,
     fallbackDescription: 'Közde pişer, lavaş ve közlenmiş sebzeyle servis edilir.',
@@ -81,7 +81,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       single('Servis Şekli', ['Pilavlı', 'Patatesli', 'Lavaşlı', 'Pilav + Patates'], { required: true, defaultIndex: 0 }),
       yanindaGelen(['Közlenmiş Biber', 'Domates', 'Turşu', 'Sumaklı Soğan'], 4),
     ],
-    removable: ['Soğan', 'Domates', 'Turşu', 'Biber', 'Maydanoz'],
+    removable: ['Soğan', 'Biber', 'Maydanoz', 'Sumak'],
     extras: ['Ekstra Et', 'Yoğurt', 'Tereyağı', 'Ekstra Pilav', 'Ayran'],
     forbiddenGroups: [...NOT_FOR_GRILL, 'Pişirme Derecesi', 'Pişme Derecesi'],
     fallbackDescription: 'Yaprak döner, pilav ve közlenmiş sebzeyle servis edilir.',
@@ -136,8 +136,8 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       pilavSecimi(['Pirinç Pilavı', 'Bulgur Pilavı', 'Yarım Pirinç Yarım Bulgur']),
       yanindaGelen(['Turşu', 'Közlenmiş Biber', 'Cacık'], 3),
     ],
-    removable: ['Turşu', 'Biber', 'Nohut', 'Tereyağı'],
-    extras: ['Ekstra Et', 'Ayran', 'Cacık', 'Ekstra Pilav'],
+    removable: ['Biber', 'Nohut', 'Tereyağı'],
+    extras: ['Ekstra Et', 'Ekstra Pilav', 'Yoğurt', 'Ekstra Tereyağı'],
     forbiddenGroups: [...NOT_FOR_GRILL, 'Ekmek', 'Lavaş', 'Pişirme Derecesi', 'Pişme Derecesi'],
     fallbackDescription: 'Tereyağlı pilav üzerinde, turşu ve biberle servis edilir.',
     cuisines: ['doner', 'ev-yemekleri', 'sokak-lezzetleri', 'tantuni'],
@@ -154,7 +154,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       single('Garnitür', ['Pilavlı', 'Patatesli', 'Piyazlı', 'Salatalı'], { required: true, defaultIndex: 0 }),
       yanindaGelen(['Közlenmiş Biber', 'Domates', 'Sumaklı Soğan', 'Ekmek'], 4),
     ],
-    removable: ['Soğan', 'Domates', 'Biber', 'Maydanoz'],
+    removable: ['Soğan', 'Biber', 'Maydanoz', 'Sumak'],
     extras: ['Ekstra Köfte', 'Piyaz', 'Kaşar', 'Ayran'],
     forbiddenGroups: NOT_FOR_GRILL,
     fallbackDescription: 'Izgarada pişen köfte, pilav ve közlenmiş biberle.',
@@ -276,7 +276,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       single('Acı', ['Acısız', 'Acılı'], { required: true, defaultIndex: 0 }),
       yanindaGelen(['Limon', 'Maydanoz', 'Soğan', 'Roka', 'Domates'], 5),
     ],
-    removable: ['Maydanoz', 'Soğan', 'Limon', 'Roka'],
+    removable: ['Sarımsak', 'Biber'],
     extras: ['Ekstra Yeşillik', 'Acılı Ezme', 'Ayran', 'Ekstra Limon'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pilav', 'Pişirme Derecesi'],
     fallbackDescription: 'İnce hamurda baharatlı kıymalı harç, yeşillikle servis.',
@@ -295,7 +295,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       menuSecimi([{ name: 'Sadece Ürün', mode: 'free' }, { name: 'Ayran ile Menü', mode: 'surcharge' }, { name: 'Şalgam ile Menü', mode: 'surcharge' }]),
     ],
     removable: ['Marul', 'Maydanoz', 'Turşu', 'Nane', 'Roka'],
-    extras: ['Ekstra Çiğ Köfte', 'Ekstra Lavaş', 'Nar Ekşisi', 'Ekstra Marul'],
+    extras: ['Ekstra Çiğ Köfte', 'Ekstra Lavaş', 'Ekstra Nar Ekşisi', 'Ekstra Marul'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pilav', 'Pişirme', 'Hamur', 'Et Seçimi'],
     forbiddenIngredients: ANIMAL,
     fallbackDescription: 'Etsiz çiğ köfte, marul, limon ve nar ekşisiyle.',
@@ -314,7 +314,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       yanindaGelen(['Turşu', 'Cacık', 'Ekmek', 'Salata'], 4),
     ],
     removable: ['Soğan', 'Biber', 'Maydanoz', 'Sarımsak'],
-    extras: ['Ekstra Porsiyon Et', 'Yoğurt', 'Cacık', 'Ekstra Pilav'],
+    extras: ['Ekstra Porsiyon Et', 'Yoğurt', 'Ekstra Pilav'],
     forbiddenGroups: [...NOT_FOR_GRILL, 'Lavaş', 'Pişirme Derecesi', 'Pişme Derecesi'],
     fallbackDescription: 'Tencerede ağır ağır pişer, pilav ve turşuyla.',
     cuisines: ['ev-yemekleri', 'steak'],
@@ -332,7 +332,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       single('Garnitür', ['Roka Salatası', 'Patates', 'Pilav', 'Mevsim Salata'], { required: true, defaultIndex: 0 }),
     ],
     removable: ['Soğan', 'Roka', 'Limon', 'Maydanoz'],
-    extras: ['Ekstra Roka', 'Tarator Sos', 'Ekstra Limon', 'Pilav'],
+    extras: ['Ekstra Roka', 'Tarator Sos', 'Ekstra Limon', 'Ekstra Garnitür'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Hamur', 'Lavaş'],
     fallbackDescription: 'Taze balık, roka, soğan ve limonla servis edilir.',
     cuisines: ['balik-deniz'],
@@ -482,9 +482,9 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     plain: false,
     optionGroups: [
       porsiyon(['Kase', 'Büyük Kase', 'Termos (1 L)'], 0),
-      yanindaGelen(['Limon', 'Ekmek', 'Kruton', 'Pul Biber'], 4),
+      yanindaGelen(['Limon', 'Ekmek', 'Pul Biber'], 3),
     ],
-    removable: ['Pul Biber', 'Tereyağı', 'Nane', 'Limon'],
+    removable: ['Tereyağı', 'Nane', 'Maydanoz'],
     extras: ['Ekstra Ekmek', 'Kruton', 'Ekstra Limon', 'Tereyağlı Sos'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme', 'Pilav', 'Lavaş', 'Hamur', 'Sos Seçimi', 'İçecek Seçimi'],
     fallbackDescription: 'Günlük pişen sıcak çorba, limon ve ekmekle servis.',
@@ -495,7 +495,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     key: 'salata',
     label: 'Salata',
     categoryKey: 'salata-meze',
-    keywords: ['salata', 'salatası', 'çoban', 'sezar', 'coleslaw', 'gavurdağı', 'piyaz'],
+    keywords: ['salata', 'salatası', 'çoban', 'sezar', 'gavurdağı', 'piyaz'],
     plain: false,
     optionGroups: [
       boy(['Küçük', 'Büyük'], 1),
@@ -535,7 +535,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       yanindaGelen(['Ekmek', 'Lavaş', 'Zeytinyağı'], 3),
     ],
     removable: ['Sarımsak', 'Acı', 'Maydanoz', 'Ceviz'],
-    extras: ['Ekstra Ekmek', 'Ekstra Zeytinyağı', 'Lavaş'],
+    extras: ['Ekstra Ekmek', 'Ekstra Zeytinyağı', 'Ekstra Lavaş'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme', 'Pilav', 'Hamur', 'İçecek Seçimi'],
     fallbackDescription: 'Günlük hazırlanan ev yapımı soğuk meze, ekmekle.',
     cuisines: ['meze', 'kebap-izgara', 'balik-deniz'],
@@ -552,7 +552,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       sosSecimi(['Yoğurt', 'Acı Sos', 'Ranch Sos', 'Tatlı Acı Sos']),
     ],
     removable: ['Maydanoz', 'Sos', 'Sarımsak'],
-    extras: ['Ekstra Sos', 'Yoğurt', 'Ekstra Adet'],
+    extras: ['Ekstra Sos', 'Ekstra Adet'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Pilav', 'Lavaş', 'Hamur'],
     fallbackDescription: 'Çıtır kızartılan sıcak başlangıç, sosuyla birlikte servis.',
     cuisines: ['kebap-izgara', 'meze', 'burger', 'uzak-dogu'],
@@ -571,7 +571,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       sosSecimi(['Ketçap', 'Mayonez', 'Barbekü Sos', 'Ranch Sos', 'Cheddar Sos']),
     ],
     removable: ['Tuz', 'Baharat'],
-    extras: ['Ekstra Sos', 'Kaşar Rendesi', 'Cheddar Sos'],
+    extras: ['Ekstra Sos', 'Kaşar Rendesi'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Lavaş', 'Hamur', 'İçecek Seçimi'],
     fallbackDescription: 'Çıtır kızartılan yan ürün, seçilen sosla servis.',
     cuisines: ['burger', 'tavuk', 'kebap-izgara', 'doner', 'steak'],
@@ -596,7 +596,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     keywords: ['kumpir'],
     plain: false,
     optionGroups: [
-      multi('Garnitür', ['Mısır', 'Bezelye', 'Rus Salatası', 'Zeytin', 'Sosis', 'Turşu', 'Havuç Tarator', 'Kaşar'], { maxSelect: 8 }),
+      multi('Garnitür', ['Mısır', 'Bezelye', 'Rus Salatası', 'Zeytin', 'Sosis', 'Turşu', 'Havuç Tarator'], { maxSelect: 7 }),
       sosSecimi(['Ketçap', 'Mayonez', 'Ranch Sos', 'Acı Sos']),
     ],
     removable: ['Tereyağı', 'Kaşar'],
@@ -611,7 +611,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     categoryKey: 'ara-sicak',
     keywords: ['midye dolma', 'midye'],
     plain: false,
-    optionGroups: [adet(['5 Adet', '10 Adet', '20 Adet'], 1), yanindaGelen(['Limon'], 1)],
+    optionGroups: [adet(['5 Adet', '10 Adet', '20 Adet'], 1)],
     removable: ['Limon'],
     extras: ['Ekstra Limon', 'Ekstra Adet'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme', 'Pilav', 'Lavaş', 'Hamur', 'Sos Seçimi'],
@@ -628,7 +628,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       adet(['4 Parça', '8 Parça', '12 Parça'], 1),
       multi('Yanında', ['Soya Sosu', 'Wasabi', 'Zencefil Turşusu'], { maxSelect: 3 }),
     ],
-    removable: ['Wasabi', 'Zencefil', 'Susam'],
+    removable: ['Susam', 'Salatalık'],
     extras: ['Ekstra Soya Sosu', 'Ekstra Wasabi', 'Acı Mayonez', 'Teriyaki Sos'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme', 'Pilav', 'Lavaş', 'Hamur', 'Ekmek'],
     fallbackDescription: 'Taze malzemelerle sarılan sushi, soya ve wasabiyle.',
@@ -639,7 +639,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     key: 'wok',
     label: 'Wok / noodle',
     categoryKey: 'ana-yemek',
-    keywords: ['noodle', 'wok', 'wok pilav', 'ramen', 'teriyaki', 'kung pao', 'tatlı ekşi', 'pad thai', 'köri', 'curry', 'udon'],
+    keywords: ['noodle', 'wok', 'wok pilav', 'kızarmış pilav', 'fried rice', 'yakisoba', 'chow mein', 'ramen', 'teriyaki', 'kung pao', 'tatlı ekşi', 'pad thai', 'köri', 'curry', 'udon'],
     plain: false,
     optionGroups: [
       single('Protein', [{ name: 'Tavuk', mode: 'free' }, { name: 'Et', mode: 'surcharge' }, { name: 'Karides', mode: 'surcharge' }, { name: 'Tofu', mode: 'free' }, { name: 'Sebze', mode: 'free' }], { required: true, defaultIndex: 0 }),
@@ -663,8 +663,8 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       aciSeviyesi(),
       sosSecimi(['Salsa', 'Guacamole', 'Ekşi Krema', 'Cheddar Sos'], 'surcharge'),
     ],
-    removable: ['Soğan', 'Kişniş', 'Jalapeño', 'Ekşi Krema', 'Domates'],
-    extras: ['Guacamole', 'Ekstra Peynir', 'Ekstra Jalapeño', 'Ekstra Et'],
+    removable: ['Soğan', 'Kişniş', 'Jalapeño', 'Domates'],
+    extras: ['Ekstra Peynir', 'Ekstra Jalapeño', 'Ekstra Et'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Pilav Seçimi', 'Hamur'],
     fallbackDescription: 'Tortillada baharatlı dolgu, salsa ve peynirle servis edilir.',
     cuisines: ['dunya-mutfagi'],
@@ -755,7 +755,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       surupSecimi(),
     ],
     removable: ['Şeker', 'Krema', 'Süt Köpüğü'],
-    extras: ['Ekstra Shot', 'Krem Şanti', 'Tarçın', 'Ekstra Süt'],
+    extras: ['Ekstra Shot', 'Krem Şanti', 'Tarçın Tozu', 'Ekstra Süt'],
     forbiddenGroups: NOT_FOR_DRINK,
     forbiddenIngredients: SAVORY,
     fallbackDescription: 'Taze demlenen sıcak içecek, isteğe göre sütlü.',
@@ -827,7 +827,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
       multi('Yan Ürün', ['Patates', 'Salata', 'Çorba', 'Tatlı'], { mode: 'surcharge', maxSelect: 2 }),
     ],
     removable: ['Soğan', 'Sos'],
-    extras: ['Ekstra Patates', 'Tatlı', 'Ekstra İçecek'],
+    extras: ['Ekstra Patates', 'Ekstra İçecek', 'Ekstra Sos'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi'],
     fallbackDescription: 'Ana ürün, yan ürün ve içecekten oluşan menü.',
     cuisines: [],

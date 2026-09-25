@@ -1,4 +1,4 @@
-import { countWords, fitDescription, isForbiddenGroup, type ProductTypeDef } from '../domain/product-type.js';
+import { countWords, fitDescription, isForbiddenGroup, SAVORY_INGREDIENTS, type ProductTypeDef } from '../domain/product-type.js';
 import { templateOptionGroupSchema, type TemplateOptionGroup } from '../domain/template.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { containsPriceAmount, stripPriceAmounts } from '../lib/price-guard.js';
@@ -43,7 +43,10 @@ export interface Suggestion {
 export type Section = 'options' | 'removable' | 'extras' | 'description';
 
 export interface GroundOptions {
+  /** The product's name as the restaurant writes it — what the product IS. */
   productName: string;
+  /** The pool's name for it when the menu writes it differently ("Gözleme" for "Peynirli Gözleme"). */
+  alsoNamed?: string | null | undefined;
   type: ProductTypeDef;
   /** The product's NAME identified the type (not the category or the cuisine's default). */
   byName: boolean;
@@ -86,6 +89,18 @@ const WITHOUT = /(siz|sız|suz|süz)$/u;
 const NOT_FOOD = new Set(['maket', 'poset', 'pecete', 'kurdan']);
 /** Options that mean "nothing added" or "as it comes": never a surcharge ("Sossuz +ücret", seen in the baseline). */
 const NONE_OPTIONS = new Set(['yok', 'sade', 'normal', 'klasik', 'standart', 'hicbiri', 'sadece urun', 'yansiz']);
+
+/** A group that picks WHICH product it is: its filling or its variety ("İç Harç", "Çeşit", "Pide Çeşidi"). */
+const VARIETY_GROUP = /(^| )(cesit|cesidi|cesitleri|ic harc|harc|harci|dolgu|dolgusu)( |$)/u;
+/** "-li" words that say how a product is made or served, not what it is filled with. */
+const NOT_A_FILLING = new Set(['tatli', 'acili', 'aromali', 'cesitli', 'harcli', 'dolgulu', 'soslu', 'kremali', 'baharatli', 'ozel']);
+/** "Peynirli", "Kaşarlı Sucuklu": a normalized word naming what is inside. */
+const isFillingWord = (word: string): boolean => word.length > 4 && /(li|lu)$/u.test(word) && !NOT_A_FILLING.has(word);
+/** Flavours that make any product sweet: a "Kakaolu Çörek" takes no kaşar or sucuk, whatever its type offers. */
+const SWEET_WORDS = new Set([
+  'kakaolu', 'cikolatali', 'karamelli', 'vanilyali', 'cilekli', 'muzlu', 'visneli', 'frambuazli', 'nutellali', 'lotuslu',
+  'recelli', 'tarcinli', 'pekmezli', 'helvali',
+]);
 
 /** Words a Turkish description carries with its own letters; written in ASCII they mean the model dropped them. */
 const ASCII_TURKISH = new Set([
@@ -235,18 +250,43 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
   }
   const rejected = (kind: 'option_group' | 'removable' | 'extra', value: string): boolean =>
     feedback?.isRejected(type.key, kind, value) === true;
-  // What the type never contains (a çiğ köfte's meat, a dessert's onion) and what is not food at all.
-  const neverWords = (type.forbiddenIngredients ?? []).map(wordsOf);
+  // Everything the product is called: the menu's words and, when the pool knows it by another name, those too.
+  const nameKeys = [options.productName, options.alsoNamed ?? ''].flatMap((n) => key(n).split(' ')).filter(Boolean);
+  const productWords = new Set(nameKeys.map(baseWord));
+  /** What the name says is inside: "kasar" for "Kaşarlı Pide", "fistik" for "Fıstıklı Kadayıf Dolması". */
+  const fillings = nameKeys.filter(isFillingWord).map(baseWord);
+  const sweet = nameKeys.some((w) => SWEET_WORDS.has(w));
+  // What the type never contains (a çiğ köfte's meat, a dessert's onion) and what is not food at all. A product
+  // whose name is sweet never contains the savory list either, whatever its type (D-188).
+  const neverWords = [...(type.forbiddenIngredients ?? []), ...(sweet ? SAVORY_INGREDIENTS : [])].map(wordsOf);
   const never = (name: string): boolean => {
     const words = wordsOf(name);
     return [...words].some((w) => NOT_FOOD.has(w)) || neverWords.some((forbiddenWords) => within(forbiddenWords, words));
   };
-  const productWords = wordsOf(options.productName);
-  /** A single choice one of whose answers is already in the product's name. Size groups are never decided. */
-  const nameDecides = (group: RawOptionGroup): boolean =>
-    group.selectionType === 'single' &&
-    !group.options.some((o) => o.priceMode === 'sets_base') &&
-    group.options.some((o) => within(wordsOf(o.name), productWords));
+  /**
+   * The name already made this choice (size groups never count): one of a single choice's answers is in the name
+   * ("Penne Arrabbiata" / "Makarna Türü"), or the name carries a filling and the group picks the filling ("Kakaolu
+   * Çörek" / "Çeşit: Peynirli, Zeytinli, Patatesli").
+   */
+  const nameDecides = (group: RawOptionGroup): boolean => {
+    if (group.options.some((o) => o.priceMode === 'sets_base')) return false;
+    if (group.selectionType === 'single' && group.options.some((o) => within(wordsOf(o.name), productWords))) return true;
+    if (fillings.length === 0 || !VARIETY_GROUP.test(key(group.name))) return false;
+    const answers = group.options.map((o) => key(o.name)).filter((k) => !NONE_OPTIONS.has(k) && k !== 'karisik');
+    const filled = answers.filter((k) => isFillingWord(k.split(' ').pop() ?? ''));
+    return filled.length >= 2 && filled.length * 2 >= answers.length;
+  };
+  /**
+   * The ingredient the product is named after is not something to take out: "Kaşar" of a "Kaşarlı Pide", "Antep
+   * Fıstığı" of a "Fıstıklı Kadayıf Dolması", "Soğan" of a "Soğan Halkası". "Pul Biber" of a "Biber Dolması" is
+   * another thing, so a plain name word only counts for a one-word ingredient.
+   */
+  const namesProduct = (name: string): boolean => {
+    const words = key(name).split(' ').filter(Boolean).map(baseWord);
+    if (words.length === 1 && productWords.has(words[0]!)) return true;
+    // Stems compared without their last letter: "fistik" / "fistigi", "tavuk" / "tavugu".
+    return words.some((w) => fillings.some((f) => w === f || (f.length >= 4 && w.startsWith(f.slice(0, -1)) && w.length - f.length <= 2)));
+  };
 
   // --- 1. separation -------------------------------------------------------------------------------------------
   const removable: string[] = [...suggestion.removable];
@@ -330,7 +370,11 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
     fitting.push({ ...group, options: kept });
   }
   const productKey = key(options.productName);
-  let removableFinal = cleanIngredients(removableOut.filter((i) => key(i) !== productKey && !never(i) && !rejected('removable', i)));
+  const namedAfter = removableOut.filter((i) => namesProduct(i));
+  if (namedAfter.length > 0) notes.push(`${namedAfter.join(', ')} çıkarılabilirden çıkarıldı: ürün adını ondan alıyor`);
+  let removableFinal = cleanIngredients(
+    removableOut.filter((i) => key(i) !== productKey && !never(i) && !namesProduct(i) && !rejected('removable', i)),
+  );
   let extrasFinal = cleanIngredients(extras.filter((i) => !never(i) && !rejected('extra', i)));
   // The same thing in both lists reads as a mistake; it is a removable (the customer takes it out).
   // The same thing as a removable AND an extra is the model saying "more of it": the extra is "Ekstra X".
@@ -373,14 +417,28 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
   } else {
     groupsFinal = [];
   }
+  // An answer in a group is not also an ingredient: "Yanında: Limon, Maydanoz" next to the removables "Limon,
+  // Maydanoz" asks twice. The group is the choice, the ingredient leaves its list — before completion, so a list
+  // emptied that way is filled from the type like any other (D-188).
+  const answerKeys = new Set(groupsFinal.flatMap((g) => g.options.map((o) => key(o.name))));
+  const answered = [...removableFinal, ...extrasFinal].filter((i) => answerKeys.has(key(i)));
+  if (answered.length > 0) notes.push(`${answered.join(', ')} malzeme listesinden çıkarıldı: bir grupta zaten seçenek`);
+  removableFinal = removableFinal.filter((i) => !answerKeys.has(key(i)));
+  extrasFinal = extrasFinal.filter((i) => !answerKeys.has(key(i)));
   if (options.want.ingredients && options.byName) {
     if (removableFinal.length === 0) {
-      removableFinal = cleanIngredients(type.removable.filter((i) => key(i) !== productKey && !never(i) && !rejected('removable', i)));
+      removableFinal = cleanIngredients(
+        type.removable.filter(
+          (i) => key(i) !== productKey && !answerKeys.has(key(i)) && !never(i) && !namesProduct(i) && !rejected('removable', i),
+        ),
+      );
       if (removableFinal.length > 0) filled.push('removable');
     }
     if (extrasFinal.length === 0) {
       const taken = new Set(removableFinal.map(key));
-      extrasFinal = cleanIngredients(type.extras.filter((i) => !taken.has(key(i)) && !never(i) && !rejected('extra', i)));
+      extrasFinal = cleanIngredients(
+        type.extras.filter((i) => !taken.has(key(i)) && !answerKeys.has(key(i)) && !never(i) && !rejected('extra', i)),
+      );
       if (extrasFinal.length > 0) filled.push('extras');
     }
   } else if (!options.want.ingredients) {

@@ -6,7 +6,7 @@ import type { VisionExtractor } from '../modules/extraction/vision-extractor.js'
 import type { CuisineGraph, CuisineNode } from '../modules/retrieval/cuisine-graph.js';
 import type { AnalyzeEvent, CardDto, CountsDto, MenuItemDto } from '../modules/analyze/schemas.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
-import { variantConflict } from '../lib/same-product.js';
+import { namesVariant, variantConflict } from '../lib/same-product.js';
 import { reconcileCategory } from '../domain/product-type.js';
 import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, type MergedItem } from './dedupe.js';
@@ -581,8 +581,13 @@ function fixCards(deps: Pick<AgentDeps, 'categories'>, items: readonly ExistingI
       status: 'pending' as const,
     };
 
-    // The name first: a canonical rename is a one-word edit on the panel.
-    if (item.canonicalName !== null && normalizeTr(item.canonicalName) !== normalizeTr(item.rawName)) {
+    // The name first: a canonical rename is a one-word edit on the panel. Not when the menu's name is the pool's
+    // plus what makes it one variant ("Peynirli Gözleme" / "Gözleme"): two such rows would both become "Gözleme".
+    if (
+      item.canonicalName !== null &&
+      normalizeTr(item.canonicalName) !== normalizeTr(item.rawName) &&
+      !namesVariant(item.normalized, normalizeTr(item.canonicalName))
+    ) {
       push({
         ...base,
         shortDescription: item.canonicalName,

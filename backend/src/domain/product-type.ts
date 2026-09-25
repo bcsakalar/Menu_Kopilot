@@ -51,6 +51,15 @@ export interface ProductTypeDef {
   priority?: number;
 }
 
+/**
+ * What a sweet product is never sold with: onion, pickles, bread, meat. The dessert and drink types forbid it, and
+ * grounding forbids it for any product whose NAME is sweet ("Kakaolu Çörek" in the bakery type, D-188).
+ */
+export const SAVORY_INGREDIENTS: readonly string[] = [
+  'Soğan', 'Sarımsak', 'Acı Sos', 'Turşu', 'Ketçap', 'Mayonez', 'Domates', 'Biber', 'Maydanoz', 'Lavaş', 'Pilav',
+  'Patates', 'Ekmek', 'Köfte', 'Et', 'Sucuk', 'Kaşar', 'Kıyma',
+];
+
 const tokenize = (text: string): string[] => normalizeTr(text).split(' ').filter(Boolean);
 
 /**

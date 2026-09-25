@@ -97,3 +97,15 @@ export function sameProductName(a: string, b: string): boolean {
 }
 
 const SLOT_WORDS = new Set(DISTINGUISHING_SLOTS.flat());
+
+/**
+ * The name is the pool's `canonical` name plus words that say WHICH one it is — "peynirli gozleme" for "gozleme",
+ * "karisik pizza menu" for "karisik pizza" — rather than the same product written differently ("gozleme porsiyon",
+ * "adana" for "adana kebap"). Renaming such a row to the canonical name would erase what it is (D-188).
+ */
+export function namesVariant(name: string, canonical: string): boolean {
+  const words = name.split(' ').filter(Boolean).map(baseWord);
+  const canonicalWords = new Set(canonical.split(' ').filter(Boolean).map(baseWord));
+  if (![...canonicalWords].every((word) => words.includes(word))) return false;
+  return words.some((word) => !canonicalWords.has(word) && !GENERIC_WORDS.has(word));
+}
