@@ -1,9 +1,10 @@
 # PROGRESS
 
-Last update: 2026-09-25 — Onboarding Copilot: the AI menu assistant measured (141-case harness, baseline
-report), rebuilt as a layered hybrid (product-type knowledge base, grounding of every card, coverage guarantee,
-learning from what the team keeps) and re-measured (after report); one simple card per product on the phone
-(D-177…D-191). Backend 696 tests, mobile 60, both clean.
+Last update: 2026-09-25 (evening) — live on production (`cc80e0c`), app 1.4.0: product cards that open and close
+(D-192), a dated, filterable analysis history on the phone and the server (D-193), and the learning loop's second
+pass — products turned down per cuisine, favoured suggestions first, "Ekibin sildikleri" with "Geri al" (D-194).
+Earlier the same day: the AI menu assistant measured, rebuilt and re-measured (D-177…D-191). Backend 704 tests,
+mobile 75, both clean.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -41,7 +42,13 @@ learning from what the team keeps) and re-measured (after report); one simple ca
       push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
-**2026-09-25 — Onboarding Copilot: AI menu assistant (D-177…D-191).** Task in five stages; all done except the
+**2026-09-25 (evening) — production on `cc80e0c`, app 1.4.0 (D-192…D-194).** Deployed with `scripts/deploy.ps1`
+(migration 0005 + seed ran; pre-deploy dump `/opt/yedek/menu-kopilot-pre-0005.dump`), signed APK
+`MenuKopilot-1.4.0-arm64.apk` on the Desktop and sent to the user. New: `GET /analyze/history`, `GET /learning`,
+`POST /learning/forget`; phone: Analiz geçmişi (home → "Tümünü gör"), Ayarlar → Ekibin sildikleri, cards that open
+and close. The user tests on the phone against production.
+
+**Earlier on 2026-09-25 — Onboarding Copilot: AI menu assistant (D-177…D-191).** Task in five stages; all done except the
 device walk-through.
 - Harness `tests/ai_eval/` (27 hand-written menus, photos in five styles incl. blurred/skewed, 3 repository photos,
   141 cases; scoring independent of the backend; seeded manual sample). Baseline `docs/ai-eval/baseline-report.md`:
@@ -278,7 +285,7 @@ Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
 | 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
 | 12 | Release APK builds and runs on a real device | ✅ release APK (debug-signed) exercised on a Galaxy S23 FE / Android 16 (all tabs); the newest build (icon, sharing, typed products) still to be installed; own signing key optional |
 | 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-190 |
+| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-194 |
 | 15 | FAZ 1: new products never already on the menu; sections A/B/C; pinned counter; < 15 s | ✅ backend (e2e + live: 0/26 duplicates, ~3 s cold); ◐ app screens checked statically, not yet compiled (D-162) |
 
 ## Pending verification by the user
