@@ -241,6 +241,7 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
       // The last line of defence for the rule the whole redesign exists for: never more of a category than the
       // menu is actually short of. Both recommender paths already respect it; this makes it impossible to skip.
       const quota = new Map(input.categoryQuota);
+      const runTotal = [...input.categoryQuota.values()].reduce((sum, want) => sum + want, 0);
       const newProducts: ValidatedNewProduct[] = [];
       for (const raw of input.recommended) {
         const pool = raw.templateId ? input.templatePayloads?.get(raw.templateId) : undefined;
@@ -260,7 +261,8 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           dropped.push({ card: raw.name, reason: `kategori bu mutfakta yok (${raw.categoryKey})` });
           continue;
         }
-        if (left <= 0) {
+        // A quick run's fill-up may go past its category, never past the run's total (D-189).
+        if (left <= 0 && (!raw.overQuota || newProducts.length >= runTotal)) {
           dropped.push({ card: raw.name, reason: `${raw.categoryKey} kategorisi zaten yeterli` });
           continue;
         }
@@ -270,7 +272,7 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           continue;
         }
         grounding.push(...built.notes.map((n) => `${name}: ${n}`));
-        quota.set(raw.categoryKey, left - 1);
+        quota.set(raw.categoryKey, Math.max(0, left - 1));
         taken.add(normalized, raw.templateId);
         newProducts.push({
           ...raw,

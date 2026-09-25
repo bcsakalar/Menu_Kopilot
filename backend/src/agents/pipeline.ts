@@ -359,6 +359,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
             limit: plan.products,
             attemptTimeoutMs: plan.attemptTimeoutMs,
             aiUsable,
+            fillUp: plan.mode === 'quick',
           },
           boundedRun,
         ),

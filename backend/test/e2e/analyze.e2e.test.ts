@@ -105,7 +105,7 @@ describe('POST /analyze — typed menu', () => {
     for (const card of result.cards) expect(['new_product', 'option', 'fix']).toContain(card.section);
   });
 
-  it('quick mode: a handful of suggestions, one per category, never a second pide', async () => {
+  it('quick mode: a handful of suggestions spread over the categories, never a second pide', async () => {
     const result = await analyze({
       cuisineId: cuisineIdBySlug.get('pide-lahmacun')!,
       mode: 'quick',
@@ -122,9 +122,11 @@ describe('POST /analyze — typed menu', () => {
       expect(card.categoryKey).not.toBeNull();
       perCategory.set(card.categoryKey!, (perCategory.get(card.categoryKey!) ?? 0) + 1);
     }
-    // "Öneri versen yeter": a few products, each from a different category — the old recommender answered this
-    // menu with six more pides.
-    for (const [key, count] of perCategory) expect(count, `${key} tek ürün almalı`).toBeLessThanOrEqual(1);
+    // "Öneri versen yeter": six products spread over the categories — the old recommender answered this menu with
+    // six more pides. With fewer usable categories than six, a category may give a second, an open gap first (the
+    // drinks here, D-189); the mains, already served by the menu, never do.
+    for (const [key, count] of perCategory) expect(count, `${key} en fazla iki ürün almalı`).toBeLessThanOrEqual(2);
+    expect(perCategory.get('ana-yemek') ?? 0, 'ikinci pide yok').toBeLessThanOrEqual(1);
     expect(perCategory.size).toBeGreaterThanOrEqual(3);
     // And the emptiest category is the one that actually gets filled.
     expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
@@ -379,6 +381,51 @@ describe('degraded modes', () => {
       expect(result.stats?.llmCalls).toBe(0);
       // The DB path still knows what a pide place is missing.
       expect(result.cards.some((c) => c.section === 'new_product')).toBe(true);
+
+      // A soup kitchen in quick mode, pool only: six products, none of them twice — "Ayran" is seeded in several
+      // related cuisines and was picked twice, the copy then dropped, leaving five (D-189).
+      const soups = multipartBody(
+        {
+          cuisineId: rows.find((r) => r.slug === 'corba')!.id,
+          mode: 'quick',
+          menuText: 'Mercimek Çorbası, Ezogelin Çorbası, İşkembe Çorbası, Kelle Paça Çorbası, Yayla Çorbası, Tavuk Suyu Çorbası',
+        },
+        [],
+      );
+      const soupRes = await local.app.inject({
+        method: 'POST',
+        url: '/api/v1/analyze',
+        headers: { ...bearer(localToken), ...soups.headers },
+        payload: soups.payload,
+      });
+      expect(soupRes.statusCode, soupRes.body).toBe(200);
+      const soupNames = soupRes
+        .json<AnalyzeResult>()
+        .cards.filter((c) => c.section === 'new_product')
+        .map((c) => c.name.toLocaleLowerCase('tr-TR'));
+      expect(new Set(soupNames).size, soupNames.join(', ')).toBe(soupNames.length);
+      expect(soupNames.length, soupNames.join(', ')).toBe(6);
+
+      // A home-cooking menu whose salad category has nothing left in the pool: without a model the slot used to stay
+      // empty (five). Quick mode fills it from the other open categories — six, never past the run's total.
+      const home = multipartBody(
+        {
+          cuisineId: rows.find((r) => r.slug === 'ev-yemekleri')!.id,
+          mode: 'quick',
+          menuText: 'Kuru Fasulye, Tereyağlı Pirinç Pilavı, Karnıyarık, Tavuk Sote, Mercimek Çorbası, Cacık, Ayran',
+        },
+        [],
+      );
+      const homeRes = await local.app.inject({
+        method: 'POST',
+        url: '/api/v1/analyze',
+        headers: { ...bearer(localToken), ...home.headers },
+        payload: home.payload,
+      });
+      expect(homeRes.statusCode, homeRes.body).toBe(200);
+      const homeNew = homeRes.json<AnalyzeResult>().cards.filter((c) => c.section === 'new_product');
+      expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(6);
+      expect(new Set(homeNew.map((c) => c.name)).size).toBe(6);
     } finally {
       await local.close();
     }

@@ -180,6 +180,31 @@ describe('run plan — how many products and from which categories', () => {
     expect(plan.quota.get('menu-kampanya')).toBe(0);
   });
 
+  it('quick mode still gives six when the cuisine has fewer categories than that', () => {
+    // A döner shop: five categories besides the combo, one of them already full.
+    const doner = categoryGaps(
+      [
+        { key: 'ana-yemek', label: 'Ana Yemek', minItems: 6, sortOrder: 1 },
+        { key: 'ara-sicak', label: 'Ara Sıcak', minItems: 1, sortOrder: 2 },
+        { key: 'salata-meze', label: 'Salata & Meze', minItems: 1, sortOrder: 3 },
+        { key: 'yan-urun', label: 'Yan Ürün', minItems: 1, sortOrder: 4 },
+        { key: 'icecek', label: 'İçecek', minItems: 2, sortOrder: 5 },
+        { key: 'menu-kampanya', label: 'Menü & Kampanya', minItems: 1, sortOrder: 6 },
+      ],
+      new Map([
+        ['ana-yemek', 4],
+        ['yan-urun', 1],
+        ['icecek', 2],
+      ]),
+    );
+    const plan = planRun({ mode: 'quick', categories: doner, current: 7, missing: 7, needOptions: 5 });
+    expect(plan.products).toBe(6);
+    expect([...plan.quota.values()].every((v) => v <= 2)).toBe(true);
+    expect(plan.quota.get('menu-kampanya')).toBe(0);
+    // Still spread first: every usable category has one before any has two.
+    expect(['ana-yemek', 'ara-sicak', 'salata-meze', 'yan-urun', 'icecek'].every((key) => (plan.quota.get(key) ?? 0) >= 1)).toBe(true);
+  });
+
   it('quick mode on a one-product menu ("ürün ekle"): seven suggestions, a category may give two', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 1, missing: 19, needOptions: 1 });
     expect(plan.products).toBe(7);

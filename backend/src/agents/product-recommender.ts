@@ -51,6 +51,8 @@ export interface RecommendedItem {
   optionGroups: SuggestedOptionGroup[];
   removableIngredients: string[];
   extraIngredients: string[];
+  /** A quick-mode fill-up past its category's quota (see `fillUp` in the input); the Validator lets it through. */
+  overQuota?: boolean;
 }
 
 export interface ProductRecommenderInput {
@@ -73,6 +75,12 @@ export interface ProductRecommenderInput {
   attemptTimeoutMs: number;
   /** False when no provider is configured / the quota is spent: only the template pool answers. */
   aiUsable: boolean;
+  /**
+   * Quick mode (D-189): when the pool and the model together leave the run short of `limit` — a category with
+   * nothing left in the pool, a model that did not answer — more pool products of the other open categories fill
+   * it, past their quota. Six is the promise of "öneri versen yeter"; the spread is only a preference.
+   */
+  fillUp?: boolean;
 }
 
 export interface ProductRecommenderResult {
@@ -150,7 +158,9 @@ async function fromTemplates(
       if (left <= 0) continue;
       const bucket = buckets.get(gap.key) ?? [];
       let index = cursor.get(gap.key) ?? 0;
-      while (index < bucket.length && taken(bucket[index]!.normalized, bucket[index]!.id)) index += 1;
+      // A product seeded in several related cuisines is several rows ("Ayran" of kebap, of çorba…): once is enough.
+      const already = (normalized: string): boolean => picked.some((p) => p.normalized === normalized || sameProductName(p.normalized, normalized));
+      while (index < bucket.length && (taken(bucket[index]!.normalized, bucket[index]!.id) || already(bucket[index]!.normalized))) index += 1;
       cursor.set(gap.key, index + 1);
       const row = bucket[index];
       if (!row) continue;
@@ -236,12 +246,25 @@ export async function runProductRecommender(
         .filter((gap) => gap.want > 0);
       const remaining = Math.max(0, input.limit - dbItems.length);
 
+      /** Quick mode's fill-up: more pool products past their category's quota until the run has `limit`. */
+      const fillUp = async (items: RecommendedItem[]): Promise<RecommendedItem[]> => {
+        if (!input.fillUp || items.length >= input.limit || run.signal.aborted) return items;
+        const extra = await fromTemplates(
+          deps,
+          { ...input, limit: input.limit - items.length, quota: input.quota.map((gap) => ({ ...gap, want: input.limit })) },
+          isTaken,
+        );
+        for (const item of extra) take(item.normalized, item.templateId);
+        return [...items, ...extra.map((item) => ({ ...item, overQuota: true }))];
+      };
+
       if (remaining === 0 || remainingGaps.length === 0 || run.signal.aborted || !input.aiUsable) {
-        const templatePayloads = await templatePayloadsFor(deps, dbItems);
-        return done({ items: dbItems, fromDb: dbItems.length, fromAi: 0, attempts: [], llmCalls: 0, cached: false, templatePayloads }, {
-          fromDb: dbItems.length,
+        const items = await fillUp(dbItems);
+        const templatePayloads = await templatePayloadsFor(deps, items);
+        return done({ items, fromDb: items.length, fromAi: 0, attempts: [], llmCalls: 0, cached: false, templatePayloads }, {
+          fromDb: items.length,
           fromAi: 0,
-          names: dbItems.map((i) => i.name),
+          names: items.map((i) => i.name),
         });
       }
 
@@ -341,19 +364,20 @@ export async function runProductRecommender(
       const model = runs.find((r) => r.meta)?.meta?.model;
       if (answered.length === 0) {
         const error = runs.find((r) => r.error)?.error ?? 'model cevabı yok';
+        const items = await fillUp(dbItems);
         return done(
           {
-            items: dbItems,
-            fromDb: dbItems.length,
+            items,
+            fromDb: items.length,
             fromAi: 0,
             attempts,
             llmCalls: countCalls(attempts),
             cached: false,
             error,
-            templatePayloads: await templatePayloadsFor(deps, dbItems),
+            templatePayloads: await templatePayloadsFor(deps, items),
           },
-          { fromDb: dbItems.length, fromAi: 0 },
-          dbItems.length > 0 ? 'ok' : 'failed',
+          { fromDb: items.length, fromAi: 0, names: items.map((i) => i.name) },
+          items.length > 0 ? 'ok' : 'failed',
         );
       }
       const raw = { items: answered.flatMap((a) => a.items) };
@@ -409,11 +433,11 @@ export async function runProductRecommender(
         aiItems.push(item);
       }
 
-      const items = [...dbItems, ...aiItems];
+      const items = await fillUp([...dbItems, ...aiItems]);
       return done(
         {
           items,
-          fromDb: dbItems.length,
+          fromDb: items.length - aiItems.length,
           fromAi: aiItems.length,
           attempts,
           llmCalls: countCalls(attempts),
@@ -423,7 +447,7 @@ export async function runProductRecommender(
           ...(model ? { model } : {}),
         },
         {
-          fromDb: dbItems.length,
+          fromDb: items.length - aiItems.length,
           fromAi: aiItems.length,
           cached,
           batches: plannedBatches.length,

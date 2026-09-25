@@ -180,6 +180,14 @@ export function planRun(input: PlanInput): RunPlan {
     const perCategory = !small && input.categories.length >= QUICK_SPREAD_CATEGORIES ? 1 : 2;
     const wanted = small ? QUICK_PRODUCTS_SMALL_MENU : QUICK_PRODUCTS;
     const quota = allocate(input.categories, wanted, (c) => (LAST_RESORT.has(c.key) ? 0 : perCategory));
+    // Six is the promise, the spread only a preference: a cuisine with five usable categories (a döner shop) came
+    // back with five. Once every category has its one, the rest go out again — the open gaps first, then what the
+    // cuisine leans on most — at most one more each (D-189).
+    if (sum(quota) < wanted && perCategory === 1) {
+      const rest = input.categories.map((c) => ({ ...c, missing: Math.max(0, c.missing - (quota.get(c.key) ?? 0)) }));
+      const second = allocate(rest, wanted - sum(quota), (c) => (LAST_RESORT.has(c.key) ? 0 : 1));
+      for (const [key, count] of second) quota.set(key, (quota.get(key) ?? 0) + count);
+    }
     return {
       mode: 'quick',
       products: sum(quota),
