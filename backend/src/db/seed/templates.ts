@@ -9,6 +9,7 @@ import { KOMBO_ICECEK_TEMPLATES } from './templates-kombo-icecek.js';
 import { KEBAP_EK_TEMPLATES } from './templates-kebap-ek.js';
 import { TATLI_DIGER_TEMPLATES } from './templates-tatli-diger.js';
 import { TATLI_SOKAK_EK_TEMPLATES } from './templates-tatli-sokak-ek.js';
+import { SHORT_DESCRIPTIONS } from './short-descriptions.js';
 import type { SeedTemplate } from './template-types.js';
 
 /**
@@ -17,7 +18,7 @@ import type { SeedTemplate } from './template-types.js';
  * The same product may appear in several cuisines (e.g. Ayran for kebap, çiğ köfte and ev yemekleri); matching
  * prefers the branch's own cuisine.
  */
-export const SEED_TEMPLATES: readonly SeedTemplate[] = [
+const ALL_TEMPLATES: readonly SeedTemplate[] = [
   ...KEBAP_DONER_TEMPLATES,
   ...HAMUR_EV_TEMPLATES,
   ...TATLI_DIGER_TEMPLATES,
@@ -32,3 +33,17 @@ export const SEED_TEMPLATES: readonly SeedTemplate[] = [
   ...KOMBO_ICECEK_TEMPLATES,
   ...EK_GENIS_TEMPLATES,
 ];
+
+/**
+ * The templates with their panel descriptions: 6–8 words, or empty for a packaged drink (D-178). The dish data
+ * above keeps its original long descriptions as the source they were shortened from.
+ */
+export const SEED_TEMPLATES: readonly SeedTemplate[] = ALL_TEMPLATES.map((t) => {
+  const short = SHORT_DESCRIPTIONS[`${t.cuisine}|${t.payload.name}`];
+  if (short === undefined) return t;
+  // An empty description marks a packaged drink: the whole row is plain on the panel, options included.
+  if (short === '') {
+    return { ...t, payload: { ...t.payload, description: '', optionGroups: [], removableIngredients: [], extraIngredients: [], upsellSuggestion: '' } };
+  }
+  return { ...t, payload: { ...t.payload, description: short } };
+});

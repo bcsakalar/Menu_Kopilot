@@ -32,16 +32,18 @@ describe('seed data', () => {
     }
   });
 
-  it('descriptions are a single short sentence (60–160 chars) without ad language', () => {
+  it('descriptions are the panel line: 6–8 words, no ad language — or empty for a packaged drink', () => {
+    const words = (text: string) => text.split(/\s+/u).filter((w) => /\p{L}/u.test(w)).length;
     for (const t of SEED_TEMPLATES) {
       const d = t.payload.description;
-      // A drink goes on the panel as a plain row — name only, no description and no options (D-175).
+      // A packaged drink goes on the panel as a plain row: name only, no description and no options (D-175).
       if (d.length === 0) {
         expect(t.payload.optionGroups, t.payload.name).toHaveLength(0);
         continue;
       }
-      expect(d.length, t.payload.name).toBeGreaterThanOrEqual(60);
-      expect(d.length, t.payload.name).toBeLessThanOrEqual(160);
+      // "Her ürün için 6–8 kelimelik doğal Türkçe açıklama" (D-178).
+      expect(words(d), `${t.cuisine} / ${t.payload.name}: ${d}`).toBeGreaterThanOrEqual(6);
+      expect(words(d), `${t.cuisine} / ${t.payload.name}: ${d}`).toBeLessThanOrEqual(8);
       expect(d).not.toMatch(/eşsiz|muhteşem|enfes|nefis|harika|mükemmel/i);
     }
   });

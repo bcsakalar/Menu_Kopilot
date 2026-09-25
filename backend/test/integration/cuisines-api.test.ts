@@ -5,6 +5,7 @@ import { cuisines, menuCategories, menuItems } from '../../src/db/schema/index.j
 import { insertTemplate } from '../../src/modules/templates/template-store.js';
 import { SEED_CATEGORIES } from '../../src/db/seed/categories.js';
 import { CUISINE_SLUGS } from '../../src/db/seed/cuisines.js';
+import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
 
@@ -29,6 +30,8 @@ interface CuisineDto {
   isSystem: boolean;
   minItemCount: number;
   targetItemCount: number;
+  typicalItemCount: number | null;
+  targetNote: string | null;
   templateCount: number;
 }
 
@@ -51,8 +54,18 @@ describe('cuisines API', () => {
     expect(data).toHaveLength(CUISINE_SLUGS.length);
     const kebap = data.find((c) => c.slug === 'kebap-izgara');
     const kebapTemplates = SEED_TEMPLATES.filter((t) => t.cuisine === 'kebap-izgara').length;
-    expect(kebap).toMatchObject({ isSystem: true, minItemCount: 10, targetItemCount: 10, templateCount: kebapTemplates });
+    // The realistic opening target (D-177): a kebab house carries ~35 products and opens with 20.
+    expect(kebap).toMatchObject({
+      isSystem: true,
+      minItemCount: CUISINE_TARGETS['kebap-izgara'].target,
+      targetItemCount: CUISINE_TARGETS['kebap-izgara'].target,
+      typicalItemCount: CUISINE_TARGETS['kebap-izgara'].typical,
+      templateCount: kebapTemplates,
+    });
+    expect(kebap?.targetNote?.length).toBeGreaterThan(10);
     expect(data.every((c) => c.templateCount >= 5)).toBe(true);
+    // Never below the 10-product rule.
+    expect(data.every((c) => c.targetItemCount >= 10)).toBe(true);
   });
 
   it('lets the user set the real minimum product count (target = max(10, min))', async () => {

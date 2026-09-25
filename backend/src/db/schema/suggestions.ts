@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, numeric, pgTable, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { cuisines } from './cuisines.js';
 import { fixKind, runMode, runStatus, suggestionItemSource, suggestionSection } from './enums.js';
 import { menuItems } from './menu-items.js';
@@ -69,6 +69,10 @@ export const suggestionItems = pgTable(
     payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
     /** null = pending, true = accepted (template saved), false = skipped. */
     accepted: boolean('accepted'),
+    /** Product type from the knowledge base (`product_types.key`), for the learning loop. */
+    productType: text('product_type'),
+    /** 0–100: how sure the pipeline is about this card (pool template high, generic fill low). */
+    confidence: smallint('confidence'),
     editedPayload: jsonb('edited_payload').$type<Record<string, unknown>>(),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

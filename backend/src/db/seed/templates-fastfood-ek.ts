@@ -754,7 +754,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     description: 'Dirsek makarna cheddar ağırlıklı kremalı peynir sosuyla karıştırılıp üzeri gratine edilerek pişirilir.',
     servingNote: 'Sıcak servis; fırın kabında gönderilir.',
     portionInfo: '1 porsiyon ~300 g',
-    groups: [makarnaPorsiyon, single('Ekstra', ['Sade', { name: 'Tavuklu', mode: 'surcharge' }, { name: 'Dana Füme', mode: 'surcharge' }, { name: 'Jalapeñolu', mode: 'surcharge' }], { required: true, defaultIndex: 0 })],
+    groups: [makarnaPorsiyon, single('Çeşit', ['Sade', { name: 'Tavuklu', mode: 'surcharge' }, { name: 'Dana Füme', mode: 'surcharge' }, { name: 'Jalapeñolu', mode: 'surcharge' }], { required: true, defaultIndex: 0 })],
     removable: ['Galeta Unu'],
     extras: ['Ekstra Cheddar'],
     tags: ['fırın makarna', 'peynirli', 'çocuk dostu'],

@@ -29,10 +29,12 @@ describe('migrations', () => {
     await handle.close();
   });
 
-  it('applies all migrations (17 tables + extensions)', async () => {
+  it('applies all migrations (19 tables + extensions)', async () => {
     await handle.migrate();
     const tables = await publicTables(handle);
-    expect(tables).toHaveLength(17);
+    expect(tables).toHaveLength(19);
+    // 0004: the product-type knowledge base and the feedback log of the learning loop.
+    expect(tables).toEqual(expect.arrayContaining(['product_types', 'suggestion_feedback']));
     expect(tables).toContain('menu_items');
     expect(tables).toContain('item_embeddings');
     expect(await extensions(handle)).toEqual(expect.arrayContaining(['pg_trgm', 'vector']));
@@ -51,8 +53,12 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003 sits on top of 0002, so both come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 2)).map((r) => r.tag)).toEqual(['0003_agents_categories', '0002_vision_routes']);
+    // 0003 and 0004 sit on top of 0002, so all three come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 3)).map((r) => r.tag)).toEqual([
+      '0004_product_types',
+      '0003_agents_categories',
+      '0002_vision_routes',
+    ]);
     // The vision chain as the first seed wrote it.
     await executeRows(
       handle.db,
@@ -68,7 +74,11 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 2)).map((r) => r.tag)).toEqual(['0003_agents_categories', '0002_vision_routes']);
+    expect((await rollbackMigrations(handle.db, 3)).map((r) => r.tag)).toEqual([
+      '0004_product_types',
+      '0003_agents_categories',
+      '0002_vision_routes',
+    ]);
     expect((await chain('vision.menu_extract')).map((r) => r['model'])).toEqual([
       'gemini-3.8-flash',
       'qwen/qwen3.8-27b',
@@ -79,6 +89,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
+    // 0004 takes its two tables with it.
+    const knowledge = await rollbackMigrations(handle.db, 1);
+    expect(knowledge.map((r) => r.tag)).toEqual(['0004_product_types']);
+    expect(await publicTables(handle)).toHaveLength(17);
+
     // 0003 restores the branch tables as empty structures, so the table count is the same on both sides of it.
     const agents = await rollbackMigrations(handle.db, 1);
     expect(agents.map((r) => r.tag)).toEqual(['0003_agents_categories']);
@@ -100,7 +115,7 @@ describe('migrations', () => {
     expect(await rollbackMigrations(handle.db, 1)).toEqual([]);
 
     await handle.migrate();
-    expect(await publicTables(handle)).toHaveLength(17);
+    expect(await publicTables(handle)).toHaveLength(19);
   });
 
   it('splits statements on drizzle breakpoints and drops comment-only chunks', () => {

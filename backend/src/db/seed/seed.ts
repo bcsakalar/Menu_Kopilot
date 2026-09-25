@@ -6,9 +6,14 @@ import { normalizeTr } from '../../lib/normalize-tr.js';
 import { loadCategoryIndex } from '../../agents/gap-analyst.js';
 import { findApprovedByName, insertTemplate, recategorizeTemplates, replaceTemplateContent } from '../../modules/templates/template-store.js';
 import type { Database } from '../client.js';
-import { cuisineCategories, cuisines, menuCategories, menuItems, promptTemplates, providerConfigs, users } from '../schema/index.js';
+import { cuisineCategories, cuisines, menuCategories, menuItems, productTypes, promptTemplates, providerConfigs, users } from '../schema/index.js';
 import { SEED_CATEGORIES, SEED_CUISINE_CATEGORIES } from './categories.js';
+import { CUISINE_TARGETS } from './cuisine-targets.js';
+import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, PRODUCT_TYPES_VERSION, SEED_PRODUCT_TYPES } from './product-types.js';
 import { LEGACY_NOTES, SEED_CUISINES } from './cuisines.js';
+
+/** The opening target every seeded cuisine started with before the researched targets (D-177). */
+const LEGACY_MIN_ITEM_COUNT = 10;
 import { SEED_PROMPTS } from './prompts.js';
 import { SEED_TEMPLATES } from './templates.js';
 
@@ -30,6 +35,10 @@ export interface SeedReport {
   categoriesInserted: number;
   cuisineCategoriesInserted: number;
   templatesCategorized: number;
+  /** Product-type rows inserted or refreshed (a user-edited row is left alone). */
+  productTypesWritten: number;
+  /** Cuisines whose opening target moved to the researched value (never one set by hand). */
+  cuisineTargetsApplied: number;
 }
 
 /**
@@ -54,6 +63,8 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
     categoriesInserted: 0,
     cuisineCategoriesInserted: 0,
     templatesCategorized: 0,
+    productTypesWritten: 0,
+    cuisineTargetsApplied: 0,
   };
 
   // Validate everything up-front so a broken seed never half-applies.
@@ -134,6 +145,64 @@ export async function seedDatabase(db: Database, options: SeedOptions = {}): Pro
         })
         .returning({ key: menuCategories.key });
       report.categoriesInserted += inserted.length;
+    }
+
+    // --- product-type knowledge base (D-179) ----------------------------------------------------------------------
+    // Refreshed on every seed until the user edits a type; from then on the row is theirs.
+    for (const type of SEED_PRODUCT_TYPES) {
+      const values = {
+        label: type.label,
+        categoryKey: type.categoryKey,
+        keywords: [...type.keywords],
+        plain: type.plain,
+        optionGroups: [...type.optionGroups],
+        removable: [...type.removable],
+        extras: [...type.extras],
+        forbiddenGroups: [...type.forbiddenGroups],
+        forbiddenIngredients: [...(type.forbiddenIngredients ?? [])],
+        fallbackDescription: type.fallbackDescription,
+        cuisines: [...type.cuisines],
+        priority: type.priority ?? 0,
+        version: PRODUCT_TYPES_VERSION,
+        updatedAt: new Date(),
+      };
+      const written = await tx
+        .insert(productTypes)
+        .values({ key: type.key, ...values })
+        .onConflictDoUpdate({ target: productTypes.key, set: values, setWhere: eq(productTypes.editedByUser, false) })
+        .returning({ key: productTypes.key });
+      report.productTypesWritten += written.length;
+    }
+    for (const [categoryKey, typeKey] of Object.entries(CATEGORY_DEFAULT_TYPE)) {
+      await tx
+        .update(menuCategories)
+        .set({ defaultProductType: typeKey })
+        .where(and(eq(menuCategories.key, categoryKey), eq(menuCategories.editedByUser, false)));
+    }
+
+    // --- realistic cuisine targets (D-177) --------------------------------------------------------------------------
+    // The research numbers and the default product type are descriptive and always refreshed; the opening target
+    // itself only while nobody set it by hand.
+    for (const [slug, target] of Object.entries(CUISINE_TARGETS)) {
+      await tx
+        .update(cuisines)
+        .set({ typicalItemCount: target.typical, targetNote: target.note, defaultProductType: CUISINE_DEFAULT_TYPE[slug] ?? null })
+        .where(eq(cuisines.slug, slug));
+      // Only while the target is still the old seeded default (10): anything else was typed by someone — through
+      // the app (flagged) or straight into the database (not flagged, but still not ours to replace).
+      const moved = await tx
+        .update(cuisines)
+        .set({ minItemCount: target.target })
+        .where(
+          and(
+            eq(cuisines.slug, slug),
+            eq(cuisines.minItemCountEditedByUser, false),
+            eq(cuisines.minItemCount, LEGACY_MIN_ITEM_COUNT),
+            sql`${cuisines.minItemCount} <> ${target.target}`,
+          ),
+        )
+        .returning({ id: cuisines.id });
+      report.cuisineTargetsApplied += moved.length;
     }
 
     for (const entry of SEED_CUISINE_CATEGORIES) {

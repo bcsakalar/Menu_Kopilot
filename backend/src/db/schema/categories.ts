@@ -23,6 +23,8 @@ export const menuCategories = pgTable(
     keywords: jsonb('keywords').$type<string[]>().notNull().default([]),
     /** Set by an edit in settings; from then on the seed (run on every start) no longer refreshes this row. */
     editedByUser: boolean('edited_by_user').notNull().default(false),
+    /** The product type an unrecognized product of this category most likely is. */
+    defaultProductType: text('default_product_type'),
   },
   (t) => [index('menu_categories_sort_idx').on(t.sortOrder)],
 );

@@ -13,6 +13,14 @@ export const cuisines = pgTable(
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     /** Minimum product count expected for a branch opening in this cuisine (user-editable, never hard-coded). */
     minItemCount: integer('min_item_count').notNull().default(10),
+    /** Set when the user changes the target in settings; the seed's realistic targets never replace it (D-177). */
+    minItemCountEditedByUser: boolean('min_item_count_edited_by_user').notNull().default(false),
+    /** A realistic product count for a delivery menu of this cuisine (the research behind the target). */
+    typicalItemCount: integer('typical_item_count'),
+    /** Why the target is what it is — shown next to it in settings. */
+    targetNote: text('target_note'),
+    /** The product type an unrecognized product of this cuisine most likely is ("Karışık" in a pide shop). */
+    defaultProductType: text('default_product_type'),
     notes: text('notes'),
     /** The user edited which categories this cuisine needs (cuisine_categories); the seed no longer touches them. */
     categoriesEditedByUser: boolean('categories_edited_by_user').notNull().default(false),

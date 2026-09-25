@@ -9,6 +9,10 @@ export const cuisineDtoSchema = z.object({
   minItemCount: z.number().int(),
   /** max(10, minItemCount) — the branch-opening target for this cuisine. */
   targetItemCount: z.number().int(),
+  /** What a complete delivery menu of this cuisine usually carries (research, D-177); null for user cuisines. */
+  typicalItemCount: z.number().int().nullable(),
+  /** Why the target is what it is. */
+  targetNote: z.string().nullable(),
   notes: z.string().nullable(),
   templateCount: z.number().int(),
 });

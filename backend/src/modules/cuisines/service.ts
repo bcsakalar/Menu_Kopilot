@@ -29,6 +29,8 @@ export class CuisineService {
         parentId: cuisines.parentId,
         isSystem: cuisines.isSystem,
         minItemCount: cuisines.minItemCount,
+        typicalItemCount: cuisines.typicalItemCount,
+        targetNote: cuisines.targetNote,
         notes: cuisines.notes,
       })
       .from(cuisines)
@@ -86,7 +88,8 @@ export class CuisineService {
       .set({
         ...(input.name !== undefined ? { name: input.name } : {}),
         ...(input.parentId !== undefined ? { parentId: input.parentId } : {}),
-        ...(input.minItemCount !== undefined ? { minItemCount: input.minItemCount } : {}),
+        // A target typed in the app is the user's: the seed's realistic targets never replace it again (D-177).
+        ...(input.minItemCount !== undefined ? { minItemCount: input.minItemCount, minItemCountEditedByUser: true } : {}),
         ...(input.notes !== undefined ? { notes: input.notes } : {}),
         updatedAt: new Date(),
       })

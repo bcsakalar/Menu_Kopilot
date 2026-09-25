@@ -179,7 +179,7 @@ export const DUNYA_DENIZ_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'balik-deniz',
     importance: 72,
-    aliases: ['Levrek', 'Izgara Levrek', 'Levrek Buğulama', 'Levrek Fileto'],
+    aliases: ['Levrek', 'Izgara Levrek', 'Levrek Fileto'],
     name: 'Levrek Izgara',
     description: 'Bütün ya da fileto levrek ızgarada, fırında veya buğulama pişirilir; roka salatası ve limonla servis edilir.',
     servingNote: 'Sıcak servis; balık kılçığı ayıklanmadan (bütün) ya da fileto, garnitür ayrı bölmede gönderilir.',
@@ -194,7 +194,7 @@ export const DUNYA_DENIZ_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'balik-deniz',
     importance: 70,
-    aliases: ['Çipura', 'Izgara Çipura', 'Çipura Buğulama', 'Çupra'],
+    aliases: ['Çipura', 'Izgara Çipura', 'Çupra'],
     name: 'Çipura Izgara',
     description: 'Bütün çipura ızgarada, fırında ya da buğulama olarak pişirilir; roka, soğan ve limonla servis edilir.',
     servingNote: 'Sıcak servis; garnitür ayrı bölmede gönderilir.',
@@ -209,7 +209,7 @@ export const DUNYA_DENIZ_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'balik-deniz',
     importance: 60,
-    aliases: ['Somon', 'Izgara Somon', 'Somon Fileto', 'Fırında Somon'],
+    aliases: ['Somon', 'Izgara Somon', 'Somon Fileto'],
     name: 'Somon Izgara',
     description: 'Norveç somonu fileto ızgarada ya da fırında pişirilir; sebze, patates püresi veya pilavla servis edilir.',
     servingNote: 'Sıcak servis; garnitür ayrı bölmede, sos ayrı kapta gönderilir.',

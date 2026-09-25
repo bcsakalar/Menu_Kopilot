@@ -12,6 +12,8 @@ import {
 } from '../../src/db/schema/index.js';
 import { countSeedTemplates, seedDatabase } from '../../src/db/seed/seed.js';
 import { SEED_CATEGORIES, SEED_CUISINE_CATEGORIES } from '../../src/db/seed/categories.js';
+import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
+import { SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
 import { LEGACY_NOTES, SEED_CUISINES } from '../../src/db/seed/cuisines.js';
 import { SEED_PROMPTS } from '../../src/db/seed/prompts.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
@@ -51,6 +53,9 @@ describe('seedDatabase', () => {
       categoriesInserted: SEED_CATEGORIES.length,
       cuisineCategoriesInserted: SEED_CUISINE_CATEGORIES.length,
       templatesCategorized: SEED_TEMPLATES.length,
+      productTypesWritten: SEED_PRODUCT_TYPES.length,
+      // Every seeded cuisine starts at 10 and moves to its researched target (none of them is exactly 10).
+      cuisineTargetsApplied: Object.values(CUISINE_TARGETS).filter((t) => t.target !== 10).length,
     });
     expect(await countSeedTemplates(handle.db)).toBe(SEED_TEMPLATES.length);
 

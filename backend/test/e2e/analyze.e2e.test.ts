@@ -5,6 +5,7 @@ import { FakeProvider, hashEmbedding } from '../helpers/fake-provider.js';
 import { bearer, createTestApp, loginAs, type TestContext } from '../helpers/test-app.js';
 import { fixtureImage, fixtureResponder, loadFixtures, multipartBody, parseSse, type Fixtures } from '../helpers/fixtures.js';
 import type { AnalyzeResult, CardDto } from '../../src/modules/analyze/schemas.js';
+import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 
 /**
  * End-to-end coverage of the agent pipeline through `POST /api/v1/analyze`.
@@ -85,7 +86,8 @@ describe('POST /analyze — typed menu', () => {
     expect(result.menu).toHaveLength(5);
     expect(result.counts).not.toBeNull();
     expect(result.counts!.current).toBe(5);
-    expect(result.counts!.target).toBe(10);
+    // The realistic opening target of the cuisine (D-177), never below the 10-product rule.
+    expect(result.counts!.target).toBe(CUISINE_TARGETS['pide-lahmacun'].target);
     expect(result.counts!.hardMinimum).toBe(10);
 
     const onMenu = new Set(result.menu.map((m) => m.normalized));

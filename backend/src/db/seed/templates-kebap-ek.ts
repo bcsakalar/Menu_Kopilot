@@ -111,7 +111,7 @@ export const KEBAP_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'kebap-izgara',
     importance: 55,
-    aliases: ['Ciğer', 'Ciğer Kebabı', 'Kuzu Ciğer Şiş', 'Diyarbakır Ciğer', 'Ciğer Dürüm'],
+    aliases: ['Ciğer', 'Ciğer Kebabı', 'Kuzu Ciğer Şiş', 'Diyarbakır Ciğer'],
     name: 'Ciğer Şiş',
     description:
       'Kuzu ciğeri kuyruk yağıyla şişe dizilip közde pişirilir; soğan, maydanoz, közlenmiş biber ve lavaşla servis edilir.',
@@ -417,7 +417,7 @@ export const KEBAP_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'pide-lahmacun',
     importance: 45,
-    aliases: ['Pastırmalı Pide', 'Pastırmalı Kaşarlı', 'Pastırmalı Yumurtalı Pide'],
+    aliases: ['Pastırmalı Pide', 'Pastırmalı Kaşarlı'],
     name: 'Pastırmalı Kaşarlı Pide',
     description: 'Kayseri pastırması ve eritilmiş kaşarla taş fırında pişen açık pide; isteğe göre yumurta kırılır.',
     servingNote: 'Sıcak servis; dilimlenmiş olarak pide kutusunda gönderilir.',

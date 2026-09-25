@@ -125,7 +125,7 @@ export const HAMUR_EV_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'pide-lahmacun',
     importance: 62,
-    aliases: ['Sucuklu Pide', 'Sucuklu Kaşarlı Pide', 'Sucuk Yumurtalı Pide', 'Yumurtalı Sucuklu Pide'],
+    aliases: ['Sucuklu Pide', 'Sucuk Yumurtalı Pide', 'Yumurtalı Sucuklu Pide'],
     name: 'Sucuklu Yumurtalı Pide',
     description: 'Tekne hamur üzerine dilim sucuk, kaşar ve yumurta konup taş fırında pişirilir; tereyağıyla servis edilir.',
     servingNote: 'Sıcak servis; yumurta sarısı isteğe göre akışkan bırakılır, dilimli olarak kutuda gönderilir.',

@@ -5,5 +5,6 @@ export * from './categories.js';
 export * from './menu-items.js';
 export * from './suggestions.js';
 export * from './agents.js';
+export * from './knowledge.js';
 export * from './system.js';
 export * from './relations.js';
