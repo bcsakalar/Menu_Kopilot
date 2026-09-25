@@ -20,7 +20,7 @@ export const recommendedProductSchema = z.object({
   shortDescription: z
     .string()
     .max(400)
-    .describe('Panele yapıştırılabilir TEK cümle, 60–140 karakter. Reklam dili ve fiyat yok.'),
+    .describe('Panele yapıştırılabilir TEK cümle, 6–8 kelime. Reklam dili ve fiyat yok.'),
   portionInfo: z.string().max(60).describe('Porsiyon/hacim bilgisi burada: "1 porsiyon ~180 g", "330 ml". Yoksa boş.'),
   priceRangeHint: z
     .string()
@@ -34,7 +34,7 @@ export const recommendedProductSchema = z.object({
    * description, portion, options and ingredients — which is exactly what gets typed into the panel.
    * Optional so that a model (or an older recorded answer) that leaves them out still produces the product.
    */
-  optionGroups: z.array(suggestedOptionGroupSchema).max(4).nullish().describe('Ürün panele girilirken açılacak 1–2 grup. Yoksa boş dizi.'),
+  optionGroups: z.array(suggestedOptionGroupSchema).max(4).nullish().describe('Ürün panele girilirken açılacak 2–3 grup. Hazır içecekte boş dizi.'),
   removableIngredients: z.array(z.string().max(80)).max(12).nullish().describe('Müşterinin çıkarabileceği malzemeler. Yoksa boş dizi.'),
   extraIngredients: z.array(z.string().max(80)).max(12).nullish().describe('Ek ücretle eklenebilecek malzemeler. Yoksa boş dizi.'),
 });

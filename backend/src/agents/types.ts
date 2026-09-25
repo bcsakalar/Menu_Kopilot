@@ -4,8 +4,10 @@ import type { AiRouter, AttemptRecord, CallContext } from '../ai/router.js';
 import type { Cache } from '../cache/cache.js';
 import type { Database } from '../db/client.js';
 import type { CategoryIndex } from '../domain/category.js';
+import type { ProductTypeIndex } from '../domain/product-type.js';
 import type { RetrievalService } from '../modules/retrieval/retrieval.service.js';
 import type { VisionExtractor } from '../modules/extraction/vision-extractor.js';
+import type { FeedbackIndex } from './knowledge.js';
 import type { AgentTracer } from './tracer.js';
 
 /** The six pipeline steps, in order. Also the `agent_steps.agent` values and the debug screen's row labels. */
@@ -37,6 +39,10 @@ export interface AgentDeps {
   cache: Cache;
   cacheTtlSeconds: number;
   categories: CategoryIndex;
+  /** The knowledge base: cuisine → product type → option templates and typical ingredients (D-179). */
+  productTypes: ProductTypeIndex;
+  /** What this team keeps and removes, per product type (D-180). */
+  feedback: FeedbackIndex;
   extractor: VisionExtractor;
   tracer: AgentTracer;
 }
@@ -72,6 +78,8 @@ export interface ExistingItem {
   canonicalName: string | null;
   matchedTemplateId: string | null;
   categoryKey: string;
+  /** Product type from the knowledge base (`product_types.key`): decides which options can apply at all. */
+  productType: string;
   sectionText: string | null;
   /** From a panel screenshot: does the product already have a description / options / removables? */
   hasDescription: 'present' | 'absent' | 'unknown';

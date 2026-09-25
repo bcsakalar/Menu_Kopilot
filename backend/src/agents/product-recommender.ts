@@ -4,6 +4,7 @@ import { getJson, setJson } from '../cache/cache.js';
 import { menuItems } from '../db/schema/index.js';
 import { sha256Hex } from '../lib/images.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
+import { sameProductName, variantConflict } from '../lib/same-product.js';
 import type { CuisineGraph } from '../modules/retrieval/cuisine-graph.js';
 import type { QuotaRow } from './plan.js';
 import type { SuggestedOptionGroup } from './schemas/option-modifier.js';
@@ -202,10 +203,15 @@ export async function runProductRecommender(
       const takenTemplates = new Set<string>();
       for (const item of input.existing) {
         takenNames.add(item.normalized);
+        // The pool's spelling of a menu product ("Mercimek" → "Mercimek Çorbası") is on the menu too: the same
+        // product seeded in another cuisine has another template id, so the id alone does not catch it.
+        if (item.canonicalName) takenNames.add(normalizeTr(item.canonicalName));
         if (item.matchedTemplateId) takenTemplates.add(item.matchedTemplateId);
       }
       const isTaken = (normalized: string, templateId: string | null): boolean =>
-        takenNames.has(normalized) || (templateId !== null && takenTemplates.has(templateId));
+        takenNames.has(normalized) ||
+        (templateId !== null && takenTemplates.has(templateId)) ||
+        [...takenNames].some((name) => sameProductName(name, normalized));
       const take = (normalized: string, templateId: string | null): void => {
         takenNames.add(normalized);
         if (templateId) takenTemplates.add(templateId);
@@ -383,6 +389,9 @@ export async function runProductRecommender(
         for (const candidate of candidates) {
           const hit = matched.hits.get(candidate.normalized);
           if (!hit) continue;
+          // "Levrek Buğulama" proposed by the model is not the pool's "Levrek Izgara", however close the letters.
+          const fuzzy = hit.matchType !== 'exact' && hit.matchType !== 'alias';
+          if (fuzzy && variantConflict(candidate.normalized, normalizeTr(hit.canonicalName))) continue;
           candidate.templateId = hit.templateId;
           candidate.name = hit.canonicalName;
           candidate.normalized = normalizeTr(hit.canonicalName);

@@ -7,6 +7,9 @@ import { fixtureImage, fixtureResponder, loadFixtures, multipartBody, parseSse, 
 import type { AnalyzeResult, CardDto } from '../../src/modules/analyze/schemas.js';
 import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 
+/** Words the way the panel counts them: 6–8 per description (D-178). */
+const words = (text: string): number => text.split(/\s+/u).filter((w) => /\p{L}/u.test(w)).length;
+
 /**
  * End-to-end coverage of the agent pipeline through `POST /api/v1/analyze`.
  * Providers are fakes driven by the recorded fixtures, so these assertions are about the pipeline's own rules:
@@ -125,14 +128,21 @@ describe('POST /analyze — typed menu', () => {
     expect(perCategory.size).toBeGreaterThanOrEqual(3);
     // And the emptiest category is the one that actually gets filled.
     expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
-    // Every new product arrives with its own options — except a drink, which goes on the panel as a plain row.
-    const suggested = bySection(result, 'new_product');
-    expect(suggested.filter((c) => c.categoryKey !== 'icecek').every((c) => c.optionGroups.length > 0)).toBe(true);
-    for (const drink of suggested.filter((c) => c.categoryKey === 'icecek')) {
-      expect(drink.optionGroups, drink.name).toHaveLength(0);
-      expect(drink.shortDescription, drink.name).toBe('');
+    // Every new product arrives with its four sections — except a packaged drink, which is a plain panel row. A
+    // prepared drink (limonata, latte) is not plain: it has a size and a description like any dish.
+    for (const card of bySection(result, 'new_product')) {
+      if (card.productType === 'mesrubat') {
+        expect(card.optionGroups, card.name).toHaveLength(0);
+        expect(card.shortDescription, card.name).toBe('');
+        continue;
+      }
+      expect(card.optionGroups.length, card.name).toBeGreaterThan(0);
+      expect(card.removableIngredients.length + card.extraIngredients.length, card.name).toBeGreaterThan(0);
+      expect(words(card.shortDescription), `${card.name}: ${card.shortDescription}`).toBeGreaterThanOrEqual(6);
+      expect(words(card.shortDescription), `${card.name}: ${card.shortDescription}`).toBeLessThanOrEqual(8);
     }
-    expect(bySection(result, 'option').length).toBeGreaterThan(0);
+    // "Yalandan olan" still completes several products already on the menu, not two or three.
+    expect(bySection(result, 'option')).toHaveLength(5);
   });
 
   it('full mode: keeps recommending past the category minimums, up to the opening target', async () => {
@@ -154,11 +164,11 @@ describe('POST /analyze — typed menu', () => {
     expect(exceeded.length, 'tam modda en az bir kategori kendi açığını aşmalı').toBeGreaterThan(0);
     expect(result.counts!.current + newProducts.length).toBeGreaterThanOrEqual(result.counts!.target);
     expect(result.warnings.some((w) => w.code === 'target_unreachable')).toBe(false);
-    // Every product on the menu that is not a drink gets an option/ingredient card, and every suggested product
-    // that is not a drink carries its own options.
-    expect(bySection(result, 'option')).toHaveLength(result.menu.filter((m) => m.categoryKey !== 'icecek').length);
-    expect(newProducts.filter((c) => c.categoryKey !== 'icecek').every((c) => c.optionGroups.length > 0)).toBe(true);
-    expect(newProducts.filter((c) => c.categoryKey === 'icecek').every((c) => c.optionGroups.length === 0)).toBe(true);
+    // Every product on the menu gets its card, and every suggested product that is not a packaged drink carries
+    // its own options.
+    expect(bySection(result, 'option')).toHaveLength(result.menu.length);
+    expect(newProducts.filter((c) => c.productType !== 'mesrubat').every((c) => c.optionGroups.length > 0)).toBe(true);
+    expect(newProducts.filter((c) => c.productType === 'mesrubat').every((c) => c.optionGroups.length === 0)).toBe(true);
     // Still never more of a category than the cuisine's own shape allows, and still spread out.
     for (const [key, count] of perCategory) {
       expect(count, `${key} kategorisi taşmamalı`).toBeLessThanOrEqual(Math.max(2, (gaps.get(key)?.minItems ?? 0) * 2));
@@ -221,13 +231,18 @@ describe('POST /analyze — panel screenshots', () => {
     for (const card of bySection(result, 'new_product')) expect(card.targetNormalized).toBeNull();
   });
 
-  it('raises a fix card for a product whose description field is empty on the panel', async () => {
+  it('gives a product with an empty panel description a ready 6–8 word one on its own card', async () => {
     const result = await analyze({ cuisineId: cuisineIdBySlug.get('kebap-izgara')! }, [{ file: 'panel-1.png' }]);
-    const fixes = bySection(result, 'fix');
-    expect(fixes.length).toBeGreaterThan(0);
-    // "Tavuk Şiş" and "Lahmacun" have an empty description in panel-1.
-    expect(fixes.some((f) => f.fixKind === 'empty_description' || f.fixKind === 'bad_name')).toBe(true);
-    for (const fix of fixes) expect(fix.targetName).not.toBeNull();
+    // "Tavuk Şiş" and "Lahmacun" have an empty description in panel-1: no separate "açıklama boş" note any more,
+    // the product's card carries the text to paste.
+    expect(bySection(result, 'fix').some((f) => f.fixKind === 'empty_description')).toBe(false);
+    const described = bySection(result, 'option').filter((c) => c.shortDescription.length > 0);
+    expect(described.length).toBeGreaterThan(0);
+    for (const card of described) {
+      expect(words(card.shortDescription), `${card.name}: ${card.shortDescription}`).toBeGreaterThanOrEqual(6);
+      expect(words(card.shortDescription), `${card.name}: ${card.shortDescription}`).toBeLessThanOrEqual(8);
+    }
+    for (const fix of bySection(result, 'fix')) expect(fix.targetName).not.toBeNull();
   });
 });
 

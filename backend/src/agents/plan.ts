@@ -18,7 +18,23 @@ export const DEFAULT_MODE: AnalysisMode = 'full';
 
 /** Quick mode: "5-6 ürün, ayrı kategorilerden". */
 const QUICK_PRODUCTS = 6;
-const QUICK_OPTION_TARGETS = 3;
+/**
+ * D-181. A menu this small is the "ürün ekle" case — one or two products typed in. It gets one more suggestion, and a
+ * category may give two: with one product on the menu there is no "second pide" to avoid, only a menu to start.
+ */
+const SMALL_MENU = 3;
+const QUICK_PRODUCTS_SMALL_MENU = 7;
+/**
+ * D-181. Quick mode asks the MODEL about this many menu products; every other product still gets its card, from the pool
+ * or the knowledge base, at no model cost. "Yalandan olan" mode is the old shape plus a little more: three cards
+ * were too few to be useful on a call, and seven fit in the same two parallel calls.
+ */
+const QUICK_OPTION_TARGETS = 7;
+/** Model calls the option agent may make, in parallel. */
+const QUICK_OPTION_BATCHES = 2;
+const FULL_OPTION_BATCHES = 5;
+/** Products per option call (the option agent's batch size). */
+const OPTION_BATCH_SIZE = 6;
 /** A cuisine with at least this many categories gets one product per category, so the six spread over six. */
 const QUICK_SPREAD_CATEGORIES = 5;
 
@@ -26,7 +42,8 @@ const QUICK_SPREAD_CATEGORIES = 5;
 const FULL_FLOOR = 8;
 /** Upper bound on one run: beyond this the list stops being something a person can go through on a call. */
 export const MAX_PRODUCTS = 40;
-export const MAX_OPTION_TARGETS = 24;
+/** Full mode completes every menu product up to here; the ones past the model batches come from the knowledge base. */
+export const MAX_OPTION_TARGETS = 40;
 
 /**
  * A combo/campaign is a package of products the restaurant must already sell, so it is the LAST thing to
@@ -58,15 +75,20 @@ const FULL_ATTEMPT_MS = 11_000;
  * gives the recommender a longer list to fill, so it needs room for those calls; quick mode is the old shape.
  */
 export function modeBudget(mode: AnalysisMode): { extraLlmCalls: number; extraInputTokens: number } {
-  return mode === 'full' ? { extraLlmCalls: 4, extraInputTokens: 15_000 } : { extraLlmCalls: 0, extraInputTokens: 0 };
+  // Quick mode's second option batch is the "biraz daha fazlası": one call on top of the old shape.
+  return mode === 'full' ? { extraLlmCalls: 6, extraInputTokens: 20_000 } : { extraLlmCalls: 1, extraInputTokens: 4_000 };
 }
 
 export interface RunPlan {
   mode: AnalysisMode;
   /** How many new products this run aims for — the sum of the quota below. */
   products: number;
-  /** How many menu products may get an option/ingredient card. */
+  /** How many menu products get a card (options, ingredients, description) — all of them, up to the cap. */
   optionTargets: number;
+  /** How many of those the model is asked about; the rest are completed from the pool and the knowledge base. */
+  modelOptionTargets: number;
+  /** How many model calls the option agent may make for them (in parallel); the rest is completed from the KB. */
+  optionBatches: number;
   /** Category key → how many new products that category may receive. The Validator enforces the same map. */
   quota: Map<string, number>;
   deadlineMs: number;
@@ -79,6 +101,8 @@ export interface RunPlan {
 export interface PlanInput {
   mode: AnalysisMode;
   categories: readonly CategoryGap[];
+  /** How many products the menu already has. */
+  current?: number;
   /** How many products short of the opening target the menu is. */
   missing: number;
   /** How many products on the menu are waiting for options. */
@@ -152,16 +176,20 @@ export function planRun(input: PlanInput): RunPlan {
   if (input.mode === 'quick') {
     // One product per category when the cuisine has enough of them: six suggestions from six different
     // categories, none of them a second copy of something the menu already leans on.
-    const perCategory = input.categories.length >= QUICK_SPREAD_CATEGORIES ? 1 : 2;
-    const quota = allocate(input.categories, QUICK_PRODUCTS, (c) => (LAST_RESORT.has(c.key) ? 0 : perCategory));
+    const small = input.current !== undefined && input.current <= SMALL_MENU;
+    const perCategory = !small && input.categories.length >= QUICK_SPREAD_CATEGORIES ? 1 : 2;
+    const wanted = small ? QUICK_PRODUCTS_SMALL_MENU : QUICK_PRODUCTS;
+    const quota = allocate(input.categories, wanted, (c) => (LAST_RESORT.has(c.key) ? 0 : perCategory));
     return {
       mode: 'quick',
       products: sum(quota),
-      optionTargets: Math.min(QUICK_OPTION_TARGETS, input.needOptions),
+      optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
+      modelOptionTargets: Math.min(QUICK_OPTION_TARGETS, input.needOptions),
+      optionBatches: QUICK_OPTION_BATCHES,
       quota,
       deadlineMs: QUICK_DEADLINE_MS,
       attemptTimeoutMs: QUICK_ATTEMPT_MS,
-      extraLlmCalls: 0,
+      extraLlmCalls: modeBudget('quick').extraLlmCalls,
     };
   }
 
@@ -184,6 +212,8 @@ export function planRun(input: PlanInput): RunPlan {
     mode: 'full',
     products: sum(quota),
     optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
+    modelOptionTargets: Math.min(FULL_OPTION_BATCHES * OPTION_BATCH_SIZE, input.needOptions),
+    optionBatches: FULL_OPTION_BATCHES,
     quota,
     deadlineMs: FULL_DEADLINE_MS,
     attemptTimeoutMs: FULL_ATTEMPT_MS,

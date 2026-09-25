@@ -51,10 +51,10 @@ export function fixtureImage(fx: Fixtures, file: string): ImageInput {
   return image;
 }
 
-/** Product names from the "- Name" lines of the option-modifier prompt. */
+/** Product names from the "- Name [tip: …] (…)" lines of the option-modifier prompt. */
 export function requestedItemNames(user: string): string[] {
   const names: string[] = [];
-  for (const match of user.matchAll(/^\s*-\s+(.+?)(?:\s+\(.*\))?\s*$/gmu)) {
+  for (const match of user.matchAll(/^\s*-\s+(.+?)(?:\s+\[tip:[^\]]*\])?(?:\s+\(.*\))?\s*$/gmu)) {
     if (match[1]) names.push(match[1]);
   }
   return names;

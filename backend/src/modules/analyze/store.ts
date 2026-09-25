@@ -48,6 +48,8 @@ export class AnalyzeStore {
         targetName: card.targetName,
         fixKind: card.fixKind,
         payload: { ...card },
+        productType: card.productType,
+        confidence: card.confidence,
         sortOrder: card.sortOrder,
       })
       .returning({ id: suggestionItems.id });
@@ -131,6 +133,9 @@ export class AnalyzeStore {
       menu: snapshot.items ?? [],
       cards: rows.map((row) => ({
         ...(row.payload as unknown as CardDto),
+        // Cards stored before the knowledge base have neither field in their payload.
+        productType: row.productType ?? null,
+        confidence: row.confidence ?? null,
         id: row.id,
         runId,
         status: row.accepted === null ? 'pending' : row.accepted ? 'accepted' : 'skipped',

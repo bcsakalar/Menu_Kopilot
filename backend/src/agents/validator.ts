@@ -1,11 +1,12 @@
 import type { PromptRepository } from '../ai/prompt-repository.js';
 import type { AiRouter, AttemptRecord, CallContext, RoutedResult, RouterRequest } from '../ai/router.js';
-import { isPlainCategory } from '../domain/category.js';
-import { templateOptionGroupSchema, templatePayloadSchema, type TemplateOptionGroup, type TemplatePayload } from '../domain/template.js';
+import { templatePayloadSchema, type ExtraIngredient, type TemplatePayload } from '../domain/template.js';
 import { cleanItemName } from '../lib/clean-name.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { containsPriceAmount, stripPriceAmounts } from '../lib/price-guard.js';
+import { sameProductName } from '../lib/same-product.js';
 import { trigramSimilarity } from '../lib/trigram.js';
+import { ground } from './grounding.js';
 import type { OptionCard } from './option-modifier.js';
 import type { RecommendedItem } from './product-recommender.js';
 import type { AgentDeps, AgentRunContext, ExistingItem } from './types.js';
@@ -17,6 +18,10 @@ import type { AgentDeps, AgentRunContext, ExistingItem } from './types.js';
  * cuisine/category fit and the minimum-target check are exactly the things a model gets subtly wrong, and a live
  * phone call cannot pay 2.5 s for a second opinion. The Validator's only model call is `generateChecked` below:
  * ONE repair round, on its own small-model route, and only when an agent's answer failed the JSON schema.
+ *
+ * Since D-179 it also grounds every card in the knowledge base (see `grounding.ts`): option groups that cannot
+ * apply to the product type are deleted, ingredients are separated from options, thin sections are completed from
+ * the type, descriptions are brought to 6–8 words — and every menu product the plan promised a card gets one.
  *
  * Card-level failures drop that card, never the run.
  */
@@ -61,11 +66,26 @@ export interface ValidationIssue {
 export interface ValidatedNewProduct extends RecommendedItem {
   /** Template payload written to the pool when the user taps "Ekle". Always price-free. */
   payload: TemplatePayload;
+  /** Product type from the knowledge base. */
+  productType: string;
+  /** 0–100: how sure the pipeline is about the card. */
+  confidence: number;
+}
+
+/**
+ * The card for a product ALREADY on the menu, after grounding: its options, what can be taken out and added, and
+ * a 6–8 word description — the four sections the phone shows for every product.
+ */
+export interface ValidatedOptionCard extends Omit<OptionCard, 'description'> {
+  productType: string;
+  /** 6–8 words, or '' when the panel already has a description. */
+  description: string;
+  confidence: number;
 }
 
 export interface ValidationResult {
   newProducts: ValidatedNewProduct[];
-  options: OptionCard[];
+  options: ValidatedOptionCard[];
   dropped: ValidationIssue[];
   /** True when the surviving new products still cannot bring the menu to the target. */
   targetUnreachable: boolean;
@@ -77,12 +97,20 @@ export interface ValidatorInput {
   recommended: readonly RecommendedItem[];
   options: readonly OptionCard[];
   /**
+   * The menu products this run promised a card to (the plan's option targets). One that reaches the Validator with
+   * no usable card — the model skipped it, timed out, or everything it said was wrong for the product — gets one
+   * built from the knowledge base, so the promised coverage holds whatever the providers did.
+   */
+  optionTargets?: readonly ExistingItem[] | undefined;
+  /**
    * Category key → how many products the cuisine is still short of. A category missing from the map is not
    * expected in this cuisine at all; one at 0 is already covered. Both refuse further recommendations.
    */
   categoryQuota: ReadonlyMap<string, number>;
   current: number;
   target: number;
+  /** The cuisine's slug: breaks ties when a product name matches two product types. */
+  cuisineSlug?: string | null | undefined;
   /** Pool templates the recommendations point at; a template-backed card carries the whole template. */
   templatePayloads?: ReadonlyMap<string, TemplatePayload> | undefined;
 }
@@ -101,7 +129,7 @@ class TakenIndex {
     if (templateId !== null && this.templateIds.has(templateId)) return true;
     if (this.names.has(normalized)) return true;
     for (const name of this.names) {
-      if (trigramSimilarity(name, normalized) >= VARIANT_SIMILARITY) return true;
+      if (trigramSimilarity(name, normalized) >= VARIANT_SIMILARITY || sameProductName(name, normalized)) return true;
     }
     return false;
   }
@@ -112,129 +140,102 @@ function plainRow(payload: TemplatePayload): TemplatePayload {
   return { ...payload, description: '', servingNote: '', optionGroups: [], removableIngredients: [], extraIngredients: [], upsellSuggestion: '' };
 }
 
-/** A price-free, deduplicated ingredient list. */
-function cleanIngredients(names: readonly string[]): string[] {
-  const seen = new Set<string>();
-  const kept: string[] = [];
-  for (const raw of names) {
-    const name = stripPriceAmounts(raw).trim().slice(0, 50);
-    const key = normalizeTr(name);
-    if (name.length === 0 || seen.has(key) || containsPriceAmount(name)) continue;
-    seen.add(key);
-    kept.push(name);
-  }
-  return kept.slice(0, 12);
+/** Extras as the payload stores them: the pool's own price hints are kept for names it already had. */
+function extrasPayload(names: readonly string[], pool: readonly ExtraIngredient[] = []): ExtraIngredient[] {
+  const known = new Map(pool.map((e) => [normalizeTr(e.name), e]));
+  return names.map((name) => known.get(normalizeTr(name)) ?? { name, priceHint: 'ek ücretli' as const });
 }
 
-function toPayload(item: RecommendedItem, portionExtra: string): TemplatePayload | null {
-  // A drink goes on the panel as a plain row: name and volume, nothing else (D-175).
-  const plain = isPlainCategory(item.categoryKey);
-  const description = plain ? '' : stripPriceAmounts(item.shortDescription).trim().slice(0, 160);
-  const portionInfo = [item.portionInfo, portionExtra].filter((p) => p.trim().length > 0).join(' · ').slice(0, 80);
-  const base: TemplatePayload = {
-    name: item.name,
-    description,
-    servingNote: '',
-    portionInfo: stripPriceAmounts(portionInfo).trim(),
-    optionGroups: [],
-    removableIngredients: [],
-    extraIngredients: [],
-    tags: [],
-    allergenNotes: [],
-    upsellSuggestion: '',
-  };
-  if (base.name.length === 0 || containsPriceAmount(`${base.name} ${base.description} ${base.portionInfo}`)) return null;
-  if (plain) return base;
+type Deps = Pick<AgentDeps, 'tracer' | 'productTypes' | 'feedback'>;
 
-  // The product's own options, when the recommender asked for them. A new product without its Boy/Porsiyon group
-  // is half a panel row, so these ride along on the card — but never at the cost of the card itself: if the
-  // extras do not pass the canonical schema, the plain payload is used instead of dropping the product.
-  const payload: TemplatePayload = {
-    ...base,
-    optionGroups: validGroups(item.optionGroups).kept,
-    removableIngredients: cleanIngredients(item.removableIngredients),
-    extraIngredients: cleanIngredients(item.extraIngredients).map((name) => ({ name, priceHint: 'ek ücretli' as const })),
-  };
-  // The canonical schema is the same one the DB enforces: a payload that fails here would fail on accept.
-  return templatePayloadSchema.safeParse(payload).success ? payload : base;
+interface BuiltProduct {
+  payload: TemplatePayload;
+  productType: string;
+  confidence: number;
+  notes: string[];
 }
 
 /**
- * Pulls a group back inside the canonical rules before validating it.
- *
- * The rules are mechanical (a single-select group has maxSelect 1; a required group starts at minSelect 1; a
- * base-price group is single, required and base-priced throughout) and a model gets exactly these wrong while
- * proposing a perfectly sensible "Boy: Küçük / Orta / Büyük". Rejecting such a group threw away the answer the
- * user was waiting for; fixing the arithmetic keeps it.
+ * A new product's payload: the curated template when the pool has one, the model's answer otherwise — grounded in
+ * both cases, so a pool row with an empty extras list or a 14-word description reaches the phone complete too.
  */
-function normalizeGroup(group: RawOptionGroup): RawOptionGroup {
-  const setsBase = group.options.filter((o) => o.priceMode === 'sets_base').length;
-  // Half or more of the options setting the base means it IS a base-price group; a single stray one is a slip.
-  const isBase = setsBase > 0 && setsBase * 2 >= group.options.length;
-  const options = group.options.map((option) => ({
-    ...option,
-    priceMode: isBase ? ('sets_base' as const) : option.priceMode === 'sets_base' ? ('surcharge' as const) : option.priceMode,
-  }));
-  const selectionType = isBase ? ('single' as const) : group.selectionType;
-  const isRequired = isBase ? true : group.isRequired;
-  const maxSelect = selectionType === 'single' ? 1 : Math.min(Math.max(1, group.maxSelect), Math.max(1, options.length));
-  const minSelect = isRequired ? Math.min(Math.max(1, group.minSelect), maxSelect) : 0;
-  return { ...group, options, selectionType, isRequired, minSelect, maxSelect };
-}
+function newProductPayload(
+  deps: Deps,
+  item: RecommendedItem,
+  pool: TemplatePayload | undefined,
+  portionExtra: string,
+  cuisineSlug: string | null | undefined,
+): BuiltProduct | null {
+  const { type, byName } = deps.productTypes.resolve(item.name, cuisineSlug, item.categoryKey);
+  const portionInfo = stripPriceAmounts([item.portionInfo, portionExtra].filter((p) => p.trim().length > 0).join(' · '))
+    .trim()
+    .slice(0, 80);
+  const base: TemplatePayload = pool
+    ? { ...pool, portionInfo: pool.portionInfo || portionInfo }
+    : {
+        name: item.name,
+        description: '',
+        servingNote: '',
+        portionInfo,
+        optionGroups: [],
+        removableIngredients: [],
+        extraIngredients: [],
+        tags: [],
+        allergenNotes: [],
+        upsellSuggestion: '',
+      };
+  if (base.name.length === 0 || containsPriceAmount(`${base.name} ${base.portionInfo}`)) return null;
+  // A packaged drink goes on the panel as a plain row: name and volume, nothing else (D-175).
+  if (type.plain) return { payload: plainRow(base), productType: type.key, confidence: byName ? 95 : 70, notes: [] };
 
-/** An option group as an agent proposes it — the canonical shape minus the fields the schema fills in. */
-export interface RawOptionGroup {
-  name: string;
-  selectionType: 'single' | 'multi';
-  isRequired: boolean;
-  minSelect: number;
-  maxSelect: number;
-  options: { name: string; priceMode: 'free' | 'surcharge' | 'sets_base'; isDefault?: boolean }[];
-}
-
-/** Drops option groups that break the canonical rules rather than dropping the whole card. */
-function validGroups(groups: readonly RawOptionGroup[]): { kept: TemplateOptionGroup[]; dropped: number } {
-  const kept: TemplateOptionGroup[] = [];
-  let dropped = 0;
-  const seen = new Set<string>();
-  for (const group of groups) {
-    const normalized = normalizeTr(group.name);
-    if (seen.has(normalized)) {
-      dropped += 1;
-      continue;
-    }
-    const parsed = templateOptionGroupSchema.safeParse(normalizeGroup(group));
-    if (!parsed.success) {
-      dropped += 1;
-      continue;
-    }
-    seen.add(normalized);
-    kept.push(parsed.data);
+  const grounded = ground(
+    {
+      optionGroups: pool ? pool.optionGroups : item.optionGroups,
+      removable: pool ? pool.removableIngredients : item.removableIngredients,
+      extras: pool ? pool.extraIngredients.map((e) => e.name) : item.extraIngredients,
+      description: pool?.description || item.shortDescription,
+    },
+    {
+      productName: base.name,
+      type,
+      byName,
+      source: pool ? 'pool' : 'model',
+      want: { options: true, ingredients: true, description: true },
+      feedback: deps.feedback,
+    },
+  );
+  const payload: TemplatePayload = {
+    ...base,
+    description: grounded.description,
+    optionGroups: grounded.optionGroups,
+    removableIngredients: grounded.removable,
+    extraIngredients: extrasPayload(grounded.extras, pool?.extraIngredients),
+  };
+  // The canonical schema is the one the DB enforces: a payload that fails here would fail on accept. The options
+  // are the risky part; without them the product itself still reaches the phone.
+  if (templatePayloadSchema.safeParse(payload).success) {
+    return { payload, productType: type.key, confidence: grounded.confidence, notes: grounded.notes };
   }
-  // At most one sets_base group per product (the canonical payload rule).
-  const baseIndexes = kept.map((g, i) => (g.options.some((o) => o.priceMode === 'sets_base') ? i : -1)).filter((i) => i >= 0);
-  if (baseIndexes.length > 1) {
-    for (const index of baseIndexes.slice(1).reverse()) {
-      kept.splice(index, 1);
-      dropped += 1;
-    }
-  }
-  return { kept, dropped };
+  const bare: TemplatePayload = { ...payload, optionGroups: [] };
+  return templatePayloadSchema.safeParse(bare).success
+    ? { payload: bare, productType: type.key, confidence: Math.min(grounded.confidence, 50), notes: [...grounded.notes, 'opsiyonlar şemadan geçmedi'] }
+    : null;
 }
 
-export async function runValidator(
-  deps: Pick<AgentDeps, 'tracer'>,
-  input: ValidatorInput,
-  _run: AgentRunContext,
-): Promise<ValidationResult> {
+export async function runValidator(deps: Deps, input: ValidatorInput, _run: AgentRunContext): Promise<ValidationResult> {
   return deps.tracer.step(
     'validator',
     'Doğrulama',
     { recommended: input.recommended.length, options: input.options.length, target: input.target },
     async () => {
       const dropped: ValidationIssue[] = [];
+      const grounding: string[] = [];
       const taken = new TakenIndex();
-      for (const item of input.existing) taken.add(item.normalized, item.matchedTemplateId);
+      for (const item of input.existing) {
+        taken.add(item.normalized, item.matchedTemplateId);
+        // "Mercimek" on the menu matched the pool's "Mercimek Çorbası": that spelling is on the menu too.
+        if (item.canonicalName) taken.add(normalizeTr(item.canonicalName), null);
+      }
 
       // --- new products -------------------------------------------------------------------------------------
       // The last line of defence for the rule the whole redesign exists for: never more of a category than the
@@ -242,11 +243,9 @@ export async function runValidator(
       const quota = new Map(input.categoryQuota);
       const newProducts: ValidatedNewProduct[] = [];
       for (const raw of input.recommended) {
-        // Even a curated pool drink is thinned to a plain row before it reaches the card (D-175).
         const pool = raw.templateId ? input.templatePayloads?.get(raw.templateId) : undefined;
-        const template = pool && isPlainCategory(raw.categoryKey) ? plainRow(pool) : pool;
         // A curated pool name is used as it is; only free model output needs the volume/packaging scrub.
-        const { name, movedToPortion } = template ? { name: template.name, movedToPortion: '' } : cleanProductName(raw.name);
+        const { name, movedToPortion } = pool ? { name: pool.name, movedToPortion: '' } : cleanProductName(raw.name);
         if (name.length < 2) {
           dropped.push({ card: raw.name, reason: 'ad çok kısa' });
           continue;
@@ -265,65 +264,125 @@ export async function runValidator(
           dropped.push({ card: raw.name, reason: `${raw.categoryKey} kategorisi zaten yeterli` });
           continue;
         }
-        const reason = stripPriceAmounts(raw.reason).trim();
-        // A drink is a plain row: the card shows the name (and the volume), nothing to paste into a description
-        // field that the panel does not have for it (D-175).
-        const plainRowItem = isPlainCategory(raw.categoryKey);
-        const item: RecommendedItem = {
-          ...raw,
-          name,
-          normalized,
-          reason,
-          // The pasteable text on the card is exactly what accepting it writes to the pool.
-          shortDescription: plainRowItem ? '' : template?.description || raw.shortDescription,
-          portionInfo: template?.portionInfo || raw.portionInfo,
-          // A price hint is allowed here on purpose — it is a talking point for the call, never written to a
-          // template. `toPayload` strips every amount from what reaches the pool.
-          priceRangeHint: raw.priceRangeHint.trim(),
-        };
-        // Template-backed: the whole curated template, options included. Otherwise a minimal, price-free payload.
-        const payload = template ?? toPayload(item, movedToPortion);
-        if (!payload) {
+        const built = newProductPayload(deps, { ...raw, name }, pool, movedToPortion, input.cuisineSlug);
+        if (!built) {
           dropped.push({ card: raw.name, reason: 'şema/fiyat kontrolünden geçmedi' });
           continue;
         }
+        grounding.push(...built.notes.map((n) => `${name}: ${n}`));
         quota.set(raw.categoryKey, left - 1);
         taken.add(normalized, raw.templateId);
-        newProducts.push({ ...item, payload });
+        newProducts.push({
+          ...raw,
+          name,
+          normalized,
+          reason: stripPriceAmounts(raw.reason).trim(),
+          // The pasteable text on the card is exactly what accepting it writes to the pool.
+          shortDescription: built.payload.description,
+          portionInfo: built.payload.portionInfo,
+          // A price hint is allowed here on purpose — it is a talking point for the call, never written to a
+          // template. The payload carries no amount at all.
+          priceRangeHint: raw.priceRangeHint.trim(),
+          optionGroups: built.payload.optionGroups,
+          removableIngredients: [...built.payload.removableIngredients],
+          extraIngredients: built.payload.extraIngredients.map((e) => e.name),
+          payload: built.payload,
+          productType: built.productType,
+          confidence: built.confidence,
+        });
       }
 
-      // --- option cards -------------------------------------------------------------------------------------
-      const onMenu = new Map(input.existing.map((i) => [i.normalized, i.categoryKey]));
-      const optionCards: OptionCard[] = [];
+      // --- cards for the products on the menu ---------------------------------------------------------------
+      const onMenu = new Map(input.existing.map((i) => [i.normalized, i]));
+      const optionCards: ValidatedOptionCard[] = [];
       const seenTargets = new Set<string>();
+      const groundCard = (card: OptionCard, item: ExistingItem, source: 'pool' | 'model' | 'kb'): ValidatedOptionCard | null => {
+        const productName = item.canonicalName ?? item.rawName;
+        const resolved = deps.productTypes.resolve(productName, input.cuisineSlug, item.categoryKey);
+        const type = deps.productTypes.get(item.productType) ?? resolved.type;
+        const grounded = ground(
+          {
+            optionGroups: card.optionGroups,
+            removable: card.removableIngredients,
+            extras: card.extraIngredients,
+            description: card.description ?? null,
+          },
+          {
+            productName,
+            type,
+            byName: resolved.byName && resolved.type.key === type.key,
+            source,
+            // What the panel screenshot already shows filled is not asked about again.
+            want: {
+              options: item.hasOptions !== 'present',
+              ingredients: item.hasRemovables !== 'present',
+              description: item.hasDescription !== 'present',
+            },
+            feedback: deps.feedback,
+          },
+        );
+        grounding.push(...grounded.notes.map((n) => `${card.targetName}: ${n}`));
+        const empty =
+          grounded.optionGroups.length === 0 && grounded.removable.length === 0 && grounded.extras.length === 0 && !grounded.description;
+        if (empty) return null;
+        return {
+          ...card,
+          optionGroups: grounded.optionGroups,
+          removableIngredients: grounded.removable,
+          extraIngredients: grounded.extras,
+          description: grounded.description,
+          productType: type.key,
+          confidence: grounded.confidence,
+        };
+      };
+
       for (const card of input.options) {
-        if (!onMenu.has(card.targetNormalized)) {
+        const item = onMenu.get(card.targetNormalized);
+        if (!item) {
           dropped.push({ card: card.targetName, reason: 'opsiyon önerisi menüde olmayan ürüne ait' });
           continue;
         }
-        // The last line of defence for the plain-row rule: a drink never gets an option card (D-175).
-        if (isPlainCategory(onMenu.get(card.targetNormalized))) {
-          dropped.push({ card: card.targetName, reason: 'içecek panelde düz ürün olarak girilir' });
+        // The last line of defence for the plain-row rule: a packaged drink never gets a card (D-175).
+        if (deps.productTypes.isPlain(item.productType)) {
+          dropped.push({ card: card.targetName, reason: 'hazır içecek panelde düz ürün olarak girilir' });
           continue;
         }
         if (seenTargets.has(card.targetNormalized)) {
           dropped.push({ card: card.targetName, reason: 'aynı ürün için ikinci opsiyon kartı' });
           continue;
         }
-        const { kept, dropped: badGroups } = validGroups(card.optionGroups);
-        if (badGroups > 0) dropped.push({ card: card.targetName, reason: `${badGroups} opsiyon grubu şemadan geçmedi` });
-        const removable = card.removableIngredients.filter((i) => i.trim().length > 0 && !containsPriceAmount(i));
-        if (kept.length === 0 && removable.length === 0) {
+        const grounded = groundCard(card, item, card.source === 'db' ? 'pool' : 'model');
+        if (!grounded) {
           dropped.push({ card: card.targetName, reason: 'geçerli opsiyon veya malzeme kalmadı' });
           continue;
         }
         seenTargets.add(card.targetNormalized);
-        optionCards.push({
-          ...card,
-          optionGroups: kept,
-          removableIngredients: removable,
-          extraIngredients: card.extraIngredients.filter((i) => i.trim().length > 0 && !containsPriceAmount(i)),
-        });
+        optionCards.push(grounded);
+      }
+
+      // --- coverage: every product the plan promised a card gets one ------------------------------------------
+      let completed = 0;
+      for (const item of input.optionTargets ?? []) {
+        if (seenTargets.has(item.normalized) || deps.productTypes.isPlain(item.productType)) continue;
+        const card = groundCard(
+          {
+            targetName: item.canonicalName ?? item.rawName,
+            targetNormalized: item.normalized,
+            matchedTemplateId: item.matchedTemplateId,
+            optionGroups: [],
+            removableIngredients: [],
+            extraIngredients: [],
+            description: null,
+            reason: 'Bu tür ürünlerde standart olan opsiyon ve malzemeler',
+            source: 'db',
+          },
+          item,
+          'kb',
+        );
+        if (!card) continue;
+        seenTargets.add(item.normalized);
+        optionCards.push(card);
+        completed += 1;
       }
 
       const reachable = input.current + newProducts.length;
@@ -340,8 +399,10 @@ export async function runValidator(
         output: {
           kept: newProducts.length,
           options: optionCards.length,
+          completedFromKnowledge: completed,
           dropped: dropped.length,
           reasons: dropped.slice(0, 20),
+          grounding: grounding.slice(0, 40),
           reachable,
           target: input.target,
         },

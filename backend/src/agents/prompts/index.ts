@@ -35,12 +35,16 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v3: keep writing options for the products at the END of a long answer, not just the first few.
   // v4: a drink is a plain panel row — no description, no options (D-175).
   // v5: write Turkish characters; a card the expert reads out loud should not say "Karisik Atistirmalik".
-  'agent.recommend.system': 5,
+  // v6: 6–8 word descriptions; only PACKAGED drinks are plain rows, prepared ones get options (D-178, D-179).
+  'agent.recommend.system': 6,
   'agent.recommend.user': 2,
   // v2: an unknown option set is not a reason to stay silent — answer for every product that was asked about.
   // v3: drinks never reach this agent.
-  'agent.options.system': 3,
-  'agent.options.user': 2,
+  // v4: four sections per product (options, removable, extras, 6–8 word description), grounded in the product-type
+  //     guide; groups the type can never have are named (D-179).
+  'agent.options.system': 4,
+  // v3: each product carries its type, and the batch carries the type guide.
+  'agent.options.user': 3,
 };
 
 export const AGENT_PROMPTS: Readonly<Record<AgentPromptKey, string>> = {

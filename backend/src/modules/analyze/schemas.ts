@@ -67,6 +67,10 @@ export const cardDtoSchema = z.object({
   suggestedValue: z.string().nullable(),
   /** Full template payload written to the pool on accept (section A). */
   payload: templatePayloadSchema.nullable(),
+  /** Product type from the knowledge base (product_types.key); null on cards stored before it existed. */
+  productType: z.string().nullable().default(null),
+  /** 0-100: how sure the pipeline is about the card. Null on fix cards and on older cards. */
+  confidence: z.number().int().nullable().default(null),
   status: z.enum(['pending', 'accepted', 'skipped']),
   sortOrder: z.number().int(),
 });

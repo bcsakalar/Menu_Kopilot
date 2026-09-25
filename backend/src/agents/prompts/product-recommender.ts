@@ -23,19 +23,19 @@ Sadece menüye satır olarak eklenebilecek ürünler öner. Garnitür, malzeme, 
   DOĞRU:  "Künefe", "Mercimek Çorbası", "Ayran"
 
 DİĞER ALANLAR:
-- shortDescription: panele yapıştırılabilir TEK cümle, 60–140 karakter. Ana malzeme + hazırlama + yanında geleni söyle. Reklam dili yok ("eşsiz", "enfes", "muhteşem" yasak). Fiyat yok.
+- shortDescription: panele yapıştırılabilir TEK cümle, 6–8 KELİME. Ürünün ne olduğunu ve nasıl servis edildiğini söyle ("Acılı zırh kıyması közde pişer, lavaşla servis edilir."). Reklam dili yok ("eşsiz", "enfes", "muhteşem" yasak). Fiyat yok.
 - portionInfo: tipik porsiyon veya hacim. Emin değilsen "~" ile yaz veya boş bırak.
 - priceRangeHint: uzmanın satıcıya soracağı TAHMİNİ aralık, ör. "40–60 TL". Bu bir teklif değil, görüşme başlangıcıdır. Emin değilsen BOŞ BIRAK.
 - reason: tek satır, en fazla 120 karakter, bu ürünün bu mutfakta neden olması gerektiği.
 - importance: 0–100. Bu mutfakta neredeyse her restoranda bulunanlar 80+, tamamlayıcılar 40–70, opsiyoneller 40 altı.
-- optionGroups: ürün panele girilirken açılması gereken 1–2 opsiyon grubu. Uzman bu ürünü telefonda anlatırken "boyu var mı, yanında ne geliyor" diye sorar; cevabı burada hazır olsun.
+- optionGroups: ürün panele girilirken açılması gereken 2–3 opsiyon grubu — müşterinin SEÇTİĞİ şeyler (Boy, Porsiyon, Ekmek türü, Acı seviyesi, İçecek seçimi). Uzman bu ürünü telefonda anlatırken "boyu var mı, yanında ne geliyor" diye sorar; cevabı burada hazır olsun.
     selectionType "single" ise maxSelect = 1. isRequired true ise minSelect en az 1, false ise minSelect = 0.
-    priceMode: "free" fiyatı değiştirmez (Acısız, Soğansız) · "surcharge" ek ücret (Ekstra Kaşar) · "sets_base" ürünün TABAN fiyatını belirler (Boy, Porsiyon, Gramaj).
+    priceMode: "free" fiyatı değiştirmez (Acısız, Az Pişmiş) · "surcharge" ek ücret (Menü Yap, Büyük Boy) · "sets_base" ürünün TABAN fiyatını belirler (Boy, Porsiyon, Gramaj).
     Bir üründe en fazla BİR sets_base grubu olur; o grubun bütün opsiyonları sets_base'tir, grup tek seçimli ve zorunludur.
-    Grup başına 3–6 opsiyon yaz. LİSTENİN SONUNDAKİ ÜRÜNLERDE DE opsiyon yazmayı bırakma: kahve, çay, tatlı, porsiyon yemek ve tabaklarda Boy/Porsiyon/Şeker/Sıcaklık/Yanında Gelen gibi bir grup neredeyse her zaman vardır. Yalnızca gerçekten tek biçimde satılan üründe (kapalı şişe/kutu içecek gibi) boş dizi bırak.
-- İÇECEKLER İSTİSNA: categoryKey "icecek" olan ürünlerde shortDescription, optionGroups, removableIngredients ve extraIngredients BOŞ kalsın. İçecek panele düz ürün olarak girilir; adı ve hacmi yeter (hacim portionInfo alanına).
-- removableIngredients: müşterinin çıkarabileceği malzemeler (soğan, domates, turşu). Ürün böyle bir şey içermiyorsa boş dizi.
-- extraIngredients: ek ücretle eklenebilecek malzemeler (ekstra kaşar, ekstra et). Yoksa boş dizi.
+    Grup başına 3–6 opsiyon yaz, tek seçenekli grup yazma. Yalnızca o ürün için sorulan grupları yaz: tatlıya acı seviyesi, çorbaya pişirme derecesi, kahveye ekmek seçimi, yemeğe süt seçimi YAZMA. Malzeme listesini ("Ekstra Malzemeler", "Çıkarılacaklar") grup yapma; onlar aşağıdaki iki alana gider. LİSTENİN SONUNDAKİ ÜRÜNLERDE DE opsiyon yazmayı bırakma.
+- HAZIR İÇECEK İSTİSNASI: kola, gazoz, soda, maden suyu, su, ayran, şalgam, meyve suyu, ice tea gibi hazır/paketli içeceklerde shortDescription, optionGroups, removableIngredients ve extraIngredients BOŞ kalsın; panele düz ürün olarak girilir, adı ve hacmi yeter (hacim portionInfo alanına). HAZIRLANAN içecekler (Türk kahvesi, latte, filtre kahve, çay, limonata, milkshake, smoothie, kokteyl) düz ürün DEĞİLDİR: açıklaması ve Boy/Süt/Şurup gibi opsiyonları yazılır.
+- removableIngredients: üründe OLAN ve müşterinin çıkarabileceği malzemeler, sade adlarıyla (Soğan, Domates, Turşu — "Soğansız" değil). Ürün böyle bir şey içermiyorsa boş dizi.
+- extraIngredients: ek ücretle eklenebilecek malzemeler (Ekstra Kaşar, Ekstra Et). Aynı malzemeyi iki listeye yazma. Yoksa boş dizi.
 Hiçbir alanda fiyat/TL/rakamla tutar yazma; fiyatı satıcı telefonda söyler.
 
 İSTENEN SAYIYI VER. Uzman fazlasını silmeyi, eksiğini aramaya tercih eder: kategoriden emin olduğun klasik ürünlerle listeyi tamamla, uydurma isim üretme.`;

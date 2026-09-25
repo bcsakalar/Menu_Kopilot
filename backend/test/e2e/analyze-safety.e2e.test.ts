@@ -128,12 +128,16 @@ describe('accepting a card never thins out the template pool', () => {
     expect(card, 'a pool-backed new product').toBeDefined();
 
     const before = await getTemplate(h.ctx.db.db, card!.matchedTemplateId!);
-    // The card itself carries the whole template, so "Düzenle" starts from everything the pool knows.
-    expect(card!.payload).toEqual(before?.payload);
+    // The card carries the whole template — grounded: every group the pool knows is still there, the description
+    // is the 6–8 word panel line, and what the card shows is exactly what accepting writes.
+    const groupNames = (payload: { optionGroups: { name: string }[] } | undefined) => payload?.optionGroups.map((g) => g.name) ?? [];
+    expect(groupNames(card!.payload!)).toEqual(expect.arrayContaining(groupNames(before?.payload)));
+    expect(card!.payload!.removableIngredients).toEqual(expect.arrayContaining(before?.payload.removableIngredients ?? []));
 
     await accept(h, card!);
     const after = await getTemplate(h.ctx.db.db, card!.matchedTemplateId!);
-    expect(after?.payload).toEqual(before?.payload);
+    expect(after?.payload).toEqual(card!.payload);
+    expect(groupNames(after?.payload)).toEqual(expect.arrayContaining(groupNames(before?.payload)));
     expect(after?.source).toBe('user');
   });
 
@@ -279,9 +283,12 @@ describe("the Validator's single repair round", () => {
 });
 
 describe('Section C — what the panel got wrong', () => {
-  it('flags a product filed under a contradicting heading', async () => {
+  it('flags a product filed under a contradicting heading; a packaged drink gets no card, a dessert its description', async () => {
     const h = await harness(
-      readsPanel([panelRow('Ayran', { sectionText: 'Tatlılar', description: 'absent', options: 'present', removables: 'present' })]),
+      readsPanel([
+        panelRow('Ayran', { sectionText: 'Tatlılar', description: 'absent', options: 'present', removables: 'present' }),
+        panelRow('Künefe', { sectionText: 'Tatlılar', description: 'absent', options: 'present', removables: 'present' }),
+      ]),
     );
     const result = await analyze(h, { cuisineId: h.cuisineId('kebap-izgara') }, ['panel-1.png']);
     const fixes = result.cards.filter((c) => c.section === 'fix' && c.targetNormalized === 'ayran');
@@ -290,6 +297,19 @@ describe('Section C — what the panel got wrong', () => {
     expect(category, 'wrong_category card').toBeDefined();
     expect(category?.currentValue).toBe('Tatlı');
     expect(category?.suggestedValue).toBe('İçecek');
+    // A packaged drink is a plain panel row: no description to ask for, no card of options.
+    expect(fixes.some((c) => c.fixKind === 'empty_description')).toBe(false);
+    expect(result.cards.some((c) => c.section === 'option' && c.targetNormalized === 'ayran')).toBe(false);
+
+    // The dessert's panel already has options and removables; its card brings only what is missing — the
+    // description, from the pool, 6–8 words.
+    const kunefe = result.cards.find((c) => c.section === 'option' && c.targetNormalized === 'kunefe');
+    expect(kunefe, 'a card for Künefe').toBeDefined();
+    expect(kunefe!.optionGroups).toHaveLength(0);
+    expect(kunefe!.removableIngredients).toHaveLength(0);
+    const count = kunefe!.shortDescription.split(/\s+/u).filter((w) => /\p{L}/u.test(w)).length;
+    expect(count, kunefe!.shortDescription).toBeGreaterThanOrEqual(6);
+    expect(count, kunefe!.shortDescription).toBeLessThanOrEqual(8);
   });
 });
 

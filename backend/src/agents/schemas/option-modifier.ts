@@ -30,6 +30,15 @@ export const optionSuggestionSchema = z.object({
   optionGroups: z.array(suggestedOptionGroupSchema).max(6),
   removableIngredients: z.array(z.string().max(80)).max(20).describe('Müşterinin çıkarabileceği malzemeler'),
   extraIngredients: z.array(z.string().max(80)).max(20).describe('Ek ücretle eklenebilecek malzemeler'),
+  /**
+   * The panel description, in the same answer: asking for it separately would be a second round trip per batch.
+   * Optional so that an answer (or a recorded one) without it still yields the options.
+   */
+  description: z
+    .string()
+    .max(300)
+    .nullish()
+    .describe('Panele yapıştırılacak açıklama: 6–8 kelime, doğal Türkçe, ürünün ne olduğunu söyler. Reklam dili ve fiyat yok.'),
   reason: z.string().max(200).describe('Tek satır: bu opsiyonlar neden gerekli'),
 });
 export type OptionSuggestion = z.infer<typeof optionSuggestionSchema>;

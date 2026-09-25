@@ -5,18 +5,18 @@ import type { ImageInput } from '../ai/types.js';
 import type { VisionExtractor } from '../modules/extraction/vision-extractor.js';
 import type { CuisineGraph, CuisineNode } from '../modules/retrieval/cuisine-graph.js';
 import type { AnalyzeEvent, CardDto, CountsDto, MenuItemDto } from '../modules/analyze/schemas.js';
-import { isPlainCategory } from '../domain/category.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
-import { getTemplates } from '../modules/templates/template-store.js';
+import { variantConflict } from '../lib/same-product.js';
+import { reconcileCategory } from '../domain/product-type.js';
 import { runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, type MergedItem } from './dedupe.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
-import { runOptionModifier, type OptionCard, type OptionModifierResult } from './option-modifier.js';
+import { runOptionModifier, type OptionModifierResult } from './option-modifier.js';
 import { modeBudget, planRun, quotaRows, type AnalysisMode } from './plan.js';
 import { runProductRecommender, type ProductRecommenderResult } from './product-recommender.js';
 import { AGENT_LABELS, type AgentDeps, type AgentName, type AgentRunContext, type ExistingItem } from './types.js';
-import { runValidator, type ValidatedNewProduct, type ValidationResult } from './validator.js';
+import { runValidator, type ValidatedNewProduct, type ValidatedOptionCard, type ValidationResult } from './validator.js';
 
 /**
  * The analysis pipeline — six agents, one run.
@@ -225,14 +225,30 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
         )
       : undefined;
 
+  const cuisineSlug = classification.cuisine.slug;
   const existing: ExistingItem[] = merged.map((item) => {
-    const hit = matched?.hits.get(item.normalized);
+    // A fuzzy match that changes what the product IS ("Levrek Buğulama" → Levrek Izgara) is no match: the product
+    // keeps its own name and gets a card for its own type instead of another dish's options and a wrong rename.
+    const found = matched?.hits.get(item.normalized);
+    const fuzzy = found !== undefined && found.matchType !== 'exact' && found.matchType !== 'alias';
+    const hit = fuzzy && variantConflict(item.normalized, normalizeTr(found.canonicalName)) ? undefined : found;
+    // Understanding layer (D-179): what KIND of product this is decides which options can apply at all — and, where
+    // a stray keyword misfiled it ("Tavuk Suyu Çorbası" as a drink), which category it counts in.
+    const keywordCategory = deps.categories.classify(item.name, item.sectionText);
+    const resolved = deps.productTypes.resolve(hit?.canonicalName ?? item.name, cuisineSlug, keywordCategory);
+    const categoryKey = reconcileCategory(
+      keywordCategory,
+      deps.categories.headingCategory(item.sectionText) !== undefined,
+      resolved,
+      (key) => deps.categories.has(key),
+    );
     return {
       rawName: item.name,
       normalized: item.normalized,
       canonicalName: hit?.canonicalName ?? null,
       matchedTemplateId: hit?.templateId ?? null,
-      categoryKey: deps.categories.classify(item.name, item.sectionText),
+      categoryKey,
+      productType: resolved.type.key,
       categoryConflict: deps.categories.conflict(item.name, item.sectionText),
       sectionText: item.sectionText,
       hasDescription: item.description,
@@ -269,7 +285,8 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
         current: existing.length,
         missing: Math.max(0, target - existing.length),
         categories: [],
-        needOptions: [],
+        // Even without the category table every product still gets its card (packaged drinks excepted).
+        needOptions: existing.filter((item) => !deps.productTypes.isPlain(item.productType)),
         needFixes: [],
       };
     },
@@ -296,10 +313,13 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   const plan = planRun({
     mode: input.mode,
     categories: analysis.categories,
+    current: analysis.current,
     missing: analysis.missing,
     needOptions: analysis.needOptions.length,
   });
   const categoryQuota = plan.quota;
+  /** The menu products this run completes: options, removable and extra ingredients, description. */
+  const optionTargets = analysis.needOptions.slice(0, plan.optionTargets);
   input.emit({
     type: 'progress',
     agent: 'product_recommender',
@@ -349,9 +369,11 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
           deps,
           {
             cuisine: { id: classification.cuisine.id, name: classification.cuisine.name },
-            targets: analysis.needOptions,
+            targets: optionTargets,
             limit: plan.optionTargets,
+            modelLimit: plan.modelOptionTargets,
             attemptTimeoutMs: plan.attemptTimeoutMs,
+            maxBatches: plan.optionBatches,
             aiUsable,
           },
           boundedRun,
@@ -376,9 +398,11 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
           existing,
           recommended: recommendation.items,
           options: optionResult.items,
+          optionTargets,
           categoryQuota,
           current: analysis.current,
           target: analysis.target,
+          cuisineSlug,
           templatePayloads: recommendation.templatePayloads,
         },
         run,
@@ -410,17 +434,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
 
   for (const item of validated.newProducts) await push(newProductCard(deps, item));
   for (const card of validated.options) await push(optionCard(deps, card, existing));
-  // Pool descriptions for the fix cards: an empty panel description comes with a ready-to-paste one when possible.
-  const fixDescriptions = await safely(
-    'matching',
-    async () => {
-      const ids = [...new Set(analysis.needFixes.flatMap((i) => (i.matchedTemplateId ? [i.matchedTemplateId] : [])))];
-      const templates = ids.length === 0 ? [] : await getTemplates(deps.db, ids);
-      return new Map(templates.filter((t) => t.payload.description.trim() !== '').map((t) => [t.id, t.payload.description]));
-    },
-    () => new Map<string, string>(),
-  );
-  for (const card of fixCards(deps, analysis.needFixes, fixDescriptions)) await push(card);
+  for (const card of fixCards(deps, analysis.needFixes)) await push(card);
 
   // ---- finalize -----------------------------------------------------------------------------------------------
   const llmCalls = deps.tracer.totals.llmCalls;
@@ -485,18 +499,19 @@ function newProductCard(deps: Pick<AgentDeps, 'categories'>, item: ValidatedNewP
     currentValue: null,
     suggestedValue: null,
     payload: item.payload,
+    productType: item.productType,
+    confidence: item.confidence,
     status: 'pending',
   };
 }
 
 function optionCard(
   deps: Pick<AgentDeps, 'categories'>,
-  card: OptionCard,
+  card: ValidatedOptionCard,
   existing: readonly ExistingItem[],
 ): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
   const target = existing.find((i) => i.normalized === card.targetNormalized);
   const categoryKey = target?.categoryKey ?? null;
-  const groupNames = card.optionGroups.map((g) => g.name).join(', ');
   return {
     section: 'option',
     // Titled with the spelling on the panel — what the user looks for during the call ("Kadayıf") — while `name`
@@ -509,7 +524,9 @@ function optionCard(
     categoryLabel: categoryKey ? deps.categories.label(categoryKey) : null,
     source: card.source === 'db' ? 'db' : 'ai',
     matchedTemplateId: card.matchedTemplateId,
-    shortDescription: groupNames || card.removableIngredients.join(', '),
+    // The product description (6-8 words), one of the four sections of the card. Empty when the panel screenshot
+    // already showed one.
+    shortDescription: card.description,
     portionInfo: '',
     priceRangeHint: '',
     reason: card.reason,
@@ -521,21 +538,20 @@ function optionCard(
     currentValue: null,
     suggestedValue: null,
     payload: null,
+    productType: card.productType,
+    confidence: card.confidence,
     status: 'pending',
   };
 }
 
 /**
- * Section C is entirely deterministic: an empty description, a shorthand name, a canonical rename and a heading that
- * contradicts the product are all facts the extractor and the matcher already established, so no model is asked to
- * restate them. One card per problem — a product can have two — and, wherever the pool knows the product, the card
- * carries the fix itself (the curated description, the canonical spelling), not just the complaint.
+ * Section C is entirely deterministic: a shorthand name, a canonical rename and a heading that contradicts the
+ * product are facts the extractor and the matcher already established, so no model is asked to restate them. One
+ * card per problem (a product can have two) and, wherever the pool knows the product, the card carries the fix
+ * itself (the canonical spelling), not just the complaint. An empty description is no longer one of them: the
+ * card of the product carries a ready 6-8 word description (D-178).
  */
-function fixCards(
-  deps: Pick<AgentDeps, 'categories'>,
-  items: readonly ExistingItem[],
-  descriptions: ReadonlyMap<string, string>,
-): Omit<CardDto, 'id' | 'runId' | 'sortOrder'>[] {
+function fixCards(deps: Pick<AgentDeps, 'categories'>, items: readonly ExistingItem[]): Omit<CardDto, 'id' | 'runId' | 'sortOrder'>[] {
   const cards: Omit<CardDto, 'id' | 'runId' | 'sortOrder'>[] = [];
   const push = (card: Omit<CardDto, 'id' | 'runId' | 'sortOrder'>): void => {
     if (cards.length < MAX_FIX_CARDS) cards.push(card);
@@ -558,6 +574,8 @@ function fixCards(
       removableIngredients: [],
       extraIngredients: [],
       payload: null,
+      productType: item.productType,
+      confidence: null,
       status: 'pending' as const,
     };
 
@@ -593,21 +611,6 @@ function fixCards(
         fixKind: 'wrong_category',
         currentValue: from,
         suggestedValue: to,
-      });
-    }
-
-    // A drink needs no description on the panel (D-175), so an empty one is not a fix.
-    if (item.hasDescription === 'absent' && !isPlainCategory(item.categoryKey)) {
-      const suggestion = item.matchedTemplateId ? descriptions.get(item.matchedTemplateId) : undefined;
-      push({
-        ...base,
-        shortDescription: suggestion ?? 'Açıklama alanı boş',
-        reason: suggestion
-          ? 'Panelde açıklama boş; havuzdaki onaylı açıklama önerildi'
-          : 'Panelde açıklama boş; ürünün içeriğini sor ve gir',
-        fixKind: 'empty_description',
-        currentValue: null,
-        suggestedValue: suggestion ?? null,
       });
     }
   }

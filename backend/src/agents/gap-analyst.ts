@@ -7,7 +7,6 @@ import {
   type CategoryExpectation,
   type CategoryGap,
   categoryGaps,
-  isPlainCategory,
 } from '../domain/category.js';
 import type { AgentDeps, AgentRunContext, ExistingItem } from './types.js';
 
@@ -27,9 +26,12 @@ export interface GapAnalysis {
   current: number;
   missing: number;
   categories: CategoryGap[];
-  /** Products on the menu whose options are not known to exist — the Option/Modifier agent's input, richest first. */
+  /**
+   * Products on the menu whose card is not known to be complete — options, ingredients or description missing or
+   * unknown. The Option/Modifier agent's input, most evidence first. Packaged drinks never appear here.
+   */
   needOptions: ExistingItem[];
-  /** Products with an empty description / a suspicious name — the "Eksik / Düzeltme" section's input. */
+  /** Products with a suspicious name or a heading that contradicts them — the "Kontrol et" notes. */
   needFixes: ExistingItem[];
 }
 
@@ -85,7 +87,7 @@ export interface GapAnalystInput {
 }
 
 export async function runGapAnalyst(
-  deps: Pick<AgentDeps, 'db' | 'tracer'>,
+  deps: Pick<AgentDeps, 'db' | 'tracer' | 'productTypes'>,
   input: GapAnalystInput,
   _run: AgentRunContext,
 ): Promise<GapAnalysis> {
@@ -117,17 +119,19 @@ export async function runGapAnalyst(
        * the pool already has curated options for — those cards cost no model call and are the richest.
        */
       const optionRank = (item: ExistingItem): number =>
-        (item.hasOptions === 'absent' ? 0 : 2) + (item.matchedTemplateId !== null ? 0 : 1);
+        (item.hasOptions === 'absent' || item.hasDescription === 'absent' ? 0 : 2) + (item.matchedTemplateId !== null ? 0 : 1);
+      const complete = (item: ExistingItem): boolean =>
+        item.hasOptions === 'present' && item.hasRemovables === 'present' && item.hasDescription === 'present';
       const needOptions = input.items
-        // A drink is a plain row on the panel: no options to ask about (D-175).
-        .filter((item) => item.hasOptions !== 'present' && !isPlainCategory(item.categoryKey))
+        // A packaged drink is a plain row on the panel: nothing to ask about (D-175). A prepared one — a latte, a
+        // lemonade — has a size, a milk, a description, and is asked about like any dish (D-179).
+        .filter((item) => !complete(item) && !deps.productTypes.isPlain(item.productType))
         .map((item, index) => ({ item, index }))
         .sort((a, b) => optionRank(a.item) - optionRank(b.item) || a.index - b.index)
         .map((entry) => entry.item);
+      // An empty description is no longer a note of its own: the product's card carries a ready 6–8 word one.
       const needFixes = input.items.filter(
         (item) =>
-          // An empty description is not a gap for a drink; the other fixes (name, category) still apply.
-          (item.hasDescription === 'absent' && !isPlainCategory(item.categoryKey)) ||
           item.categoryConflict !== null ||
           looksAbbreviated(item.rawName) ||
           (item.canonicalName !== null && item.canonicalName !== item.rawName),

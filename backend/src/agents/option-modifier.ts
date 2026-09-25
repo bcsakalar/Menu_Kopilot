@@ -26,6 +26,8 @@ export interface OptionCard {
   optionGroups: OptionSuggestion['optionGroups'];
   removableIngredients: string[];
   extraIngredients: string[];
+  /** The proposed panel description (6–8 words); the Validator decides whether it is usable. */
+  description: string | null;
   reason: string;
   source: 'db' | 'ai';
 }
@@ -37,6 +39,13 @@ export interface OptionModifierInput {
   limit: number;
   /** How long one model attempt may take; the mode decides (see `plan.ts`). */
   attemptTimeoutMs: number;
+  /** How many model calls this agent may make (they run in parallel); the mode decides. */
+  maxBatches?: number;
+  /**
+   * How many of the products the pool does not know go to the model. The others get no card here; the Validator
+   * builds theirs from the knowledge base (coverage guarantee), so quick mode stays two calls on a long menu.
+   */
+  modelLimit?: number;
   /** False when no provider is configured / the quota is spent: only the template pool answers. */
   aiUsable: boolean;
 }
@@ -61,8 +70,51 @@ const EXAMPLE_TEMPLATES = 3;
 const BATCH = 6;
 const MAX_BATCHES = 4;
 
+/**
+ * Splits the products into at most `maxBatches` calls of at most BATCH each, evenly: seven products are 4 + 3, not
+ * 6 + 1 — the slower of two parallel calls decides the wall clock, so the two should be the same size.
+ */
+export function splitBatches<T>(items: readonly T[], maxBatches: number): T[][] {
+  const capped = items.slice(0, BATCH * Math.max(1, maxBatches));
+  const count = Math.min(Math.max(1, maxBatches), Math.ceil(capped.length / BATCH));
+  if (capped.length === 0) return [];
+  const size = Math.ceil(capped.length / count);
+  const out: T[][] = [];
+  for (let i = 0; i < capped.length; i += size) out.push(capped.slice(i, i + size));
+  return out;
+}
+
+/** The knowledge-base context for the products of one batch: each product type once, however many products share it. */
+function typeGuide(deps: Pick<AgentDeps, 'productTypes' | 'feedback'>, batch: readonly ExistingItem[]): string {
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  for (const item of batch) {
+    const type = deps.productTypes.get(item.productType);
+    if (!type || seen.has(type.key)) continue;
+    seen.add(type.key);
+    const groups = type.optionGroups
+      .map((g) => {
+        const kind = g.options.some((o) => o.priceMode === 'sets_base') ? 'taban fiyat' : g.selectionType === 'single' ? 'tek seçim' : 'çoklu seçim';
+        return `${g.name} [${kind}${g.isRequired ? ', zorunlu' : ''}]: ${g.options.map((o) => o.name).join(', ')}`;
+      })
+      .join(' | ');
+    const rejected = deps.feedback.rejectedFor(type.key);
+    lines.push(
+      [
+        `${type.key} — ${type.label}`,
+        `  tipik gruplar: ${groups || '-'}`,
+        `  tipik çıkarılabilir: ${type.removable.join(', ') || '-'}`,
+        `  tipik ekstra: ${type.extras.join(', ') || '-'}`,
+        `  bu tipte ASLA olmayan gruplar: ${type.forbiddenGroups.join(', ') || '-'}`,
+        ...(rejected.length > 0 ? [`  ekibin sürekli sildiği öneriler (önerme): ${rejected.join(', ')}`] : []),
+      ].join('\n'),
+    );
+  }
+  return lines.join('\n') || '-';
+}
+
 export async function runOptionModifier(
-  deps: Pick<AgentDeps, 'db' | 'router' | 'prompts' | 'categories' | 'tracer'>,
+  deps: Pick<AgentDeps, 'db' | 'router' | 'prompts' | 'categories' | 'tracer' | 'productTypes' | 'feedback'>,
   input: OptionModifierInput,
   run: AgentRunContext,
 ): Promise<OptionModifierResult> {
@@ -106,13 +158,14 @@ export async function runOptionModifier(
           })),
           removableIngredients: [...payload.removableIngredients],
           extraIngredients: payload.extraIngredients.map((i) => i.name),
-          reason: 'Havuzdaki onaylı karttan alındı',
+          description: payload.description || null,
+          reason: 'Bu ürün için kayıtlı kart',
           source: 'db',
         });
       }
 
       const covered = new Set(dbCards.map((c) => c.targetNormalized));
-      const forModel = targets.filter((t) => !covered.has(t.normalized));
+      const forModel = targets.filter((t) => !covered.has(t.normalized)).slice(0, input.modelLimit ?? targets.length);
       if (forModel.length === 0 || run.signal.aborted || !input.aiUsable) {
         return {
           value: { ...empty, items: dbCards, fromDb: dbCards.length } satisfies OptionModifierResult,
@@ -123,10 +176,7 @@ export async function runOptionModifier(
       // --- the rest go to the model, in small batches ------------------------------------------------------
       const examples = await exampleTemplates(deps, input.cuisine.id);
       const system = (await deps.prompts.render('agent.options.system')).text;
-      const batches: ExistingItem[][] = [];
-      for (let i = 0; i < forModel.length && batches.length < MAX_BATCHES; i += BATCH) {
-        batches.push(forModel.slice(i, i + BATCH));
-      }
+      const batches = splitBatches(forModel, input.maxBatches ?? MAX_BATCHES);
 
       const runs = await Promise.all(
         batches.map(async (batch, batchIndex) => {
@@ -137,9 +187,10 @@ export async function runOptionModifier(
                 .map((t) => {
                   const name = t.canonicalName ?? t.rawName;
                   const known = t.optionNames.length > 0 ? ` (ekranda görünen gruplar: ${t.optionNames.join(', ')})` : '';
-                  return `- ${name}${known}`;
+                  return `- ${name} [tip: ${t.productType}]${known}`;
                 })
                 .join('\n'),
+              types: typeGuide(deps, batch),
               examples,
               max: batch.length,
             })
@@ -189,9 +240,13 @@ export async function runOptionModifier(
       for (const candidate of ok.flatMap((r) => r.value.items)) {
         const parsed = optionSuggestionSchema.safeParse(candidate);
         if (!parsed.success) continue;
-        const target = byNormalized.get(normalizeTr(parsed.data.targetName));
+        // The prompt writes "Adana Kebap [tip: kebap-porsiyon]"; a model that copies the tag along still means the product.
+        const target = byNormalized.get(normalizeTr(parsed.data.targetName.replace(/\s*\[[^\]]*\]\s*$/u, '')));
         if (!target || aiCards.some((c) => c.targetNormalized === target.normalized)) continue;
-        if (parsed.data.optionGroups.length === 0 && parsed.data.removableIngredients.length === 0) continue;
+        // An answer with nothing in it is not a card; the Validator builds this product's card from the knowledge
+        // base instead (coverage guarantee), so skipping here loses nothing.
+        const description = parsed.data.description?.trim() || null;
+        if (parsed.data.optionGroups.length === 0 && parsed.data.removableIngredients.length === 0 && !description) continue;
         aiCards.push({
           targetName: target.canonicalName ?? target.rawName,
           targetNormalized: target.normalized,
@@ -199,6 +254,7 @@ export async function runOptionModifier(
           optionGroups: parsed.data.optionGroups,
           removableIngredients: parsed.data.removableIngredients,
           extraIngredients: parsed.data.extraIngredients,
+          description,
           reason: parsed.data.reason,
           source: 'ai',
         });

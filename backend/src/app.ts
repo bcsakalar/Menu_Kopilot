@@ -194,7 +194,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     store: analyzeStore,
     registry: new RunRegistry<AnalyzeEvent>(),
     queue,
-    // `tracer` and `categories` are per-run: the service builds them for each analysis.
+    // `tracer`, `categories`, `productTypes` and `feedback` are per-run: the service loads them for each analysis.
     pipelineDeps: {
       db,
       router: ai.router,

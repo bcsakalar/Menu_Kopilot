@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import type { FastifyBaseLogger } from 'fastify';
 import { runAnalysis, type AnalyzePipelineDeps } from '../../agents/pipeline.js';
 import { loadCategoryIndex } from '../../agents/gap-analyst.js';
+import { loadFeedbackIndex, loadProductTypeIndex } from '../../agents/knowledge.js';
 import { AgentTracer } from '../../agents/tracer.js';
 import type { ImageInput } from '../../ai/types.js';
 import type { Database, Executor } from '../../db/client.js';
@@ -14,6 +15,7 @@ import { normalizeTr } from '../../lib/normalize-tr.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import { addAliases, findApprovedByName, getTemplate, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
+import { diffFeedback, recordFeedback } from './feedback.js';
 import type { AnalyzeEvent, AnalyzeFields, AnalyzeResult, CardDto, ClassificationDto } from './schemas.js';
 import type { AnalyzeStore } from './store.js';
 
@@ -28,7 +30,7 @@ export interface AnalyzeServiceDeps {
   store: AnalyzeStore;
   registry: RunRegistry<AnalyzeEvent>;
   queue: JobQueue;
-  pipelineDeps: Omit<AnalyzePipelineDeps, 'tracer' | 'categories'>;
+  pipelineDeps: Omit<AnalyzePipelineDeps, 'tracer' | 'categories' | 'productTypes' | 'feedback'>;
   log: FastifyBaseLogger;
 }
 
@@ -79,6 +81,9 @@ export class AnalyzeService {
     emit({ type: 'run', runId });
 
     const categories = await loadCategoryIndex(db);
+    // The knowledge base and what the team taught it, read fresh: an edit or a day of feedback counts on the next run.
+    const productTypes = await loadProductTypeIndex(db);
+    const feedback = await loadFeedbackIndex(db);
     const tracer = new AgentTracer({
       db,
       runId,
@@ -96,6 +101,8 @@ export class AnalyzeService {
         ...this.deps.pipelineDeps,
         tracer,
         categories,
+        productTypes,
+        feedback,
         onAgentError: (agent, err) => this.deps.log.error({ err, runId, agent }, 'agent failed, run continues'),
       },
       {
@@ -186,14 +193,16 @@ export class AnalyzeService {
    * Accepts a card into the template pool.
    *
    * Only `new_product` cards create or replace a template — an `option` card enriches the template of the product
-   * it targets, and a `fix` card is a note for the call, not a pool write.
+   * it targets, and a `fix` card is a note for the call, not a pool write. The payload, when sent, is the card as
+   * the user kept it (suggestions tapped away are missing from it); what was kept and what was removed is also
+   * recorded for the learning loop (D-180).
    */
   async accept(userId: string, cardId: string, body: { payload?: TemplatePayload | undefined }): Promise<CardDto> {
     const { db, store } = this.deps;
     const existing = await store.setAccepted(userId, cardId, true, body.payload);
     if (!existing) throw notFound('Kart');
 
-    // A fix card is a note for the call ("açıklamayı sor"), not something to write into the pool.
+    // A fix card is a note for the call ("adı sor"), not something to write into the pool.
     if (existing.section === 'fix') return existing;
 
     const run = await store.snapshot(userId, existing.runId);
@@ -202,11 +211,22 @@ export class AnalyzeService {
 
     let templateId: string | null;
     try {
-      templateId = await db.transaction((tx) =>
-        existing.section === 'option'
-          ? this.mergeOptions(tx, existing, cuisineId, userId)
-          : this.saveProduct(tx, existing, body.payload, cuisineId, userId),
-      );
+      templateId = await db.transaction(async (tx) => {
+        const id =
+          existing.section === 'option'
+            ? await this.mergeOptions(tx, existing, body.payload, cuisineId, userId)
+            : await this.saveProduct(tx, existing, body.payload, cuisineId, userId);
+        const kept = body.payload ?? keptAsSuggested(existing);
+        await recordFeedback(tx, {
+          userId,
+          card: existing,
+          rows: [
+            ...(existing.section === 'new_product' ? [{ kind: 'product' as const, value: existing.name, action: 'accepted' as const }] : []),
+            ...diffFeedback(existing, kept),
+          ],
+        });
+        return id;
+      });
     } catch (err) {
       if (isUniqueViolation(err)) throw new AppError('CONFLICT', 'Bu mutfakta aynı isimde onaylı başka bir şablon var');
       throw err;
@@ -221,6 +241,11 @@ export class AnalyzeService {
   async skip(userId: string, cardId: string): Promise<CardDto> {
     const card = await this.deps.store.setAccepted(userId, cardId, false);
     if (!card) throw notFound('Kart');
+    // A new product the user turned down is a signal about the product; skipping a menu product's card is not a
+    // verdict on its suggestions (it usually means "later"), so it teaches nothing.
+    if (card.section === 'new_product') {
+      await recordFeedback(this.deps.db, { userId, card, rows: [{ kind: 'product', value: card.name, action: 'removed' }] });
+    }
     return card;
   }
 
@@ -245,7 +270,9 @@ export class AnalyzeService {
     const target = pointed ?? (byName ? await getTemplate(tx, byName.id) : undefined);
     let templateId: string;
     if (target) {
-      if (edited && !isDeepStrictEqual(target.payload, payload)) {
+      // The card is the template after grounding — a 6-8 word description, groups that fit the product, completed
+      // ingredients — so accepting it, edited or not, writes that improved version.
+      if (!isDeepStrictEqual(target.payload, payload)) {
         await replaceTemplateContent(tx, target.id, payload, { source: 'user' });
       } else if (target.source === 'seed') {
         await replaceTemplateContent(tx, target.id, target.payload, { source: 'user' });
@@ -271,15 +298,30 @@ export class AnalyzeService {
    * the pool does not know the product yet, it is created with just these options — so the next call about the
    * same restaurant finds it.
    */
-  private async mergeOptions(tx: Executor, card: CardDto, cuisineId: string, userId: string): Promise<string> {
+  private async mergeOptions(
+    tx: Executor,
+    card: CardDto,
+    edited: TemplatePayload | undefined,
+    cuisineId: string,
+    userId: string,
+  ): Promise<string> {
     const name = card.targetName ?? card.name;
     const pointed = card.matchedTemplateId ? await getTemplate(tx, card.matchedTemplateId) : undefined;
     const approved = pointed ? undefined : await findApprovedByName(tx, cuisineId, normalizeTr(card.name));
     const template = pointed ?? (approved ? await getTemplate(tx, approved.id) : undefined);
+    // What the user kept: the edited payload when the phone sent one, the card as suggested otherwise.
+    const source = edited
+      ? {
+          optionGroups: edited.optionGroups,
+          removableIngredients: edited.removableIngredients,
+          extraIngredients: edited.extraIngredients.map((e) => e.name),
+          description: edited.description,
+        }
+      : { ...card, description: card.shortDescription };
 
     let templateId: string;
     if (template) {
-      const merged = templatePayloadSchema.parse(mergeOptionCard(template.payload, card));
+      const merged = templatePayloadSchema.parse(mergeOptionCard(template.payload, source));
       if (!isDeepStrictEqual(merged, template.payload) || template.source === 'seed') {
         await replaceTemplateContent(tx, template.id, merged, { source: 'user' });
       }
@@ -299,7 +341,7 @@ export class AnalyzeService {
             allergenNotes: [],
             upsellSuggestion: '',
           },
-          card,
+          source,
         ),
       );
       templateId = await insertTemplate(tx, { cuisineId, payload, source: 'user', approved: true, createdBy: userId });
@@ -313,8 +355,25 @@ export class AnalyzeService {
 const MAX_GROUPS = 12;
 const MAX_INGREDIENTS = 25;
 
-/** Pure merge of an option card into a template payload; exported for the unit tests. */
-export function mergeOptionCard(base: TemplatePayload, card: Pick<CardDto, 'optionGroups' | 'removableIngredients' | 'extraIngredients'>): TemplatePayload {
+/** The card as the pipeline suggested it, in payload form: what "accepted untouched" means for the feedback diff. */
+function keptAsSuggested(card: CardDto): Pick<TemplatePayload, 'optionGroups' | 'removableIngredients' | 'extraIngredients' | 'description'> {
+  if (card.payload) return card.payload;
+  return {
+    optionGroups: card.optionGroups.map((g) => ({ ...g, options: g.options.map((o) => ({ ...o, isDefault: false })) })),
+    removableIngredients: card.removableIngredients,
+    extraIngredients: card.extraIngredients.map((name) => ({ name, priceHint: 'ek ücretli' as const })),
+    description: card.shortDescription,
+  };
+}
+
+/**
+ * Pure merge of an option card into a template payload; exported for the unit tests. A description the user kept
+ * replaces the template's: it is the 6-8 word panel line they just approved.
+ */
+export function mergeOptionCard(
+  base: TemplatePayload,
+  card: Pick<CardDto, 'optionGroups' | 'removableIngredients' | 'extraIngredients'> & { description?: string | undefined },
+): TemplatePayload {
   const incoming = card.optionGroups.map((group) => ({
     ...group,
     options: group.options.map((option) => ({ ...option, isDefault: false })),
@@ -345,8 +404,10 @@ export function mergeOptionCard(base: TemplatePayload, card: Pick<CardDto, 'opti
     extras.push({ name, priceHint: 'ek ücretli' });
   }
 
+  const description = card.description?.trim();
   return {
     ...base,
+    ...(description ? { description } : {}),
     optionGroups: [...kept, ...incoming].slice(0, MAX_GROUPS),
     removableIngredients: union(base.removableIngredients, card.removableIngredients),
     extraIngredients: extras.slice(0, MAX_INGREDIENTS),

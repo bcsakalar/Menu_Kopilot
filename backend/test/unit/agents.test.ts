@@ -166,14 +166,26 @@ describe('run plan — how many products and from which categories', () => {
     ]),
   );
 
-  it('quick mode: six suggestions spread over six different categories, no combos', () => {
-    const plan = planRun({ mode: 'quick', categories: kebap, missing: 20, needOptions: 10 });
+  it('quick mode: six suggestions spread over six different categories, no combos, every menu product completed', () => {
+    const plan = planRun({ mode: 'quick', categories: kebap, current: 8, missing: 20, needOptions: 10 });
     expect(plan.products).toBe(6);
-    expect(plan.optionTargets).toBe(3);
+    // Every menu product gets its four sections; the model is asked about seven, in two parallel calls at most,
+    // and the pool and the knowledge base complete the rest at no model cost.
+    expect(plan.optionTargets).toBe(10);
+    expect(plan.modelOptionTargets).toBe(7);
+    expect(plan.optionBatches).toBe(2);
     // One per category — the user's "5 farklı kategoriden 5-6 ürün".
     expect([...plan.quota.values()].every((v) => v <= 1)).toBe(true);
     expect(quotaRows(kebap, plan.quota)).toHaveLength(6);
     expect(plan.quota.get('menu-kampanya')).toBe(0);
+  });
+
+  it('quick mode on a one-product menu ("ürün ekle"): seven suggestions, a category may give two', () => {
+    const plan = planRun({ mode: 'quick', categories: kebap, current: 1, missing: 19, needOptions: 1 });
+    expect(plan.products).toBe(7);
+    expect([...plan.quota.values()].every((v) => v <= 2)).toBe(true);
+    expect(plan.quota.get('menu-kampanya')).toBe(0);
+    expect(plan.optionTargets).toBe(1);
   });
 
   it('full mode: fills to the opening target, not just to the category minimums', () => {

@@ -69,6 +69,11 @@ export class CategoryIndex {
     return this.match(name) ?? FALLBACK_CATEGORY;
   }
 
+  /** The category the restaurant's own heading names, when the taxonomy knows the heading. */
+  headingCategory(sectionText: string | null | undefined): string | undefined {
+    return sectionText ? this.match(sectionText) : undefined;
+  }
+
   /**
    * The restaurant's own heading and the product's name point at two different categories ("Ayran" under
    * "Tatlılar"). Reported only when BOTH resolve, so a heading the taxonomy does not know ("Ocakbaşı") never
