@@ -128,6 +128,8 @@ class AnalysisCard {
     this.currentValue,
     this.suggestedValue,
     this.payload,
+    this.productType,
+    this.confidence,
     this.status = CardStatus.pending,
     this.sortOrder = 0,
     this.queued = false,
@@ -156,6 +158,8 @@ class AnalysisCard {
         currentValue: json.strOrNull('currentValue'),
         suggestedValue: json.strOrNull('suggestedValue'),
         payload: json.object('payload') == null ? null : TemplatePayload.fromJson(json.object('payload')!),
+        productType: json.strOrNull('productType'),
+        confidence: json.intOrNull('confidence'),
         status: CardStatus.fromWire(json.str('status')),
         sortOrder: json.integer('sortOrder'),
       );
@@ -194,6 +198,12 @@ class AnalysisCard {
 
   /// Section A only: what is written to the pool on accept.
   final TemplatePayload? payload;
+
+  /// The kind of product ("durum", "tatli-serbetli") the suggestions were checked against; null on older cards.
+  final String? productType;
+
+  /// 0-100: how sure the suggestions are. Low ones get a "Kontrol et" label.
+  final int? confidence;
   final CardStatus status;
   final int sortOrder;
 
@@ -225,10 +235,72 @@ class AnalysisCard {
         currentValue: currentValue,
         suggestedValue: suggestedValue,
         payload: payload ?? this.payload,
+        productType: productType,
+        confidence: confidence,
         status: status ?? this.status,
         sortOrder: sortOrder,
         queued: queued ?? this.queued,
       );
+
+  /// Everything the card suggests, as a payload: the four sections the screen shows. A new product carries its
+  /// own payload (it may have been edited); a product already on the menu is built from the card fields.
+  TemplatePayload get content =>
+      payload ??
+      TemplatePayload(
+        name: name,
+        description: shortDescription,
+        optionGroups: [
+          for (final group in optionGroups)
+            OptionGroup(
+              name: group.name,
+              selectionType: SelectionType.fromWire(group.selectionType),
+              isRequired: group.isRequired,
+              minSelect: group.minSelect,
+              maxSelect: group.maxSelect,
+              options: [for (final o in group.options) TemplateOption(name: o.name, priceMode: PriceMode.fromWire(o.priceMode))],
+            ),
+        ],
+        removableIngredients: removableIngredients,
+        extraIngredients: [for (final e in extraIngredients) ExtraIngredient(name: e)],
+      );
+
+  /// A packaged drink: on the panel just a name, nothing to choose or describe.
+  bool get isPlainRow {
+    final c = content;
+    return section == CardSection.newProduct &&
+        c.optionGroups.isEmpty &&
+        c.removableIngredients.isEmpty &&
+        c.extraIngredients.isEmpty &&
+        c.description.trim().isEmpty;
+  }
+
+  /// The card as the user kept it: every suggestion they tapped away is left out (see [ItemKey]).
+  TemplatePayload kept(Set<String> removed) {
+    final c = content;
+    return c
+        .copyWith(
+          description: removed.contains(ItemKey.description) ? '' : c.description,
+          optionGroups: [
+            for (final group in c.optionGroups)
+              if (!removed.contains(ItemKey.group(group.name)))
+                group.copyWith(
+                  options: [
+                    for (final option in group.options)
+                      if (!removed.contains(ItemKey.option(group.name, option.name))) option,
+                  ],
+                ),
+          ],
+          removableIngredients: [
+            for (final name in c.removableIngredients)
+              if (!removed.contains(ItemKey.removable(name))) name,
+          ],
+          extraIngredients: [
+            for (final extra in c.extraIngredients)
+              if (!removed.contains(ItemKey.extra(extra.name))) extra,
+          ],
+        )
+        .normalized();
+  }
 
   Json toJson() => {
         'id': id,
@@ -253,10 +325,30 @@ class AnalysisCard {
         'currentValue': currentValue,
         'suggestedValue': suggestedValue,
         'payload': payload?.toJson(),
+        'productType': productType,
+        'confidence': confidence,
         'status': status.name,
         'sortOrder': sortOrder,
       };
 }
+
+/// Keys of the suggestions on a card, for "tap to remove": a whole option group, one option inside it, an
+/// ingredient, or the description.
+abstract final class ItemKey {
+  static String group(String name) => 'g|$name';
+  static String option(String group, String option) => 'o|$group|$option';
+  static String removable(String name) => 'r|$name';
+  static String extra(String name) => 'e|$name';
+  static const String description = 'd';
+}
+
+/// Server notices worth showing to the operations team, in their words. The technical ones (a provider was slow,
+/// one step fell back) are hidden: the cards are complete either way.
+String? friendlyWarning(String code, String message) => switch (code) {
+      'slow_providers' || 'recommend_failed' || 'options_failed' || 'agent_failed' => null,
+      'local_only' || 'quota_exceeded' || 'not_configured' || 'ai_off' => 'Yapay zekâ şu an kullanılamıyor; öneriler hazır listeden geldi.',
+      _ => message.isEmpty ? null : message,
+    };
 
 /// One category of the progress header: how many products the menu has against what the cuisine expects.
 class CategoryCount {
@@ -593,7 +685,12 @@ class AnalysisResult {
         menu: json.objects('menu').map(AnalysisMenuItem.fromJson).toList(),
         cards: json.objects('cards').map(AnalysisCard.fromJson).toList(),
         stats: json.object('stats') == null ? null : AnalysisStats.fromJson(json.object('stats')!),
-        warnings: json.objects('warnings').map((w) => w.str('message')).where((m) => m.isNotEmpty).toList(),
+        warnings: json
+            .objects('warnings')
+            .map((w) => friendlyWarning(w.str('code'), w.str('message')))
+            .whereType<String>()
+            .toSet()
+            .toList(),
         error: json.strOrNull('error'),
         createdAt: DateTime.tryParse(json.str('createdAt')),
       );

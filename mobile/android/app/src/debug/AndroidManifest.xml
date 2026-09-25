@@ -7,5 +7,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Debug builds may talk to a local backend over plain HTTP (e.g. http://10.0.2.2:3000).
          Release builds only use HTTPS (Caddy terminates TLS on the VPS). -->
-    <application android:usesCleartextTraffic="true" tools:replace="android:usesCleartextTraffic"/>
+    <application
+        android:label="Kopilot TEST"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:label,android:usesCleartextTraffic"/>
 </manifest>

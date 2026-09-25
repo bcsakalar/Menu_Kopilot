@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/design/components.dart';
 import '../../core/design/count_meter.dart';
@@ -16,12 +15,13 @@ import '../../data/models/template_payload.dart';
 import '../home/cuisine_picker.dart';
 import 'analysis_controller.dart';
 import 'card_editor_screen.dart';
-import 'section_cards.dart';
+import 'product_card.dart';
 
-/// The one result screen. Pinned on top: how many products the menu has against the cuisine target, and the
-/// section filter. Below: three titled, counted sections — new products, options for products already on the
-/// menu, and things to fix — each scannable without opening anything. The screen stays awake while it is open,
-/// because it is read during a phone call.
+/// The one result screen, built for someone on a phone call who is not a technical person.
+///
+/// Pinned on top: how many products the menu has against the cuisine's target. Below it two big tabs — "Yeni
+/// ürünler" and "Menüdeki ürünler" — and under each tab one card per product with the same four sections. Nothing
+/// on the screen needs a second screen. The screen stays awake while it is open, because it is read during a call.
 class ResultsScreen extends ConsumerStatefulWidget {
   const ResultsScreen({super.key, this.request, this.runId});
 
@@ -86,17 +86,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     if (edited != null) ref.read(analysisControllerProvider.notifier).updatePayload(card.id, edited);
   }
 
-  void _copySelected(AnalysisViewState state) {
-    final l10n = context.l10n;
-    final chosen = state.cards.where((c) => state.selected.contains(c.id)).toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    if (chosen.isEmpty) return;
-    final text = chosen.map((c) => cardCopyText(l10n, c)).join('\n\n');
-    copyToClipboard(context, text);
-    Haptics.confirm();
-  }
-
-  /// The user overrides the Classifier: same menu, another cuisine. The server reuses the product list it read.
+  /// The user overrides the cuisine: same menu, another cuisine. The server reuses the product list it read.
   Future<void> _changeCuisine() async {
     final cuisine = await pickCuisine(context);
     if (cuisine == null || !mounted) return;
@@ -134,55 +124,38 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         actions: [
           if (state.isStreaming)
             TextButton.icon(onPressed: controller.cancel, icon: const Icon(Icons.stop_rounded), label: Text(l10n.stop)),
-          if (state.runId != null && !state.isStreaming)
-            IconButton(
-              tooltip: l10n.pipelineDebug,
-              icon: const Icon(Icons.bug_report_outlined),
-              onPressed: () => context.push('/suggest/debug?runId=${state.runId}'),
-            ),
         ],
       ),
-      bottomNavigationBar: state.selected.isEmpty
-          ? null
-          : _SelectionBar(
-              count: state.selected.length,
-              onCopy: () => _copySelected(state),
-              onClear: controller.clearSelection,
-            ),
       body: switch (state.phase) {
         RunPhase.idle => EmptyState(icon: Icons.playlist_add_rounded, message: l10n.noAnalysisYet),
         RunPhase.queued => EmptyState(icon: Icons.cloud_upload_outlined, message: l10n.queuedOffline),
         RunPhase.error when state.cards.isEmpty => EmptyState(
             icon: Icons.error_outline_rounded,
-            message: state.error ?? l10n.genericError,
+            message: state.error == null ? l10n.errorRetry : '${state.error}\n${l10n.errorRetry}',
+            action: FilledButton.icon(
+              key: const Key('retry-run'),
+              onPressed: controller.retry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.retry),
+            ),
           ),
         _ => Column(
             children: [
-              // Pinned: the number that matters and the filter never scroll away during the call.
+              // Pinned: the number that matters never scrolls away during the call.
               if (state.counts != null) _ProgressStrip(state: state, onChangeCuisine: canRerun ? _changeCuisine : null),
-              if (!reading) _FilterChips(state: state, onChanged: controller.setFilter),
+              if (!reading) _Tabs(state: state, onChanged: controller.setTab),
               Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          const DisclaimerBanner(),
-                          if (state.offline) InlineNotice(l10n.offlineBanner, icon: Icons.cloud_off_rounded, tone: Tone.amber),
-                          if (state.classification?.disagrees ?? false)
-                            _CuisineMismatch(
-                              classification: state.classification!,
-                              onRerun: canRerun ? _rerun : null,
-                            ),
-                          for (final warning in state.warnings)
-                            InlineNotice(warning, icon: Icons.warning_amber_rounded, tone: Tone.amber),
-                          if (reading) ScanSkeleton(message: state.message ?? l10n.analyzing),
-                        ],
-                      ),
-                    ),
-                    for (final section in state.visibleSections) _sectionGroup(state, controller, section),
-                    if (state.isStreaming && !reading) const SliverToBoxAdapter(child: SkeletonCard()),
-                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                child: ListView(
+                  key: const Key('result-list'),
+                  padding: const EdgeInsets.only(bottom: 40),
+                  children: [
+                    if (state.offline) InlineNotice(l10n.offlineBanner, icon: Icons.cloud_off_rounded, tone: Tone.amber),
+                    if (state.classification?.disagrees ?? false)
+                      _CuisineMismatch(classification: state.classification!, onRerun: canRerun ? _rerun : null),
+                    for (final warning in state.warnings) InlineNotice(warning, icon: Icons.info_outline_rounded, tone: Tone.amber),
+                    if (reading) ScanSkeleton(message: state.message ?? l10n.analyzing),
+                    if (!reading) ..._tabContent(state, controller),
+                    if (state.isStreaming && !reading) const SkeletonCard(),
                   ],
                 ),
               ),
@@ -192,56 +165,65 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     );
   }
 
-  /// One section: its header sticks while the section is on screen and hands over to the next one, so it always
-  /// names the block you are reading. Empty sections still show their header with a "yok" line — the absence of
-  /// a section is information too ("bu menüde düzeltilecek bir şey çıkmadı").
-  Widget _sectionGroup(AnalysisViewState state, AnalysisController controller, CardSection section) {
+  List<Widget> _tabContent(AnalysisViewState state, AnalysisController controller) {
     final l10n = context.l10n;
-    final cards = state.section(section);
-    if (cards.isEmpty && state.filter == SectionFilter.all && state.isStreaming) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _SectionHeaderDelegate(
-            section: section,
-            count: cards.length,
-            palette: context.palette,
-            theme: Theme.of(context),
-            title: sectionTitle(l10n, section),
-            hint: sectionHint(l10n, section),
-            onSelectAll: cards.any((c) => c.isPending) ? () => controller.selectSection(section) : null,
-            selectAllLabel: l10n.selectAll,
-          ),
-        ),
-        if (cards.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpace.page, 4, AppSpace.page, 12),
-              child: Text(l10n.sectionEmpty, style: Theme.of(context).textTheme.bodySmall),
-            ),
-          )
-        else
-          SliverList.builder(
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              final card = cards[index];
-              return SectionCardView(
-                key: ValueKey(card.id),
-                card: card,
-                busy: _busy.contains(card.id),
-                selected: state.selected.contains(card.id),
-                onToggleSelect: () => controller.toggleSelected(card.id),
-                onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true),
-                onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false),
-                onEdit: card.payload == null ? null : () => _openEditor(card),
-              );
-            },
-          ),
-      ],
+    final text = Theme.of(context).textTheme;
+    final hint = Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, 10, AppSpace.page, 2),
+      child: Text(l10n.tapToRemove, style: text.bodyMedium?.copyWith(color: context.palette.textMuted)),
     );
+    Widget empty(String message) => Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, 24, AppSpace.page, 8),
+          child: Text(message, textAlign: TextAlign.center, style: text.bodyLarge?.copyWith(color: context.palette.textMuted)),
+        );
+
+    switch (state.activeTab) {
+      case ResultTab.newProducts:
+        final cards = state.newProducts;
+        if (cards.isEmpty) return [if (!state.isStreaming) empty(l10n.tabNewProductsEmpty)];
+        return [
+          hint,
+          for (final card in cards)
+            ProductCard(
+              key: ValueKey(card.id),
+              card: card,
+              title: card.name,
+              removed: state.removedOf(card.id),
+              busy: _busy.contains(card.id),
+              onToggle: (key) => controller.toggleItem(card.id, key),
+              onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true),
+              onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false),
+              onEdit: card.payload == null ? null : () => _openEditor(card),
+            ),
+        ];
+      case ResultTab.menuProducts:
+        final entries = state.menuEntries;
+        if (entries.isEmpty) return [if (!state.isStreaming) empty(l10n.tabMenuProductsEmpty)];
+        return [
+          hint,
+          for (final entry in entries)
+            ProductCard(
+              key: ValueKey('entry-${entry.key}'),
+              card: entry.card,
+              title: entry.title,
+              notes: entry.notes,
+              removed: entry.card == null ? const {} : state.removedOf(entry.card!.id),
+              busy: entry.card != null && _busy.contains(entry.card!.id),
+              onToggle: (key) {
+                if (entry.card != null) controller.toggleItem(entry.card!.id, key);
+              },
+              onAccept: () {
+                final card = entry.card;
+                if (card != null) _act(card.id, () => controller.accept(card.id), accept: true);
+              },
+              onSkip: () {
+                final card = entry.card;
+                if (card != null) _act(card.id, () => controller.skip(card.id), accept: false);
+              },
+              onNoteDone: (note) => _act(note.id, () => controller.accept(note.id), accept: true),
+            ),
+        ];
+    }
   }
 }
 
@@ -266,8 +248,8 @@ class _TitleBlock extends StatelessWidget {
   }
 }
 
-/// Pinned progress: "Mevcut X ürün / hedef Y", the cuisine (tap to change it), the 10-product rule and the
-/// categories still short. Updates live as cards are accepted.
+/// Pinned progress: "Menüde X ürün · hedef Y", a bar, how many are still needed, the sections still short, and the
+/// cuisine (tap to change it). Updates live as products are accepted.
 class _ProgressStrip extends StatelessWidget {
   const _ProgressStrip({required this.state, required this.onChangeCuisine});
 
@@ -283,18 +265,13 @@ class _ProgressStrip extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final counts = state.counts!;
     final open = counts.openCategories;
-
-    final numbers = text.titleLarge?.copyWith(fontFeatures: tabularFigures, fontWeight: FontWeight.w700);
-    final words = text.bodyMedium?.copyWith(color: p.textMuted);
-    final rule = [
+    final need = [
       if (!counts.meetsHardMinimum) l10n.belowHardMinimum(counts.hardMinimum),
-      if (counts.missing > 0) l10n.missingCount(counts.missing) else l10n.targetReached,
+      if (counts.missing > 0) l10n.stillNeeded(counts.missing) else l10n.targetReached,
     ].join(' · ');
     final status = switch (state.phase) {
       RunPhase.streaming => state.message ?? l10n.analyzing,
       RunPhase.cancelled => l10n.stopped,
-      _ when state.stats != null && state.stats!.cacheHit => l10n.fromCache,
-      _ when state.stats != null => l10n.analysisSummary(state.stats!.menuItems, state.stats!.llmCalls),
       _ => '',
     };
 
@@ -303,7 +280,7 @@ class _ProgressStrip extends StatelessWidget {
       child: Container(
         key: const Key('analysis-counts'),
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(AppSpace.page, 10, AppSpace.sm, 8),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 10, AppSpace.sm, 10),
         decoration: BoxDecoration(border: Border(bottom: BorderSide(color: p.border))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,15 +289,9 @@ class _ProgressStrip extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: '${l10n.progressCurrent} ', style: words),
-                        TextSpan(text: '${counts.current}', style: numbers),
-                        TextSpan(text: ' ${l10n.productsUnit} / ${l10n.progressTarget} ', style: words),
-                        TextSpan(text: '${counts.target}', style: numbers?.copyWith(color: p.textMuted)),
-                      ],
-                    ),
+                  child: Text(
+                    l10n.progressLine(counts.current, counts.target),
+                    style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700, fontFeatures: tabularFigures),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -334,32 +305,26 @@ class _ProgressStrip extends StatelessWidget {
                 current: counts.current,
                 target: counts.target,
                 color: counts.meetsTarget ? p.success : p.amber,
-                height: 4,
+                height: 6,
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 6, right: AppSpace.sm),
               child: Text(
-                [rule, if (status.isNotEmpty) status].join(' · '),
-                style: text.bodySmall?.copyWith(color: counts.meetsHardMinimum ? p.textMuted : p.amber),
+                [need, if (status.isNotEmpty) status].join(' · '),
+                style: text.bodyMedium?.copyWith(color: counts.meetsHardMinimum ? p.textMuted : p.amber),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (open.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: SizedBox(
-                  height: 24,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: open.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 6),
-                    itemBuilder: (context, index) {
-                      final category = open[index];
-                      return Pill('${category.label} ${category.present}/${category.minItems}', tone: Tone.amber);
-                    },
-                  ),
+                padding: const EdgeInsets.only(top: 2, right: AppSpace.sm),
+                child: Text(
+                  l10n.missingCategories(open.map((c) => '${c.label} ${c.present}/${c.minItems}').join(', ')),
+                  style: text.bodyMedium?.copyWith(color: p.textMuted),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
           ],
@@ -369,7 +334,7 @@ class _ProgressStrip extends StatelessWidget {
   }
 }
 
-/// "mutfak türü: Pide & Lahmacun ▾" — the Classifier's verdict, one tap from being overridden.
+/// "mutfak türü: Pide & Lahmacun ▾" — the cuisine, one tap from being changed.
 class _CuisineButton extends StatelessWidget {
   const _CuisineButton({required this.name, required this.onTap});
 
@@ -382,7 +347,7 @@ class _CuisineButton extends StatelessWidget {
     final p = context.palette;
     final text = Theme.of(context).textTheme;
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 170),
+      constraints: const BoxConstraints(maxWidth: 170, minHeight: 44),
       child: Tooltip(
         message: l10n.changeCuisine,
         child: InkWell(
@@ -390,19 +355,19 @@ class _CuisineButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppRadius.control),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
                   child: Text(
                     l10n.cuisineLabelled(name),
-                    style: text.bodySmall?.copyWith(color: onTap == null ? p.textMuted : p.accentText),
+                    style: text.bodyMedium?.copyWith(color: onTap == null ? p.textMuted : p.accentText),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (onTap != null) Icon(Icons.expand_more_rounded, size: 16, color: p.accentText),
+                if (onTap != null) Icon(Icons.expand_more_rounded, size: 18, color: p.accentText),
               ],
             ),
           ),
@@ -412,8 +377,8 @@ class _CuisineButton extends StatelessWidget {
   }
 }
 
-/// Shown only when the Classifier read a different cuisine than the one picked: a one-line "did you mean", with
-/// the re-run one tap away.
+/// Shown only when the menu reads as another cuisine than the one picked: a one-line "did you mean", with the
+/// re-run one tap away.
 class _CuisineMismatch extends StatelessWidget {
   const _CuisineMismatch({required this.classification, required this.onRerun});
 
@@ -442,154 +407,41 @@ class _CuisineMismatch extends StatelessWidget {
   }
 }
 
-class _FilterChips extends StatelessWidget {
-  const _FilterChips({required this.state, required this.onChanged});
+/// Two big tabs with their counts: what to add, and what to complete.
+class _Tabs extends StatelessWidget {
+  const _Tabs({required this.state, required this.onChanged});
 
   final AnalysisViewState state;
-  final ValueChanged<SectionFilter> onChanged;
+  final ValueChanged<ResultTab> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final entries = <(SectionFilter, String, int)>[
-      (SectionFilter.all, l10n.filterAll, state.cards.length),
-      (SectionFilter.newProduct, l10n.filterNewProducts, state.count(CardSection.newProduct)),
-      (SectionFilter.option, l10n.filterOptions, state.count(CardSection.option)),
-      (SectionFilter.fix, l10n.filterFixes, state.count(CardSection.fix)),
-    ];
-    return SizedBox(
-      height: 48,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpace.page, vertical: 4),
-        itemCount: entries.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final (filter, label, count) = entries[index];
-          return FilterChip(
-            key: ValueKey('filter-${filter.name}'),
-            selected: state.filter == filter,
-            label: Text('$label · $count'),
-            onSelected: (_) {
-              Haptics.select();
-              onChanged(filter);
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Bottom bar while cards are ticked: copy them all at once, or clear the selection.
-class _SelectionBar extends StatelessWidget {
-  const _SelectionBar({required this.count, required this.onCopy, required this.onClear});
-
-  final int count;
-  final VoidCallback onCopy;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final p = context.palette;
-    return SafeArea(
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: p.surface, border: Border(top: BorderSide(color: p.border))),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpace.page, 8, AppSpace.page, 8),
-          child: Row(
-            children: [
-              IconButton(onPressed: onClear, icon: const Icon(Icons.close_rounded), tooltip: l10n.clearSelection),
-              const SizedBox(width: 4),
-              Expanded(child: Text(l10n.selectedCount(count), style: Theme.of(context).textTheme.titleSmall)),
-              FilledButton.icon(
-                key: const Key('copy-selected'),
-                onPressed: onCopy,
-                icon: const Icon(Icons.copy_all_rounded, size: 18),
-                label: Text(l10n.copySelected),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Sticky section header: colour bar, icon, title, live count, and "hepsini seç" for that section.
-class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _SectionHeaderDelegate({
-    required this.section,
-    required this.count,
-    required this.palette,
-    required this.theme,
-    required this.title,
-    required this.hint,
-    required this.onSelectAll,
-    required this.selectAllLabel,
-  });
-
-  final CardSection section;
-  final int count;
-  final AppPalette palette;
-  final ThemeData theme;
-  final String title;
-  final String hint;
-  final VoidCallback? onSelectAll;
-  final String selectAllLabel;
-
-  static const double _height = 56;
-
-  @override
-  double get minExtent => _height;
-
-  @override
-  double get maxExtent => _height;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final style = sectionStyle(palette, section);
-    return Material(
-      color: palette.canvas,
-      child: Container(
-        height: _height,
-        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.sm, 0),
-        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: palette.border))),
-        child: Row(
-          children: [
-            Container(width: 3, height: 26, decoration: BoxDecoration(color: style.colour, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(width: 10),
-            Icon(style.icon, size: 18, color: style.colour),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('$title · $count', style: theme.textTheme.titleSmall),
-                  Text(hint, style: theme.textTheme.bodySmall?.copyWith(fontSize: 11.5, color: palette.textFaint), maxLines: 1),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, 10, AppSpace.page, 2),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<ResultTab>(
+          key: const Key('result-tabs'),
+          showSelectedIcon: false,
+          style: SegmentedButton.styleFrom(minimumSize: const Size(0, 48), textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          segments: [
+            ButtonSegment(
+              value: ResultTab.newProducts,
+              label: Text(l10n.tabNewProducts(state.count(CardSection.newProduct)), key: const Key('tab-new')),
             ),
-            if (onSelectAll != null)
-              TextButton(
-                key: ValueKey('select-all-${section.name}'),
-                onPressed: onSelectAll,
-                child: Text(selectAllLabel, style: theme.textTheme.labelMedium),
-              ),
+            ButtonSegment(
+              value: ResultTab.menuProducts,
+              label: Text(l10n.tabMenuProducts(state.menuEntries.length), key: const Key('tab-menu')),
+            ),
           ],
+          selected: {state.activeTab},
+          onSelectionChanged: (selection) {
+            Haptics.select();
+            onChanged(selection.first);
+          },
         ),
       ),
     );
   }
-
-  @override
-  bool shouldRebuild(covariant _SectionHeaderDelegate old) =>
-      old.count != count ||
-      old.section != section ||
-      (old.onSelectAll == null) != (onSelectAll == null) ||
-      old.palette != palette ||
-      old.title != title ||
-      old.hint != hint;
 }

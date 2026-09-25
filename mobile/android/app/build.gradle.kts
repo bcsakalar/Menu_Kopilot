@@ -53,6 +53,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // A test build installs NEXT TO the release app on the same phone, so trying a change never replaces
+            // (or signs over) the app the team is using.
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = if (hasReleaseKey) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
         }

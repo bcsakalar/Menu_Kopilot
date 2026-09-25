@@ -187,7 +187,7 @@ abstract class AppLocalizations {
   /// No description provided for @genericError.
   ///
   /// In tr, this message translates to:
-  /// **'Bir şeyler ters gitti'**
+  /// **'Bir sorun oldu. Tekrar dene.'**
   String get genericError;
 
   /// No description provided for @networkError.
@@ -421,7 +421,7 @@ abstract class AppLocalizations {
   /// No description provided for @queuedOffline.
   ///
   /// In tr, this message translates to:
-  /// **'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek'**
+  /// **'İnternet yok. Analiz kaydedildi, bağlantı gelince kendiliğinden başlayacak.'**
   String get queuedOffline;
 
   /// No description provided for @pendingQueue.
@@ -457,7 +457,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultsTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Analiz'**
+  /// **'Sonuçlar'**
   String get resultsTitle;
 
   /// No description provided for @readingPhotos.
@@ -721,7 +721,7 @@ abstract class AppLocalizations {
   /// No description provided for @extraNotes.
   ///
   /// In tr, this message translates to:
-  /// **'Not (isteğe bağlı)'**
+  /// **'Not'**
   String get extraNotes;
 
   /// No description provided for @extraNotesHint.
@@ -739,19 +739,19 @@ abstract class AppLocalizations {
   /// No description provided for @menuTextLabel.
   ///
   /// In tr, this message translates to:
-  /// **'Menüde neler var?'**
+  /// **'Menüdeki ürünler'**
   String get menuTextLabel;
 
   /// No description provided for @menuTextHint.
   ///
   /// In tr, this message translates to:
-  /// **'ör. adana, urfa, lahmacun — ekran görüntüsü olmadan da çalışır'**
+  /// **'ör. adana, urfa, lahmacun — tek bir ürün de yazabilirsin'**
   String get menuTextHint;
 
   /// No description provided for @noAnalysisYet.
   ///
   /// In tr, this message translates to:
-  /// **'Henüz analiz yok — menüyü yaz veya ekran görüntüsü ekle'**
+  /// **'Henüz analiz yok. Ana ekrandan menü fotoğrafı ekle ya da ürün adlarını yaz.'**
   String get noAnalysisYet;
 
   /// No description provided for @missingCount.
@@ -763,13 +763,13 @@ abstract class AppLocalizations {
   /// No description provided for @targetReached.
   ///
   /// In tr, this message translates to:
-  /// **'Hedef tamam'**
+  /// **'Hedefe ulaşıldı'**
   String get targetReached;
 
   /// No description provided for @analyzing.
   ///
   /// In tr, this message translates to:
-  /// **'Analiz ediliyor…'**
+  /// **'Hazırlanıyor…'**
   String get analyzing;
 
   /// No description provided for @analysisSummary.
@@ -1393,31 +1393,31 @@ abstract class AppLocalizations {
   /// No description provided for @modeTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Ne kadar öneri istiyorsun?'**
+  /// **'Nasıl çalışsın?'**
   String get modeTitle;
 
   /// No description provided for @modeQuickTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Öneri versen yeter'**
+  /// **'Hızlı'**
   String get modeQuickTitle;
 
   /// No description provided for @modeQuickHint.
   ///
   /// In tr, this message translates to:
-  /// **'Menüdeki ürünlere 2-3 opsiyon, ayrı kategorilerden 5-6 yeni ürün. Hızlı.'**
+  /// **'6–7 yeni ürün önerisi; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 10 saniye.'**
   String get modeQuickHint;
 
   /// No description provided for @modeFullTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Hakikaten işimizi yapalım'**
+  /// **'Tam'**
   String get modeFullTitle;
 
   /// No description provided for @modeFullHint.
   ///
   /// In tr, this message translates to:
-  /// **'Mutfağın minimum ürün sayısına kadar yeni ürün, her ürüne opsiyon ve malzeme. Biraz daha uzun sürer.'**
+  /// **'Menü mutfağın hedef ürün sayısına tamamlanır; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.'**
   String get modeFullHint;
 
   /// No description provided for @debugToggle.
@@ -1671,6 +1671,228 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Doğrulama'**
   String get agentValidator;
+
+  /// No description provided for @tabNewProducts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni ürünler ({count})'**
+  String tabNewProducts(int count);
+
+  /// No description provided for @tabMenuProducts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünler ({count})'**
+  String tabMenuProducts(int count);
+
+  /// No description provided for @tabNewProductsEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni ürün önerisi çıkmadı.'**
+  String get tabNewProductsEmpty;
+
+  /// No description provided for @tabMenuProductsEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüdeki ürünler için öneri çıkmadı.'**
+  String get tabMenuProductsEmpty;
+
+  /// No description provided for @sectionOptionsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyonlar'**
+  String get sectionOptionsTitle;
+
+  /// No description provided for @sectionRemovablesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkarılabilir malzemeler'**
+  String get sectionRemovablesTitle;
+
+  /// No description provided for @sectionExtrasTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekstra malzemeler'**
+  String get sectionExtrasTitle;
+
+  /// No description provided for @sectionDescriptionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama'**
+  String get sectionDescriptionTitle;
+
+  /// No description provided for @panelHasIt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Panelde zaten var'**
+  String get panelHasIt;
+
+  /// No description provided for @noSuggestion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri yok'**
+  String get noSuggestion;
+
+  /// No description provided for @plainProduct.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.'**
+  String get plainProduct;
+
+  /// No description provided for @acceptAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hepsini kabul et'**
+  String get acceptAll;
+
+  /// No description provided for @acceptKept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilenleri kabul et'**
+  String get acceptKept;
+
+  /// No description provided for @acceptPlain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüye ekle'**
+  String get acceptPlain;
+
+  /// No description provided for @dontSuggest.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerme'**
+  String get dontSuggest;
+
+  /// No description provided for @notNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdi değil'**
+  String get notNow;
+
+  /// No description provided for @acceptedDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul edildi'**
+  String get acceptedDone;
+
+  /// No description provided for @skippedDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkarıldı'**
+  String get skippedDone;
+
+  /// No description provided for @tapToRemove.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstemediğine dokun, çıkarılsın'**
+  String get tapToRemove;
+
+  /// No description provided for @checkThis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kontrol et'**
+  String get checkThis;
+
+  /// No description provided for @newProductBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni ürün'**
+  String get newProductBadge;
+
+  /// No description provided for @onMenuBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüde var'**
+  String get onMenuBadge;
+
+  /// No description provided for @noteRename.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğru adı: {name}'**
+  String noteRename(String name);
+
+  /// No description provided for @noteAbbreviated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad kısaltılmış görünüyor, tam adını sor.'**
+  String get noteAbbreviated;
+
+  /// No description provided for @noteCategory.
+  ///
+  /// In tr, this message translates to:
+  /// **'Panelde {from} bölümünde, {to} olabilir.'**
+  String noteCategory(String from, String to);
+
+  /// No description provided for @noteDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get noteDone;
+
+  /// No description provided for @progressLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Menüde {current} ürün · hedef {target}'**
+  String progressLine(int current, int target);
+
+  /// No description provided for @stillNeeded.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ürün daha lazım'**
+  String stillNeeded(int count);
+
+  /// No description provided for @missingCategories.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eksik bölümler: {list}'**
+  String missingCategories(String list);
+
+  /// No description provided for @priceAsk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiyatı sor: {range}'**
+  String priceAsk(String range);
+
+  /// No description provided for @portionLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Porsiyon: {value}'**
+  String portionLine(String value);
+
+  /// No description provided for @removeGroup.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grubu çıkar'**
+  String get removeGroup;
+
+  /// No description provided for @restoreGroup.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grubu geri al'**
+  String get restoreGroup;
+
+  /// No description provided for @aiOffNotice.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapay zekâ şu an kullanılamıyor; öneriler hazır listeden geldi.'**
+  String get aiOffNotice;
+
+  /// No description provided for @notesToggle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not ekle (isteğe bağlı)'**
+  String get notesToggle;
+
+  /// No description provided for @copySection.
+  ///
+  /// In tr, this message translates to:
+  /// **'{section} kopyala'**
+  String copySection(String section);
+
+  /// No description provided for @errorRetry.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz tamamlanamadı. Tekrar dene.'**
+  String get errorRetry;
 }
 
 class _AppLocalizationsDelegate

@@ -35,6 +35,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   late final TextEditingController _menuText = TextEditingController(text: ref.read(homeDraftProvider).menuText);
   late final TextEditingController _notes = TextEditingController(text: ref.read(homeDraftProvider).notes);
 
+  /// The note field is rarely needed: it stays folded behind one line until asked for.
+  late bool _showNotes = ref.read(homeDraftProvider).notes.isNotEmpty;
+
   @override
   void dispose() {
     _menuText.dispose();
@@ -233,23 +236,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onTap: () => notifier.setMode(AnalysisMode.full),
           ),
           const SizedBox(height: AppSpace.md),
-          TextField(
-            key: const Key('notes-field'),
-            controller: _notes,
-            minLines: 1,
-            maxLines: 4,
-            decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
-            onChanged: notifier.setNotes,
-          ),
-          const SizedBox(height: AppSpace.sm),
-          SwitchListTile.adaptive(
-            key: const Key('debug-switch'),
-            value: draft.debug,
-            onChanged: notifier.setDebug,
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.debugToggle, style: Theme.of(context).textTheme.titleSmall),
-            subtitle: Text(l10n.debugToggleHint, style: Theme.of(context).textTheme.bodySmall),
-          ),
+          if (_showNotes)
+            TextField(
+              key: const Key('notes-field'),
+              controller: _notes,
+              minLines: 1,
+              maxLines: 4,
+              decoration: InputDecoration(labelText: l10n.extraNotes, hintText: l10n.extraNotesHint),
+              onChanged: notifier.setNotes,
+            )
+          else
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: const Key('notes-toggle'),
+                onPressed: () => setState(() => _showNotes = true),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.notesToggle),
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+              ),
+            ),
           const _RecentRuns(),
         ],
       ),

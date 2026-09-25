@@ -27,19 +27,20 @@ class AnalyzeRequest {
 
 enum RunPhase { idle, streaming, done, error, cancelled, queued }
 
-/// Which section the filter chips are showing.
-enum SectionFilter {
-  all,
-  newProduct,
-  option,
-  fix;
+/// The two tabs of the result screen: products to add, and the products the restaurant already sells.
+enum ResultTab { newProducts, menuProducts }
 
-  CardSection? get section => switch (this) {
-        SectionFilter.all => null,
-        SectionFilter.newProduct => CardSection.newProduct,
-        SectionFilter.option => CardSection.option,
-        SectionFilter.fix => CardSection.fix,
-      };
+/// One product already on the menu: its card (options, ingredients, description) and the notes about it (a better
+/// name, a section it may not belong to). Shown as one card, because on the phone it is one product.
+class MenuEntry {
+  const MenuEntry({required this.key, required this.title, required this.card, required this.notes});
+
+  final String key;
+  final String title;
+  final AnalysisCard? card;
+  final List<AnalysisCard> notes;
+
+  int get sortOrder => [if (card != null) card!.sortOrder, ...notes.map((n) => n.sortOrder)].reduce((a, b) => a < b ? a : b);
 }
 
 class AnalysisViewState {
@@ -58,8 +59,8 @@ class AnalysisViewState {
     this.request,
     this.cuisineName = '',
     this.offline = false,
-    this.filter = SectionFilter.all,
-    this.selected = const {},
+    this.tab,
+    this.removed = const {},
   });
 
   final String? runId;
@@ -80,10 +81,12 @@ class AnalysisViewState {
 
   /// Loaded from the local copy (no connection).
   final bool offline;
-  final SectionFilter filter;
 
-  /// Card ids ticked for "seçilenleri kopyala".
-  final Set<String> selected;
+  /// The tab the user picked; null until they pick one (see [activeTab]).
+  final ResultTab? tab;
+
+  /// Per card: the suggestions the user tapped away ([ItemKey]s). Accepting sends what is left.
+  final Map<String, Set<String>> removed;
 
   bool get isStreaming => phase == RunPhase.streaming;
 
@@ -92,11 +95,36 @@ class AnalysisViewState {
 
   int count(CardSection value) => cards.where((c) => c.section == value).length;
 
-  /// Sections the current filter shows, in screen order.
-  List<CardSection> get visibleSections {
-    final picked = filter.section;
-    return picked == null ? CardSection.values : [picked];
+  List<AnalysisCard> get newProducts => section(CardSection.newProduct);
+
+  /// The products already on the menu, one entry each: the option card and the fix notes of the same product.
+  List<MenuEntry> get menuEntries {
+    final byKey = <String, ({AnalysisCard? card, List<AnalysisCard> notes, String title})>{};
+    for (final card in cards) {
+      if (card.section == CardSection.newProduct) continue;
+      final key = card.targetNormalized ?? card.name;
+      final entry = byKey[key] ?? (card: null, notes: <AnalysisCard>[], title: card.targetName ?? card.name);
+      byKey[key] = card.section == CardSection.option
+          ? (card: card, notes: entry.notes, title: card.targetName ?? card.name)
+          : (card: entry.card, notes: [...entry.notes, card], title: entry.title);
+    }
+    return [
+      for (final MapEntry(:key, :value) in byKey.entries)
+        MenuEntry(key: key, title: value.title, card: value.card, notes: value.notes..sort((a, b) => a.sortOrder.compareTo(b.sortOrder))),
+    ]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
   }
+
+  /// The tab on screen: the user's pick, or — before they pick — the one that answers the run. A run about one or
+  /// two products ("ürün ekle") opens on those products; a menu analysis opens on the products to add.
+  ResultTab get activeTab {
+    if (tab != null) return tab!;
+    final menuCount = menuEntries.length;
+    if (count(CardSection.newProduct) == 0 && menuCount > 0) return ResultTab.menuProducts;
+    if (menuCount > 0 && menuCount <= 2 && counts != null && counts!.current <= 2) return ResultTab.menuProducts;
+    return ResultTab.newProducts;
+  }
+
+  Set<String> removedOf(String cardId) => removed[cardId] ?? const {};
 
   AnalysisViewState copyWith({
     String? runId,
@@ -113,8 +141,8 @@ class AnalysisViewState {
     AnalyzeRequest? request,
     String? cuisineName,
     bool? offline,
-    SectionFilter? filter,
-    Set<String>? selected,
+    ResultTab? tab,
+    Map<String, Set<String>>? removed,
   }) =>
       AnalysisViewState(
         runId: runId ?? this.runId,
@@ -131,12 +159,12 @@ class AnalysisViewState {
         request: request ?? this.request,
         cuisineName: cuisineName ?? this.cuisineName,
         offline: offline ?? this.offline,
-        filter: filter ?? this.filter,
-        selected: selected ?? this.selected,
+        tab: tab ?? this.tab,
+        removed: removed ?? this.removed,
       );
 }
 
-/// Returned by [AnalysisController.accept] when the card has nothing worth saving yet.
+/// Returned by [AnalysisController.accept] when the card has nothing worth saving (no name).
 class CardNeedsContent implements Exception {
   const CardNeedsContent();
 }
@@ -273,9 +301,11 @@ class AnalysisController extends Notifier<AnalysisViewState> {
         state = state.copyWith(cards: cards);
       case TraceEvent(:final step):
         state = state.copyWith(trace: [...state.trace.where((s) => s.seq != step.seq), step]..sort((a, b) => a.seq.compareTo(b.seq)));
-      case WarningEvent(:final message):
-        // A re-attached stream replays its past events; a notice is shown once.
-        if (!state.warnings.contains(message)) state = state.copyWith(warnings: [...state.warnings, message]);
+      case WarningEvent(:final code, :final message):
+        // Only what the team can act on is shown, in their words; a re-attached stream replays its past events,
+        // so a notice is shown once.
+        final text = friendlyWarning(code, message);
+        if (text != null && !state.warnings.contains(text)) state = state.copyWith(warnings: [...state.warnings, text]);
       case DoneEvent(:final status, :final stats):
         state = state.copyWith(phase: status == 'cancelled' ? RunPhase.cancelled : RunPhase.done, stats: stats);
         unawaited(_persistRecent());
@@ -378,21 +408,26 @@ class AnalysisController extends Notifier<AnalysisViewState> {
 
   // ---- screen state ------------------------------------------------------------------------------------------
 
-  void setFilter(SectionFilter filter) => state = state.copyWith(filter: filter);
+  void setTab(ResultTab tab) => state = state.copyWith(tab: tab);
 
-  void toggleSelected(String cardId) {
-    final next = {...state.selected};
-    if (!next.remove(cardId)) next.add(cardId);
-    state = state.copyWith(selected: next);
+  /// One tap removes a suggestion from the card; a second tap brings it back.
+  void toggleItem(String cardId, String key) {
+    final current = {...state.removedOf(cardId)};
+    if (!current.remove(key)) current.add(key);
+    state = state.copyWith(removed: {...state.removed, cardId: current});
   }
 
-  /// "Hepsini seç" on a section header: every undecided card of that section.
-  void selectSection(CardSection section) {
-    final ids = state.section(section).where((c) => c.isPending).map((c) => c.id);
-    state = state.copyWith(selected: {...state.selected, ...ids});
+  /// Retries a run that failed before producing anything, with the same request.
+  Future<void> retry() async {
+    final request = state.request;
+    if (request != null) {
+      await start(request);
+    } else if (state.runId != null) {
+      await load(state.runId!);
+    } else {
+      await loadLatest();
+    }
   }
-
-  void clearSelection() => state = state.copyWith(selected: const {});
 
   // ---- card actions ------------------------------------------------------------------------------------------
 
@@ -404,15 +439,15 @@ class AnalysisController extends Notifier<AnalysisViewState> {
   }
 
   void _replace(AnalysisCard card) {
-    // A decided card leaves the bulk selection: it is no longer something to paste.
-    final selected = card.isPending ? state.selected : ({...state.selected}..remove(card.id));
-    state = state.copyWith(cards: [for (final c in state.cards) c.id == card.id ? card : c], selected: selected);
+    state = state.copyWith(cards: [for (final c in state.cards) c.id == card.id ? card : c]);
     unawaited(_persistRecent());
   }
 
+  /// The card edited by hand: what it now says is what the user wants, so nothing stays tapped away.
   void updatePayload(String cardId, TemplatePayload payload) {
     final card = _card(cardId);
     if (card == null) return;
+    state = state.copyWith(removed: {...state.removed, cardId: const {}});
     _replace(card.copyWith(payload: payload));
   }
 
@@ -423,14 +458,16 @@ class AnalysisController extends Notifier<AnalysisViewState> {
     state = state.copyWith(counts: counts.withAdded(card.categoryKey));
   }
 
+  /// Accepts the card as the user kept it: the suggestions they tapped away are not sent, and the server records
+  /// both what was kept and what was removed (the learning loop). A fix note is just ticked off.
+  ///
   /// Returns null on success, otherwise [CardNeedsContent] or the server's [ApiException].
   Future<Exception?> accept(String cardId) async {
     final card = _card(cardId);
     if (card == null) return null;
-    final payload = card.payload?.normalized();
-    if (card.section == CardSection.newProduct && (payload == null || !payload.hasContent)) {
-      return const CardNeedsContent();
-    }
+    final payload = card.section == CardSection.fix ? null : card.kept(state.removedOf(cardId));
+    // A packaged drink is a name and nothing else — that is a complete panel row, not an empty card.
+    if (payload != null && payload.name.isEmpty) return const CardNeedsContent();
     try {
       final result = await _api.accept(cardId, payload: payload);
       if (!ref.mounted) return null;
@@ -468,7 +505,3 @@ class AnalysisController extends Notifier<AnalysisViewState> {
 
 final analysisControllerProvider = NotifierProvider<AnalysisController, AnalysisViewState>(AnalysisController.new);
 
-/// The run trace, fetched on demand by the hidden debug screen.
-final runTraceProvider = FutureProvider.autoDispose.family<RunTrace, String>((ref, runId) async {
-  return ref.read(apiClientProvider).analysisTrace(runId);
-});

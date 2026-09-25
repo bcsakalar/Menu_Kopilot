@@ -57,7 +57,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Çevrimdışı: son sonuçlar ve şablonlar gösteriliyor';
 
   @override
-  String get genericError => 'Bir şeyler ters gitti';
+  String get genericError => 'Bir sorun oldu. Tekrar dene.';
 
   @override
   String get networkError => 'Sunucuya ulaşılamadı. Bağlantını kontrol et.';
@@ -185,7 +185,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get queuedOffline =>
-      'Bağlantı yok: istek kuyruğa alındı, bağlantı gelince gönderilecek';
+      'İnternet yok. Analiz kaydedildi, bağlantı gelince kendiliğinden başlayacak.';
 
   @override
   String pendingQueue(int count) {
@@ -207,7 +207,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cameraPermission => 'Kamera izni gerekli';
 
   @override
-  String get resultsTitle => 'Analiz';
+  String get resultsTitle => 'Sonuçlar';
 
   @override
   String get readingPhotos => 'Fotoğraflar okunuyor…';
@@ -348,7 +348,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'İstersen platform panelinin ekran görüntülerini veya menü fotoğrafını ekle; üst üste binen görüntüler sorun değil.';
 
   @override
-  String get extraNotes => 'Not (isteğe bağlı)';
+  String get extraNotes => 'Not';
 
   @override
   String get extraNotesHint => 'ör. restoran tatlı da yapıyor';
@@ -357,15 +357,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analyzeButton => 'Analiz et';
 
   @override
-  String get menuTextLabel => 'Menüde neler var?';
+  String get menuTextLabel => 'Menüdeki ürünler';
 
   @override
   String get menuTextHint =>
-      'ör. adana, urfa, lahmacun — ekran görüntüsü olmadan da çalışır';
+      'ör. adana, urfa, lahmacun — tek bir ürün de yazabilirsin';
 
   @override
   String get noAnalysisYet =>
-      'Henüz analiz yok — menüyü yaz veya ekran görüntüsü ekle';
+      'Henüz analiz yok. Ana ekrandan menü fotoğrafı ekle ya da ürün adlarını yaz.';
 
   @override
   String missingCount(int count) {
@@ -373,10 +373,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get targetReached => 'Hedef tamam';
+  String get targetReached => 'Hedefe ulaşıldı';
 
   @override
-  String get analyzing => 'Analiz ediliyor…';
+  String get analyzing => 'Hazırlanıyor…';
 
   @override
   String analysisSummary(int items, int calls) {
@@ -740,21 +740,21 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get modeTitle => 'Ne kadar öneri istiyorsun?';
+  String get modeTitle => 'Nasıl çalışsın?';
 
   @override
-  String get modeQuickTitle => 'Öneri versen yeter';
+  String get modeQuickTitle => 'Hızlı';
 
   @override
   String get modeQuickHint =>
-      'Menüdeki ürünlere 2-3 opsiyon, ayrı kategorilerden 5-6 yeni ürün. Hızlı.';
+      '6–7 yeni ürün önerisi; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 10 saniye.';
 
   @override
-  String get modeFullTitle => 'Hakikaten işimizi yapalım';
+  String get modeFullTitle => 'Tam';
 
   @override
   String get modeFullHint =>
-      'Mutfağın minimum ürün sayısına kadar yeni ürün, her ürüne opsiyon ve malzeme. Biraz daha uzun sürer.';
+      'Menü mutfağın hedef ürün sayısına tamamlanır; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.';
 
   @override
   String get debugToggle => 'Ayrıntılı kayıt';
@@ -891,4 +891,137 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get agentValidator => 'Doğrulama';
+
+  @override
+  String tabNewProducts(int count) {
+    return 'Yeni ürünler ($count)';
+  }
+
+  @override
+  String tabMenuProducts(int count) {
+    return 'Menüdeki ürünler ($count)';
+  }
+
+  @override
+  String get tabNewProductsEmpty => 'Yeni ürün önerisi çıkmadı.';
+
+  @override
+  String get tabMenuProductsEmpty => 'Menüdeki ürünler için öneri çıkmadı.';
+
+  @override
+  String get sectionOptionsTitle => 'Opsiyonlar';
+
+  @override
+  String get sectionRemovablesTitle => 'Çıkarılabilir malzemeler';
+
+  @override
+  String get sectionExtrasTitle => 'Ekstra malzemeler';
+
+  @override
+  String get sectionDescriptionTitle => 'Açıklama';
+
+  @override
+  String get panelHasIt => 'Panelde zaten var';
+
+  @override
+  String get noSuggestion => 'Öneri yok';
+
+  @override
+  String get plainProduct =>
+      'Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.';
+
+  @override
+  String get acceptAll => 'Hepsini kabul et';
+
+  @override
+  String get acceptKept => 'Seçilenleri kabul et';
+
+  @override
+  String get acceptPlain => 'Menüye ekle';
+
+  @override
+  String get dontSuggest => 'Önerme';
+
+  @override
+  String get notNow => 'Şimdi değil';
+
+  @override
+  String get acceptedDone => 'Kabul edildi';
+
+  @override
+  String get skippedDone => 'Çıkarıldı';
+
+  @override
+  String get tapToRemove => 'İstemediğine dokun, çıkarılsın';
+
+  @override
+  String get checkThis => 'Kontrol et';
+
+  @override
+  String get newProductBadge => 'Yeni ürün';
+
+  @override
+  String get onMenuBadge => 'Menüde var';
+
+  @override
+  String noteRename(String name) {
+    return 'Doğru adı: $name';
+  }
+
+  @override
+  String get noteAbbreviated => 'Ad kısaltılmış görünüyor, tam adını sor.';
+
+  @override
+  String noteCategory(String from, String to) {
+    return 'Panelde $from bölümünde, $to olabilir.';
+  }
+
+  @override
+  String get noteDone => 'Tamam';
+
+  @override
+  String progressLine(int current, int target) {
+    return 'Menüde $current ürün · hedef $target';
+  }
+
+  @override
+  String stillNeeded(int count) {
+    return '$count ürün daha lazım';
+  }
+
+  @override
+  String missingCategories(String list) {
+    return 'Eksik bölümler: $list';
+  }
+
+  @override
+  String priceAsk(String range) {
+    return 'Fiyatı sor: $range';
+  }
+
+  @override
+  String portionLine(String value) {
+    return 'Porsiyon: $value';
+  }
+
+  @override
+  String get removeGroup => 'Grubu çıkar';
+
+  @override
+  String get restoreGroup => 'Grubu geri al';
+
+  @override
+  String get aiOffNotice =>
+      'Yapay zekâ şu an kullanılamıyor; öneriler hazır listeden geldi.';
+
+  @override
+  String get notesToggle => 'Not ekle (isteğe bağlı)';
+
+  @override
+  String copySection(String section) {
+    return '$section kopyala';
+  }
+
+  @override
+  String get errorRetry => 'Analiz tamamlanamadı. Tekrar dene.';
 }

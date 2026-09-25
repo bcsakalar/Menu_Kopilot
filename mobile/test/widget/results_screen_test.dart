@@ -18,10 +18,24 @@ import 'package:menu_kopilot/data/models/template_payload.dart';
 import 'package:menu_kopilot/features/results/results_screen.dart';
 import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
-/// A pide-only menu: five main courses, nothing to drink, no soup, no dessert. The three sections and the
-/// progress header are exactly what the screen has to make obvious during a call.
-Json result({String status = 'completed', bool disagrees = false}) => {
-      'runId': '11111111-1111-1111-1111-111111111111',
+const runId = '11111111-1111-1111-1111-111111111111';
+
+Json soupGroups() => {
+      'name': 'Porsiyon',
+      'selectionType': 'single',
+      'isRequired': true,
+      'minSelect': 1,
+      'maxSelect': 1,
+      'options': [
+        {'name': 'Yarım', 'priceMode': 'sets_base'},
+        {'name': 'Tam', 'priceMode': 'sets_base'},
+      ],
+    };
+
+/// A pide-only menu: five main courses, nothing to drink, no soup. The result is one soup and one drink to add,
+/// a card for a pide the restaurant already sells, and a note about a shorthand name.
+Json result({String status = 'completed', bool disagrees = false, List<Json> warnings = const []}) => {
+      'runId': runId,
       'status': status,
       if (disagrees)
         'classification': {
@@ -45,7 +59,6 @@ Json result({String status = 'completed', bool disagrees = false}) => {
         'categories': [
           {'key': 'icecek', 'label': 'İçecek', 'present': 0, 'minItems': 2, 'missing': 2},
           {'key': 'corba', 'label': 'Çorba', 'present': 0, 'minItems': 1, 'missing': 1},
-          {'key': 'ana-yemek', 'label': 'Ana Yemek', 'present': 5, 'minItems': 6, 'missing': 1},
         ],
       },
       'menu': [
@@ -53,46 +66,60 @@ Json result({String status = 'completed', bool disagrees = false}) => {
       ],
       'cards': [
         {
-          'id': 'card-new',
-          'runId': '11111111-1111-1111-1111-111111111111',
+          'id': 'card-soup',
+          'runId': runId,
+          'section': 'new_product',
+          'name': 'Mercimek Çorbası',
+          'source': 'db',
+          'categoryKey': 'corba',
+          'categoryLabel': 'Çorba',
+          'shortDescription': 'Kırmızı mercimek, tereyağlı sosla sıcak servis edilir.',
+          'priceRangeHint': '60–90 TL',
+          'productType': 'corba',
+          'confidence': 92,
+          'status': 'pending',
+          'sortOrder': 0,
+          'optionGroups': [soupGroups()],
+          'removableIngredients': ['Tereyağlı Sos', 'Pul Biber'],
+          'extraIngredients': ['Ekstra Limon', 'Kıtır Ekmek'],
+          'payload': {
+            'name': 'Mercimek Çorbası',
+            'description': 'Kırmızı mercimek, tereyağlı sosla sıcak servis edilir.',
+            'optionGroups': [soupGroups()],
+            'removableIngredients': ['Tereyağlı Sos', 'Pul Biber'],
+            'extraIngredients': [
+              {'name': 'Ekstra Limon', 'priceHint': 'ek ücretli'},
+              {'name': 'Kıtır Ekmek', 'priceHint': 'ek ücretli'},
+            ],
+          },
+        },
+        {
+          // A packaged drink: a plain panel row, nothing to choose or describe.
+          'id': 'card-ayran',
+          'runId': runId,
           'section': 'new_product',
           'name': 'Ayran',
           'source': 'db',
           'categoryKey': 'icecek',
           'categoryLabel': 'İçecek',
-          'shortDescription': 'Taze yoğurttan tuzlu ayran, soğuk servis edilir.',
-          'priceRangeHint': '25–40 TL',
-          'reason': 'İçecek kategorisi tamamen boş',
+          'productType': 'mesrubat',
+          'confidence': 95,
           'status': 'pending',
-          'sortOrder': 0,
-          // A suggested product arrives with the options it should be opened with, exactly like a product the
-          // restaurant already sells.
-          'optionGroups': [
-            {
-              'name': 'Boy',
-              'selectionType': 'single',
-              'isRequired': true,
-              'minSelect': 1,
-              'maxSelect': 1,
-              'options': [
-                {'name': '300 ml', 'priceMode': 'sets_base'},
-                {'name': '1 L', 'priceMode': 'sets_base'},
-              ],
-            },
-          ],
-          'extraIngredients': ['Ekstra Tuz'],
-          'payload': {'name': 'Ayran', 'description': 'Taze yoğurttan tuzlu ayran, soğuk servis edilir.'},
+          'sortOrder': 1,
+          'payload': {'name': 'Ayran', 'description': ''},
         },
         {
           'id': 'card-option',
-          'runId': '11111111-1111-1111-1111-111111111111',
+          'runId': runId,
           'section': 'option',
           'name': 'Kıymalı Pide',
           'targetName': 'Kıymalı Pide',
           'targetNormalized': 'kiymali pide',
           'source': 'ai',
           'categoryLabel': 'Ana Yemek',
-          'reason': 'Panelde opsiyon alanı boş',
+          'shortDescription': 'Taş fırında pişen kıymalı tekne pide, tereyağıyla.',
+          'productType': 'pide',
+          'confidence': 50,
           'optionGroups': [
             {
               'name': 'Boy',
@@ -106,13 +133,14 @@ Json result({String status = 'completed', bool disagrees = false}) => {
               ],
             },
           ],
-          'removableIngredients': ['Soğan'],
+          'removableIngredients': ['Soğan', 'Maydanoz'],
+          'extraIngredients': ['Ekstra Kaşar'],
           'status': 'pending',
-          'sortOrder': 1,
+          'sortOrder': 2,
         },
         {
           'id': 'card-fix',
-          'runId': '11111111-1111-1111-1111-111111111111',
+          'runId': runId,
           'section': 'fix',
           'name': 'Karışık Pide',
           'targetName': 'Karışık Pd',
@@ -123,17 +151,18 @@ Json result({String status = 'completed', bool disagrees = false}) => {
           'suggestedValue': 'Karışık Pide',
           'reason': 'Ad kısaltma gibi görünüyor',
           'status': 'pending',
-          'sortOrder': 2,
+          'sortOrder': 3,
         },
       ],
-      'stats': {'llmCalls': 2, 'menuItems': 5, 'newProducts': 1, 'optionCards': 1, 'fixCards': 1, 'latencyMs': 3400},
-      'warnings': <Json>[],
+      'stats': {'llmCalls': 2, 'menuItems': 5, 'newProducts': 2, 'optionCards': 1, 'fixCards': 1, 'latencyMs': 3400},
+      'warnings': warnings,
     };
 
 class FakeApi extends ApiClient {
   FakeApi() : super(baseUrl: 'http://fake', tokens: MemoryTokenStore());
 
   final List<String> accepted = [];
+  final Map<String, TemplatePayload?> acceptedPayloads = {};
   final List<String> skipped = [];
   final List<AnalyzeRequestData> started = [];
   Json payload = result();
@@ -168,6 +197,7 @@ class FakeApi extends ApiClient {
   @override
   Future<AnalysisCard> accept(String itemId, {TemplatePayload? payload}) async {
     accepted.add(itemId);
+    acceptedPayloads[itemId] = payload;
     final card = AnalysisResult.fromJson(this.payload).cards.firstWhere((c) => c.id == itemId);
     return card.copyWith(status: CardStatus.accepted);
   }
@@ -217,144 +247,185 @@ void main() {
       ];
 
   Future<void> open(WidgetTester tester) async {
-    // A phone, not the 800×600 test default: the pinned strip and the sticky headers are sized for this.
+    // A phone, not the 800×600 test default: the pinned strip and the tabs are sized for this.
     tester.view.physicalSize = const Size(412 * 3, 915 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(host(overrides(), const ResultsScreen(runId: '11111111-1111-1111-1111-111111111111')));
+    await tester.pumpWidget(host(overrides(), const ResultsScreen(runId: runId)));
     await tester.pumpAndSettle();
   }
 
-  /// The result list (not the horizontal chip/pill strips). The test font draws every glyph as a full square, so
-  /// the page is far taller than on a phone: later sections have to be scrolled to before they exist.
-  Finder resultList() => find.descendant(of: find.byType(CustomScrollView), matching: find.byType(Scrollable)).first;
-  Future<void> scrollTo(WidgetTester tester, Finder finder) => tester.scrollUntilVisible(finder, 250, scrollable: resultList());
+  /// The test font draws every glyph as a full square, so the page is far taller than on a phone: later cards
+  /// have to be scrolled to before they exist.
+  Finder resultList() => find.descendant(of: find.byKey(const Key('result-list')), matching: find.byType(Scrollable)).first;
+  Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+    await tester.scrollUntilVisible(finder, 250, scrollable: resultList());
+    // Built is not the same as on screen: the list builds a little past the bottom edge.
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+  }
 
-  /// The horizontal filter strip; its later chips are built only once it is scrolled.
-  Finder chipStrip() => find.ancestor(of: find.byType(FilterChip).first, matching: find.byType(Scrollable)).first;
+  Future<void> tapOn(WidgetTester tester, Finder finder) async {
+    await scrollTo(tester, finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openMenuTab(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('tab-menu')));
+    await tester.pumpAndSettle();
+  }
 
   group('ResultsScreen', () {
-    testWidgets('shows the count against the target, the cuisine and the open categories', (tester) async {
+    testWidgets('shows the count against the target, what is still needed and the short sections', (tester) async {
       await open(tester);
       expect(find.byKey(const Key('analysis-counts')), findsOneWidget);
-      expect(find.textContaining('Mevcut 5 ürün / hedef 10'), findsOneWidget);
+      expect(find.text('Menüde 5 ürün · hedef 10'), findsOneWidget);
       expect(find.textContaining('mutfak türü: Pide & Lahmacun'), findsOneWidget);
       // Below the hard 10-product rule, that is what the caption has to say first.
       expect(find.textContaining('en az 10 ürün'), findsOneWidget);
-      expect(find.textContaining('5 ürün eksik'), findsOneWidget);
-      // Only the short categories are listed, emptiest first.
-      expect(find.text('İçecek 0/2'), findsOneWidget);
-      expect(find.text('Çorba 0/1'), findsOneWidget);
+      expect(find.textContaining('5 ürün daha lazım'), findsOneWidget);
+      expect(find.text('Eksik bölümler: İçecek 0/2, Çorba 0/1'), findsOneWidget);
+      // No technical words on the screen.
+      expect(find.textContaining('AI çağrısı'), findsNothing);
+      expect(find.textContaining("DB'den"), findsNothing);
     });
 
-    testWidgets('splits the cards into three titled, counted sections', (tester) async {
+    testWidgets('two tabs: products to add and products already on the menu, with their counts', (tester) async {
       await open(tester);
-      expect(find.textContaining('YENİ ÜRÜNLER · 1'), findsOneWidget);
-      await scrollTo(tester, find.textContaining('OPSİYON & MALZEME · 1'));
-      expect(find.textContaining('OPSİYON & MALZEME · 1'), findsOneWidget);
-      await scrollTo(tester, find.textContaining('EKSİK / DÜZELTME · 1'));
-      expect(find.textContaining('EKSİK / DÜZELTME · 1'), findsOneWidget);
+      expect(find.text('Yeni ürünler (2)'), findsOneWidget);
+      // The pide's card and the note about "Karışık Pd" are two products.
+      expect(find.text('Menüdeki ürünler (2)'), findsOneWidget);
+      expect(find.text('Mercimek Çorbası'), findsOneWidget);
+      expect(find.text('Kıymalı Pide'), findsNothing);
+
+      await openMenuTab(tester);
+      expect(find.text('Kıymalı Pide'), findsOneWidget);
+      expect(find.text('Mercimek Çorbası'), findsNothing);
     });
 
-    testWidgets('puts the target product first on an option card, and the rename on a fix card', (tester) async {
+    testWidgets('every product card has the four sections, each with its own copy button', (tester) async {
       await open(tester);
-      // Section B: which product it belongs to, then the group and its choices.
-      await scrollTo(tester, find.text('Boy'));
-      expect(find.text('Kıymalı Pide'), findsWidgets);
-      expect(find.text('Boy'), findsOneWidget);
-      // The panel's "fiyat farkı" in words: this choice sets the base price.
-      expect(find.text('Tek Kişilik · tabanı belirler'), findsOneWidget);
-      // Section C: old name struck through, suggested name next to it.
-      await scrollTo(tester, find.byKey(const ValueKey('card-fix')));
-      expect(find.text('Karışık Pd'), findsWidgets);
-      expect(find.text('Karışık Pide'), findsWidgets);
+      final card = find.byKey(const ValueKey('product-card-soup'));
+      for (final title in ['Opsiyonlar', 'Çıkarılabilir malzemeler', 'Ekstra malzemeler', 'Açıklama']) {
+        expect(find.descendant(of: card, matching: find.text(title)), findsOneWidget, reason: title);
+      }
+      expect(find.descendant(of: card, matching: find.text('Kopyala')), findsNWidgets(4));
+      expect(find.descendant(of: card, matching: find.text('Tam · tabanı belirler')), findsOneWidget);
+      expect(find.descendant(of: card, matching: find.text('Kırmızı mercimek, tereyağlı sosla sıcak servis edilir.')), findsOneWidget);
     });
 
-    testWidgets('shows the price hint of a new product but never inside its template', (tester) async {
+    testWidgets('one tap takes a suggestion out; accepting sends only what was kept', (tester) async {
       await open(tester);
-      expect(find.text('25–40 TL'), findsOneWidget);
-      final card = AnalysisResult.fromJson(result()).cards.first;
-      expect(card.payload?.toJson().toString().contains('TL'), isFalse);
+      await tapOn(tester, find.byKey(const ValueKey('chip-r|Pul Biber')));
+      await tapOn(tester, find.byKey(const ValueKey('chip-o|Porsiyon|Yarım')));
+      // The button says what it will do now.
+      expect(find.text('Seçilenleri kabul et'), findsOneWidget);
+
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
+      final sent = api.acceptedPayloads['card-soup']!;
+      expect(sent.removableIngredients, ['Tereyağlı Sos']);
+      expect(sent.optionGroups.single.options.map((o) => o.name), ['Tam']);
+      expect(sent.extraIngredients.map((e) => e.name), ['Ekstra Limon', 'Kıtır Ekmek']);
+      expect(sent.description, 'Kırmızı mercimek, tereyağlı sosla sıcak servis edilir.');
     });
 
-    testWidgets('reveals the options and ingredients suggested for a new product', (tester) async {
+    testWidgets('a whole option group comes out with one tap and back with another', (tester) async {
       await open(tester);
-      // Folded away at first — twenty products unrolling six groups each is a scroll, not a list — but the card
-      // says what is inside, and one tap opens it.
-      expect(find.text('1 opsiyon grubu · 1 malzeme'), findsOneWidget);
-      expect(find.text('300 ml · tabanı belirler'), findsNothing);
-
-      await tester.tap(find.byKey(const Key('card-details-toggle')).first);
-      await tester.pumpAndSettle();
-      expect(find.text('300 ml · tabanı belirler'), findsOneWidget);
-      expect(find.textContaining('Ekstra Tuz'), findsOneWidget);
-    });
-
-    testWidgets('filters down to one section and back', (tester) async {
-      await open(tester);
-      await tester.scrollUntilVisible(find.byKey(const Key('filter-option')), 120, scrollable: chipStrip());
-      await tester.tap(find.byKey(const Key('filter-option')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('OPSİYON & MALZEME · 1'), findsOneWidget);
-      expect(find.textContaining('YENİ ÜRÜNLER'), findsNothing);
-
-      // Back to the start of the strip, where 'Tümü' sits.
-      await tester.drag(chipStrip(), const Offset(800, 0));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('filter-all')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('YENİ ÜRÜNLER · 1'), findsOneWidget);
-    });
-
-    testWidgets('bulk-selects cards and offers one copy for all of them', (tester) async {
-      await open(tester);
-      expect(find.byKey(const Key('copy-selected')), findsNothing);
-      await tester.tap(find.byIcon(Icons.check_box_outline_blank_rounded).first);
-      await tester.pumpAndSettle();
-      expect(find.text('1 kart seçili'), findsOneWidget);
-      expect(find.byKey(const Key('copy-selected')), findsOneWidget);
+      await tapOn(tester, find.byKey(const ValueKey('group-Porsiyon')));
+      expect(find.text('Grubu geri al'), findsOneWidget);
+      expect(find.byKey(const ValueKey('chip-o|Porsiyon|Tam')), findsNothing);
+      await tapOn(tester, find.byKey(const ValueKey('group-Porsiyon')));
+      expect(find.byKey(const ValueKey('chip-o|Porsiyon|Tam')), findsOneWidget);
     });
 
     testWidgets('accepting a new product moves the counter during the call', (tester) async {
       await open(tester);
-      await tester.tap(find.text('Ekle').first);
-      await tester.pumpAndSettle();
-      expect(api.accepted, ['card-new']);
-      // 5 → 6 without waiting for a re-run, and the drinks pill moves with it.
-      expect(find.textContaining('Mevcut 6 ürün'), findsOneWidget);
-      expect(find.textContaining('4 ürün eksik'), findsOneWidget);
-      expect(find.text('İçecek 1/2'), findsOneWidget);
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
+      expect(api.accepted, ['card-soup']);
+      // 5 → 6 without waiting for a re-run, and the soup section moves with it.
+      expect(find.text('Menüde 6 ürün · hedef 10'), findsOneWidget);
+      expect(find.textContaining('4 ürün daha lazım'), findsOneWidget);
+      expect(find.text('Eksik bölümler: İçecek 0/2'), findsOneWidget);
+      expect(find.text('Kabul edildi'), findsOneWidget);
     });
 
-    testWidgets('selects a whole section from its header', (tester) async {
+    testWidgets('a packaged drink is added with its name alone', (tester) async {
       await open(tester);
-      await scrollTo(tester, find.byKey(const ValueKey('select-all-option')));
-      await tester.tap(find.byKey(const ValueKey('select-all-option')));
-      await tester.pumpAndSettle();
-      expect(find.text('1 kart seçili'), findsOneWidget);
+      await scrollTo(tester, find.byKey(const ValueKey('accept-card-ayran')));
+      expect(find.text('Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.'), findsOneWidget);
+      expect(find.text('Menüye ekle'), findsOneWidget);
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-ayran')));
+      expect(api.accepted, ['card-ayran']);
+    });
+
+    testWidgets('shows the price to ask about, never inside the template', (tester) async {
+      await open(tester);
+      expect(find.text('Fiyatı sor: 60–90 TL'), findsOneWidget);
+      final card = AnalysisResult.fromJson(result()).cards.first;
+      expect(card.payload?.toJson().toString().contains('TL'), isFalse);
+    });
+
+    testWidgets('a product on the menu: its card, a "Kontrol et" when unsure, and the note about another product', (tester) async {
+      await open(tester);
+      await openMenuTab(tester);
+      final pide = find.byKey(const ValueKey('product-card-option'));
+      expect(find.descendant(of: pide, matching: find.text('Kontrol et')), findsOneWidget);
+      expect(find.descendant(of: pide, matching: find.text('Tek Kişilik · tabanı belirler')), findsOneWidget);
+      expect(find.descendant(of: pide, matching: find.text('Soğan')), findsOneWidget);
+      expect(find.descendant(of: pide, matching: find.text('Şimdi değil')), findsOneWidget);
+
+      await scrollTo(tester, find.byKey(const ValueKey('note-done-card-fix')));
+      expect(find.text('Doğru adı: Karışık Pide'), findsOneWidget);
+      await tapOn(tester, find.byKey(const ValueKey('note-done-card-fix')));
+      expect(api.accepted, ['card-fix']);
+    });
+
+    testWidgets('accepting a product on the menu sends its four sections', (tester) async {
+      await open(tester);
+      await openMenuTab(tester);
+      await tapOn(tester, find.byKey(const ValueKey('chip-e|Ekstra Kaşar')));
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-option')));
+      final sent = api.acceptedPayloads['card-option']!;
+      expect(sent.name, 'Kıymalı Pide');
+      expect(sent.optionGroups.single.name, 'Boy');
+      expect(sent.removableIngredients, ['Soğan', 'Maydanoz']);
+      expect(sent.extraIngredients, isEmpty);
+      expect(sent.description, 'Taş fırında pişen kıymalı tekne pide, tereyağıyla.');
+    });
+
+    testWidgets('"Önerme" takes a new product off the list and keeps the rest', (tester) async {
+      await open(tester);
+      await tapOn(tester, find.byKey(const ValueKey('skip-card-soup')));
+      expect(api.skipped, ['card-soup']);
+      expect(find.text('Çıkarıldı'), findsOneWidget);
+      expect(find.text('Yeni ürünler (2)'), findsOneWidget);
+    });
+
+    testWidgets('hides technical notices and keeps the ones the team can act on', (tester) async {
+      api.payload = result(
+        warnings: [
+          {'code': 'slow_providers', 'message': 'AI sağlayıcıları 11 sn içinde cevap vermedi; veritabanı önerileriyle devam edildi.'},
+          {'code': 'extract_failed', 'message': '1 görüntü okunamadı; kalanlarla devam edildi.'},
+        ],
+      );
+      await open(tester);
+      expect(find.textContaining('sağlayıcı'), findsNothing);
+      expect(find.text('1 görüntü okunamadı; kalanlarla devam edildi.'), findsOneWidget);
     });
 
     testWidgets('re-runs against the cuisine the menu reads as, without re-reading the menu', (tester) async {
       api.payload = result(disagrees: true);
       await open(tester);
       expect(find.textContaining('Kebap & Izgara gibi görünüyor'), findsOneWidget);
-      await scrollTo(tester, find.byKey(const Key('rerun-suggested')));
       await tester.tap(find.byKey(const Key('rerun-suggested')));
       await tester.pumpAndSettle();
       final request = api.started.single;
-      expect(request.fromRunId, '11111111-1111-1111-1111-111111111111');
+      expect(request.fromRunId, runId);
       expect(request.cuisineId, 'c2');
       expect(request.images, isEmpty);
       expect(find.textContaining('mutfak türü: Kebap & Izgara'), findsOneWidget);
       expect(find.textContaining('hedef 12'), findsOneWidget);
-    });
-
-    testWidgets('rejecting a card marks it and keeps the rest', (tester) async {
-      await open(tester);
-      await tester.tap(find.text('Reddet').first);
-      await tester.pumpAndSettle();
-      expect(api.skipped, ['card-new']);
-      expect(find.textContaining('YENİ ÜRÜNLER · 1'), findsOneWidget);
     });
   });
 }

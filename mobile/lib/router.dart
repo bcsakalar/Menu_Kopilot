@@ -7,7 +7,6 @@ import 'features/auth/login_screen.dart';
 import 'features/camera/camera_capture_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/results/analysis_controller.dart';
-import 'features/results/pipeline_debug_screen.dart';
 import 'features/results/results_screen.dart';
 import 'features/settings/category_settings_screen.dart';
 import 'features/settings/cuisine_settings_screen.dart';
@@ -62,11 +61,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                         runId: state.uri.queryParameters['runId'],
                       );
                     },
-                  ),
-                  // Hidden: reached from the bug icon on the result screen, never from the navigation bar.
-                  GoRoute(
-                    path: 'debug',
-                    builder: (_, state) => PipelineDebugScreen(runId: state.uri.queryParameters['runId'] ?? ''),
                   ),
                 ],
               ),
