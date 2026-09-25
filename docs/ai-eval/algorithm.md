@@ -111,6 +111,15 @@ düştüyse ya da söylediği her şey ürüne yanlışsa kartı bilgi tabanınd
   söylenir.
 - Kabul edilen kart havuza yazılır (şablon güncellenir, panel yazımı takma ad olur): aynı ürün bir dahaki sefere
   model çağrısı olmadan, ekibin onayladığı hâliyle gelir.
+- İkinci tur (D-194):
+  - **Ürün, mutfak başına:** bir mutfakta en az 3 kez ve %70'ten fazla "Önerme" denen ürün o mutfağa artık
+    önerilmez (havuzdan da modelden de); modele "ekibin bu mutfakta istemediği ürünler" diye söylenir. Başka mutfak
+    etkilenmez.
+  - **Sevilen öneri öne:** bir tipte en az 3 kez ve %70'ten fazla kabul edilen çıkarılabilir/ekstra kartın başına
+    geçer ve modele "ekibin hep kabul ettiği" diye söylenir; her kabul şablonun kullanım sayısını artırır, havuzda
+    sık kabul edilen ürün öne çıkar (en fazla 10 kabule kadar).
+  - **Geri al:** telefonda Ayarlar → "Ekibin sildikleri" öğrenilenleri listeler; "Geri al" o kararın satırlarını
+    silmeden işaretler (`ignored_at`, kim ve ne zaman), döngü onları artık saymaz.
 
 ## Kod haritası
 
@@ -121,5 +130,6 @@ düştüyse ya da söylediği her şey ürüne yanlışsa kartı bilgi tabanınd
 | Bilgi tabanı | `backend/src/db/seed/product-types.ts`, `backend/src/db/schema/knowledge.ts`, `backend/src/agents/knowledge.ts`, `backend/drizzle/0004_product_types.sql` |
 | Üretim | `backend/src/agents/product-recommender.ts`, `backend/src/agents/option-modifier.ts`, `backend/src/agents/prompts/` |
 | Doğrulama | `backend/src/agents/grounding.ts`, `backend/src/agents/validator.ts` |
-| Öğrenme | `backend/src/modules/analyze/feedback.ts`, `backend/src/modules/analyze/service.ts` |
+| Öğrenme | `backend/src/agents/knowledge.ts`, `backend/src/modules/analyze/feedback.ts`, `backend/src/modules/analyze/service.ts`, `backend/src/modules/learning/` |
+| Analiz geçmişi | `backend/src/modules/analyze/store.ts` (`history`), `mobile/lib/features/history/` |
 | Mutfak hedefleri | `backend/src/db/seed/cuisine-targets.ts`, `docs/ai-eval/cuisine-targets.md` |

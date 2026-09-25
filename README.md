@@ -368,11 +368,14 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
   that is already on the menu, category quotas, a failing agent → partial result, re-run with another cuisine without
   re-reading the images, typed products without keys, LOCAL_ONLY_MODE, voice notes, the product-type knowledge base
   and grounding (absurd groups removed, ingredients separated from options, 6–8 word descriptions, coverage), the
-  matching guard and the learning loop. Fixtures are hand-written stand-ins; see `backend/test/fixtures/llm/README.md`.
-- Mobile: `cd mobile; flutter analyze; flutter test` — ~60 tests: SSE parser, models, error texts, HTTPS rule,
+  matching guard, the learning loop (products turned down per cuisine, favoured suggestions first, "Geri al") and the
+  analysis history (filters, paging by time). Fixtures are hand-written stand-ins; see
+  `backend/test/fixtures/llm/README.md`.
+- Mobile: `cd mobile; flutter analyze; flutter test` — ~75 tests: SSE parser, models, error texts, HTTPS rule,
   offline queue (re-runs, requests queued by older versions), template pool cache, photo limits, and widget tests
   (result screen: pinned counter, the two tabs, the four sections of a product card, one-tap removal and "kabul et"
-  sending only what was kept, per-section copy, notes, live counter, cuisine re-run; category settings; voice note
+  sending only what was kept, per-section copy, cards that open and close, notes, live counter, cuisine re-run; the
+  analysis history — days, times, filters, offline; "Ekibin sildikleri" with "Geri al"; category settings; voice note
   button; sharing into the app).
 - AI quality: `tests/ai_eval/` — 141 scenarios over all 27 cuisines, scored by independent rules
   ([`tests/ai_eval/README.md`](tests/ai_eval/README.md); reports in [`docs/ai-eval/`](docs/ai-eval/)).

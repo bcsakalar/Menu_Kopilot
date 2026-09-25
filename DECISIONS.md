@@ -832,3 +832,21 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   of what it holds as the user kept it ("1 opsiyon grubu · 2 çıkarılabilir · 2 ekstra · açıklama"); a tap anywhere on
   the header opens the four sections with a short slide. Cards start closed, except when a tab holds a single product
   ("ürün ekle"); a card closes itself once accepted or skipped. A note-only row stays open (it is one line).
+- **D-193** — **Analysis history with date, time and filters** (user: "tarihli saatli saklansın, filtreleme olsun").
+  The phone keeps every analysis it made (up to 500; the whole result for the newest 100, the summary for the rest)
+  with the time it was made — saving a run again after an accept no longer moves its time — its mode, cuisine, first
+  products and card counts. The server's `GET /analyze/history` (newest first, paged by time, filtered by date range,
+  cuisine, mode and a product/cuisine search) fills in runs made on another phone or before the install; the screen
+  always reads the phone's copy, so it opens instantly and works offline. "Analiz geçmişi" groups runs under
+  "Bugün", "Dün" and the date, with the time, cuisine, mode and what each run produced; filters: date (today, last 7
+  days, this month, a range of days), quick, full, cuisine, and a search that ignores Turkish letter case and
+  accents. `suggestion_runs.analysis_mode` stores the mode from now on (migration 0005); older runs have none.
+- **D-194** — **The learning loop, second pass.** (1) A product turned down with "Önerme" at least 3 times and in
+  more than 70 % of its verdicts for one cuisine is no longer suggested to that cuisine — by the pool or the model,
+  which is told so (recommender user prompt v3); `suggestion_feedback.cuisine_id` records the kitchen (backfilled).
+  (2) What the team keeps taking comes first: a removable or an extra accepted at least 3 times and in more than 70 %
+  of its verdicts for a product type leads its list and is named to the option model; every accepted card counts as a
+  use of its template (`usage_count` was never incremented), and the pool ranks a template up to 10 uses higher.
+  (3) Ayarlar → "Ekibin sildikleri" lists what was learned, with "Geri al": the rows are kept and marked
+  (`ignored_at`, `ignored_by`), and the loop stops counting them (`GET /learning`, `POST /learning/forget`). Two
+  spellings of one suggestion now add up instead of overwriting each other.
