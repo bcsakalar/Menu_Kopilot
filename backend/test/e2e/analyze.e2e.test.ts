@@ -426,6 +426,26 @@ describe('degraded modes', () => {
       const homeNew = homeRes.json<AnalyzeResult>().cards.filter((c) => c.section === 'new_product');
       expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(6);
       expect(new Set(homeNew.map((c) => c.name)).size).toBe(6);
+
+      // Two variants of one pool product stay two products: listed by their own names, never "renamed" to the pool's
+      // bare "Gözleme", and not asked the filling their name already chose (D-188).
+      const variants = multipartBody(
+        { cuisineId: rows.find((r) => r.slug === 'manti-hamur-isleri')!.id, mode: 'quick', menuText: 'Peynirli Gözleme, Patatesli Gözleme' },
+        [],
+      );
+      const variantRes = await local.app.inject({
+        method: 'POST',
+        url: '/api/v1/analyze',
+        headers: { ...bearer(localToken), ...variants.headers },
+        payload: variants.payload,
+      });
+      expect(variantRes.statusCode, variantRes.body).toBe(200);
+      const variantResult = variantRes.json<AnalyzeResult>();
+      expect(variantResult.menu.map((m) => m.name).sort()).toEqual(['Patatesli Gözleme', 'Peynirli Gözleme']);
+      expect(variantResult.cards.filter((c) => c.section === 'fix' && c.fixKind === 'bad_name' && c.suggestedValue === 'Gözleme')).toHaveLength(0);
+      for (const card of variantResult.cards.filter((c) => c.section === 'option')) {
+        expect(card.optionGroups.map((g) => g.name), card.targetName ?? card.name).not.toContain('İç Harç');
+      }
     } finally {
       await local.close();
     }

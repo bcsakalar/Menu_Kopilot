@@ -264,7 +264,9 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   });
 
   const menu: MenuItemDto[] = existing.map((item) => ({
-    name: item.canonicalName ?? item.rawName,
+    // The pool's spelling, unless the menu's name is a variant of it: "Peynirli Gözleme" and "Patatesli Gözleme" are
+    // two products, not "Gözleme" twice (D-188).
+    name: item.canonicalName !== null && !namesVariant(item.normalized, normalizeTr(item.canonicalName)) ? item.canonicalName : item.rawName,
     normalized: item.normalized,
     categoryKey: item.categoryKey,
     categoryLabel: deps.categories.label(item.categoryKey),
