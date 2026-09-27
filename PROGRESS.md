@@ -1,6 +1,7 @@
 # PROGRESS
 
-Last update: 2026-09-28 — live on production (`8749d16`), app 1.5.0: call mode (D-196) — cards in call order with
+Last update: 2026-09-28 — live on production (`a860b2b`), app 1.5.1: the app stands on its own — no platform name
+anywhere (D-197). Before it, 1.5.0: call mode (D-196) — cards in call order with
 the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
 learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
 Before: history, cards that open and close, the learning loop's second pass (D-192…D-194, 1.4.0). Backend 716
@@ -42,6 +43,14 @@ tests, mobile 85, both clean.
       push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
+**2026-09-28 (night) — production on `a860b2b`, app 1.5.1 (D-197).** User: the app must work on its own and not look
+tied to any company's systems. Every platform name, the platform's internal system names and the branch-opening
+wording are gone from the phone's texts, the server's messages, the prompts (recommender system v7 / user v5,
+options system v5, activated by the seed on deploy), comments, tests, docs and the original spec; no KVKK text
+existed anywhere. Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d197.dump`. Signed `MenuKopilot-1.5.1-arm64.apk` on
+the Desktop and sent to the user. Left as they were (the user's call): inactive old prompt versions and three unused
+legacy prompt keys in `prompt_templates` still carry the old wording; the private repository's history too.
+
 **2026-09-28 — production on `8749d16`, app 1.5.0 (D-195, D-196).** Deployed with `scripts/deploy.ps1` (migration
 0006 `suggestion_items.answer/answered_at` ran, recommender user prompt v4 activated; pre-deploy dump
 `/opt/yedek/menu-kopilot-pre-0006.dump`); the later commits touch only the phone and the docs, and the server clone
