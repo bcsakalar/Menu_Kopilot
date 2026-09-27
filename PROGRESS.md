@@ -46,7 +46,7 @@ tests, mobile 85, both clean.
 **2026-09-28 (night) — production on `a860b2b`, app 1.5.1 (D-197).** User: the app must work on its own and not look
 tied to any company's systems. Every platform name, the platform's internal system names and the branch-opening
 wording are gone from the phone's texts, the server's messages, the prompts (recommender system v7 / user v5,
-options system v5, activated by the seed on deploy), comments, tests, docs and the original spec; no KVKK text
+options system v5, activated by the seed on deploy), comments, tests, docs and the original spec; no personal-data notice
 existed anywhere. Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d197.dump`. Signed `MenuKopilot-1.5.1-arm64.apk` on
 the Desktop and sent to the user. Left as they were (the user's call): inactive old prompt versions and three unused
 legacy prompt keys in `prompt_templates` still carry the old wording; the private repository's history too.

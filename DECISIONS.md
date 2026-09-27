@@ -886,4 +886,4 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   (recommender system v7, user v5, options system v5 — a redeploy activates them), code comments, tests, the docs
   and the original spec. The rules the app works with (at least 10 products, a target per cuisine, drinks as plain
   rows) stay: they are the team's own settings, editable from the app. The repository and the production database
-  were searched for KVKK texts too: there were none.
+  were searched for personal-data notices too: there were none.
