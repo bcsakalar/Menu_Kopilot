@@ -1,10 +1,10 @@
 /**
- * System cuisines, aligned with the kitchen categories of the platform app (Burger, Döner, Köfte, Steak, Tavuk, Kebap,
+ * System cuisines: the kitchen categories food-ordering apps commonly use (Burger, Döner, Köfte, Steak, Tavuk, Kebap,
  * Pizza, Tatlı, Mantı & Makarna, Salata & Sağlık, Dondurma, Kahvaltı, Ev Yemekleri, Pide & Lahmacun, Pastane & Fırın,
  * Kahve & İçecek, Tost & Sandviç, Sokak Lezzetleri, Balık & Deniz Ürünleri, Uzak Doğu, Dünya Mutfağı, Börek,
  * Çiğ Köfte, Meze, Çorba, Tantuni).
  *
- * min_item_count starts at 10 for every cuisine on purpose: the platform's real per-cuisine minimums are not public and are
+ * min_item_count starts at 10 for every cuisine on purpose: real per-cuisine minimums differ from team to team and are
  * entered by the user from the settings screen (never hard-coded). Re-seeding never overwrites a cuisine the user
  * edited; the notes are refreshed only while they still hold a text written by an earlier seed (LEGACY_NOTES).
  * Parents drive recommendations: a branch sees its own cuisine first, then parent/children, then siblings.

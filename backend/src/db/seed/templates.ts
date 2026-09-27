@@ -14,7 +14,7 @@ import type { SeedTemplate } from './template-types.js';
 
 /**
  * Ready-made Turkish templates (source='seed', approved=true) that make Stage B and the gap recommendations useful
- * from day one: the 40 classics of the first release, then a second wave that covers every platform kitchen category.
+ * from day one: the 40 classics of the first release, then a second wave that covers every kitchen category.
  * The same product may appear in several cuisines (e.g. Ayran for kebap, çiğ köfte and ev yemekleri); matching
  * prefers the branch's own cuisine.
  */

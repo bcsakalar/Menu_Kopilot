@@ -25,7 +25,7 @@ import {
  * and the seed leaves it alone (`edited_by_user`). Bump `PRODUCT_TYPES_VERSION` when a row here changes so that
  * running installations pick up the new wording.
  *
- * How to read a row: the option groups are what such a product opens with on the delivery platform panel, the removable
+ * How to read a row: the option groups are what such a product opens with on a restaurant's panel, the removable
  * list is what customers take out, the extras list what they add for a fee. `forbiddenGroups` are option groups
  * that never fit the type — the validator deletes them no matter who proposed them. Keywords are plain Turkish;
  * they are normalized when the index is built.

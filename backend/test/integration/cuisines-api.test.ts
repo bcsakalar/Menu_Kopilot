@@ -77,7 +77,7 @@ describe('cuisines API', () => {
       method: 'PATCH',
       url: `/api/v1/cuisines/${pizza?.id}`,
       headers: bearer(token),
-      payload: { minItemCount: 16, notes: 'platform pizza minimumu' },
+      payload: { minItemCount: 16, notes: 'Ekibin pizza minimumu' },
     });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toMatchObject({ minItemCount: 16, targetItemCount: 16 });

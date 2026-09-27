@@ -6,7 +6,7 @@ import { CUISINE_SLUGS, SEED_CUISINES } from '../../src/db/seed/cuisines.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
 
 describe('seed data', () => {
-  it('covers every platform kitchen category with a ready template set', () => {
+  it('covers every kitchen category with a ready template set', () => {
     expect(SEED_CUISINES).toHaveLength(CUISINE_SLUGS.length);
     expect(new Set(SEED_CUISINES.map((c) => c.slug)).size).toBe(CUISINE_SLUGS.length);
     expect(SEED_TEMPLATES.length).toBeGreaterThanOrEqual(280);

@@ -1,7 +1,7 @@
 import { boy, icecekSecimi, pilavSecimi, porsiyon, single, sizeGroup, yanindaGelen } from './groups.js';
 import { type SeedTemplate, template } from './template-types.js';
 
-/** Ev Yemekleri (second wave), Çorba and Mantı & Hamur İşleri: the daily-menu classics of a lokanta on the platform. */
+/** Ev Yemekleri (second wave), Çorba and Mantı & Hamur İşleri: the daily-menu classics of a lokanta. */
 
 const lokantaPorsiyon = porsiyon(['Yarım Porsiyon', '1 Porsiyon', '1,5 Porsiyon'], 1);
 

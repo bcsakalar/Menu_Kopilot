@@ -7,7 +7,7 @@ import { type SeedTemplate, template } from './template-types.js';
  * 1. **Menü & kampanya** — the category every cuisine expects one of and the pool had zero templates for, so the
  *    "last resort" slot could only ever be filled by the model. A combo is a package of products the restaurant
  *    already sells, so each one is written as a real panel row with its own Menü / İçecek / Yan Ürün groups.
- * 2. **Drinks as plain rows.** On the platform panel a drink is entered as the product and nothing else: no
+ * 2. **Drinks as plain rows.** On a restaurant's panel a drink is entered as the product and nothing else: no
  *    description, no option groups (D-175). These templates are therefore deliberately bare — the name, the
  *    volume in `portionInfo`, and that is all. They exist so the recommender can close a drinks gap from the
  *    pool, instantly, instead of paying a model call for "Ayran".

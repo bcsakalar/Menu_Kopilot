@@ -2,7 +2,7 @@
   "name": "menu-kopilot-api",
   "version": "0.1.0",
   "private": true,
-  "description": "Menü Kopilot backend: suggestion + gap-analysis pipelines for platform branch openings",
+  "description": "Menü Kopilot backend: suggestion + gap-analysis pipelines for restaurant menus",
   "type": "module",
   "engines": {
     "node": ">=22"

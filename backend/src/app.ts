@@ -129,7 +129,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
       info: {
         title: 'Menü Kopilot API',
         description:
-          'Menu analysis API for platform branch openings. One endpoint, six agents, three sections of cards. ' +
+          'Menu analysis API for restaurant menus. One endpoint, six agents, three sections of cards. ' +
           'Streaming endpoints use SSE.',
         version: APP_VERSION,
       },

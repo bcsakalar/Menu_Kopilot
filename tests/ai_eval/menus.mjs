@@ -1,7 +1,7 @@
 /**
  * Test menus for the AI evaluation — one per cuisine in the system (27, `backend/src/db/seed/cuisines.ts`).
  *
- * Each one is what a representative actually gets during a branch-opening call: a small, INCOMPLETE menu (the
+ * Each one is what a representative actually gets during a call with the restaurant: a small, INCOMPLETE menu (the
  * whole point of the product is to fill it), real Turkish dish names, prices on the printed version. The same menu
  * is used three ways:
  *   - `typed`   what the representative types or dictates (some written the way people type on a phone: no Turkish

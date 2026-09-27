@@ -92,11 +92,11 @@ export const GAP_TEXT = {
         ? `${cuisine} menülerinde sık görülür`
         : `${cuisine} menülerinde görülür`,
   reasonRelatedCuisine: (related: string) => `${related} ürünü; menüyü genişletir`,
-  progressExtract: 'Panel ekran görüntüleri okunuyor',
+  progressExtract: 'Menü görüntüleri okunuyor',
   progressAnalyze: 'Menü karşılaştırılıyor',
   progressRecommend: 'Ek öneriler hazırlanıyor',
   extractFailed: (kind: string) => `Bir ekran görüntüsü okunamadı (${kind}).`,
-  aiUnavailable: 'AI kullanılamıyor (anahtar yok, yerel mod veya kota): yalnızca önbellekteki ekran görüntüleri ve kayıtlı şube menüsü kullanıldı.',
+  aiUnavailable: 'AI kullanılamıyor (anahtar yok, yerel mod veya kota): yalnızca önbellekteki görüntü okumaları ve kayıtlı menü kullanıldı.',
   noItems: 'Ekran görüntülerinde ürün bulunamadı; ürün listesinin göründüğü ekranı paylaş.',
   aiRecommendationsFailed: 'Ek AI önerileri alınamadı; veritabanı önerileri gösteriliyor.',
   providerFallback: (failed: string) => `Birincil sağlayıcı yanıt vermedi (${failed}); yedek kullanıldı.`,

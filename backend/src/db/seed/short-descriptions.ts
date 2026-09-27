@@ -2,7 +2,7 @@
  * The panel description of every seed template, 6–8 words (D-178).
  *
  * The original seed descriptions were written as full sentences — 11–16 words, measured on all 424 — while the
- * description a representative types into the delivery platform panel is one short line. The operations team asked
+ * description a representative types into the restaurant's panel is one short line. The team asked
  * for exactly that: "her ürün için 6–8 kelimelik doğal Türkçe açıklama". Keyed by `cuisine|name` and applied by
  * `templates.ts`, so the dish data stays where it was written and this file is the one place descriptions live.
  *

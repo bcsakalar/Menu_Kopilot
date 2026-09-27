@@ -16,8 +16,8 @@ import {
 import { type SeedTemplate, template } from './template-types.js';
 
 /**
- * Second wave of the kebap family (Kebap & Izgara, Döner, Pide & Lahmacun, Köfte): the products and sides a platform
- * branch of these cuisines usually lists next to the classics in templates-kebap-doner.ts.
+ * Second wave of the kebap family (Kebap & Izgara, Döner, Pide & Lahmacun, Köfte): the products and sides a
+ * restaurant of these cuisines usually lists next to the classics in templates-kebap-doner.ts.
  */
 
 const izgaraYaninda = yanindaGelen([

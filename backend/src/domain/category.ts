@@ -12,7 +12,7 @@ import { normalizeTr } from '../lib/normalize-tr.js';
 export const FALLBACK_CATEGORY = 'ana-yemek';
 
 /**
- * Categories whose products go on the panel as a PLAIN row: the name, and nothing else. On a delivery platform a drink
+ * Categories whose products go on the panel as a PLAIN row: the name, and nothing else. On the panel a drink
  * carries neither a description nor option groups — "orası direkt ürün diye geçiyor" — so suggesting either is
  * noise the expert has to skip past on the call (D-175). The rule lives here because three places need it: the
  * Gap Analyst (no option card, no "açıklama boş" fix), the Validator (a new drink's card carries nothing extra)

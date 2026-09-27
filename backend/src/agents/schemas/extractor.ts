@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Extractor agent — JSON schema. READING ONLY: it never invents, enriches or recommends.
  *
- * One schema covers both inputs, because a menu photo and a platform panel screenshot carry the same fields with
+ * One schema covers both inputs, because a menu photo and a panel screenshot carry the same fields with
  * different completeness: a photo usually has a price and no option info, a panel row the opposite. The
  * secondary fields carry defaults so a model that omits one loses that detail instead of losing the product.
  */

@@ -5,7 +5,7 @@ prompts ask for and deliberately include realistic flaws (a clipped name, overla
 a product name, `+15 TL` in an option name) so the Validator and the dedupe paths are exercised.
 
 - `extract/<image>.json` — the Extractor's answer (`agent.extract`) for `../images/<image>`, keyed by file name (the
-  test helper maps the image's sha256 → file). `panel-1` and `panel-2` are two overlapping platform panel screenshots
+  test helper maps the image's sha256 → file). `panel-1` and `panel-2` are two overlapping panel screenshots
   with empty description/option fields; the `menu-*` files are menu photos.
 - `recommend-items.json` — the Product Recommender's answer (`agent.recommend`) for the pide menu's category gaps.
 

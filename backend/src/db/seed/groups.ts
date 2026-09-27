@@ -70,7 +70,7 @@ export const aciSeviyesi = (defaultIndex = 0) =>
     defaultIndex,
   });
 
-// Group names follow the wording of the platform panel ("İçecek Seçimi", "Ekmek Seçimi", "Sos Seçimi").
+// Group names follow the wording restaurant panels use ("İçecek Seçimi", "Ekmek Seçimi", "Sos Seçimi").
 export const ekmekTercihi = (options: readonly OptionSpec[] = ['Lavaş', 'Tırnaklı Pide', 'Bazlama', 'Ekmeksiz']) =>
   single('Ekmek Seçimi', options, { required: true, defaultIndex: 0 });
 

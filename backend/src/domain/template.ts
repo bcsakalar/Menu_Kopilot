@@ -123,7 +123,7 @@ export const templatePayloadSchema = z
 export type TemplatePayload = z.infer<typeof templatePayloadSchema>;
 export type TemplatePayloadInput = z.input<typeof templatePayloadSchema>;
 
-/** Option group names that always define the base price (platform: "Boy: Orta" sets the price, not a delta). */
+/** Option group names that always define the base price ("Boy: Orta" sets the price, not a delta). */
 const BASE_PRICE_GROUP = /^(boy|boyut|porsiyon|porsiyon (secimi|boyu)|gramaj|adet|buyukluk|size)\b/;
 
 export function isBasePriceGroupName(name: string): boolean {
