@@ -16,7 +16,9 @@ serbestçe öneriyor, ürünün ne olduğunu bilen ve modelin cevabını ona gö
       │
  5 KAPSAM GARANTİSİ ─ menüdeki her ürün kart alır; model yetişemezse havuz/bilgi tabanı
       │
- telefonda: ürün başına tek kart, 4 bölüm  ──(kabul/çıkar)──►  6 ÖĞRENME
+ 7 ÇAĞRI ─────────── çağrı sırası · kartta "satıcıya söyle" cümlesi · Evet / Düşünecek / Hayır · ofis listesi
+      │
+ telefonda: ürün başına tek kart, 4 bölüm  ──(satıcının cevabı)──►  6 ÖĞRENME
 ```
 
 ## 1. Anlama
@@ -118,8 +120,43 @@ düştüyse ya da söylediği her şey ürüne yanlışsa kartı bilgi tabanınd
   - **Sevilen öneri öne:** bir tipte en az 3 kez ve %70'ten fazla kabul edilen çıkarılabilir/ekstra kartın başına
     geçer ve modele "ekibin hep kabul ettiği" diye söylenir; her kabul şablonun kullanım sayısını artırır, havuzda
     sık kabul edilen ürün öne çıkar (en fazla 10 kabule kadar).
-  - **Geri al:** telefonda Ayarlar → "Ekibin sildikleri" öğrenilenleri listeler; "Geri al" o kararın satırlarını
-    silmeden işaretler (`ignored_at`, kim ve ne zaman), döngü onları artık saymaz.
+  - **Geri al:** telefonda Ayarlar → "Öğrenilenler" (eski adı "Ekibin sildikleri") öğrenilenleri listeler; "Geri al"
+    o kararın satırlarını silmeden işaretler (`ignored_at`, kim ve ne zaman), döngü onları artık saymaz.
+- Üçüncü tur (D-196): sinyal artık satıcının çağrıdaki cevabı.
+  - "Evet" kartı çiplerin bırakıldığı hâliyle kaydeder (eski "kabul et"), "Hayır" ürünü reddedilmiş sayar,
+    "Düşünecek" öğrenmeye girmez. Cevap çağrı içinde değişebilir; yalnız son cevap sayılır (öncekilerin geri bildirim
+    satırları `ignored_at` ile işaretlenir).
+  - Bir mutfakta satıcıların en az 3 kez ve %70'ten fazla "Hayır" dediği ürün artık **gizlenmez**, kategorisinin ve
+    çağrının **sonuna** düşer (başka uygun ürün yoksa yine önerilir; boş slottan iyidir). Satıcıların çoğunun "Evet"
+    dediği ürün öne gelir ve kartında "son 5 satıcıdan 4 tanesi ekledi" yazar. Model hâlâ "satıcıların çoğunlukla
+    reddettiği ürünler"i bilir (recommender user prompt v4).
+
+## 7. Çağrı (D-196)
+
+Uzman çağrı sırasında sonuç ekranını okuyarak satıcıya önerir; amaç ihtiyaç yaratmak. Her kart bir **öncelik** ve
+satıcıya söylenecek **tek cümle** taşır; kartlar çağrı sırasıyla gelir. Cümle yalnızca gerçeklerden kurulur, olmayan
+istatistik söylenmez (`backend/src/agents/pitch.ts`):
+
+| kart | cümle (sırayla, en fazla iki parça) | öncelik |
+|---|---|---|
+| yeni ürün | kategoride hiç ürün yok → "Menünüzde hiç tatlı yok" | 100 |
+| | kategori eksik → "İçecek tarafınız az (1/3)" | 80 |
+| | ≥ 3 satıcı cevabı, çoğu evet → "son 5 satıcıdan 4 tanesi ekledi" | +10 |
+| | satıcılar çoğunlukla hayır dedi → cümleye girmez | −40 |
+| | havuz önemi ≥ 70 / ≥ 50 → "… menülerinin çoğunda var" / "… menülerinde sık görülür" | + önem/10 |
+| | hazır içecek, başka söz yok → "Hazır içecek, eklemesi kolay." | |
+| menüdeki ürün | menü seçeneği → "Menü seçeneği (patates, içecek) sepeti büyütür." | 70 |
+| | içecek seçeneği · boy/porsiyon · ekstralar · diğer seçim · çıkarılabilir · açıklama | 65 · 60 · 50 · 40 · 30 · 20 |
+| | panelde hiç opsiyonu yoksa | +10 |
+
+Çağrı boyunca her kartta **Evet · Düşünecek · Hayır**; üstte "Evet 2 · Düşünecek 1 · Hayır 3" ve menü sayacı her
+değişikliği izler. Çağrıdan sonra **Ofiste girilecekler**: "Evet" ürünleri girilecek bölümleriyle ve "Panele girildi"
+işaretiyle (telefonda saklanır), "Düşünecek" ürünleri cümleleri ve "Evet dedi" düğmesiyle, çağrı notu (yazılı ya da
+sesli) ve "Satıcıya gönder" (anlaşılanların düz bir mesajı).
+
+Fotoğraf okuma (D-195): 7 sn'de cevap vermeyen okuma, aynı fotoğrafı zincirdeki sonraki sağlayıcıda da başlatır; ilk
+geçerli cevap kazanır, diğeri iptal edilir. Uzun menüde ilk sağlayıcı 9 sn sürebildiği ve ikincisi 1000 token ile
+sınırlı olduğu için kısa zaman aşımı yerine bu yol seçildi.
 
 ## Kod haritası
 
@@ -132,4 +169,6 @@ düştüyse ya da söylediği her şey ürüne yanlışsa kartı bilgi tabanınd
 | Doğrulama | `backend/src/agents/grounding.ts`, `backend/src/agents/validator.ts` |
 | Öğrenme | `backend/src/agents/knowledge.ts`, `backend/src/modules/analyze/feedback.ts`, `backend/src/modules/analyze/service.ts`, `backend/src/modules/learning/` |
 | Analiz geçmişi | `backend/src/modules/analyze/store.ts` (`history`), `mobile/lib/features/history/` |
+| Çağrı | `backend/src/agents/pitch.ts`, `backend/src/modules/analyze/store.ts` (`setAnswer`), `mobile/lib/features/results/product_card.dart`, `mobile/lib/features/results/office_screen.dart` |
+| Fotoğraf okuma | `backend/src/modules/extraction/vision-extractor.ts` (`hedged`) |
 | Mutfak hedefleri | `backend/src/db/seed/cuisine-targets.ts`, `docs/ai-eval/cuisine-targets.md` |

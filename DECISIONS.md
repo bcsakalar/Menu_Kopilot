@@ -850,3 +850,31 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   (3) Ayarlar → "Ekibin sildikleri" lists what was learned, with "Geri al": the rows are kept and marked
   (`ignored_at`, `ignored_by`), and the loop stops counting them (`GET /learning`, `POST /learning/forget`). Two
   spellings of one suggestion now add up instead of overwriting each other.
+- **D-195** — **A slow photo read gets a second reader** (user: "menüyü taratıyom çağrı sırasında"). Measured on
+  production: a menu photo reads in 4.5 s at the median, but one read in eight hung on the first vision provider for
+  the whole 18 s timeout, after which the next provider answered in 2 s — dead air on a call with the seller. A read
+  that has not answered after 7 s now starts the same photo on the next provider of the chain; the first good answer
+  wins and the other call is cancelled (a cancelled attempt does not count against the provider's circuit breaker).
+  A hedge that fails does not end the read: the first call keeps going down its chain as before. *Why not a shorter
+  timeout:* a long menu can take 9 s on the first provider, and the next one caps its output at 1000 tokens, so
+  cutting the first one short would trade a slow full read for a fast partial one.
+- **D-196** — **Call mode** (user: the expert reads the app on the phone during the call, pitches the suggestions
+  to the seller — "ihtiyaç yaratmak" — notes what the seller agrees to and enters it on the seller's panel back in
+  the office; nothing is copied during the call). (1) *The order and the "neden":* every card carries one sentence to
+  say to the seller and a priority; the cards arrive in call order. A new product: a category with nothing in it
+  opens ("Menünüzde hiç tatlı yok"), then a thin one ("İçecek tarafınız az (1/3)"), then how common the product is
+  in this cuisine's curated pool ("… menülerinin çoğunda var"), and — once at least 3 earlier sellers answered — "son
+  5 satıcıdan 4 tanesi ekledi". A product on the menu: the strongest thing its card adds (a menu choice grows the
+  basket, then a drink, a size, extras, other choices, removables, a description), a little earlier when the panel
+  shows it with no options at all. Facts only: a statistic that is not there is not said. (2) *The seller's answer:*
+  "Evet" (the product as the chips were left — replaces "kabul et"), "Düşünecek", "Hayır" on every card, changeable
+  during the call; the last answer counts (`suggestion_items.answer`, `answered_at`, migration 0006, backfilled from
+  `accepted`; `POST /suggestion-items/:id/later`). The screen shows "Evet 2 · Düşünecek 1 · Hayır 3" and the
+  counter follows every change. (3) *Ofiste girilecekler:* the "Evet" products with every section to enter and a
+  "Panele girildi" tick (kept on the phone), the "Düşünecek" ones with their sentence and an "Evet dedi" for the
+  call back, a call note (typed or spoken), and "Satıcıya gönder" — a plain message of what was agreed. (4)
+  *Learning from the answers:* a "Hayır" is now what the seller said, not what the team deleted, so a product sellers
+  of a kitchen mostly turn down (≥ 3 answers, > 70 % "Hayır") goes to the back of its category and of the call — no
+  longer out of the list (D-194 hid it): another seller may want it, and nothing fits better than an empty slot.
+  Products they mostly take come earlier and say so. The model is still told what sellers turn down (recommender
+  user prompt v4). Ayarlar → "Öğrenilenler" (was "Ekibin sildikleri") shows both.
