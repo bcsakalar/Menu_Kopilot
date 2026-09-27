@@ -46,10 +46,12 @@ enum CardOrigin {
   static CardOrigin fromWire(String value) => CardOrigin.values.firstWhereOrNull((o) => o.name == value) ?? CardOrigin.review;
 }
 
+/// The seller's answer on the call (D-196): accepted = "Evet", skipped = "Hayır", later = "Düşünecek".
 enum CardStatus {
   pending,
   accepted,
-  skipped;
+  skipped,
+  later;
 
   static CardStatus fromWire(String value) => CardStatus.values.firstWhereOrNull((s) => s.name == value) ?? CardStatus.pending;
 }
@@ -130,6 +132,8 @@ class AnalysisCard {
     this.payload,
     this.productType,
     this.confidence,
+    this.pitch = '',
+    this.priority = 0,
     this.status = CardStatus.pending,
     this.sortOrder = 0,
     this.queued = false,
@@ -160,6 +164,8 @@ class AnalysisCard {
         payload: json.object('payload') == null ? null : TemplatePayload.fromJson(json.object('payload')!),
         productType: json.strOrNull('productType'),
         confidence: json.intOrNull('confidence'),
+        pitch: json.str('pitch'),
+        priority: json.integer('priority'),
         status: CardStatus.fromWire(json.str('status')),
         sortOrder: json.integer('sortOrder'),
       );
@@ -204,6 +210,12 @@ class AnalysisCard {
 
   /// 0-100: how sure the suggestions are. Low ones get a "Kontrol et" label.
   final int? confidence;
+
+  /// One sentence to say to the seller on the call — why this card (D-196); '' on older cards.
+  final String pitch;
+
+  /// The order of the call, higher first; the cards already arrive in it.
+  final int priority;
   final CardStatus status;
   final int sortOrder;
 
@@ -237,6 +249,8 @@ class AnalysisCard {
         payload: payload ?? this.payload,
         productType: productType,
         confidence: confidence,
+        pitch: pitch,
+        priority: priority,
         status: status ?? this.status,
         sortOrder: sortOrder,
         queued: queued ?? this.queued,
@@ -327,6 +341,8 @@ class AnalysisCard {
         'payload': payload?.toJson(),
         'productType': productType,
         'confidence': confidence,
+        'pitch': pitch,
+        'priority': priority,
         'status': status.name,
         'sortOrder': sortOrder,
       };
@@ -382,6 +398,14 @@ class CategoryCount {
         missing: (minItems - present - 1).clamp(0, minItems),
       );
 
+  CategoryCount withOneLess() => CategoryCount(
+        key: key,
+        label: label,
+        present: present > 0 ? present - 1 : 0,
+        minItems: minItems,
+        missing: (minItems - (present > 0 ? present - 1 : 0)).clamp(0, minItems),
+      );
+
   Json toJson() => {'key': key, 'label': label, 'present': present, 'minItems': minItems, 'missing': missing};
 }
 
@@ -434,6 +458,18 @@ class AnalysisCounts {
         cuisineName: cuisineName,
         cuisineId: cuisineId,
         categories: [for (final c in categories) c.key == categoryKey ? c.withOneMore() : c],
+      );
+
+  /// The seller took back a "Evet" during the call: the product is off the menu again.
+  AnalysisCounts withRemoved(String? categoryKey) => AnalysisCounts(
+        current: current > 0 ? current - 1 : 0,
+        target: target,
+        missing: (target - (current > 0 ? current - 1 : 0)).clamp(0, target),
+        hardMinimum: hardMinimum,
+        cuisineMin: cuisineMin,
+        cuisineName: cuisineName,
+        cuisineId: cuisineId,
+        categories: [for (final c in categories) c.key == categoryKey ? c.withOneLess() : c],
       );
 
   Json toJson() => {

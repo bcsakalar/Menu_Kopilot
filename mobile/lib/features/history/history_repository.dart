@@ -138,6 +138,7 @@ class HistoryRepository {
             known.status != item.status ||
             known.acceptedCount != item.accepted ||
             known.skippedCount != item.skipped ||
+            known.laterCount != item.later ||
             known.productNamesJson == '[]') {
           changed = true;
           break;
@@ -166,6 +167,7 @@ class HistoryRepository {
         menuCardCount: Value(item.menuCards),
         acceptedCount: Value(item.accepted),
         skippedCount: Value(item.skipped),
+        laterCount: Value(item.later),
         currentCount: Value(item.current),
         targetCount: Value(item.target),
       );

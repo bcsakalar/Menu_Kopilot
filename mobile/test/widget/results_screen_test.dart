@@ -77,6 +77,8 @@ Json result({String status = 'completed', bool disagrees = false, List<Json> war
           'priceRangeHint': '60–90 TL',
           'productType': 'corba',
           'confidence': 92,
+          'pitch': 'Menünüzde hiç çorba yok; Pide & Lahmacun menülerinin çoğunda var.',
+          'priority': 108,
           'status': 'pending',
           'sortOrder': 0,
           'optionGroups': [soupGroups()],
@@ -164,6 +166,7 @@ class FakeApi extends ApiClient {
   final List<String> accepted = [];
   final Map<String, TemplatePayload?> acceptedPayloads = {};
   final List<String> skipped = [];
+  final List<String> laterIds = [];
   final List<AnalyzeRequestData> started = [];
   Json payload = result();
 
@@ -207,6 +210,13 @@ class FakeApi extends ApiClient {
     skipped.add(itemId);
     final card = AnalysisResult.fromJson(payload).cards.firstWhere((c) => c.id == itemId);
     return card.copyWith(status: CardStatus.skipped);
+  }
+
+  @override
+  Future<AnalysisCard> later(String itemId) async {
+    laterIds.add(itemId);
+    final card = AnalysisResult.fromJson(payload).cards.firstWhere((c) => c.id == itemId);
+    return card.copyWith(status: CardStatus.later);
   }
 }
 
@@ -325,7 +335,7 @@ void main() {
       await tapOn(tester, find.byKey(const ValueKey('chip-r|Pul Biber')));
       await tapOn(tester, find.byKey(const ValueKey('chip-o|Porsiyon|Yarım')));
       // The button says what it will do now.
-      expect(find.text('Seçilenleri kabul et'), findsOneWidget);
+      expect(find.text('Evet (seçilenler)'), findsOneWidget);
 
       await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
       final sent = api.acceptedPayloads['card-soup']!;
@@ -345,7 +355,7 @@ void main() {
       expect(find.byKey(const ValueKey('chip-o|Porsiyon|Tam')), findsOneWidget);
     });
 
-    testWidgets('accepting a new product moves the counter during the call', (tester) async {
+    testWidgets('"Evet" moves the counter during the call', (tester) async {
       await open(tester);
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
@@ -354,7 +364,46 @@ void main() {
       expect(find.text('Menüde 6 ürün · hedef 10'), findsOneWidget);
       expect(find.textContaining('4 ürün daha lazım'), findsOneWidget);
       expect(find.text('Eksik bölümler: İçecek 0/2'), findsOneWidget);
-      expect(find.text('Kabul edildi'), findsOneWidget);
+      expect(find.text('Evet dedi'), findsOneWidget);
+      // The call so far, and the way to the office list.
+      expect(find.text('Evet 1 · Düşünecek 0 · Hayır 0'), findsOneWidget);
+      expect(find.text('Ofiste girilecekler (1)'), findsOneWidget);
+    });
+
+    testWidgets('the sentence for the seller is on the closed card (D-196)', (tester) async {
+      await open(tester);
+      final soup = find.byKey(const ValueKey('product-card-soup'));
+      expect(
+        find.descendant(of: soup, matching: find.text('Menünüzde hiç çorba yok; Pide & Lahmacun menülerinin çoğunda var.')),
+        findsOneWidget,
+      );
+      // Still closed: the sentence is there without opening the card.
+      expect(find.byKey(const ValueKey('accept-card-soup')), findsNothing);
+      // A card without a sentence has no empty line for it.
+      expect(find.byKey(const ValueKey('pitch-card-ayran')), findsNothing);
+    });
+
+    testWidgets('"Düşünecek" keeps the product for the follow-up, and an answer can be changed during the call', (tester) async {
+      await open(tester);
+      await openCard(tester, 'card-soup');
+      await tapOn(tester, find.byKey(const ValueKey('later-card-soup')));
+      expect(api.laterIds, ['card-soup']);
+      expect(find.text('Evet 0 · Düşünecek 1 · Hayır 0'), findsOneWidget);
+      // Not on the menu yet: the counter stays.
+      expect(find.text('Menüde 5 ürün · hedef 10'), findsOneWidget);
+
+      // The seller changes their mind: "Evet" — then "Hayır" after all; the counter follows both.
+      await openCard(tester, 'card-soup');
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
+      expect(find.text('Menüde 6 ürün · hedef 10'), findsOneWidget);
+      await openCard(tester, 'card-soup');
+      await tapOn(tester, find.byKey(const ValueKey('skip-card-soup')));
+      expect(api.skipped, ['card-soup']);
+      expect(find.text('Menüde 5 ürün · hedef 10'), findsOneWidget);
+      expect(find.text('Evet 0 · Düşünecek 0 · Hayır 1'), findsOneWidget);
+      expect(find.text('Hayır dedi'), findsOneWidget);
+      // Nothing for the office: the link goes.
+      expect(find.byKey(const Key('office-open')), findsNothing);
     });
 
     testWidgets('a packaged drink is added with its name alone', (tester) async {
@@ -364,7 +413,7 @@ void main() {
       await openCard(tester, 'card-ayran');
       await scrollTo(tester, find.byKey(const ValueKey('accept-card-ayran')));
       expect(find.text('Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.'), findsOneWidget);
-      expect(find.text('Menüye ekle'), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const ValueKey('accept-card-ayran')), matching: find.text('Evet')), findsOneWidget);
       await tapOn(tester, find.byKey(const ValueKey('accept-card-ayran')));
       expect(api.accepted, ['card-ayran']);
     });
@@ -385,7 +434,9 @@ void main() {
       expect(find.descendant(of: pide, matching: find.text('Kontrol et')), findsOneWidget);
       expect(find.descendant(of: pide, matching: find.text('Tek Kişilik · tabanı belirler')), findsOneWidget);
       expect(find.descendant(of: pide, matching: find.text('Soğan')), findsOneWidget);
-      expect(find.descendant(of: pide, matching: find.text('Şimdi değil')), findsOneWidget);
+      for (final answer in ['Evet', 'Düşünecek', 'Hayır']) {
+        expect(find.descendant(of: pide, matching: find.text(answer)), findsOneWidget, reason: answer);
+      }
 
       await scrollTo(tester, find.byKey(const ValueKey('note-done-card-fix')));
       expect(find.text('Doğru adı: Karışık Pide'), findsOneWidget);
@@ -406,12 +457,12 @@ void main() {
       expect(sent.description, 'Taş fırında pişen kıymalı tekne pide, tereyağıyla.');
     });
 
-    testWidgets('"Önerme" takes a new product off the list and keeps the rest', (tester) async {
+    testWidgets('"Hayır" marks a new product and keeps it on the list', (tester) async {
       await open(tester);
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('skip-card-soup')));
       expect(api.skipped, ['card-soup']);
-      expect(find.text('Çıkarıldı'), findsOneWidget);
+      expect(find.text('Hayır dedi'), findsOneWidget);
       expect(find.text('Yeni ürünler (2)'), findsOneWidget);
     });
 
@@ -432,7 +483,7 @@ void main() {
       expect(find.descendant(of: soup, matching: find.text('Opsiyonlar')), findsNothing);
     });
 
-    testWidgets('a closed card counts only what was kept, and closes itself once accepted', (tester) async {
+    testWidgets('a closed card counts only what was kept, and closes itself once answered', (tester) async {
       await open(tester);
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('chip-r|Pul Biber')));
@@ -441,7 +492,7 @@ void main() {
 
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
-      expect(find.text('Kabul edildi'), findsOneWidget);
+      expect(find.text('Evet dedi'), findsOneWidget);
       expect(find.byKey(const ValueKey('chip-r|Tereyağlı Sos')), findsNothing);
     });
 

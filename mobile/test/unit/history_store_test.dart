@@ -46,6 +46,7 @@ void main() {
             menuCount: 2,
             newProducts: 6,
             accepted: 2,
+            later: 1,
           ),
         ),
         HistoryRepository.companionOf(HistoryItem(runId: 'r2', createdAt: DateTime(2026, 9, 20, 18), status: 'partial')),
@@ -53,10 +54,42 @@ void main() {
       final r1 = (await db.recentRun('r1'))!;
       expect(r1.snapshotJson, '{"cards":[]}');
       expect(r1.title, 'Kıymalı Pide, Kaşarlı Pide');
-      expect((r1.mode, r1.newCount, r1.acceptedCount, r1.menuCount), ('quick', 6, 2, 2));
+      expect((r1.mode, r1.newCount, r1.acceptedCount, r1.laterCount, r1.menuCount), ('quick', 6, 2, 1, 2));
       final r2 = (await db.recentRun('r2'))!;
       expect(r2.snapshotJson, '{}');
       expect(r2.status, 'partial');
+    });
+
+    test('a phone on the 1.4 database (v2) keeps its history and gets the "Düşünecek" count (D-196)', () async {
+      await db.close();
+      // The v2 table exactly as 1.4.0 created it, with one analysis in it.
+      final v2 = AppDatabase(
+        DatabaseConnection(
+          NativeDatabase.memory(
+            setup: (raw) => raw
+              ..execute('''
+                CREATE TABLE "recent_runs" ("run_id" TEXT NOT NULL, "cuisine_id" TEXT NULL,
+                  "cuisine_name" TEXT NOT NULL DEFAULT '', "title" TEXT NOT NULL DEFAULT '', "status" TEXT NOT NULL,
+                  "card_count" INTEGER NOT NULL DEFAULT 0, "snapshot_json" TEXT NOT NULL, "created_at" INTEGER NOT NULL,
+                  "mode" TEXT NULL, "finished_at" INTEGER NULL, "product_names_json" TEXT NOT NULL DEFAULT '[]',
+                  "menu_count" INTEGER NOT NULL DEFAULT 0, "new_count" INTEGER NOT NULL DEFAULT 0,
+                  "menu_card_count" INTEGER NOT NULL DEFAULT 0, "accepted_count" INTEGER NOT NULL DEFAULT 0,
+                  "skipped_count" INTEGER NOT NULL DEFAULT 0, "current_count" INTEGER NULL, "target_count" INTEGER NULL,
+                  PRIMARY KEY ("run_id"))''')
+              ..execute(
+                'INSERT INTO recent_runs (run_id, status, snapshot_json, created_at, accepted_count) '
+                "VALUES ('old', 'completed', '{\"cards\":[]}', 1790000000, 3)",
+              )
+              ..execute('PRAGMA user_version = 2'),
+          ),
+          closeStreamsSynchronously: true,
+        ),
+      );
+      db = v2;
+      final old = (await db.recentRun('old'))!;
+      expect((old.acceptedCount, old.laterCount, old.snapshotJson), (3, 0, '{"cards":[]}'));
+      await db.saveRecentRun(run('new', DateTime(2026, 9, 28, 10)).copyWith(laterCount: const Value(2)));
+      expect((await db.recentRun('new'))!.laterCount, 2);
     });
 
     test('keeps the newest 500 analyses, and the whole result only for the newest 100', () async {
@@ -94,6 +127,7 @@ void main() {
             menuCardCount: 0,
             acceptedCount: 0,
             skippedCount: 0,
+            laterCount: 0,
           ),
         );
 

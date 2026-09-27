@@ -236,12 +236,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String historyAccepted(int count) {
-    return '$count kabul';
+    return '$count evet';
   }
 
   @override
   String historySkipped(int count) {
-    return '$count çıkarıldı';
+    return '$count hayır';
+  }
+
+  @override
+  String historyLater(int count) {
+    return '$count düşünecek';
   }
 
   @override
@@ -272,28 +277,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get historyStatusFailed => 'Hata';
 
   @override
-  String get learningTitle => 'Ekibin sildikleri';
+  String get learningTitle => 'Öğrenilenler';
 
   @override
   String get learningHint => 'Sistemin öğrendiklerini gör, yanlışsa geri al';
 
   @override
   String get learningIntro =>
-      'Ekibin en az 3 kez ve çoğunlukla sildiği öneriler artık gelmiyor. Yanlışlıkla öğrenildiyse “Geri al”a dokun; bir sonraki analizde yeniden önerilir.';
+      'Satıcıların en az 3 kez ve çoğunlukla “Hayır” dediği ürünler öneri listesinin sonuna düşer. Ekibin kartlardan sürekli sildiği öneriler artık gelmez. Yanlışlıkla öğrenildiyse “Geri al”a dokun.';
 
   @override
-  String get learningProducts => 'Artık önerilmeyen ürünler';
+  String get learningProducts => 'Satıcıların çoğunlukla reddettiği ürünler';
 
   @override
   String get learningSuggestions => 'Kartlarda artık gelmeyen öneriler';
 
   @override
   String get learningEmpty =>
-      'Henüz öğrenilen bir şey yok. Ekip bir öneriyi en az 3 kez silince burada görünür.';
+      'Henüz öğrenilen bir şey yok. Satıcılar bir ürüne en az 3 kez “Hayır” deyince ya da ekip bir öneriyi en az 3 kez silince burada görünür.';
 
   @override
   String learnedProductLine(String cuisine, int count, String date) {
-    return '$cuisine · $count kez “Önerme” · $date';
+    return '$cuisine · $count kez “Hayır” · $date';
   }
 
   @override
@@ -320,7 +325,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String undoProductQuestion(String name, String cuisine) {
-    return '“$name” $cuisine mutfağında yeniden önerilsin mi?';
+    return '“$name” $cuisine mutfağında yeniden öne alınsın mı?';
   }
 
   @override
@@ -329,7 +334,8 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get undoDone => 'Geri alındı; bir sonraki analizde yeniden önerilir.';
+  String get undoDone =>
+      'Geri alındı; bir sonraki analizde yeniden hesaba katılır.';
 
   @override
   String get queuedOffline =>
@@ -1079,29 +1085,107 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.';
 
   @override
-  String get acceptAll => 'Hepsini kabul et';
-
-  @override
-  String get acceptKept => 'Seçilenleri kabul et';
-
-  @override
-  String get acceptPlain => 'Menüye ekle';
-
-  @override
-  String get dontSuggest => 'Önerme';
-
-  @override
-  String get notNow => 'Şimdi değil';
-
-  @override
-  String get acceptedDone => 'Kabul edildi';
-
-  @override
-  String get skippedDone => 'Çıkarıldı';
-
-  @override
   String get tapToRemove =>
-      'Ürüne dokun, kartı açılsın. İstemediğin öneriye dokun, çıkarılsın.';
+      'Ürüne dokun, kartı aç. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.';
+
+  @override
+  String get answerYes => 'Evet';
+
+  @override
+  String get answerYesKept => 'Evet (seçilenler)';
+
+  @override
+  String get answerLater => 'Düşünecek';
+
+  @override
+  String get answerNo => 'Hayır';
+
+  @override
+  String get answeredYes => 'Evet dedi';
+
+  @override
+  String get answeredNo => 'Hayır dedi';
+
+  @override
+  String get answeredLater => 'Düşünecek';
+
+  @override
+  String get pitchLabel => 'Satıcıya söyle';
+
+  @override
+  String callProgress(int yes, int later, int no) {
+    return 'Evet $yes · Düşünecek $later · Hayır $no';
+  }
+
+  @override
+  String get officeTitle => 'Ofiste girilecekler';
+
+  @override
+  String officeOpen(int count) {
+    return 'Ofiste girilecekler ($count)';
+  }
+
+  @override
+  String officeYes(int count) {
+    return 'Satıcı evet dedi ($count)';
+  }
+
+  @override
+  String officeLater(int count) {
+    return 'Düşünecek ($count)';
+  }
+
+  @override
+  String officeEntered(int done, int total) {
+    return '$done/$total panele girildi';
+  }
+
+  @override
+  String get officeEnteredCheck => 'Panele girildi';
+
+  @override
+  String get officeLaterYes => 'Evet dedi';
+
+  @override
+  String get officeNote => 'Çağrı notu';
+
+  @override
+  String get officeNoteHint => 'Satıcının istekleri, fiyatlar, dönüş zamanı…';
+
+  @override
+  String get officeEmpty =>
+      'Henüz satıcının evet dediği ya da düşüneceği bir ürün yok. Çağrıda kartlardaki “Evet” ve “Düşünecek” butonlarını kullan.';
+
+  @override
+  String get officeShare => 'Satıcıya gönder';
+
+  @override
+  String get officeShareCopied =>
+      'Paylaşım açılamadı; metin panoya kopyalandı, sohbete yapıştırabilirsin.';
+
+  @override
+  String get officeShareIntro =>
+      'Merhaba, görüşmemizde menünüze eklemeyi konuştuğumuz ürünler:';
+
+  @override
+  String get officeShareLater => 'Düşünmek istediğiniz ürünler:';
+
+  @override
+  String officeShareMenuLine(String name, String what) {
+    return '$name ($what)';
+  }
+
+  @override
+  String get officeWhatOptions => 'opsiyonlar';
+
+  @override
+  String get officeWhatRemovables => 'çıkarılabilir malzemeler';
+
+  @override
+  String get officeWhatExtras => 'ekstra malzemeler';
+
+  @override
+  String get officeWhatDescription => 'açıklama';
 
   @override
   String get openCard => 'Kartı aç';

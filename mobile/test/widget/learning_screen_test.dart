@@ -10,7 +10,7 @@ import 'package:menu_kopilot/data/models/history.dart';
 import 'package:menu_kopilot/features/settings/learning_screen.dart';
 import 'package:menu_kopilot/l10n/gen/app_localizations.dart';
 
-/// What the team taught: one product turned down for a pizzeria, one extra deleted on pides.
+/// What the calls taught: one product sellers said "Hayır" to in pizzerias, one extra the team deleted on pides.
 class FakeLearningApi extends ApiClient {
   FakeLearningApi() : super(baseUrl: 'http://fake', tokens: MemoryTokenStore());
 
@@ -87,12 +87,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('LearningScreen ("Ekibin sildikleri")', () {
-    testWidgets('lists what the suggestions no longer offer, and why', (tester) async {
+  group('LearningScreen ("Öğrenilenler")', () {
+    testWidgets('lists what was learned from the calls and the cards, and why', (tester) async {
       await open(tester);
-      expect(find.text('Artık önerilmeyen ürünler'), findsOneWidget);
+      expect(find.text('Öğrenilenler'), findsOneWidget);
+      expect(find.text('Satıcıların çoğunlukla reddettiği ürünler'), findsOneWidget);
       expect(find.text('Künefe'), findsOneWidget);
-      expect(find.text('Pizza · 4 kez “Önerme” · 25 Eyl 14:32'), findsOneWidget);
+      expect(find.text('Pizza · 4 kez “Hayır” · 25 Eyl 14:32'), findsOneWidget);
       expect(find.text('Kartlarda artık gelmeyen öneriler'), findsOneWidget);
       expect(find.text('Ekstra Mısır'), findsOneWidget);
       expect(find.text('Pide · ekstra · 5 kez silindi · 24 Eyl 09:10'), findsOneWidget);
@@ -102,7 +103,7 @@ void main() {
       await open(tester);
       await tester.tap(find.descendant(of: find.byKey(const ValueKey('learned-product-c-pizza-Künefe')), matching: find.text('Geri al')));
       await tester.pumpAndSettle();
-      expect(find.text('“Künefe” Pizza mutfağında yeniden önerilsin mi?'), findsOneWidget);
+      expect(find.text('“Künefe” Pizza mutfağında yeniden öne alınsın mı?'), findsOneWidget);
       // Changing one's mind costs nothing.
       await tester.tap(find.text('İptal'));
       await tester.pumpAndSettle();
@@ -114,14 +115,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(api.forgotten, ['product:Künefe']);
       expect(find.text('Künefe'), findsNothing);
-      expect(find.text('Geri alındı; bir sonraki analizde yeniden önerilir.'), findsOneWidget);
+      expect(find.text('Geri alındı; bir sonraki analizde yeniden hesaba katılır.'), findsOneWidget);
 
       await tester.tap(find.descendant(of: find.byKey(const ValueKey('learned-suggestion-pide-extra-Ekstra Mısır')), matching: find.text('Geri al')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('undo-confirm')));
       await tester.pumpAndSettle();
       expect(api.forgotten, ['product:Künefe', 'extra:Ekstra Mısır']);
-      expect(find.text('Henüz öğrenilen bir şey yok. Ekip bir öneriyi en az 3 kez silince burada görünür.'), findsOneWidget);
+      expect(
+        find.text('Henüz öğrenilen bir şey yok. Satıcılar bir ürüne en az 3 kez “Hayır” deyince ya da ekip bir öneriyi en az 3 kez silince burada görünür.'),
+        findsOneWidget,
+      );
     });
   });
 }

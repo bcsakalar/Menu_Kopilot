@@ -76,6 +76,15 @@ class PendingQueue {
         ),
       );
 
+  Future<void> enqueueLater(String itemId) => _db.into(_db.pendingRequests).insert(
+        PendingRequestsCompanion.insert(
+          id: _uuid.v4(),
+          kind: 'later',
+          payloadJson: jsonEncode({'itemId': itemId}),
+          createdAt: DateTime.now(),
+        ),
+      );
+
   /// Sends queued requests in order. Stops at the first network error (still offline). Returns how many were sent.
   Future<int> flush(ApiClient api) async {
     var sent = 0;
@@ -94,6 +103,8 @@ class PendingQueue {
             await api.accept(data.str('itemId'), payload: payload == null ? null : TemplatePayload.fromJson(payload));
           case 'skip':
             await api.skip(data.str('itemId'));
+          case 'later':
+            await api.later(data.str('itemId'));
           default:
             // A kind this version cannot send (a removed screen): kept for inspection, never reported as sent.
             await (_db.update(_db.pendingRequests)..where((t) => t.id.equals(request.id))).write(

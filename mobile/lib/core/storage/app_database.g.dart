@@ -414,6 +414,18 @@ class $RecentRunsTable extends RecentRuns
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _laterCountMeta = const VerificationMeta(
+    'laterCount',
+  );
+  @override
+  late final GeneratedColumn<int> laterCount = GeneratedColumn<int>(
+    'later_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     runId,
@@ -434,6 +446,7 @@ class $RecentRunsTable extends RecentRuns
     skippedCount,
     currentCount,
     targetCount,
+    laterCount,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -587,6 +600,12 @@ class $RecentRunsTable extends RecentRuns
         ),
       );
     }
+    if (data.containsKey('later_count')) {
+      context.handle(
+        _laterCountMeta,
+        laterCount.isAcceptableOrUnknown(data['later_count']!, _laterCountMeta),
+      );
+    }
     return context;
   }
 
@@ -668,6 +687,10 @@ class $RecentRunsTable extends RecentRuns
         DriftSqlType.int,
         data['${effectivePrefix}target_count'],
       ),
+      laterCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}later_count'],
+      )!,
     );
   }
 
@@ -700,6 +723,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
   final int skippedCount;
   final int? currentCount;
   final int? targetCount;
+  final int laterCount;
   const RecentRun({
     required this.runId,
     this.cuisineId,
@@ -719,6 +743,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     required this.skippedCount,
     this.currentCount,
     this.targetCount,
+    required this.laterCount,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -751,6 +776,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     if (!nullToAbsent || targetCount != null) {
       map['target_count'] = Variable<int>(targetCount);
     }
+    map['later_count'] = Variable<int>(laterCount);
     return map;
   }
 
@@ -782,6 +808,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       targetCount: targetCount == null && nullToAbsent
           ? const Value.absent()
           : Value(targetCount),
+      laterCount: Value(laterCount),
     );
   }
 
@@ -809,6 +836,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       skippedCount: serializer.fromJson<int>(json['skippedCount']),
       currentCount: serializer.fromJson<int?>(json['currentCount']),
       targetCount: serializer.fromJson<int?>(json['targetCount']),
+      laterCount: serializer.fromJson<int>(json['laterCount']),
     );
   }
   @override
@@ -833,6 +861,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       'skippedCount': serializer.toJson<int>(skippedCount),
       'currentCount': serializer.toJson<int?>(currentCount),
       'targetCount': serializer.toJson<int?>(targetCount),
+      'laterCount': serializer.toJson<int>(laterCount),
     };
   }
 
@@ -855,6 +884,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     int? skippedCount,
     Value<int?> currentCount = const Value.absent(),
     Value<int?> targetCount = const Value.absent(),
+    int? laterCount,
   }) => RecentRun(
     runId: runId ?? this.runId,
     cuisineId: cuisineId.present ? cuisineId.value : this.cuisineId,
@@ -874,6 +904,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     skippedCount: skippedCount ?? this.skippedCount,
     currentCount: currentCount.present ? currentCount.value : this.currentCount,
     targetCount: targetCount.present ? targetCount.value : this.targetCount,
+    laterCount: laterCount ?? this.laterCount,
   );
   RecentRun copyWithCompanion(RecentRunsCompanion data) {
     return RecentRun(
@@ -913,6 +944,9 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
       targetCount: data.targetCount.present
           ? data.targetCount.value
           : this.targetCount,
+      laterCount: data.laterCount.present
+          ? data.laterCount.value
+          : this.laterCount,
     );
   }
 
@@ -936,7 +970,8 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
           ..write('acceptedCount: $acceptedCount, ')
           ..write('skippedCount: $skippedCount, ')
           ..write('currentCount: $currentCount, ')
-          ..write('targetCount: $targetCount')
+          ..write('targetCount: $targetCount, ')
+          ..write('laterCount: $laterCount')
           ..write(')'))
         .toString();
   }
@@ -961,6 +996,7 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
     skippedCount,
     currentCount,
     targetCount,
+    laterCount,
   );
   @override
   bool operator ==(Object other) =>
@@ -983,7 +1019,8 @@ class RecentRun extends DataClass implements Insertable<RecentRun> {
           other.acceptedCount == this.acceptedCount &&
           other.skippedCount == this.skippedCount &&
           other.currentCount == this.currentCount &&
-          other.targetCount == this.targetCount);
+          other.targetCount == this.targetCount &&
+          other.laterCount == this.laterCount);
 }
 
 class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
@@ -1005,6 +1042,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
   final Value<int> skippedCount;
   final Value<int?> currentCount;
   final Value<int?> targetCount;
+  final Value<int> laterCount;
   final Value<int> rowid;
   const RecentRunsCompanion({
     this.runId = const Value.absent(),
@@ -1025,6 +1063,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     this.skippedCount = const Value.absent(),
     this.currentCount = const Value.absent(),
     this.targetCount = const Value.absent(),
+    this.laterCount = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecentRunsCompanion.insert({
@@ -1046,6 +1085,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     this.skippedCount = const Value.absent(),
     this.currentCount = const Value.absent(),
     this.targetCount = const Value.absent(),
+    this.laterCount = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : runId = Value(runId),
        status = Value(status),
@@ -1070,6 +1110,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     Expression<int>? skippedCount,
     Expression<int>? currentCount,
     Expression<int>? targetCount,
+    Expression<int>? laterCount,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1091,6 +1132,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
       if (skippedCount != null) 'skipped_count': skippedCount,
       if (currentCount != null) 'current_count': currentCount,
       if (targetCount != null) 'target_count': targetCount,
+      if (laterCount != null) 'later_count': laterCount,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1114,6 +1156,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     Value<int>? skippedCount,
     Value<int?>? currentCount,
     Value<int?>? targetCount,
+    Value<int>? laterCount,
     Value<int>? rowid,
   }) {
     return RecentRunsCompanion(
@@ -1135,6 +1178,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
       skippedCount: skippedCount ?? this.skippedCount,
       currentCount: currentCount ?? this.currentCount,
       targetCount: targetCount ?? this.targetCount,
+      laterCount: laterCount ?? this.laterCount,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1196,6 +1240,9 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
     if (targetCount.present) {
       map['target_count'] = Variable<int>(targetCount.value);
     }
+    if (laterCount.present) {
+      map['later_count'] = Variable<int>(laterCount.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1223,6 +1270,7 @@ class RecentRunsCompanion extends UpdateCompanion<RecentRun> {
           ..write('skippedCount: $skippedCount, ')
           ..write('currentCount: $currentCount, ')
           ..write('targetCount: $targetCount, ')
+          ..write('laterCount: $laterCount, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2864,6 +2912,7 @@ typedef $$RecentRunsTableCreateCompanionBuilder = RecentRunsCompanion Function({
   Value<int> skippedCount,
   Value<int?> currentCount,
   Value<int?> targetCount,
+  Value<int> laterCount,
   Value<int> rowid,
 });
 typedef $$RecentRunsTableUpdateCompanionBuilder = RecentRunsCompanion Function({
@@ -2885,6 +2934,7 @@ typedef $$RecentRunsTableUpdateCompanionBuilder = RecentRunsCompanion Function({
   Value<int> skippedCount,
   Value<int?> currentCount,
   Value<int?> targetCount,
+  Value<int> laterCount,
   Value<int> rowid,
 });
 
@@ -2984,6 +3034,11 @@ class $$RecentRunsTableFilterComposer
 
   ColumnFilters<int> get targetCount => $composableBuilder(
     column: $table.targetCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get laterCount => $composableBuilder(
+    column: $table.laterCount,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3086,6 +3141,11 @@ class $$RecentRunsTableOrderingComposer
     column: $table.targetCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get laterCount => $composableBuilder(
+    column: $table.laterCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RecentRunsTableAnnotationComposer
@@ -3168,6 +3228,11 @@ class $$RecentRunsTableAnnotationComposer
     column: $table.targetCount,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get laterCount => $composableBuilder(
+    column: $table.laterCount,
+    builder: (column) => column,
+  );
 }
 
 class $$RecentRunsTableTableManager
@@ -3219,6 +3284,7 @@ class $$RecentRunsTableTableManager
                 Value<int> skippedCount = const Value.absent(),
                 Value<int?> currentCount = const Value.absent(),
                 Value<int?> targetCount = const Value.absent(),
+                Value<int> laterCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecentRunsCompanion(
                 runId: runId,
@@ -3239,6 +3305,7 @@ class $$RecentRunsTableTableManager
                 skippedCount: skippedCount,
                 currentCount: currentCount,
                 targetCount: targetCount,
+                laterCount: laterCount,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3261,6 +3328,7 @@ class $$RecentRunsTableTableManager
                 Value<int> skippedCount = const Value.absent(),
                 Value<int?> currentCount = const Value.absent(),
                 Value<int?> targetCount = const Value.absent(),
+                Value<int> laterCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecentRunsCompanion.insert(
                 runId: runId,
@@ -3281,6 +3349,7 @@ class $$RecentRunsTableTableManager
                 skippedCount: skippedCount,
                 currentCount: currentCount,
                 targetCount: targetCount,
+                laterCount: laterCount,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -379,6 +379,12 @@ class ApiClient {
         return AnalysisCard.fromJson(response.data ?? const {});
       });
 
+  /// "Düşünecek": the seller will think about it (D-196).
+  Future<AnalysisCard> later(String itemId) => _guard(() async {
+        final response = await _dio.post<Json>('/suggestion-items/$itemId/later');
+        return AnalysisCard.fromJson(response.data ?? const {});
+      });
+
   // ---- template pool ----------------------------------------------------------------------------------------
 
   Future<({List<TemplateItem> items, int total})> templates({

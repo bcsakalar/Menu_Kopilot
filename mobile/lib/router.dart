@@ -8,6 +8,7 @@ import 'features/camera/camera_capture_screen.dart';
 import 'features/history/history_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/results/analysis_controller.dart';
+import 'features/results/office_screen.dart';
 import 'features/results/results_screen.dart';
 import 'features/settings/category_settings_screen.dart';
 import 'features/settings/cuisine_settings_screen.dart';
@@ -63,6 +64,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                         runId: state.uri.queryParameters['runId'],
                       );
                     },
+                  ),
+                  // After the call: what to enter on the seller's panel (D-196).
+                  GoRoute(
+                    path: 'office',
+                    redirect: (_, state) => state.uri.queryParameters['runId'] == null ? '/suggest' : null,
+                    builder: (_, state) => OfficeScreen(runId: state.uri.queryParameters['runId']!),
                   ),
                   GoRoute(path: 'history', builder: (_, _) => const HistoryScreen()),
                 ],

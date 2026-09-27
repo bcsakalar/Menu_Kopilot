@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/design/components.dart';
 import '../../core/design/count_meter.dart';
@@ -127,12 +128,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     // A re-run needs the server (it reuses the stored product list) and a finished run to start from.
     final canRerun = state.runId != null && !state.isStreaming && !state.offline;
 
+    final runId = state.runId;
+    final openOffice = runId == null ? null : () => context.push('/suggest/office?runId=$runId');
+
     return Scaffold(
       appBar: AppBar(
         title: _TitleBlock(title: l10n.resultsTitle, subtitle: state.cuisineName.isEmpty ? null : state.cuisineName),
         actions: [
           if (state.isStreaming)
-            TextButton.icon(onPressed: controller.cancel, icon: const Icon(Icons.stop_rounded), label: Text(l10n.stop)),
+            TextButton.icon(onPressed: controller.cancel, icon: const Icon(Icons.stop_rounded), label: Text(l10n.stop))
+          else if (openOffice != null)
+            IconButton(
+              key: const Key('office-action'),
+              onPressed: openOffice,
+              icon: const Icon(Icons.assignment_turned_in_outlined),
+              tooltip: l10n.officeTitle,
+            ),
         ],
       ),
       body: switch (state.phase) {
@@ -151,7 +162,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         _ => Column(
             children: [
               // Pinned: the number that matters never scrolls away during the call.
-              if (state.counts != null) _ProgressStrip(state: state, onChangeCuisine: canRerun ? _changeCuisine : null),
+              if (state.counts != null)
+                _ProgressStrip(state: state, onChangeCuisine: canRerun ? _changeCuisine : null, onOffice: openOffice),
               if (!reading) _Tabs(state: state, onChanged: controller.setTab),
               Expanded(
                 child: ListView(
@@ -204,6 +216,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               onToggle: (key) => controller.toggleItem(card.id, key),
               onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true, collapse: card.id),
               onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false, collapse: card.id),
+              onLater: () => _act(card.id, () => controller.later(card.id), accept: false, collapse: card.id),
               onEdit: card.payload == null ? null : () => _openEditor(card),
             ),
         ];
@@ -234,6 +247,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               onSkip: () {
                 final card = entry.card;
                 if (card != null) _act(card.id, () => controller.skip(card.id), accept: false, collapse: 'entry-${entry.key}');
+              },
+              onLater: () {
+                final card = entry.card;
+                if (card != null) _act(card.id, () => controller.later(card.id), accept: false, collapse: 'entry-${entry.key}');
               },
               onNoteDone: (note) => _act(note.id, () => controller.accept(note.id), accept: true),
             ),
@@ -266,12 +283,15 @@ class _TitleBlock extends StatelessWidget {
 /// Pinned progress: "Menüde X ürün · hedef Y", a bar, how many are still needed, the sections still short, and the
 /// cuisine (tap to change it). Updates live as products are accepted.
 class _ProgressStrip extends StatelessWidget {
-  const _ProgressStrip({required this.state, required this.onChangeCuisine});
+  const _ProgressStrip({required this.state, required this.onChangeCuisine, required this.onOffice});
 
   final AnalysisViewState state;
 
   /// Null while the run is going or offline: a re-run needs a finished run and the server.
   final VoidCallback? onChangeCuisine;
+
+  /// Opens "Ofiste girilecekler".
+  final VoidCallback? onOffice;
 
   @override
   Widget build(BuildContext context) {
@@ -280,6 +300,10 @@ class _ProgressStrip extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final counts = state.counts!;
     final open = counts.openCategories;
+    final answered = state.cards.where((c) => c.section != CardSection.fix);
+    final yes = answered.where((c) => c.status == CardStatus.accepted).length;
+    final later = answered.where((c) => c.status == CardStatus.later).length;
+    final no = answered.where((c) => c.status == CardStatus.skipped).length;
     final need = [
       if (!counts.meetsHardMinimum) l10n.belowHardMinimum(counts.hardMinimum),
       if (counts.missing > 0) l10n.stillNeeded(counts.missing) else l10n.targetReached,
@@ -341,6 +365,21 @@ class _ProgressStrip extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+            // The call so far: the seller's answers, and the list to take to the office (D-196).
+            if (yes + later + no > 0)
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.callProgress(yes, later, no),
+                      key: const Key('call-progress'),
+                      style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontFeatures: tabularFigures),
+                    ),
+                  ),
+                  if (yes + later > 0 && onOffice != null)
+                    TextButton(key: const Key('office-open'), onPressed: onOffice, child: Text(l10n.officeOpen(yes + later))),
+                ],
               ),
           ],
         ),

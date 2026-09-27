@@ -37,6 +37,8 @@ class RecentRuns extends Table {
   IntColumn get skippedCount => integer().withDefault(const Constant(0))();
   IntColumn get currentCount => integer().nullable()();
   IntColumn get targetCount => integer().nullable()();
+  // v3 (D-196): the seller's "Düşünecek" answers.
+  IntColumn get laterCount => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {runId};
@@ -59,9 +61,8 @@ class PendingRequests extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-/// Call checklist ticks of a gap analysis ("Çağrıda sor"), persisted while on the phone.
-/// Kept for the schema version, unused since the call checklist became the "Eksik / Düzeltme" section.
-/// Dropping it needs a Drift migration and a build_runner pass — see docs/FAZ3_RAPOR.md.
+/// Ticks kept on the phone, per list: today the "Panele girildi" ticks of the office list (D-196), under the key
+/// `office:<runId>` with the card id as [questionKey]. (First made for the old call checklist, hence the names.)
 class ChecklistTicks extends Table {
   TextColumn get analysisId => text()();
   TextColumn get questionKey => text()();
@@ -93,7 +94,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'menu_kopilot'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -116,6 +117,8 @@ class AppDatabase extends _$AppDatabase {
               await m.addColumn(recentRuns, column);
             }
           }
+          // v3: "Düşünecek" answers (D-196); older rows count zero until saved or synced again.
+          if (from < 3) await m.addColumn(recentRuns, recentRuns.laterCount);
         },
       );
 

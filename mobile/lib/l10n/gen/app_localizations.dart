@@ -511,14 +511,20 @@ abstract class AppLocalizations {
   /// No description provided for @historyAccepted.
   ///
   /// In tr, this message translates to:
-  /// **'{count} kabul'**
+  /// **'{count} evet'**
   String historyAccepted(int count);
 
   /// No description provided for @historySkipped.
   ///
   /// In tr, this message translates to:
-  /// **'{count} çıkarıldı'**
+  /// **'{count} hayır'**
   String historySkipped(int count);
+
+  /// No description provided for @historyLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} düşünecek'**
+  String historyLater(int count);
 
   /// No description provided for @historyMore.
   ///
@@ -571,7 +577,7 @@ abstract class AppLocalizations {
   /// No description provided for @learningTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Ekibin sildikleri'**
+  /// **'Öğrenilenler'**
   String get learningTitle;
 
   /// No description provided for @learningHint.
@@ -583,13 +589,13 @@ abstract class AppLocalizations {
   /// No description provided for @learningIntro.
   ///
   /// In tr, this message translates to:
-  /// **'Ekibin en az 3 kez ve çoğunlukla sildiği öneriler artık gelmiyor. Yanlışlıkla öğrenildiyse “Geri al”a dokun; bir sonraki analizde yeniden önerilir.'**
+  /// **'Satıcıların en az 3 kez ve çoğunlukla “Hayır” dediği ürünler öneri listesinin sonuna düşer. Ekibin kartlardan sürekli sildiği öneriler artık gelmez. Yanlışlıkla öğrenildiyse “Geri al”a dokun.'**
   String get learningIntro;
 
   /// No description provided for @learningProducts.
   ///
   /// In tr, this message translates to:
-  /// **'Artık önerilmeyen ürünler'**
+  /// **'Satıcıların çoğunlukla reddettiği ürünler'**
   String get learningProducts;
 
   /// No description provided for @learningSuggestions.
@@ -601,13 +607,13 @@ abstract class AppLocalizations {
   /// No description provided for @learningEmpty.
   ///
   /// In tr, this message translates to:
-  /// **'Henüz öğrenilen bir şey yok. Ekip bir öneriyi en az 3 kez silince burada görünür.'**
+  /// **'Henüz öğrenilen bir şey yok. Satıcılar bir ürüne en az 3 kez “Hayır” deyince ya da ekip bir öneriyi en az 3 kez silince burada görünür.'**
   String get learningEmpty;
 
   /// No description provided for @learnedProductLine.
   ///
   /// In tr, this message translates to:
-  /// **'{cuisine} · {count} kez “Önerme” · {date}'**
+  /// **'{cuisine} · {count} kez “Hayır” · {date}'**
   String learnedProductLine(String cuisine, int count, String date);
 
   /// No description provided for @learnedSuggestionLine.
@@ -648,7 +654,7 @@ abstract class AppLocalizations {
   /// No description provided for @undoProductQuestion.
   ///
   /// In tr, this message translates to:
-  /// **'“{name}” {cuisine} mutfağında yeniden önerilsin mi?'**
+  /// **'“{name}” {cuisine} mutfağında yeniden öne alınsın mı?'**
   String undoProductQuestion(String name, String cuisine);
 
   /// No description provided for @undoSuggestionQuestion.
@@ -660,7 +666,7 @@ abstract class AppLocalizations {
   /// No description provided for @undoDone.
   ///
   /// In tr, this message translates to:
-  /// **'Geri alındı; bir sonraki analizde yeniden önerilir.'**
+  /// **'Geri alındı; bir sonraki analizde yeniden hesaba katılır.'**
   String get undoDone;
 
   /// No description provided for @queuedOffline.
@@ -1983,53 +1989,179 @@ abstract class AppLocalizations {
   /// **'Hazır içecek: açıklama ve opsiyon gerekmez, adıyla eklenir.'**
   String get plainProduct;
 
-  /// No description provided for @acceptAll.
-  ///
-  /// In tr, this message translates to:
-  /// **'Hepsini kabul et'**
-  String get acceptAll;
-
-  /// No description provided for @acceptKept.
-  ///
-  /// In tr, this message translates to:
-  /// **'Seçilenleri kabul et'**
-  String get acceptKept;
-
-  /// No description provided for @acceptPlain.
-  ///
-  /// In tr, this message translates to:
-  /// **'Menüye ekle'**
-  String get acceptPlain;
-
-  /// No description provided for @dontSuggest.
-  ///
-  /// In tr, this message translates to:
-  /// **'Önerme'**
-  String get dontSuggest;
-
-  /// No description provided for @notNow.
-  ///
-  /// In tr, this message translates to:
-  /// **'Şimdi değil'**
-  String get notNow;
-
-  /// No description provided for @acceptedDone.
-  ///
-  /// In tr, this message translates to:
-  /// **'Kabul edildi'**
-  String get acceptedDone;
-
-  /// No description provided for @skippedDone.
-  ///
-  /// In tr, this message translates to:
-  /// **'Çıkarıldı'**
-  String get skippedDone;
-
   /// No description provided for @tapToRemove.
   ///
   /// In tr, this message translates to:
-  /// **'Ürüne dokun, kartı açılsın. İstemediğin öneriye dokun, çıkarılsın.'**
+  /// **'Ürüne dokun, kartı aç. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.'**
   String get tapToRemove;
+
+  /// No description provided for @answerYes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet'**
+  String get answerYes;
+
+  /// No description provided for @answerYesKept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet (seçilenler)'**
+  String get answerYesKept;
+
+  /// No description provided for @answerLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşünecek'**
+  String get answerLater;
+
+  /// No description provided for @answerNo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hayır'**
+  String get answerNo;
+
+  /// No description provided for @answeredYes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet dedi'**
+  String get answeredYes;
+
+  /// No description provided for @answeredNo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hayır dedi'**
+  String get answeredNo;
+
+  /// No description provided for @answeredLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşünecek'**
+  String get answeredLater;
+
+  /// No description provided for @pitchLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satıcıya söyle'**
+  String get pitchLabel;
+
+  /// No description provided for @callProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet {yes} · Düşünecek {later} · Hayır {no}'**
+  String callProgress(int yes, int later, int no);
+
+  /// No description provided for @officeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ofiste girilecekler'**
+  String get officeTitle;
+
+  /// No description provided for @officeOpen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ofiste girilecekler ({count})'**
+  String officeOpen(int count);
+
+  /// No description provided for @officeYes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satıcı evet dedi ({count})'**
+  String officeYes(int count);
+
+  /// No description provided for @officeLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşünecek ({count})'**
+  String officeLater(int count);
+
+  /// No description provided for @officeEntered.
+  ///
+  /// In tr, this message translates to:
+  /// **'{done}/{total} panele girildi'**
+  String officeEntered(int done, int total);
+
+  /// No description provided for @officeEnteredCheck.
+  ///
+  /// In tr, this message translates to:
+  /// **'Panele girildi'**
+  String get officeEnteredCheck;
+
+  /// No description provided for @officeLaterYes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet dedi'**
+  String get officeLaterYes;
+
+  /// No description provided for @officeNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çağrı notu'**
+  String get officeNote;
+
+  /// No description provided for @officeNoteHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satıcının istekleri, fiyatlar, dönüş zamanı…'**
+  String get officeNoteHint;
+
+  /// No description provided for @officeEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz satıcının evet dediği ya da düşüneceği bir ürün yok. Çağrıda kartlardaki “Evet” ve “Düşünecek” butonlarını kullan.'**
+  String get officeEmpty;
+
+  /// No description provided for @officeShare.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satıcıya gönder'**
+  String get officeShare;
+
+  /// No description provided for @officeShareCopied.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşım açılamadı; metin panoya kopyalandı, sohbete yapıştırabilirsin.'**
+  String get officeShareCopied;
+
+  /// No description provided for @officeShareIntro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Merhaba, görüşmemizde menünüze eklemeyi konuştuğumuz ürünler:'**
+  String get officeShareIntro;
+
+  /// No description provided for @officeShareLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşünmek istediğiniz ürünler:'**
+  String get officeShareLater;
+
+  /// No description provided for @officeShareMenuLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} ({what})'**
+  String officeShareMenuLine(String name, String what);
+
+  /// No description provided for @officeWhatOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'opsiyonlar'**
+  String get officeWhatOptions;
+
+  /// No description provided for @officeWhatRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'çıkarılabilir malzemeler'**
+  String get officeWhatRemovables;
+
+  /// No description provided for @officeWhatExtras.
+  ///
+  /// In tr, this message translates to:
+  /// **'ekstra malzemeler'**
+  String get officeWhatExtras;
+
+  /// No description provided for @officeWhatDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'açıklama'**
+  String get officeWhatDescription;
 
   /// No description provided for @openCard.
   ///

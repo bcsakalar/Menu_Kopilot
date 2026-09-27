@@ -16,6 +16,7 @@ class HistoryItem {
     this.menuCards = 0,
     this.accepted = 0,
     this.skipped = 0,
+    this.later = 0,
     this.current,
     this.target,
   });
@@ -34,6 +35,7 @@ class HistoryItem {
         menuCards: json.integer('menuCards'),
         accepted: json.integer('accepted'),
         skipped: json.integer('skipped'),
+        later: json.integer('later'),
         current: json.intOrNull('current'),
         target: json.intOrNull('target'),
       );
@@ -51,6 +53,9 @@ class HistoryItem {
   final int menuCards;
   final int accepted;
   final int skipped;
+
+  /// The seller's "Düşünecek" answers (D-196); accepted is "Evet", skipped is "Hayır".
+  final int later;
   final int? current;
   final int? target;
 }
@@ -69,7 +74,7 @@ class HistoryPage {
   final String? nextBefore;
 }
 
-/// A product the team kept turning down for one kitchen ("Önerme"), which is no longer suggested there (D-194).
+/// A product sellers kept saying "Hayır" to in one kitchen; it goes to the back of the list there (D-194, D-196).
 class LearnedProduct {
   const LearnedProduct({
     required this.cuisineId,

@@ -324,6 +324,7 @@ class _HistoryRow extends StatelessWidget {
       if (row.newCount > 0) l10n.historyNew(row.newCount),
       if (row.menuCardCount > 0) l10n.historyOnMenu(row.menuCardCount),
       if (row.acceptedCount > 0) l10n.historyAccepted(row.acceptedCount),
+      if (row.laterCount > 0) l10n.historyLater(row.laterCount),
       if (row.skippedCount > 0) l10n.historySkipped(row.skippedCount),
     ].join(' · ');
     final (icon, color, status) = switch (entry.status) {

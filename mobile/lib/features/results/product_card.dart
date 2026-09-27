@@ -17,6 +17,9 @@ import '../../l10n/gen/app_localizations.dart';
 ///
 /// On a phone a list of open cards is a long scroll, so a card opens and closes (user, after the first release): closed
 /// it is its name, its badges and one line of what it holds; a tap on the header opens the four sections.
+///
+/// The card is read out on the call (D-196): under the name, the sentence to say to the seller ("Menünüzde hiç tatlı
+/// yok…"); at the bottom, the seller's answer — "Evet", "Düşünecek", "Hayır" — which can be changed while talking.
 
 /// Below this confidence a card says "Kontrol et": the suggestions are generic for the product type.
 const int lowConfidence = 60;
@@ -60,6 +63,7 @@ class ProductCard extends StatelessWidget {
     required this.onToggle,
     required this.onAccept,
     required this.onSkip,
+    required this.onLater,
     this.notes = const [],
     this.onNoteDone,
     this.onEdit,
@@ -74,8 +78,14 @@ class ProductCard extends StatelessWidget {
   final Set<String> removed;
   final bool busy;
   final void Function(String key) onToggle;
+  /// "Evet".
   final VoidCallback onAccept;
+
+  /// "Hayır".
   final VoidCallback onSkip;
+
+  /// "Düşünecek".
+  final VoidCallback onLater;
   final List<AnalysisCard> notes;
   final void Function(AnalysisCard note)? onNoteDone;
   final VoidCallback? onEdit;
@@ -92,7 +102,8 @@ class ProductCard extends StatelessWidget {
     final l10n = context.l10n;
     final p = context.palette;
     final card = this.card;
-    final decided = card != null && !card.isPending;
+    // "Düşünecek" is still open: the card keeps its colour and its chips.
+    final decided = card != null && (card.status == CardStatus.accepted || card.status == CardStatus.skipped);
     final isNew = card?.section == CardSection.newProduct;
     final collapsible = card != null && onExpandedChanged != null;
     final open = !collapsible || expanded;
@@ -136,9 +147,9 @@ class ProductCard extends StatelessWidget {
                             child: Text(l10n.plainProduct, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: p.textMuted)),
                           )
                         else
-                          _Sections(card: card, removed: removed, enabled: !decided && !busy, onToggle: onToggle),
+                          _Sections(card: card, removed: removed, enabled: card.status != CardStatus.accepted && !busy, onToggle: onToggle),
                         const SizedBox(height: 12),
-                        _Actions(card: card, removed: removed, busy: busy, onAccept: onAccept, onSkip: onSkip),
+                        _Answers(card: card, removed: removed, busy: busy, onYes: onAccept, onLater: onLater, onNo: onSkip),
                       ],
                     ],
                   ),
@@ -231,20 +242,43 @@ class _Header extends StatelessWidget {
                 card.section == CardSection.newProduct ? l10n.newProductBadge : l10n.onMenuBadge,
                 tone: card.section == CardSection.newProduct ? Tone.accent : Tone.neutral,
               ),
-            if (card != null && card.isPending && (card.confidence ?? 100) < lowConfidence)
+            if (card != null && (card.isPending || card.status == CardStatus.later) && (card.confidence ?? 100) < lowConfidence)
               Pill(l10n.checkThis, tone: Tone.amber, icon: Icons.visibility_outlined),
-            if (card?.status == CardStatus.accepted) Pill(l10n.acceptedDone, tone: Tone.success, icon: Icons.check_rounded),
-            if (skipped) Pill(l10n.skippedDone, tone: Tone.neutral),
+            if (card?.status == CardStatus.accepted) Pill(l10n.answeredYes, tone: Tone.success, icon: Icons.check_rounded),
+            if (card?.status == CardStatus.later) Pill(l10n.answeredLater, tone: Tone.amber, icon: Icons.schedule_rounded),
+            if (skipped) Pill(l10n.answeredNo, tone: Tone.neutral),
             if (card?.queued ?? false) Pill(l10n.queuedBadge, tone: Tone.amber, icon: Icons.cloud_upload_outlined),
             if (details.isNotEmpty) Text(details, style: text.bodyMedium?.copyWith(color: p.textMuted)),
           ],
         ),
+        // What to say to the seller: on the closed card too, so the call can go down the list without opening it.
+        if (card != null && card.section != CardSection.fix && card.pitch.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Icon(Icons.campaign_outlined, size: 18, color: p.accentText, semanticLabel: l10n.pitchLabel),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    card.pitch,
+                    key: ValueKey('pitch-${card.id}'),
+                    style: text.bodyLarge?.copyWith(fontSize: 15, height: 1.3, color: skipped ? p.textMuted : p.text),
+                  ),
+                ),
+              ],
+            ),
+          ),
         if (summary != null && summary!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(summary!, style: text.bodyMedium?.copyWith(color: p.textMuted)),
           ),
-        if (open && card != null && card.section == CardSection.newProduct && card.priceRangeHint.isNotEmpty && card.isPending)
+        if (open && card != null && card.section == CardSection.newProduct && card.priceRangeHint.isNotEmpty && !skipped && card.status != CardStatus.accepted)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(l10n.priceAsk(card.priceRangeHint), style: text.bodyMedium?.copyWith(color: p.textMuted)),
@@ -594,14 +628,24 @@ class _DescriptionChip extends StatelessWidget {
   }
 }
 
-class _Actions extends StatelessWidget {
-  const _Actions({required this.card, required this.removed, required this.busy, required this.onAccept, required this.onSkip});
+/// The seller's answer (D-196): "Evet" (on the menu, as the chips were left), "Düşünecek", "Hayır". The chosen one
+/// stays marked; another tap changes it — sellers change their minds during a call.
+class _Answers extends StatelessWidget {
+  const _Answers({
+    required this.card,
+    required this.removed,
+    required this.busy,
+    required this.onYes,
+    required this.onLater,
+    required this.onNo,
+  });
 
   final AnalysisCard card;
   final Set<String> removed;
   final bool busy;
-  final VoidCallback onAccept;
-  final VoidCallback onSkip;
+  final VoidCallback onYes;
+  final VoidCallback onLater;
+  final VoidCallback onNo;
 
   @override
   Widget build(BuildContext context) {
@@ -612,25 +656,67 @@ class _Actions extends StatelessWidget {
         child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4))),
       );
     }
-    if (!card.isPending) return const SizedBox.shrink();
-    final isNew = card.section == CardSection.newProduct;
-    final label = card.isPlainRow ? l10n.acceptPlain : (removed.isEmpty ? l10n.acceptAll : l10n.acceptKept);
+    final pending = card.isPending;
+    Widget answer({
+      required Key key,
+      required IconData icon,
+      required String label,
+      required bool chosen,
+      required bool primary,
+      required VoidCallback onPressed,
+    }) {
+      final child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(chosen ? Icons.check_rounded : icon, size: 18),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      );
+      const size = Size(0, 52);
+      const padding = EdgeInsets.symmetric(horizontal: 8);
+      if (chosen) return FilledButton.tonal(key: key, onPressed: onPressed, style: FilledButton.styleFrom(minimumSize: size, padding: padding), child: child);
+      if (primary) return FilledButton(key: key, onPressed: onPressed, style: FilledButton.styleFrom(minimumSize: size, padding: padding), child: child);
+      return OutlinedButton(key: key, onPressed: onPressed, style: OutlinedButton.styleFrom(minimumSize: size, padding: padding), child: child);
+    }
+
     return Row(
       children: [
-        TextButton(
-          key: ValueKey('skip-${card.id}'),
-          onPressed: onSkip,
-          style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
-          child: Text(isNew ? l10n.dontSuggest : l10n.notNow),
+        Expanded(
+          flex: 4,
+          child: answer(
+            key: ValueKey('accept-${card.id}'),
+            icon: Icons.thumb_up_alt_outlined,
+            label: removed.isEmpty || card.isPlainRow ? l10n.answerYes : l10n.answerYesKept,
+            chosen: card.status == CardStatus.accepted,
+            primary: pending,
+            onPressed: onYes,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: FilledButton.icon(
-            key: ValueKey('accept-${card.id}'),
-            onPressed: onAccept,
-            icon: const Icon(Icons.check_rounded, size: 20),
-            label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
+          flex: 4,
+          child: answer(
+            key: ValueKey('later-${card.id}'),
+            icon: Icons.schedule_rounded,
+            label: l10n.answerLater,
+            chosen: card.status == CardStatus.later,
+            primary: false,
+            onPressed: onLater,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: answer(
+            key: ValueKey('skip-${card.id}'),
+            icon: Icons.close_rounded,
+            label: l10n.answerNo,
+            chosen: card.status == CardStatus.skipped,
+            primary: false,
+            onPressed: onNo,
           ),
         ),
       ],

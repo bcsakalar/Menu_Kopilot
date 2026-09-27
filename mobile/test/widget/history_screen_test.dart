@@ -67,6 +67,7 @@ void main() {
         newCount: const Value(12),
         menuCardCount: const Value(5),
         acceptedCount: const Value(3),
+        laterCount: const Value(2),
       ),
     );
     await db.saveRecentRun(
@@ -152,7 +153,7 @@ void main() {
       expect(find.descendant(of: pide, matching: find.text('00:05')), findsOneWidget);
       expect(find.descendant(of: pide, matching: find.text('Kıymalı Pide, Kaşarlı Pide, Kuşbaşılı Pide +2')), findsOneWidget);
       expect(find.descendant(of: pide, matching: find.text('Pide & Lahmacun · Tam')), findsOneWidget);
-      expect(find.descendant(of: pide, matching: find.text('12 yeni · 5 menüde · 3 kabul')), findsOneWidget);
+      expect(find.descendant(of: pide, matching: find.text('12 yeni · 5 menüde · 3 evet · 2 düşünecek')), findsOneWidget);
       final pizza = find.byKey(const ValueKey('history-r-pizza'));
       expect(find.descendant(of: pizza, matching: find.text('Eksik tamamlandı · 6 yeni')), findsOneWidget);
 

@@ -396,6 +396,7 @@ class AnalysisController extends Notifier<AnalysisViewState> {
           menuCardCount: Value(state.cards.where((c) => c.section == CardSection.option).length),
           acceptedCount: Value(decided.where((c) => c.status == CardStatus.accepted).length),
           skippedCount: Value(decided.where((c) => c.status == CardStatus.skipped).length),
+          laterCount: Value(decided.where((c) => c.status == CardStatus.later).length),
           currentCount: Value(state.counts?.current),
           targetCount: Value(state.counts?.target),
         ),
@@ -470,6 +471,13 @@ class AnalysisController extends Notifier<AnalysisViewState> {
     state = state.copyWith(counts: counts.withAdded(card.categoryKey));
   }
 
+  /// A "Evet" taken back during the call ("Hayır" or "Düşünecek" instead): the counter goes back too (D-196).
+  void _unbumpCount(AnalysisCard card) {
+    final counts = state.counts;
+    if (counts == null || card.section != CardSection.newProduct || card.status != CardStatus.accepted) return;
+    state = state.copyWith(counts: counts.withRemoved(card.categoryKey));
+  }
+
   /// Accepts the card as the user kept it: the suggestions they tapped away are not sent, and the server records
   /// both what was kept and what was removed (the learning loop). A fix note is just ticked off.
   ///
@@ -480,34 +488,62 @@ class AnalysisController extends Notifier<AnalysisViewState> {
     final payload = card.section == CardSection.fix ? null : card.kept(state.removedOf(cardId));
     // A packaged drink is a name and nothing else — that is a complete panel row, not an empty card.
     if (payload != null && payload.name.isEmpty) return const CardNeedsContent();
+    // An answer can be changed during the call; the counter moves only when the product was not on it yet.
+    final wasYes = card.status == CardStatus.accepted;
     try {
       final result = await _api.accept(cardId, payload: payload);
       if (!ref.mounted) return null;
       _replace(result);
-      _bumpCount(card);
+      if (!wasYes) _bumpCount(card);
       ref.invalidate(templatePoolProvider);
       return null;
     } on ApiException catch (e) {
       if (e.isNetwork) {
         await ref.read(pendingQueueProvider).enqueueAccept(cardId, payload: payload);
         _replace(card.copyWith(status: CardStatus.accepted, queued: true));
-        _bumpCount(card);
+        if (!wasYes) _bumpCount(card);
         return null;
       }
       return e;
     }
   }
 
+  /// "Hayır": the seller does not want it.
   Future<Exception?> skip(String cardId) async {
     final card = _card(cardId);
     if (card == null) return null;
     try {
-      _replace(await _api.skip(cardId));
+      final result = await _api.skip(cardId);
+      if (!ref.mounted) return null;
+      _unbumpCount(card);
+      _replace(result);
       return null;
     } on ApiException catch (e) {
       if (e.isNetwork) {
         await ref.read(pendingQueueProvider).enqueueSkip(cardId);
+        _unbumpCount(card);
         _replace(card.copyWith(status: CardStatus.skipped, queued: true));
+        return null;
+      }
+      return e;
+    }
+  }
+
+  /// "Düşünecek": the seller will think about it; it stays on the follow-up list (D-196).
+  Future<Exception?> later(String cardId) async {
+    final card = _card(cardId);
+    if (card == null) return null;
+    try {
+      final result = await _api.later(cardId);
+      if (!ref.mounted) return null;
+      _unbumpCount(card);
+      _replace(result);
+      return null;
+    } on ApiException catch (e) {
+      if (e.isNetwork) {
+        await ref.read(pendingQueueProvider).enqueueLater(cardId);
+        _unbumpCount(card);
+        _replace(card.copyWith(status: CardStatus.later, queued: true));
         return null;
       }
       return e;

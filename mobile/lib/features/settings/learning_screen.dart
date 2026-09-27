@@ -13,8 +13,8 @@ import '../../l10n/gen/app_localizations.dart';
 /// What the team taught the suggestions (D-194).
 final learningProvider = FutureProvider.autoDispose<LearningResult>((ref) => ref.watch(apiClientProvider).learning());
 
-/// "Ekibin sildikleri": the products and card suggestions the team kept throwing away, which the suggestions no
-/// longer offer — each with a "Geri al" for the one learned by mistake.
+/// "Öğrenilenler": the products sellers kept saying "Hayır" to, which now come last (D-196), and the card suggestions
+/// the team kept deleting, which no longer come — each with a "Geri al" for the one learned by mistake.
 class LearningScreen extends ConsumerWidget {
   const LearningScreen({super.key});
 
