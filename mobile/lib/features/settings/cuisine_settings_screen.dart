@@ -9,7 +9,7 @@ import '../../core/widgets/common.dart';
 import '../../data/models/common.dart';
 import 'category_settings_screen.dart';
 
-/// Cuisine types and their minimum product counts (user data — the real platform minimums are entered here).
+/// Cuisine types and their minimum product counts (user data — the minimums the team works with are entered here).
 class CuisineSettingsScreen extends ConsumerWidget {
   const CuisineSettingsScreen({super.key});
 

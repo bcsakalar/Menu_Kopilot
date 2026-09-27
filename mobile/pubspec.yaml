@@ -1,8 +1,8 @@
 name: menu_kopilot
-description: "Menü Kopilot — şube açılış asistanı"
+description: "Menü Kopilot — restoran menü asistanı"
 publish_to: 'none'
 
-version: 1.5.0+7
+version: 1.5.1+8
 
 environment:
   sdk: ^3.13.1

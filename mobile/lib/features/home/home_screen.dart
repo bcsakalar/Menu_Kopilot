@@ -264,7 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 /// One of the two ways to run the analysis. Two boxes, one of them always ticked: the expert picks between
-/// "bir iki öneri yeter" and "menüyü açılışa hazır hale getir" before the call, not in a settings screen.
+/// "bir iki öneri yeter" and "menüyü hedefe tamamla" before the call, not in a settings screen.
 class _ModeChoice extends StatelessWidget {
   const _ModeChoice({
     required this.title,

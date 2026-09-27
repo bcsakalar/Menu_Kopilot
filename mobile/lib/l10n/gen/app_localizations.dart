@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In tr, this message translates to:
-  /// **'Şube açılışında menüyü hızla tamamla'**
+  /// **'Restoran menüsünü hızla tamamla'**
   String get appTagline;
 
   /// No description provided for @changeServer.
@@ -217,7 +217,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareAsMenuPhotosHint.
   ///
   /// In tr, this message translates to:
-  /// **'Menü fotoğrafı ya da platform panel ekran görüntüsü — ikisi de olur'**
+  /// **'Menü fotoğrafı ya da ekran görüntüsü — ikisi de olur'**
   String get shareAsMenuPhotosHint;
 
   /// No description provided for @shareAsProductList.
@@ -960,13 +960,13 @@ abstract class AppLocalizations {
   /// No description provided for @screenshots.
   ///
   /// In tr, this message translates to:
-  /// **'Panel ekran görüntüleri'**
+  /// **'Menü görüntüleri'**
   String get screenshots;
 
   /// No description provided for @screenshotsHint.
   ///
   /// In tr, this message translates to:
-  /// **'İstersen platform panelinin ekran görüntülerini veya menü fotoğrafını ekle; üst üste binen görüntüler sorun değil.'**
+  /// **'İstersen menünün fotoğrafını veya ekran görüntülerini ekle; üst üste binen görüntüler sorun değil.'**
   String get screenshotsHint;
 
   /// No description provided for @extraNotes.
@@ -1128,7 +1128,7 @@ abstract class AppLocalizations {
   /// No description provided for @cuisinesAndMinimumsHint.
   ///
   /// In tr, this message translates to:
-  /// **'Açılış hedefi ve beklenen kategoriler buradan hesaplanır'**
+  /// **'Menü hedefi ve beklenen kategoriler buradan hesaplanır'**
   String get cuisinesAndMinimumsHint;
 
   /// No description provided for @categoriesTitle.
@@ -1170,7 +1170,7 @@ abstract class AppLocalizations {
   /// No description provided for @cuisineCategoriesHelp.
   ///
   /// In tr, this message translates to:
-  /// **'İşaretli kategoriler bu mutfakta beklenir; sayı, açılış için o kategoride olması gereken en az ürün. 0 = olsa iyi olur. Değişiklik bir sonraki analizde geçerli olur.'**
+  /// **'İşaretli kategoriler bu mutfakta beklenir; sayı, menüde o kategoride olması gereken en az ürün. 0 = olsa iyi olur. Değişiklik bir sonraki analizde geçerli olur.'**
   String get cuisineCategoriesHelp;
 
   /// No description provided for @minItemsLabel.
@@ -1206,7 +1206,7 @@ abstract class AppLocalizations {
   /// No description provided for @minimumsHelp.
   ///
   /// In tr, this message translates to:
-  /// **'Gerçek platform minimumlarını buraya gir. Açılış hedefi = en az 10 veya bu sayı (hangisi büyükse). Menüdeki ⋮ ile hangi kategorilerin beklendiğini de ayarlayabilirsin.'**
+  /// **'Her mutfak türünde menüde olması gereken en az ürün sayısını buraya gir. Menü hedefi = en az 10 veya bu sayı (hangisi büyükse). Menüdeki ⋮ ile hangi kategorilerin beklendiğini de ayarlayabilirsin.'**
   String get minimumsHelp;
 
   /// No description provided for @minimumLine.
@@ -1638,7 +1638,7 @@ abstract class AppLocalizations {
   /// No description provided for @belowHardMinimum.
   ///
   /// In tr, this message translates to:
-  /// **'Açılış için en az {min} ürün gerekli'**
+  /// **'Menüde en az {min} ürün olmalı'**
   String belowHardMinimum(int min);
 
   /// No description provided for @modeTitle.

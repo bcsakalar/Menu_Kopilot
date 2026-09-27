@@ -1,6 +1,6 @@
 # menu_kopilot
 
-Menü Kopilot - şube açılış asistanı
+Menü Kopilot - restoran menü asistanı
 
 ## Getting Started
 

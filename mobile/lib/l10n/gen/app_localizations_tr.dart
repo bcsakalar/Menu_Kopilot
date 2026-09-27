@@ -13,7 +13,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Menü Kopilot';
 
   @override
-  String get appTagline => 'Şube açılışında menüyü hızla tamamla';
+  String get appTagline => 'Restoran menüsünü hızla tamamla';
 
   @override
   String get changeServer => 'Değiştir';
@@ -75,7 +75,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get shareAsMenuPhotosHint =>
-      'Menü fotoğrafı ya da platform panel ekran görüntüsü — ikisi de olur';
+      'Menü fotoğrafı ya da ekran görüntüsü — ikisi de olur';
 
   @override
   String get shareAsProductList => 'Metni menü listesine ekle';
@@ -495,11 +495,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invalidNumber => '1 ile 500 arasında bir sayı gir';
 
   @override
-  String get screenshots => 'Panel ekran görüntüleri';
+  String get screenshots => 'Menü görüntüleri';
 
   @override
   String get screenshotsHint =>
-      'İstersen platform panelinin ekran görüntülerini veya menü fotoğrafını ekle; üst üste binen görüntüler sorun değil.';
+      'İstersen menünün fotoğrafını veya ekran görüntülerini ekle; üst üste binen görüntüler sorun değil.';
 
   @override
   String get extraNotes => 'Not';
@@ -595,7 +595,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cuisinesAndMinimumsHint =>
-      'Açılış hedefi ve beklenen kategoriler buradan hesaplanır';
+      'Menü hedefi ve beklenen kategoriler buradan hesaplanır';
 
   @override
   String get categoriesTitle => 'Kategoriler ve anahtar kelimeler';
@@ -621,7 +621,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cuisineCategoriesHelp =>
-      'İşaretli kategoriler bu mutfakta beklenir; sayı, açılış için o kategoride olması gereken en az ürün. 0 = olsa iyi olur. Değişiklik bir sonraki analizde geçerli olur.';
+      'İşaretli kategoriler bu mutfakta beklenir; sayı, menüde o kategoride olması gereken en az ürün. 0 = olsa iyi olur. Değişiklik bir sonraki analizde geçerli olur.';
 
   @override
   String minItemsLabel(int count) {
@@ -642,7 +642,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get minimumsHelp =>
-      'Gerçek platform minimumlarını buraya gir. Açılış hedefi = en az 10 veya bu sayı (hangisi büyükse). Menüdeki ⋮ ile hangi kategorilerin beklendiğini de ayarlayabilirsin.';
+      'Her mutfak türünde menüde olması gereken en az ürün sayısını buraya gir. Menü hedefi = en az 10 veya bu sayı (hangisi büyükse). Menüdeki ⋮ ile hangi kategorilerin beklendiğini de ayarlayabilirsin.';
 
   @override
   String minimumLine(int min, int target) {
@@ -890,7 +890,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String belowHardMinimum(int min) {
-    return 'Açılış için en az $min ürün gerekli';
+    return 'Menüde en az $min ürün olmalı';
   }
 
   @override
