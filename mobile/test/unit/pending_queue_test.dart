@@ -6,17 +6,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:menu_kopilot/core/network/api_client.dart';
 import 'package:menu_kopilot/core/storage/app_database.dart';
 import 'package:menu_kopilot/core/storage/token_store.dart';
+import 'package:menu_kopilot/data/models/analysis.dart';
+import 'package:menu_kopilot/data/models/template_payload.dart';
 import 'package:menu_kopilot/features/offline/pending_queue.dart';
 
 class FakeQueueApi extends ApiClient {
   FakeQueueApi() : super(baseUrl: 'http://fake', tokens: MemoryTokenStore());
 
   final List<AnalyzeRequestData> analyzed = [];
+  final List<String> answers = [];
 
   @override
   Future<String> analyzeAsync(AnalyzeRequestData request) async {
     analyzed.add(request);
     return 'run-${analyzed.length}';
+  }
+
+  AnalysisCard _card(String id, CardStatus status) =>
+      AnalysisCard.fromJson({'id': id, 'runId': 'r', 'section': 'new_product', 'name': id}).copyWith(status: status);
+
+  @override
+  Future<AnalysisCard> accept(String itemId, {TemplatePayload? payload}) async {
+    answers.add('evet:$itemId:${payload?.name ?? '-'}');
+    return _card(itemId, CardStatus.accepted);
+  }
+
+  @override
+  Future<AnalysisCard> skip(String itemId) async {
+    answers.add('hayır:$itemId');
+    return _card(itemId, CardStatus.skipped);
+  }
+
+  @override
+  Future<AnalysisCard> later(String itemId) async {
+    answers.add('düşünecek:$itemId');
+    return _card(itemId, CardStatus.later);
   }
 }
 
@@ -62,6 +86,14 @@ void main() {
     expect(await queue.flush(api), 1);
     expect(api.analyzed.single.menuText, 'adana, lahmacun');
     expect(api.analyzed.single.cuisineId, 'c1');
+  });
+
+  test('an answer changed offline reaches the server as the phone shows it: only the last one is sent (D-196)', () async {
+    await queue.enqueueLater('soup');
+    await queue.enqueueSkip('ayran');
+    await queue.enqueueAccept('soup', payload: const TemplatePayload(name: 'Mercimek Çorbası'));
+    expect(await queue.flush(api), 2);
+    expect(api.answers, ['hayır:ayran', 'evet:soup:Mercimek Çorbası']);
   });
 
   test('never reports a kind it cannot send as sent', () async {

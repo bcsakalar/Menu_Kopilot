@@ -58,32 +58,38 @@ class PendingQueue {
     return id;
   }
 
-  Future<void> enqueueAccept(String itemId, {TemplatePayload? payload}) => _db.into(_db.pendingRequests).insert(
-        PendingRequestsCompanion.insert(
-          id: _uuid.v4(),
-          kind: 'accept',
-          payloadJson: jsonEncode({'itemId': itemId, 'payload': payload?.toJson()}),
-          createdAt: DateTime.now(),
-        ),
-      );
+  /// "Evet" (and a note ticked off).
+  Future<void> enqueueAccept(String itemId, {TemplatePayload? payload}) =>
+      _enqueueAnswer('accept', itemId, {'payload': payload?.toJson()});
 
-  Future<void> enqueueSkip(String itemId) => _db.into(_db.pendingRequests).insert(
-        PendingRequestsCompanion.insert(
-          id: _uuid.v4(),
-          kind: 'skip',
-          payloadJson: jsonEncode({'itemId': itemId}),
-          createdAt: DateTime.now(),
-        ),
-      );
+  /// "Hayır".
+  Future<void> enqueueSkip(String itemId) => _enqueueAnswer('skip', itemId, const {});
 
-  Future<void> enqueueLater(String itemId) => _db.into(_db.pendingRequests).insert(
-        PendingRequestsCompanion.insert(
-          id: _uuid.v4(),
-          kind: 'later',
-          payloadJson: jsonEncode({'itemId': itemId}),
-          createdAt: DateTime.now(),
-        ),
-      );
+  /// "Düşünecek".
+  Future<void> enqueueLater(String itemId) => _enqueueAnswer('later', itemId, const {});
+
+  static const _answerKinds = ['accept', 'skip', 'later'];
+
+  /// The seller's answers (D-196): only the last one for a card waits in the queue. An answer changed while offline
+  /// ("Düşünecek", then "Evet" a few seconds later) must reach the server as the phone shows it — two requests made
+  /// within the same second have no order the queue could rely on.
+  Future<void> _enqueueAnswer(String kind, String itemId, Map<String, Object?> extra) => _db.transaction(() async {
+        final waiting = await (_db.select(_db.pendingRequests)
+              ..where((t) => t.status.equals('queued') & t.kind.isIn(_answerKinds)))
+            .get();
+        for (final row in waiting) {
+          if (asJson(jsonDecode(row.payloadJson)).str('itemId') != itemId) continue;
+          await (_db.delete(_db.pendingRequests)..where((t) => t.id.equals(row.id))).go();
+        }
+        await _db.into(_db.pendingRequests).insert(
+              PendingRequestsCompanion.insert(
+                id: _uuid.v4(),
+                kind: kind,
+                payloadJson: jsonEncode({'itemId': itemId, ...extra}),
+                createdAt: DateTime.now(),
+              ),
+            );
+      });
 
   /// Sends queued requests in order. Stops at the first network error (still offline). Returns how many were sent.
   Future<int> flush(ApiClient api) async {
