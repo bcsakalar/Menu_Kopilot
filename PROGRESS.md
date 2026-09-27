@@ -1,10 +1,10 @@
 # PROGRESS
 
-Last update: 2026-09-25 (evening) — live on production (`cc80e0c`), app 1.4.0: product cards that open and close
-(D-192), a dated, filterable analysis history on the phone and the server (D-193), and the learning loop's second
-pass — products turned down per cuisine, favoured suggestions first, "Ekibin sildikleri" with "Geri al" (D-194).
-Earlier the same day: the AI menu assistant measured, rebuilt and re-measured (D-177…D-191). Backend 704 tests,
-mobile 75, both clean.
+Last update: 2026-09-28 — live on production (`8749d16`), app 1.5.0: call mode (D-196) — cards in call order with
+the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
+learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
+Before: history, cards that open and close, the learning loop's second pass (D-192…D-194, 1.4.0). Backend 716
+tests, mobile 85, both clean.
 
 ## How to resume after a context reset
 1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
@@ -42,6 +42,16 @@ mobile 75, both clean.
       push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
+**2026-09-28 — production on `8749d16`, app 1.5.0 (D-195, D-196).** Deployed with `scripts/deploy.ps1` (migration
+0006 `suggestion_items.answer/answered_at` ran, recommender user prompt v4 activated; pre-deploy dump
+`/opt/yedek/menu-kopilot-pre-0006.dump`); the later commits touch only the phone and the docs, and the server clone
+is pulled to them. Signed APK `MenuKopilot-1.5.0-arm64.apk` (built from `f2fe630`: an answer changed offline is
+queued once) on the Desktop and sent to the user, who uses it in the office from 2026-09-28. New:
+`POST /suggestion-items/:id/later`, `pitch`/`priority` on every card, `later` in the history; phone: the answer
+buttons, the call strip ("Evet 2 · Düşünecek 1 · Hayır 3"), "Ofiste girilecekler" (results → app bar or the strip),
+Ayarlar → Öğrenilenler (was "Ekibin sildikleri"); local database v3. Next: watch the first real calls — how often
+"Düşünecek" turns into "Evet", and whether the order of the call matches what the experts say first.
+
 **2026-09-25 (evening) — production on `cc80e0c`, app 1.4.0 (D-192…D-194).** Deployed with `scripts/deploy.ps1`
 (migration 0005 + seed ran; pre-deploy dump `/opt/yedek/menu-kopilot-pre-0005.dump`), signed APK
 `MenuKopilot-1.4.0-arm64.apk` on the Desktop and sent to the user. New: `GET /analyze/history`, `GET /learning`,
