@@ -45,6 +45,13 @@ describe('migrations', () => {
                                             ('suggestion_feedback', 'ignored_at'), ('suggestion_feedback', 'ignored_by'))`,
     );
     expect(columns).toHaveLength(4);
+    // 0006: the seller's answer on the call.
+    const answers = await executeRows(
+      handle.db,
+      sql`select column_name from information_schema.columns where table_schema = 'public' and table_name = 'suggestion_items'
+          and column_name in ('answer', 'answered_at')`,
+    );
+    expect(answers).toHaveLength(2);
     expect(await extensions(handle)).toEqual(expect.arrayContaining(['pg_trgm', 'vector']));
   });
 
@@ -61,8 +68,9 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003, 0004 and 0005 sit on top of 0002, so all four come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 4)).map((r) => r.tag)).toEqual([
+    // 0003 to 0006 sit on top of 0002, so all five come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 5)).map((r) => r.tag)).toEqual([
+      '0006_seller_answers',
       '0005_learning_history',
       '0004_product_types',
       '0003_agents_categories',
@@ -83,7 +91,8 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 4)).map((r) => r.tag)).toEqual([
+    expect((await rollbackMigrations(handle.db, 5)).map((r) => r.tag)).toEqual([
+      '0006_seller_answers',
       '0005_learning_history',
       '0004_product_types',
       '0003_agents_categories',
@@ -99,7 +108,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
-    // 0005 only adds columns.
+    // 0006 and 0005 only add columns.
+    const answers = await rollbackMigrations(handle.db, 1);
+    expect(answers.map((r) => r.tag)).toEqual(['0006_seller_answers']);
+    expect(await publicTables(handle)).toHaveLength(19);
+
     const history = await rollbackMigrations(handle.db, 1);
     expect(history.map((r) => r.tag)).toEqual(['0005_learning_history']);
     expect(await publicTables(handle)).toHaveLength(19);

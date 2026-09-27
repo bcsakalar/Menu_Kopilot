@@ -1,3 +1,4 @@
+import { and, eq, isNull } from 'drizzle-orm';
 import type { Executor } from '../../db/client.js';
 import { suggestionFeedback } from '../../db/schema/index.js';
 import type { FeedbackKind } from '../../agents/knowledge.js';
@@ -49,6 +50,17 @@ export function diffFeedback(
     });
   }
   return rows;
+}
+
+/**
+ * An answer changed during the call ("Hayır", then "Evet"): what the card taught before stops counting, so the
+ * learning loop hears the last answer only (D-196). The rows stay, marked.
+ */
+export async function forgetCardFeedback(db: Executor, cardId: string, userId: string): Promise<void> {
+  await db
+    .update(suggestionFeedback)
+    .set({ ignoredAt: new Date(), ignoredBy: userId })
+    .where(and(eq(suggestionFeedback.cardId, cardId), isNull(suggestionFeedback.ignoredAt)));
 }
 
 export async function recordFeedback(

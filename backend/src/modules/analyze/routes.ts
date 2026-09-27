@@ -193,7 +193,21 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
 
   app.post(
     '/suggestion-items/:id/skip',
-    { schema: { tags: ['analyze'], security, params: itemIdParams, response: { 200: cardDtoSchema } } },
+    { schema: { tags: ['analyze'], summary: 'The seller said no ("Hayır")', security, params: itemIdParams, response: { 200: cardDtoSchema } } },
     async (request) => service.skip(getAuthUser(request).id, request.params.id),
+  );
+
+  app.post(
+    '/suggestion-items/:id/later',
+    {
+      schema: {
+        tags: ['analyze'],
+        summary: 'The seller will think about it ("Düşünecek"); nothing is learned or written to the pool',
+        security,
+        params: itemIdParams,
+        response: { 200: cardDtoSchema },
+      },
+    },
+    async (request) => service.later(getAuthUser(request).id, request.params.id),
   );
 };

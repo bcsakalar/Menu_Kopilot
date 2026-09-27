@@ -43,6 +43,13 @@
       "when": 1790380000000,
       "tag": "0005_learning_history",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790640000000,
+      "tag": "0006_seller_answers",
+      "breakpoints": true
     }
   ]
 }

@@ -113,6 +113,12 @@ export class FeedbackIndex {
     return rejectedTally(this.productTallies.get(FeedbackIndex.productKey(cuisineId, name)));
   }
 
+  /** What sellers of one cuisine answered about a product ("Evet" / "Hayır"), for the call's sentence (D-196). */
+  productStats(cuisineId: string | null | undefined, name: string): Tally | undefined {
+    if (!cuisineId) return undefined;
+    return this.productTallies.get(FeedbackIndex.productKey(cuisineId, name));
+  }
+
   /** The products turned down for one cuisine, most often first — named to the model so it does not propose them. */
   rejectedProducts(cuisineId: string | null | undefined): string[] {
     if (!cuisineId) return [];

@@ -7,12 +7,14 @@ import type { CuisineGraph, CuisineNode } from '../modules/retrieval/cuisine-gra
 import type { AnalyzeEvent, CardDto, CountsDto, MenuItemDto } from '../modules/analyze/schemas.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { namesVariant, variantConflict } from '../lib/same-product.js';
+import type { CategoryGap } from '../domain/category.js';
 import { reconcileCategory } from '../domain/product-type.js';
 import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, type MergedItem } from './dedupe.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
 import { runOptionModifier, type OptionModifierResult } from './option-modifier.js';
+import { menuProductPitch, newProductPitch } from './pitch.js';
 import { modeBudget, planRun, quotaRows, type AnalysisMode } from './plan.js';
 import { runProductRecommender, type ProductRecommenderResult } from './product-recommender.js';
 import { AGENT_LABELS, type AgentDeps, type AgentName, type AgentRunContext, type ExistingItem } from './types.js';
@@ -437,8 +439,13 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     input.emit({ type: 'item', card: saved });
   };
 
-  for (const item of validated.newProducts) await push(newProductCard(deps, item));
-  for (const card of validated.options) await push(optionCard(deps, card, existing));
+  // The order of the call (D-196): each section is stored in the order the expert should bring it up — what the
+  // menu lacks first, what sellers of this kitchen keep saying yes to next — so the phone just lists them.
+  const callOrder = <T extends { priority: number }>(items: T[]): T[] =>
+    items.map((item, index) => ({ item, index })).sort((a, b) => b.item.priority - a.item.priority || a.index - b.index).map((x) => x.item);
+  const pitchContext = { gaps: analysis.categories, cuisineId: classification.cuisine.id, cuisineName: classification.cuisine.name };
+  for (const card of callOrder(validated.newProducts.map((item) => newProductCard(deps, item, pitchContext)))) await push(card);
+  for (const card of callOrder(validated.options.map((card) => optionCard(deps, card, existing)))) await push(card);
   for (const card of fixCards(deps, analysis.needFixes)) await push(card);
 
   // ---- finalize -----------------------------------------------------------------------------------------------
@@ -479,7 +486,20 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   };
 }
 
-function newProductCard(deps: Pick<AgentDeps, 'categories'>, item: ValidatedNewProduct): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
+function newProductCard(
+  deps: Pick<AgentDeps, 'categories' | 'feedback' | 'productTypes'>,
+  item: ValidatedNewProduct,
+  context: { gaps: readonly CategoryGap[]; cuisineId: string; cuisineName: string },
+): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
+  const pitch = newProductPitch({
+    categoryKey: item.categoryKey,
+    categoryLabel: deps.categories.label(item.categoryKey),
+    gaps: context.gaps,
+    cuisineName: context.cuisineName,
+    importance: item.source === 'db' ? item.importance : 0,
+    plain: deps.productTypes.get(item.productType)?.plain === true,
+    answers: deps.feedback.productStats(context.cuisineId, item.name),
+  });
   return {
     section: 'new_product',
     name: item.name,
@@ -506,6 +526,9 @@ function newProductCard(deps: Pick<AgentDeps, 'categories'>, item: ValidatedNewP
     payload: item.payload,
     productType: item.productType,
     confidence: item.confidence,
+    // Without a solid fact to say, the recommender's own reason is still better than silence.
+    pitch: pitch.text || item.reason,
+    priority: pitch.priority,
     status: 'pending',
   };
 }
@@ -517,6 +540,13 @@ function optionCard(
 ): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
   const target = existing.find((i) => i.normalized === card.targetNormalized);
   const categoryKey = target?.categoryKey ?? null;
+  const pitch = menuProductPitch({
+    optionGroups: card.optionGroups,
+    removableIngredients: card.removableIngredients,
+    extraIngredients: card.extraIngredients,
+    description: card.description,
+    hadNoOptions: target?.hasOptions === 'absent',
+  });
   return {
     section: 'option',
     // Titled with the spelling on the panel — what the user looks for during the call ("Kadayıf") — while `name`
@@ -545,6 +575,8 @@ function optionCard(
     payload: null,
     productType: card.productType,
     confidence: card.confidence,
+    pitch: pitch.text,
+    priority: pitch.priority,
     status: 'pending',
   };
 }
@@ -581,6 +613,8 @@ function fixCards(deps: Pick<AgentDeps, 'categories'>, items: readonly ExistingI
       payload: null,
       productType: item.productType,
       confidence: null,
+      pitch: '',
+      priority: 0,
       status: 'pending' as const,
     };
 

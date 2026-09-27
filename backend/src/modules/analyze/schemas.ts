@@ -71,7 +71,14 @@ export const cardDtoSchema = z.object({
   productType: z.string().nullable().default(null),
   /** 0-100: how sure the pipeline is about the card. Null on fix cards and on older cards. */
   confidence: z.number().int().nullable().default(null),
-  status: z.enum(['pending', 'accepted', 'skipped']),
+  /** One sentence to say to the seller on the call — why this card (D-196). '' on older cards. */
+  pitch: z.string().default(''),
+  /** The order of the call: higher first (D-196). The cards are also stored in this order. */
+  priority: z.number().int().default(0),
+  /**
+   * The seller's answer: accepted = "Evet", skipped = "Hayır", later = "Düşünecek" (D-196); pending until asked.
+   */
+  status: z.enum(['pending', 'accepted', 'skipped', 'later']),
   sortOrder: z.number().int(),
 });
 export type CardDto = z.infer<typeof cardDtoSchema>;
@@ -205,6 +212,8 @@ export const historyItemSchema = z.object({
   menuCards: z.number().int(),
   accepted: z.number().int(),
   skipped: z.number().int(),
+  /** Cards the seller will think about ("Düşünecek"). */
+  later: z.number().int(),
   current: z.number().int().nullable(),
   target: z.number().int().nullable(),
 });

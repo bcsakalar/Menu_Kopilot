@@ -72,6 +72,9 @@ export const suggestionItems = pgTable(
     payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
     /** null = pending, true = accepted (template saved), false = skipped. */
     accepted: boolean('accepted'),
+    /** The seller's answer on the call (D-196): yes | no | later ("Düşünecek", `accepted` stays null). */
+    answer: text('answer'),
+    answeredAt: timestamp('answered_at', { withTimezone: true }),
     /** Product type from the knowledge base (`product_types.key`), for the learning loop. */
     productType: text('product_type'),
     /** 0–100: how sure the pipeline is about this card (pool template high, generic fill low). */

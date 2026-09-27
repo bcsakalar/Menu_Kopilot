@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { cuisines, menuItems, suggestionFeedback, users } from '../../src/db/schema/index.js';
 import type { AnalyzeResult, CardDto, HistoryResult } from '../../src/modules/analyze/schemas.js';
 import type { LearningResult } from '../../src/modules/learning/schemas.js';
@@ -180,5 +180,47 @@ describe('analysis history (D-193)', () => {
   it('refuses a malformed filter', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/analyze/history?mode=slow', headers: bearer(token) });
     expect(res.statusCode).toBe(400);
+  });
+});
+
+describe('the call (D-196)', () => {
+  it('lists the products to add in call order, each with a sentence for the seller', async () => {
+    const run = await analyze({ cuisineId: cuisine('pide-lahmacun'), mode: 'quick', menuText: PIDE_MENU });
+    const cards = newProducts(run);
+    // Stored in the order of the call: what the menu lacks first.
+    const priorities = cards.map((c) => c.priority);
+    expect([...priorities].sort((a, b) => b - a)).toEqual(priorities);
+    expect(cards[0]?.pitch).toMatch(/^Menünüzde hiç .+ yok/u);
+    // The products already on the menu get one too: what their card adds.
+    const onMenu = run.cards.filter((c) => c.section === 'option');
+    expect(onMenu.length).toBeGreaterThan(0);
+    expect(onMenu.every((c) => c.pitch.length > 0)).toBe(true);
+    const snapshot = await get<AnalyzeResult>(`/api/v1/analyze/${run.runId}`);
+    expect(snapshot.cards.map((c) => c.pitch)).toEqual(run.cards.map((c) => c.pitch));
+  });
+
+  it('"Düşünecek" is an answer of its own, and the last answer is the one the learning loop hears', async () => {
+    const run = await analyze({ cuisineId: cuisine('pide-lahmacun'), mode: 'quick', menuText: PIDE_MENU });
+    const card = newProducts(run).at(-1)!;
+
+    const later = await post<CardDto>(`/api/v1/suggestion-items/${card.id}/later`);
+    expect(later.status).toBe('later');
+    expect(later.pitch).toBe(card.pitch);
+    const snapshot = await get<AnalyzeResult>(`/api/v1/analyze/${run.runId}`);
+    expect(snapshot.cards.find((c) => c.id === card.id)?.status).toBe('later');
+    const history = await get<HistoryResult>('/api/v1/analyze/history?limit=1');
+    expect(history.items[0]).toEqual(expect.objectContaining({ runId: run.runId, later: 1, accepted: 0, skipped: 0 }));
+
+    // "Hayır", then the seller changes their mind: only the "Evet" counts.
+    expect((await post<CardDto>(`/api/v1/suggestion-items/${card.id}/skip`)).status).toBe('skipped');
+    expect((await post<CardDto>(`/api/v1/suggestion-items/${card.id}/accept`)).status).toBe('accepted');
+    const rows = await ctx.db.db
+      .select({ action: suggestionFeedback.action, ignoredAt: suggestionFeedback.ignoredAt })
+      .from(suggestionFeedback)
+      .where(and(eq(suggestionFeedback.cardId, card.id), eq(suggestionFeedback.kind, 'product')));
+    expect(rows.filter((r) => r.ignoredAt === null).map((r) => r.action)).toEqual(['accepted']);
+    expect(rows.filter((r) => r.ignoredAt !== null).map((r) => r.action)).toEqual(['removed']);
+    const after = await get<HistoryResult>('/api/v1/analyze/history?limit=1');
+    expect(after.items[0]).toEqual(expect.objectContaining({ later: 0, accepted: 1, skipped: 0 }));
   });
 });

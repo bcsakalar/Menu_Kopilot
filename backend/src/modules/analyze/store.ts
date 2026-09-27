@@ -18,6 +18,15 @@ import type {
   TraceStep,
 } from './schemas.js';
 
+export type SellerAnswer = 'yes' | 'no' | 'later';
+
+/** The card's state as the phone shows it: the seller's answer, or "pending" until one is given. */
+function statusOf(answer: string | null, accepted: boolean | null): CardDto['status'] {
+  if (answer === 'later') return 'later';
+  if (accepted === null) return 'pending';
+  return accepted ? 'accepted' : 'skipped';
+}
+
 /** `%` and `_` typed into the search box are letters, not wildcards. */
 const likePattern = (text: string): string => `%${text.replace(/[\\%_]/gu, (c) => `\\${c}`)}%`;
 const asInt = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : null);
@@ -153,9 +162,12 @@ export class AnalyzeStore {
         // Cards stored before the knowledge base have neither field in their payload.
         productType: row.productType ?? null,
         confidence: row.confidence ?? null,
+        // …nor, before the call screen, a sentence for the seller and a place in the call.
+        pitch: (row.payload as { pitch?: string }).pitch ?? '',
+        priority: (row.payload as { priority?: number }).priority ?? 0,
         id: row.id,
         runId,
-        status: row.accepted === null ? 'pending' : row.accepted ? 'accepted' : 'skipped',
+        status: statusOf(row.answer, row.accepted),
         ...(row.editedPayload ? { payload: row.editedPayload as unknown as CardDto['payload'] } : {}),
       })),
       stats: stats ?? null,
@@ -232,6 +244,7 @@ export class AnalyzeStore {
               menuCards: sql<number>`count(*) filter (where ${suggestionItems.section} = 'option')::int`,
               accepted: sql<number>`count(*) filter (where ${suggestionItems.accepted} = true and ${suggestionItems.section} <> 'fix')::int`,
               skipped: sql<number>`count(*) filter (where ${suggestionItems.accepted} = false and ${suggestionItems.section} <> 'fix')::int`,
+              later: sql<number>`count(*) filter (where ${suggestionItems.answer} = 'later' and ${suggestionItems.section} <> 'fix')::int`,
             })
             .from(suggestionItems)
             .where(inArray(suggestionItems.runId, ids))
@@ -256,6 +269,7 @@ export class AnalyzeStore {
         menuCards: tally?.menuCards ?? 0,
         accepted: tally?.accepted ?? 0,
         skipped: tally?.skipped ?? 0,
+        later: tally?.later ?? 0,
         current: asInt(counts.current),
         target: asInt(counts.target),
       };
@@ -311,8 +325,11 @@ export class AnalyzeStore {
     };
   }
 
-  /** Marks a card accepted/skipped and returns it. */
-  async setAccepted(userId: string, cardId: string, accepted: boolean, payload?: unknown): Promise<CardDto | null> {
+  /**
+   * Records the seller's answer (D-196) and returns the card. An answer can be changed during the call: the last one stands. "Evet" may
+   * carry the card as the user kept it.
+   */
+  async setAnswer(userId: string, cardId: string, answer: SellerAnswer, payload?: unknown): Promise<CardDto | null> {
     const [row] = await this.db
       .select({ item: suggestionItems, runUser: suggestionRuns.userId })
       .from(suggestionItems)
@@ -322,18 +339,23 @@ export class AnalyzeStore {
     if (!row || row.runUser !== userId) return null;
 
     const edited = payload === undefined ? undefined : templatePayloadSchema.parse(payload);
+    const accepted = answer === 'yes' ? true : answer === 'no' ? false : null;
     await this.db
       .update(suggestionItems)
-      .set({ accepted, ...(edited ? { editedPayload: edited } : {}) })
+      .set({ accepted, answer, answeredAt: new Date(), ...(edited ? { editedPayload: edited } : {}) })
       .where(eq(suggestionItems.id, cardId));
 
     const card = row.item.payload as unknown as CardDto;
     return {
       ...card,
+      pitch: card.pitch ?? '',
+      priority: card.priority ?? 0,
+      productType: row.item.productType ?? card.productType ?? null,
+      confidence: row.item.confidence ?? card.confidence ?? null,
       id: row.item.id,
       runId: row.item.runId,
-      status: accepted ? 'accepted' : 'skipped',
-      ...(edited ? { payload: edited } : {}),
+      status: statusOf(answer, accepted),
+      ...(edited ? { payload: edited } : row.item.editedPayload ? { payload: row.item.editedPayload as unknown as CardDto['payload'] } : {}),
     };
   }
 

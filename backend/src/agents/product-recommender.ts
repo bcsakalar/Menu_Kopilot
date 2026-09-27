@@ -106,7 +106,7 @@ export interface ProductRecommenderResult {
  * lets a menu that is twenty products short actually get twenty suggestions.
  */
 async function fromTemplates(
-  deps: Pick<AgentDeps, 'db' | 'categories'>,
+  deps: Pick<AgentDeps, 'db' | 'categories' | 'feedback'>,
   input: ProductRecommenderInput,
   taken: (normalized: string, templateId: string | null) => boolean,
 ): Promise<RecommendedItem[]> {
@@ -139,6 +139,12 @@ async function fromTemplates(
     // Rows seeded before the taxonomy existed have no category: classify them on the fly.
     const categoryKey = row.categoryKey ?? deps.categories.classify(row.name);
     buckets.get(categoryKey)?.push(row);
+  }
+  // A product the sellers of this kitchen kept turning down goes to the back of its category — never away: when
+  // nothing else fits, it is still better than an empty slot (D-196).
+  for (const [key, bucket] of buckets) {
+    const turnedDown = (row: (typeof rows)[number]) => deps.feedback.isProductRejected(input.cuisine.id, row.normalized);
+    buckets.set(key, [...bucket.filter((row) => !turnedDown(row)), ...bucket.filter(turnedDown)]);
   }
 
   const quota = new Map(openGaps.map((g) => [g.key, g.want]));
@@ -220,13 +226,12 @@ export async function runProductRecommender(
         if (item.canonicalName) takenNames.add(normalizeTr(item.canonicalName));
         if (item.matchedTemplateId) takenTemplates.add(item.matchedTemplateId);
       }
-      // A product this kitchen's team kept turning down ("Önerme") is as good as taken (D-194).
+      // What the sellers of this kitchen kept turning down is named to the model and goes to the back (D-196).
       const rejectedProducts = deps.feedback.rejectedProducts(input.cuisine.id);
       const isTaken = (normalized: string, templateId: string | null): boolean =>
         takenNames.has(normalized) ||
         (templateId !== null && takenTemplates.has(templateId)) ||
-        [...takenNames].some((name) => sameProductName(name, normalized)) ||
-        deps.feedback.isProductRejected(input.cuisine.id, normalized);
+        [...takenNames].some((name) => sameProductName(name, normalized));
       const take = (normalized: string, templateId: string | null): void => {
         takenNames.add(normalized);
         if (templateId) takenTemplates.add(templateId);
@@ -404,6 +409,8 @@ export async function runProductRecommender(
         .sort(
           (a, b) =>
             (priority.get(a.categoryKey) ?? Number.MAX_SAFE_INTEGER) - (priority.get(b.categoryKey) ?? Number.MAX_SAFE_INTEGER) ||
+            Number(deps.feedback.isProductRejected(input.cuisine.id, a.normalized)) -
+              Number(deps.feedback.isProductRejected(input.cuisine.id, b.normalized)) ||
             b.importance - a.importance,
         );
 

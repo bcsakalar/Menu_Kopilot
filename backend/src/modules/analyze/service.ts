@@ -15,7 +15,7 @@ import { normalizeTr } from '../../lib/normalize-tr.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
-import { diffFeedback, recordFeedback } from './feedback.js';
+import { diffFeedback, forgetCardFeedback, recordFeedback } from './feedback.js';
 import type { AnalyzeEvent, AnalyzeFields, AnalyzeResult, CardDto, ClassificationDto, HistoryQuery, HistoryResult } from './schemas.js';
 import type { AnalyzeStore } from './store.js';
 
@@ -205,7 +205,7 @@ export class AnalyzeService {
    */
   async accept(userId: string, cardId: string, body: { payload?: TemplatePayload | undefined }): Promise<CardDto> {
     const { db, store } = this.deps;
-    const existing = await store.setAccepted(userId, cardId, true, body.payload);
+    const existing = await store.setAnswer(userId, cardId, 'yes', body.payload);
     if (!existing) throw notFound('Kart');
 
     // A fix card is a note for the call ("adı sor"), not something to write into the pool.
@@ -223,6 +223,7 @@ export class AnalyzeService {
             ? await this.mergeOptions(tx, existing, body.payload, cuisineId, userId)
             : await this.saveProduct(tx, existing, body.payload, cuisineId, userId);
         const kept = body.payload ?? keptAsSuggested(existing);
+        await forgetCardFeedback(tx, cardId, userId);
         await recordFeedback(tx, {
           userId,
           card: existing,
@@ -248,14 +249,26 @@ export class AnalyzeService {
   }
 
   async skip(userId: string, cardId: string): Promise<CardDto> {
-    const card = await this.deps.store.setAccepted(userId, cardId, false);
+    const card = await this.deps.store.setAnswer(userId, cardId, 'no');
     if (!card) throw notFound('Kart');
-    // A new product the user turned down is a signal about the product; skipping a menu product's card is not a
-    // verdict on its suggestions (it usually means "later"), so it teaches nothing.
+    await forgetCardFeedback(this.deps.db, cardId, userId);
+    // A new product the seller turned down is a signal about the product; a "Hayır" on a menu product's card means
+    // the seller does not want to change that product now — not a verdict on each suggestion — so it teaches nothing.
     if (card.section === 'new_product') {
       const cuisineId = await this.deps.store.runCuisineId(card.runId);
       await recordFeedback(this.deps.db, { userId, card, cuisineId, rows: [{ kind: 'product', value: card.name, action: 'removed' }] });
     }
+    return card;
+  }
+
+  /**
+   * "Düşünecek" (D-196): the seller will think about it. Nothing is learned from it and nothing goes into the pool;
+   * an earlier answer on the same card stops counting.
+   */
+  async later(userId: string, cardId: string): Promise<CardDto> {
+    const card = await this.deps.store.setAnswer(userId, cardId, 'later');
+    if (!card) throw notFound('Kart');
+    await forgetCardFeedback(this.deps.db, cardId, userId);
     return card;
   }
 

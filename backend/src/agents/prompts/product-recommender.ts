@@ -53,7 +53,7 @@ BU KOŞUDA İSTENEN ÜRÜNLER (anahtar | ad | menüdeki durum | kaç ürün iste
 Bu koşuda zaten önerilmiş olanlar (tekrarlama):
 {{already}}
 
-Ekibin bu mutfakta istemediği ürünler (bunları ve varyantlarını ÖNERME):
+Satıcıların bu mutfakta çoğunlukla reddettiği ürünler (başka uygun ürün varsa bunları önerme):
 {{rejected}}
 
 Uzmanın notu: {{notes}}
