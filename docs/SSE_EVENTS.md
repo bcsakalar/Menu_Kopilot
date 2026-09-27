@@ -6,7 +6,7 @@ One endpoint does what "Öneri" and "Tamamla" used to do separately:
 
 | field | | |
 |---|---|---|
-| `images` | ≤ 5 | platform panel screenshots and/or menu photos; overlapping screenshots are deduplicated |
+| `images` | ≤ 5 | menu photos and/or panel screenshots; overlapping screenshots are deduplicated |
 | `menuText` | optional | products typed or dictated during the call, `,` / `;` / newline separated — parsed without a model |
 | `cuisineId` | optional | the user's pick; left out → the Classifier decides |
 | `notes` | optional | free text for the call |

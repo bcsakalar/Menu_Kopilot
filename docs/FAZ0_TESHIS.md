@@ -32,7 +32,7 @@ Dart değişiklikleri derlenmeden yazıldı; FAZ 3'te hangi komutların çalış
 
 ### "Tamamla" ekranı — ayrı teşhis ve karar
 
-**Şu an ne yapıyor:** şube seç → platform panel ekran görüntüsü ve/veya menü metni gir → analiz. Çıktı: mevcut/hedef
+**Şu an ne yapıyor:** şube seç → panel ekran görüntüsü ve/veya menü metni gir → analiz. Çıktı: mevcut/hedef
 sayaç, "Çağrıda sor" checklist'i (≤15 soru, tikler şube başına kalıcı), eksik alanı olan ürünler, önerilen ürünler.
 
 **Ne eksik:** (a) şube kaydı zorunluluğu, (b) Öneri ekranıyla veri paylaşmıyor — aynı menüyü iki kez girmek gerekiyor,

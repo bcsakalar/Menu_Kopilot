@@ -277,7 +277,7 @@ değiştirip yeniden analiz; `category_settings_test.dart`: kategori ve min. say
 6. **Model çıktısı değişken** — aynı menüye her koşuda birebir aynı öneriler gelmiyor; kotalar ve Validator sınırları
    koruyor, içerik değişebiliyor.
 7. **Fixture beklentileri ile DB mutfak beklentileri farklı** (ör. Tatlı mutfağında atıştırmalık) — artık
-   uygulamadan ayarlanabilir; gerçek platform minimumlarını girmek kullanıcıda.
+   uygulamadan ayarlanabilir; ekibin kendi minimumlarını girmek kullanıcıda.
 8. `ChecklistTicks` Drift tablosu kullanılmıyor; kaldırmak Drift migration'ı + `build_runner` ister (SDK gerekli).
 9. Kullanılmayan 5 eski l10n metni (bu çalışmadan önce de kullanılmıyordu) duruyor.
 

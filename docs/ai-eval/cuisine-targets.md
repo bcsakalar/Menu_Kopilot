@@ -1,7 +1,7 @@
 # Mutfak türüne göre gerçekçi ürün sayısı ve açılış hedefi
 
-AŞAMA 2 çıktısı. Şube açılışı için kural **en az 10 ürün** (`MIN_BRANCH_ITEMS`, değişmedi). Bunun üstüne her mutfak türü
-için gerçek bir paket servis menüsünün taşıdığı ürün sayısına dayanan bir **açılış hedefi** eklendi. "Tam" mod menüyü bu
+AŞAMA 2 çıktısı. Menü için kural **en az 10 ürün** (`MIN_BRANCH_ITEMS`, değişmedi). Bunun üstüne her mutfak türü
+için gerçek bir paket servis menüsünün taşıdığı ürün sayısına dayanan bir **menü hedefi** eklendi. "Tam" mod menüyü bu
 hedefe tamamlamaya çalışır; ekrandaki "hedef" sayısı da budur.
 
 ## Tablo

@@ -1,7 +1,7 @@
 # Menü Kopilot
 
-A personal field assistant for a delivery platform branch-opening specialist, used during the live phone call with
-the restaurant. **One screen, one button:** screenshots of the restaurant's platform panel, a menu photo, or simply the
+A stand-alone field assistant for a menu specialist, used during the live phone call with the restaurant. **One
+screen, one button:** screenshots of the restaurant's menu panel, a menu photo, or simply the
 products typed/dictated during the call ("adana, urfa, ayran") → **Analiz et** → a result that can be scanned in
 seconds:
 
@@ -21,7 +21,7 @@ from the gallery, a product list as text) and *Sesli not* (dictate product names
 `LOCAL_ONLY_MODE`).
 
 > **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
-> restaurant; the app shows this warning on every result screen. The tool never talks to any delivery platform system:
+> restaurant; the app shows this warning on every result screen. The tool never talks to any ordering platform:
 > input is manual (typing, photos, screenshots) and output is copy/paste.
 > **Templates never contain a price.** The only amount the app shows is a new product's *estimated* price range
 > (`25–40 TL`), a prompt for the conversation that is never written into the template pool; prices read on photos
@@ -70,7 +70,7 @@ flowchart LR
 Token economy — the database and caches answer first, the LLM is the last resort:
 
 1. **Retrieval without AI:** exact name → alias → `pg_trgm` similarity → pgvector (only approved templates). The
-   316 seed templates in 27 cuisines aligned with the platform's kitchen categories (`source='seed'`, badge **Hazır şablon**)
+   316 seed templates in 27 common kitchen categories (`source='seed'`, badge **Hazır şablon**)
    and every card the user approves (badge **DB'den**)
    come back with zero LLM calls (`cache_hit=true`).
 2. **Caches (Redis, 30 days):** per-image extraction, recommender answers per gap set and voice transcriptions —

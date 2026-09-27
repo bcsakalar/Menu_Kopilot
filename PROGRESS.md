@@ -35,7 +35,7 @@ tests, mobile 85, both clean.
       editable from the app, before/after measurement, report (`docs/FAZ3_RAPOR.md`)
 - [ ] **FAZ 0–3 follow-up (user)** — compile + test the app (CI on a PR or a machine with Flutter), device walk-through
       with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
-- [x] **Onboarding Copilot — AI menu assistant (2026-09-24/25)** — evaluation harness (141 cases) and baseline
+- [x] **AI menu assistant (2026-09-24/25)** — evaluation harness (141 cases) and baseline
       report, realistic cuisine targets, product-type knowledge base + grounding + coverage guarantee + learning loop,
       one simple card per product on the phone, after report (D-177…D-190)
 - [ ] **AI menu assistant follow-up (user)** — device screenshots (phone locked / not attached during the work),
@@ -58,7 +58,7 @@ Ayarlar → Öğrenilenler (was "Ekibin sildikleri"); local database v3. Next: w
 `POST /learning/forget`; phone: Analiz geçmişi (home → "Tümünü gör"), Ayarlar → Ekibin sildikleri, cards that open
 and close. The user tests on the phone against production.
 
-**Earlier on 2026-09-25 — Onboarding Copilot: AI menu assistant (D-177…D-191).** Task in five stages; all done except the
+**Earlier on 2026-09-25 — AI menu assistant (D-177…D-191).** Task in five stages; all done except the
 device walk-through.
 - Harness `tests/ai_eval/` (27 hand-written menus, photos in five styles incl. blurred/skewed, 3 repository photos,
   141 cases; scoring independent of the backend; seeded manual sample). Baseline `docs/ai-eval/baseline-report.md`:
@@ -125,7 +125,7 @@ verification by the user** below.
 **Production is live on myserver** (2026-09-18): `/opt/menu-kopilot` (git clone, read-only deploy key), API image
 `menu-kopilot-api:<sha>` built on the PC, stack healthy behind nginx for `menu.example.com` (security headers,
 rate limits, Cloudflare real IP), secrets in `/etc/menu-kopilot/env`, nightly `pg_dump` to `/opt/yedek`. Production
-data: 27 cuisines aligned with the platform app, 316 seed templates, admin `admin@example.com` (password in the
+data: 27 common cuisines, 316 seed templates, admin `admin@example.com` (password in the
 desktop note). old-app was retired (stopped + archived; permanent removal steps in `docs/DEPLOY_MYSERVER.md`).
 Signed release APK on the desktop (`MenuKopilot-1.0.0-arm64.apk`, key in `%USERPROFILE%\.android-keys\menu-kopilot\`).
 Left for the user: the Cloudflare DNS record `menu` -> <SUNUCU_IP> (Proxied), uninstalling the old debug build on

@@ -308,7 +308,7 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   Terms, last updated 2026-04-28: unpaid content used for product improvement + human review, "do not submit
   sensitive…"; Groq: no retention by default, up to 30 days for reliability/abuse logs unless Zero Data Retention). (F6)
 - **D-111** — Product identity on the branch menu: the same normalized name is one product; different panel names
-  are different products even when they match the same template (platform lists "Adana Dürüm" and "Adana Porsiyon"
+  are different products even when they match the same template (a panel lists "Adana Dürüm" and "Adana Porsiyon"
   separately, both count toward the target); a Mod 1 card and a panel row under another name linked by the template
   are one product — the card row is renamed to the panel name during gap analysis, or the card is attached to the
   most similar panel row without a card when accepted later (`gap/menu-merge.ts`, `attachAcceptedCard`). This keeps
@@ -491,20 +491,20 @@ Format: **D-NNN** — decision. *Why:* rationale. (Phase)
   for interpolation (`--env-file`) and as the container's `env_file`. The output was checked with the API's own env
   schema in production mode.
 - **D-146** — Production seed data (user request: "research, prepare cuisines and templates in detail"). Cuisines now
-  mirror the kitchen categories of the platform app (checked on the platform site: Burger, Döner, Köfte, Steak, Tavuk, Kebap,
+  mirror the kitchen categories food-ordering apps commonly use (Burger, Döner, Köfte, Steak, Tavuk, Kebap,
   Pizza, Tatlı, Mantı & Makarna, Salata & Sağlık, Dondurma, Kahvaltı, Ev Yemekleri, Pide & Lahmacun, Pastane & Fırın,
   Kahve & İçecek, Tost & Sandviç, Sokak Lezzetleri, Balık & Deniz Ürünleri, Uzak Doğu, Dünya Mutfağı, Börek, Çiğ Köfte,
   Meze, Çorba, Tantuni): 27 cuisines with parents chosen for recommendations (Köfte/Döner/Pide → Kebap, Çorba/Mantı →
   Ev Yemekleri, Dondurma → Tatlı, Tantuni → Sokak, Tost → Kahvaltı, Börek → Pastane, Meze → Balık) and notes that list
-  the usual menu sections, the must-have products and what to ask. `min_item_count` stays 10 everywhere: the platform's real
-  minimums are not public (D-019 rule unchanged). Templates grew from 40 to 316 (5–17 per cuisine), all original text
+  the usual menu sections, the must-have products and what to ask. `min_item_count` stays 10 everywhere: real
+  minimums differ from team to team (D-019 rule unchanged). Templates grew from 40 to 316 (5–17 per cuisine), all original text
   (no copied descriptions), no prices, validated by the same Zod schema; popular-order data (Yemeksepeti 2025 summary:
   döner, burger, pizza, kebap, lahmacun, mercimek çorbası, ayran) set the importance values. The same product may now
   be seeded in several cuisines (Ayran for kebap, çiğ köfte, ev yemekleri, sokak; Patates Kızartması for döner, burger,
   tavuk): recommendations only look at the branch's cuisine family, and matching already prefers the own cuisine. Rules
   enforced by tests: names unique within a cuisine, the same spelling across cuisines, no alias equal to any canonical
-  name; `template()` drops aliases that normalize to the name or to an earlier alias. Option groups use the platform panel
-  wording ("İçecek Seçimi", "Ekmek Seçimi", "Sos Seçimi"; new factories for Menü, Adet, Gramaj, Pilav, Pişirme Şekli,
+  name; `template()` drops aliases that normalize to the name or to an earlier alias. Option groups use the wording
+  restaurant panels use ("İçecek Seçimi", "Ekmek Seçimi", "Sos Seçimi"; new factories for Menü, Adet, Gramaj, Pilav, Pişirme Şekli,
   Hamur, Süt, Şurup, Yan Ürün) and the checklist question map knows both old and new names. The seed refreshes a
   cuisine's notes only while they still hold an earlier seed's text (`LEGACY_NOTES`), so user-edited notes and minimums
   survive. Tests that relied on "unknown" fixture products (Humus, İçli Köfte, Şalgam, Kazandibi…) now delete those
@@ -878,3 +878,12 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   longer out of the list (D-194 hid it): another seller may want it, and nothing fits better than an empty slot.
   Products they mostly take come earlier and say so. The model is still told what sellers turn down (recommender
   user prompt v4). Ayarlar → "Öğrenilenler" (was "Ekibin sildikleri") shows both.
+- **D-197** — **Menü Kopilot stands on its own** (user: the app works by itself and must not look tied to any
+  company's systems; it is an external tool). No platform name, no platform's internal system names and no
+  "branch opening" wording anywhere the app, the server or the AI shows or reads: the phone's texts (tagline
+  "Restoran menüsünü hızla tamamla", "menü hedefi" instead of an opening target, "Menüde en az 10 ürün olmalı",
+  photo hints without a platform), the server's messages, the API description, the recommender and option prompts
+  (recommender system v7, user v5, options system v5 — a redeploy activates them), code comments, tests, the docs
+  and the original spec. The rules the app works with (at least 10 products, a target per cuisine, drinks as plain
+  rows) stay: they are the team's own settings, editable from the app. The repository and the production database
+  were searched for KVKK texts too: there were none.
