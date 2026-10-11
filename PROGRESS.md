@@ -55,7 +55,7 @@ calls answered (Beyti Sarma ← Adana, Ali Nazik ← Urfa, Köfte Dürüm ← Iz
 none of another shop. Phone: "X alternatifi" on the card, Opsiyon/Çıkar/Ekstra/Açıklama buttons on a closed card that
 open a sheet with tabs, "Kopyala" and the answer; "Tümünü aç/kapat", search, "Alternatifler" filter; no login screen
 (`POST /auth/device` with `APP_ACCESS_KEY`, set in `/etc/menu-kopilot/env`; the key file is
-`%USERPROFILE%\.android-keys\menu-kopilotpp-access-key.txt`, also in the local `.env.production`). nginx site copied
+`%USERPROFILE%\.android-keys\menu-kopilot\app-access-key.txt`, also in the local `.env.production`). nginx site copied
 (`/auth/device` rate-limited like the login). Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d198.dump`. Signed
 `MenuKopilot-1.6.0-arm64.apk` (release key) on the Desktop. Backend 723 tests, mobile results screen 19 (full mobile
 suite green before the last UI test change). Next: watch real calls — how often alternatives get "Evet".
