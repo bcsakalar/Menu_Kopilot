@@ -1,6 +1,6 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { getAuthUser } from '../../plugins/auth.js';
-import { loginBodySchema, refreshBodySchema, tokenResponseSchema, userDtoSchema } from './schemas.js';
+import { deviceBodySchema, loginBodySchema, refreshBodySchema, tokenResponseSchema, userDtoSchema } from './schemas.js';
 import type { AuthService } from './service.js';
 
 export const authRoutes: FastifyPluginAsyncZod<{ service: AuthService }> = async (app, { service }) => {
@@ -16,6 +16,20 @@ export const authRoutes: FastifyPluginAsyncZod<{ service: AuthService }> = async
       },
     },
     async (request) => service.login(request.body.email, request.body.password, request.body.deviceName),
+  );
+
+  app.post(
+    '/auth/device',
+    {
+      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+      schema: {
+        tags: ['auth'],
+        summary: 'Device sign-in with the key the app is built with (no e-mail/password); returns tokens',
+        body: deviceBodySchema,
+        response: { 200: tokenResponseSchema },
+      },
+    },
+    async (request) => service.enrollDevice(request.body.appKey, request.body.deviceName),
   );
 
   app.post(

@@ -36,6 +36,30 @@ describe('auth API', () => {
     expect(body.error.requestId).toBeTruthy();
   });
 
+  // D-199: a release build signs itself in with the key it carries; without APP_ACCESS_KEY the door stays shut.
+  it('signs a device in with the app key, and only with it', async () => {
+    const off = await ctx.app.inject({ method: 'POST', url: '/api/v1/auth/device', payload: { appKey: 'anything-at-all-0123456789', deviceName: 'x' } });
+    expect(off.statusCode).toBe(401);
+
+    const key = 'test-app-access-key-0123456789abcdef';
+    const keyed = await createTestApp({ env: { APP_ACCESS_KEY: key } });
+    try {
+      const wrong = await keyed.app.inject({ method: 'POST', url: '/api/v1/auth/device', payload: { appKey: `${key}x`, deviceName: 'x' } });
+      expect(wrong.statusCode).toBe(401);
+      const right = await keyed.app.inject({ method: 'POST', url: '/api/v1/auth/device', payload: { appKey: key, deviceName: 'telefon' } });
+      expect(right.statusCode, right.body).toBe(200);
+      const tokens = right.json<{ accessToken: string; refreshToken: string; user: { email: string } }>();
+      // The team account: history, pool and learning stay one.
+      expect(tokens.user.email).toBe(TEST_ADMIN.email);
+      const me = await keyed.app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { authorization: `Bearer ${tokens.accessToken}` } });
+      expect(me.statusCode).toBe(200);
+      const refreshed = await keyed.app.inject({ method: 'POST', url: '/api/v1/auth/refresh', payload: { refreshToken: tokens.refreshToken } });
+      expect(refreshed.statusCode).toBe(200);
+    } finally {
+      await keyed.close();
+    }
+  });
+
   it('validates the body', async () => {
     const res = await ctx.app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { email: 'not-an-email' } });
     expect(res.statusCode).toBe(400);

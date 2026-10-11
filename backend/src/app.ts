@@ -161,6 +161,8 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     refreshTtlDays: config.auth.refreshTtlDays,
     accessTtlSeconds: durationToSeconds(config.auth.accessTtl),
     signAccessToken: (claims) => app.jwt.sign(claims),
+    appAccessKey: config.auth.appAccessKey,
+    deviceAccountEmail: config.admin.email,
   });
   await app.register(authPlugin, { service: authService });
 

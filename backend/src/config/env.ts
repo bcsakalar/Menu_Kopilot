@@ -24,6 +24,11 @@ const envSchema = z
     JWT_SECRET: z.string().min(32).default(DEV_JWT_SECRET),
     JWT_ACCESS_TTL: z.string().default('12h'),
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(90),
+    /**
+     * D-199. The key the app is built with (`--dart-define=APP_ACCESS_KEY=…`): a phone that presents it is signed in
+     * to the team account without an e-mail and password. Unset = device sign-in is off.
+     */
+    APP_ACCESS_KEY: z.string().min(24).optional(),
 
     ADMIN_EMAIL: z.email().default('admin@menukopilot.local'),
     ADMIN_PASSWORD: z.string().min(8).default(DEV_ADMIN_PASSWORD),
@@ -72,6 +77,8 @@ export interface AppConfig {
     jwtSecret: string;
     accessTtl: string;
     refreshTtlDays: number;
+    /** Device sign-in key (D-199); undefined = off. */
+    appAccessKey: string | undefined;
   };
   admin: { email: string; password: string; name: string };
   seedOnStart: boolean;
@@ -127,6 +134,7 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
       jwtSecret: env.JWT_SECRET,
       accessTtl: env.JWT_ACCESS_TTL,
       refreshTtlDays: env.REFRESH_TOKEN_TTL_DAYS,
+      appAccessKey: emptyToUndefined(env.APP_ACCESS_KEY),
     },
     admin: { email: env.ADMIN_EMAIL.toLowerCase(), password: env.ADMIN_PASSWORD, name: env.ADMIN_NAME },
     seedOnStart: env.SEED_ON_START,

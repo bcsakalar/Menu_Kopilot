@@ -16,6 +16,11 @@ export const loginBodySchema = z.object({
   deviceName: z.string().trim().min(1).max(100).default('Bilinmeyen cihaz'),
 });
 
+export const deviceBodySchema = z.object({
+  appKey: z.string().min(1).max(200),
+  deviceName: z.string().trim().min(1).max(100).default('Bilinmeyen cihaz'),
+});
+
 export const refreshBodySchema = z.object({
   refreshToken: z.string().min(20).max(200),
 });

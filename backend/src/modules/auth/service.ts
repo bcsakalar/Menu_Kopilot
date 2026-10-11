@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { devices, users } from '../../db/schema/index.js';
@@ -10,6 +10,10 @@ export interface AuthServiceOptions {
   refreshTtlDays: number;
   accessTtlSeconds: number;
   signAccessToken: (claims: AccessTokenClaims) => string;
+  /** D-199: the key the app is built with; undefined = device sign-in is off. */
+  appAccessKey?: string | undefined;
+  /** The account a device signs in to: the team account the seed creates (`ADMIN_EMAIL`). */
+  deviceAccountEmail?: string | undefined;
   now?: () => Date;
 }
 
@@ -47,6 +51,26 @@ export class AuthService {
     return { accessToken, refreshToken, expiresIn: this.options.accessTtlSeconds, deviceId, user: toDto(user) };
   }
 
+  /**
+   * D-199. "Kurulunca hazır": the app signs itself in with the key it was built with — no e-mail, no password on the
+   * phone. The device gets its own session (a rotating refresh token, revocable on the server like any other) on the
+   * team account, so the history, the template pool and what the team taught stay one. Off unless APP_ACCESS_KEY is
+   * set; changing the key on the server shuts out every build that carries the old one.
+   */
+  async enrollDevice(appKey: string, deviceName: string): Promise<TokenResponse> {
+    const expected = this.options.appAccessKey;
+    // Compared as hashes: equal length, constant time, and a wrong key of any length costs the same.
+    if (!expected || !timingSafeEqual(Buffer.from(sha256(appKey), 'hex'), Buffer.from(sha256(expected), 'hex'))) {
+      throw new AppError('UNAUTHORIZED', 'Uygulama anahtarı geçersiz');
+    }
+    const email = this.options.deviceAccountEmail?.toLowerCase();
+    const [user] = email
+      ? await this.db.select().from(users).where(eq(users.email, email)).limit(1)
+      : await this.db.select().from(users).where(eq(users.role, 'admin')).limit(1);
+    if (!user) throw new AppError('INTERNAL_ERROR', 'Ekip hesabı bulunamadı');
+    return this.openDevice(user, deviceName);
+  }
+
   async login(email: string, password: string, deviceName: string): Promise<TokenResponse> {
     const [user] = await this.db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
     if (!user) {
@@ -57,6 +81,11 @@ export class AuthService {
     if (!(await verifyPassword(password, user.passwordHash))) {
       throw new AppError('UNAUTHORIZED', 'E-posta veya şifre hatalı');
     }
+    return this.openDevice(user, deviceName);
+  }
+
+  /** A new device session on the account: a rotating refresh token (stored hashed) and an access token. */
+  private async openDevice(user: UserRow, deviceName: string): Promise<TokenResponse> {
     const refreshToken = randomBytes(32).toString('base64url');
     const [device] = await this.db
       .insert(devices)
