@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-09-28 — live on production (`a860b2b`), app 1.5.1: the app stands on its own — no platform name
+Last update: 2026-10-11 — live on production (`4d547a4`), app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
 anywhere (D-197). Before it, 1.5.0: call mode (D-196) — cards in call order with
 the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
 learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
@@ -43,6 +43,23 @@ tests, mobile 85, both clean.
       push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
+**2026-10-11 — production on `4d547a4`, app 1.6.0 (D-198, D-199).** User, testing on the phone: new products that a
+restaurant cannot make, quick mode too thin, options/extras/descriptions too far away during the call, and no login.
+Production data showed quick mode never asked the model for new products (the pool filled six slots per cuisine by
+importance: Waffle/Kumpir/Midye Tava to a kokoreççi, Tavuk Döner Dürüm to a kebapçı). Now: a kitchen profile gates
+every new product (`agents/kitchen.ts`); alternatives built on the menu's own products (`basedOn`) are asked of the
+model on every run, in a call of their own (recommender system v9 / user v6, route Groq low → Flash-Lite → Flash, also
+in the production rows); quick = 6 alternatives + 4 category products, full = 8 alternatives on top; a main filed as a
+side by its bread word counts as a main. Measured live after the last deploy: kebap menu 10 products in 8.2 s, all model
+calls answered (Beyti Sarma ← Adana, Ali Nazik ← Urfa, Köfte Dürüm ← Izgara Köfte…); kokoreç menu 5 fitting products,
+none of another shop. Phone: "X alternatifi" on the card, Opsiyon/Çıkar/Ekstra/Açıklama buttons on a closed card that
+open a sheet with tabs, "Kopyala" and the answer; "Tümünü aç/kapat", search, "Alternatifler" filter; no login screen
+(`POST /auth/device` with `APP_ACCESS_KEY`, set in `/etc/menu-kopilot/env`; the key file is
+`%USERPROFILE%\.android-keys\menu-kopilotpp-access-key.txt`, also in the local `.env.production`). nginx site copied
+(`/auth/device` rate-limited like the login). Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d198.dump`. Signed
+`MenuKopilot-1.6.0-arm64.apk` (release key) on the Desktop. Backend 723 tests, mobile results screen 19 (full mobile
+suite green before the last UI test change). Next: watch real calls — how often alternatives get "Evet".
+
 **2026-09-28 (night) — production on `a860b2b`, app 1.5.1 (D-197).** User: the app must work on its own and not look
 tied to any company's systems. Every platform name, the platform's internal system names and the branch-opening
 wording are gone from the phone's texts, the server's messages, the prompts (recommender system v7 / user v5,
