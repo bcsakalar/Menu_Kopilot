@@ -437,13 +437,13 @@ export async function runProductRecommender(
       }
       if (current.length > 0) gapBatches.push(current);
       const plannedGaps = gapBatches.slice(0, MAX_GAP_BATCHES);
-      const firstWant = plannedGaps[0]?.reduce((sum, g) => sum + g.want, 0) ?? 0;
-      const batches: Batch[] =
-        input.alternatives > 0 && firstWant + input.alternatives > RECOMMEND_BATCH
-          ? [{ gaps: [], alternatives: input.alternatives }, ...plannedGaps.map((gaps) => ({ gaps, alternatives: 0 }))]
-          : plannedGaps.length > 0
-            ? plannedGaps.map((gaps, index) => ({ gaps, alternatives: index === 0 ? input.alternatives : 0 }))
-            : [{ gaps: [], alternatives: input.alternatives }];
+      // The alternatives always get a call of their own: two short answers in parallel, on different providers,
+      // arrive sooner than one long one — measured on production, ten products with their options in one answer ran
+      // past the 8 s attempt on both the first and the second provider.
+      const batches: Batch[] = [
+        ...(input.alternatives > 0 ? [{ gaps: [], alternatives: input.alternatives }] : []),
+        ...plannedGaps.map((gaps) => ({ gaps, alternatives: 0 })),
+      ];
 
       const kitchenBrief = input.kitchen.describe();
       const categoryList = input.categories.map((c) => `${c.key} | ${c.label}`).join(', ') || '-';

@@ -76,7 +76,7 @@ describe('AiRouter', () => {
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.meta.provider).toBe('groq'); // text.item_enrich primary = gpt-oss-120b
     expect(groq.calls[0]?.model).toBe(MODELS.groqGptOss120b);
-    expect(groq.calls[0]?.params?.reasoningEffort).toBe('medium');
+    expect(groq.calls[0]?.params?.reasoningEffort).toBe('low');
     const rows = await usageRows();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ taskKey: 'agent.recommend', provider: 'groq', success: true });

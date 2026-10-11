@@ -88,8 +88,8 @@ const FULL_ATTEMPT_MS = 11_000;
  */
 export function modeBudget(mode: AnalysisMode): { extraLlmCalls: number; extraInputTokens: number } {
   // Quick mode's second option batch is the "biraz daha fazlası"; the alternatives (D-198) add one recommend call in
-  // full mode and a longer prompt — the kitchen brief — in both.
-  return mode === 'full' ? { extraLlmCalls: 7, extraInputTokens: 26_000 } : { extraLlmCalls: 2, extraInputTokens: 8_000 };
+  // call of their own in both modes, with a longer prompt — the kitchen brief.
+  return mode === 'full' ? { extraLlmCalls: 7, extraInputTokens: 26_000 } : { extraLlmCalls: 3, extraInputTokens: 10_000 };
 }
 
 export interface RunPlan {

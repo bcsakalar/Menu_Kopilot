@@ -117,6 +117,8 @@ const NOISE_WORDS: ReadonlySet<string> = new Set([
   'cift', 'tek', 'sade', 'ozel', 'usta', 'ev', 'yapimi', 'usulu', 'klasik', 'geleneksel', 'taze', 'sikma', 've', 'ile',
   'bol', 'mini', 'maxi', 'mega', 'super', 'extra', 'ekstra', 'special', 'spesiyal', 'lezzet', 'nefis', 'gunun',
   'tatli', 'corba', 'icecek', 'kutu', 'sise', 'litre', 'litrelik', 'cl', 'ml', 'lt',
+  // The bread a product is served in is no shared ingredient: "Ekmek Kadayıfı" is nothing like "Tam Ekmek Kokoreç".
+  'ekmek', 'arasi',
 ]);
 
 /** Packaged soft-drink brands and words: a menu with any of them has "Kutu İçecek" already. */
@@ -214,14 +216,9 @@ export class KitchenProfile {
     const shared = closest?.shared ?? 0;
     const sameType = this.types.has(type);
 
-    if (missing && !sameType) {
-      return { ok: false, score: 0, basedOn, reason: `${SPECIALTIES.get(missing)} menüde yok` };
-    }
-    if (missing && sameType && shared === 0) {
-      // Same family, but a speciality the menu does not show ("Fıstıklı Künefe" to a baklava shop is fine only
-      // because baklava shops do künefe — see SPECIALTY_ALSO; a "Döner Pide" to a pide shop is not).
-      return { ok: false, score: 0, basedOn, reason: `${SPECIALTIES.get(missing)} menüde yok` };
-    }
+    // A speciality the menu does not show is never offered, whatever its type: "Ekmek Arası Tantuni" is an ekmek
+    // arası like the kokoreççi's, but there is no tantuni sac behind that counter.
+    if (missing) return { ok: false, score: 0, basedOn, reason: `${SPECIALTIES.get(missing)} menüde yok` };
     const reachable = !this.informative || this.reachable.has(type) || (!byName && shared > 0);
     if (!reachable) return { ok: false, score: 0, basedOn, reason: 'bu mutfağın ürünü değil' };
 
@@ -246,14 +243,19 @@ export class KitchenProfile {
     });
   }
 
-  /** The menu product sharing the most ingredient/form words with a candidate; same type breaks ties. */
+  /**
+   * The menu product a candidate is closest to: one of the same type first ("Tavuk Suyu Çorbası" is the soup pot's,
+   * not the grill's "Tavuk Şiş"), then the one sharing the most ingredient/form words.
+   */
   private closest(own: readonly string[], type: string): { name: string; shared: number } | null {
     let best: { name: string; shared: number; same: boolean } | null = null;
     for (const product of this.products) {
       const shared = own.filter((word) => product.words.has(word)).length;
       const same = product.type === type;
-      if (!best || shared > best.shared || (shared === best.shared && same && !best.same)) best = { name: product.name, shared, same };
+      const better = !best || (same && !best.same) || (same === best.same && shared > best.shared);
+      if (better) best = { name: product.name, shared, same };
     }
+    if (best?.same) return { name: best.name, shared: Math.max(best.shared, 1) };
     return best;
   }
 

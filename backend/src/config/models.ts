@@ -247,8 +247,10 @@ export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = 
   ],
   // Recommendation quality is the whole point of the redesign: strongest model first.
   'agent.recommend': [
-    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'medium', maxOutputTokens: 8000 } },
-    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'medium', maxOutputTokens: 8000 } },
+    // D-198: low effort. With medium, six products with their options ran past the 8 s attempt on both providers
+    // (the reasoning tokens also eat Groq's free 8 K tokens a minute); the kitchen brief does the thinking now.
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 8000 } },
+    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
     { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
   ],
   // Option groups are long output but a well-understood shape: low reasoning, high token ceiling.

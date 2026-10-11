@@ -910,7 +910,7 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   ("Adana Kebap alternatifi") and its sentence for the seller leads with it ("Adana Kebap ürününüzün alternatifi;
   aynı harçla…", priority 85); a closed card shows its sections as buttons — "Opsiyon 2 · Çıkar 3 · Ekstra 4 ·
   Açıklama" — and one tap opens that section in a sheet with tabs for the other three, "Kopyala" and the seller's
-  answer; "Tümünü aç / kapat", a search box on lists longer than six, and "Alternatifler" as a filter. App 1.6.0.
+  answer; "Tümünü aç / kapat", a search box on lists longer than six, and "Alternatifler" as a filter. App 1.6.0. (5) *Measured on production after the first deploy:* ten products with their options in one answer ran past the 8 s attempt on Groq (medium reasoning, and the free 8 K tokens a minute shared with the option agent) and on Gemini Flash, so both runs fell back to the pool; and the pool still let "Ekmek Arası Tantuni" and "Ekmek Kadayıfı" through to a kokoreççi. Now the alternatives get a call of their own (two short answers in parallel on different providers), the recommend route runs at low effort (code default and the production rows), a missing speciality is refused whatever the type, bread words ("ekmek", "arası") are no shared ingredient, and an alternative is tied to a menu product of its own type first.
 - **D-199** — **No login screen: the app signs itself in** (user: "e-posta ve şifre gerek yok, direkt kullanıma hazır
   olsun"; confirmed after the auto-mode check flagged it, with the trade-off below). A release build carries an app
   key (`--dart-define=APP_ACCESS_KEY`, the server's `APP_ACCESS_KEY`, ≥ 24 characters); on the first request the
