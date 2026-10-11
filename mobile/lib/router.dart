@@ -28,8 +28,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/suggest',
     refreshListenable: refresh,
     redirect: (context, state) {
-      final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
+      // D-199: a build with the app key signs itself in — it opens straight to work, never to a login screen.
+      if (deviceSignIn) return location == '/login' || location == '/splash' ? '/suggest' : null;
+      final auth = ref.read(authControllerProvider);
       if (!auth.hasValue && auth.isLoading) return location == '/splash' ? null : '/splash';
       final loggedIn = auth.value != null;
       if (!loggedIn) return location == '/login' ? null : '/login';

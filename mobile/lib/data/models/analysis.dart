@@ -134,6 +134,7 @@ class AnalysisCard {
     this.confidence,
     this.pitch = '',
     this.priority = 0,
+    this.basedOn,
     this.status = CardStatus.pending,
     this.sortOrder = 0,
     this.queued = false,
@@ -166,6 +167,7 @@ class AnalysisCard {
         confidence: json.intOrNull('confidence'),
         pitch: json.str('pitch'),
         priority: json.integer('priority'),
+        basedOn: json.strOrNull('basedOn'),
         status: CardStatus.fromWire(json.str('status')),
         sortOrder: json.integer('sortOrder'),
       );
@@ -216,6 +218,10 @@ class AnalysisCard {
 
   /// The order of the call, higher first; the cards already arrive in it.
   final int priority;
+
+  /// A new product built on a product of the menu (D-198): that product, as the menu spells it ("Adana Kebap" for
+  /// "Beyti"). Null for a product that fills a category, and on older cards.
+  final String? basedOn;
   final CardStatus status;
   final int sortOrder;
 
@@ -251,6 +257,7 @@ class AnalysisCard {
         confidence: confidence,
         pitch: pitch,
         priority: priority,
+        basedOn: basedOn,
         status: status ?? this.status,
         sortOrder: sortOrder,
         queued: queued ?? this.queued,
@@ -343,6 +350,7 @@ class AnalysisCard {
         'confidence': confidence,
         'pitch': pitch,
         'priority': priority,
+        'basedOn': basedOn,
         'status': status.name,
         'sortOrder': sortOrder,
       };

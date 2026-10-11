@@ -24,6 +24,39 @@ import '../../l10n/gen/app_localizations.dart';
 /// Below this confidence a card says "Kontrol et": the suggestions are generic for the product type.
 const int lowConfidence = 60;
 
+/// The four sections of a card, in the order the panel asks for them. Each one is a tap away on a closed card
+/// (D-198: during the call the expert needs "Lahmacun'un ekstraları" now, not after a scroll through the card).
+enum CardSectionKind { options, removables, extras, description }
+
+/// Whether the card has anything to show in [kind].
+bool hasSection(AnalysisCard card, CardSectionKind kind) {
+  final c = card.content;
+  return switch (kind) {
+    CardSectionKind.options => c.optionGroups.isNotEmpty,
+    CardSectionKind.removables => c.removableIngredients.isNotEmpty,
+    CardSectionKind.extras => c.extraIngredients.isNotEmpty,
+    CardSectionKind.description => c.description.trim().isNotEmpty,
+  };
+}
+
+/// "Opsiyon 2", "Çıkar 3", "Ekstra 4", "Açıklama": a section's quick button, counted as the user kept it.
+String sectionQuickLabel(AppLocalizations l10n, AnalysisCard card, Set<String> removed, CardSectionKind kind) {
+  final kept = card.kept(removed);
+  return switch (kind) {
+    CardSectionKind.options => l10n.quickOptions(kept.optionGroups.length),
+    CardSectionKind.removables => l10n.quickRemovables(kept.removableIngredients.length),
+    CardSectionKind.extras => l10n.quickExtras(kept.extraIngredients.length),
+    CardSectionKind.description => l10n.quickDescription,
+  };
+}
+
+IconData sectionIcon(CardSectionKind kind) => switch (kind) {
+      CardSectionKind.options => Icons.tune_rounded,
+      CardSectionKind.removables => Icons.remove_circle_outline_rounded,
+      CardSectionKind.extras => Icons.add_circle_outline_rounded,
+      CardSectionKind.description => Icons.notes_rounded,
+    };
+
 /// "1 Porsiyon · tabanı belirler": the price effect of a choice, in words. Amounts are never suggested.
 String optionLabel(AppLocalizations l10n, TemplateOption option) => switch (option.priceMode) {
       PriceMode.free => option.name,
@@ -69,6 +102,7 @@ class ProductCard extends StatelessWidget {
     this.onEdit,
     this.expanded = true,
     this.onExpandedChanged,
+    this.onOpenSection,
     super.key,
   });
 
@@ -97,6 +131,9 @@ class ProductCard extends StatelessWidget {
   /// note, which is short anyway).
   final ValueChanged<bool>? onExpandedChanged;
 
+  /// Opens one section of the card on its own (a sheet over the list). Null: no quick buttons.
+  final ValueChanged<CardSectionKind>? onOpenSection;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -108,6 +145,10 @@ class ProductCard extends StatelessWidget {
     final collapsible = card != null && onExpandedChanged != null;
     final open = !collapsible || expanded;
     final pendingNotes = notes.where((n) => n.isPending).length;
+    // Closed, a card with something to enter shows its sections as buttons: one tap to the extras, no scrolling.
+    final quick = !open && !card.isPlainRow && card.section != CardSection.fix && onOpenSection != null
+        ? CardSectionKind.values.where((kind) => hasSection(card, kind)).toList()
+        : const <CardSectionKind>[];
 
     return AppCard(
       key: card == null ? null : ValueKey('product-${card.id}'),
@@ -127,8 +168,10 @@ class ProductCard extends StatelessWidget {
                     onExpandedChanged!(!expanded);
                   }
                 : null,
-            summary: collapsible && !open ? cardSummary(l10n, card, removed, notes: pendingNotes) : null,
+            summary: collapsible && !open && quick.isEmpty ? cardSummary(l10n, card, removed, notes: pendingNotes) : null,
           ),
+          if (quick.isNotEmpty && card != null)
+            _QuickSections(card: card, kinds: quick, removed: removed, notes: pendingNotes, onOpen: onOpenSection!),
           // Opening and closing slide rather than jump, so the eye keeps its place in the list.
           AnimatedSize(
             duration: const Duration(milliseconds: 220),
@@ -149,7 +192,7 @@ class ProductCard extends StatelessWidget {
                         else
                           _Sections(card: card, removed: removed, enabled: card.status != CardStatus.accepted && !busy, onToggle: onToggle),
                         const SizedBox(height: 12),
-                        _Answers(card: card, removed: removed, busy: busy, onYes: onAccept, onLater: onLater, onNo: onSkip),
+                        CardAnswers(card: card, removed: removed, busy: busy, onYes: onAccept, onLater: onLater, onNo: onSkip),
                       ],
                     ],
                   ),
@@ -242,6 +285,7 @@ class _Header extends StatelessWidget {
                 card.section == CardSection.newProduct ? l10n.newProductBadge : l10n.onMenuBadge,
                 tone: card.section == CardSection.newProduct ? Tone.accent : Tone.neutral,
               ),
+            if (card?.basedOn != null) Pill(l10n.alternativeOf(card!.basedOn!), tone: Tone.accent, icon: Icons.alt_route_rounded),
             if (card != null && (card.isPending || card.status == CardStatus.later) && (card.confidence ?? 100) < lowConfidence)
               Pill(l10n.checkThis, tone: Tone.amber, icon: Icons.visibility_outlined),
             if (card?.status == CardStatus.accepted) Pill(l10n.answeredYes, tone: Tone.success, icon: Icons.check_rounded),
@@ -345,6 +389,38 @@ class _Sections extends StatelessWidget {
   final void Function(String key) onToggle;
 
   @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final kind in CardSectionKind.values)
+            CardSectionView(card: card, kind: kind, removed: removed, enabled: enabled, onToggle: onToggle),
+        ],
+      );
+}
+
+/// One section of a card — on the open card, and alone in the quick sheet. Every suggestion is a chip kept until
+/// tapped; the section has its own "Kopyala".
+class CardSectionView extends StatelessWidget {
+  const CardSectionView({
+    required this.card,
+    required this.kind,
+    required this.removed,
+    required this.enabled,
+    required this.onToggle,
+    this.divider = true,
+    super.key,
+  });
+
+  final AnalysisCard card;
+  final CardSectionKind kind;
+  final Set<String> removed;
+  final bool enabled;
+  final void Function(String key) onToggle;
+
+  /// The line above the section on the card; the sheet has tabs instead.
+  final bool divider;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final content = card.content;
@@ -352,13 +428,12 @@ class _Sections extends StatelessWidget {
     // A product on the menu gets every section the panel lacks; an empty one means the panel already has it.
     final none = card.section == CardSection.option ? l10n.panelHasIt : l10n.noSuggestion;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SectionBlock(
+    return switch (kind) {
+      CardSectionKind.options => _SectionBlock(
           key: const Key('section-options'),
-          icon: Icons.tune_rounded,
+          icon: sectionIcon(kind),
           title: l10n.sectionOptionsTitle,
+          divider: divider,
           copyText: optionsCopyText(l10n, kept.optionGroups),
           empty: content.optionGroups.isEmpty ? none : null,
           child: Column(
@@ -369,10 +444,11 @@ class _Sections extends StatelessWidget {
             ],
           ),
         ),
-        _SectionBlock(
+      CardSectionKind.removables => _SectionBlock(
           key: const Key('section-removables'),
-          icon: Icons.remove_circle_outline_rounded,
+          icon: sectionIcon(kind),
           title: l10n.sectionRemovablesTitle,
+          divider: divider,
           copyText: listCopyText(kept.removableIngredients),
           empty: content.removableIngredients.isEmpty ? none : null,
           child: _ChipWrap(
@@ -384,10 +460,11 @@ class _Sections extends StatelessWidget {
             onToggle: onToggle,
           ),
         ),
-        _SectionBlock(
+      CardSectionKind.extras => _SectionBlock(
           key: const Key('section-extras'),
-          icon: Icons.add_circle_outline_rounded,
+          icon: sectionIcon(kind),
           title: l10n.sectionExtrasTitle,
+          divider: divider,
           copyText: listCopyText(kept.extraIngredients.map((e) => e.name).toList()),
           empty: content.extraIngredients.isEmpty ? none : null,
           child: _ChipWrap(
@@ -399,10 +476,11 @@ class _Sections extends StatelessWidget {
             onToggle: onToggle,
           ),
         ),
-        _SectionBlock(
+      CardSectionKind.description => _SectionBlock(
           key: const Key('section-description'),
-          icon: Icons.notes_rounded,
+          icon: sectionIcon(kind),
           title: l10n.sectionDescriptionTitle,
+          divider: divider,
           copyText: kept.description,
           empty: content.description.trim().isEmpty ? none : null,
           child: _DescriptionChip(
@@ -412,7 +490,47 @@ class _Sections extends StatelessWidget {
             onToggle: () => onToggle(ItemKey.description),
           ),
         ),
-      ],
+    };
+  }
+}
+
+/// A closed card's sections as buttons with their counts — "Opsiyon 2 · Çıkar 3 · Ekstra 4 · Açıklama". One tap
+/// opens that section over the list.
+class _QuickSections extends StatelessWidget {
+  const _QuickSections({required this.card, required this.kinds, required this.removed, required this.notes, required this.onOpen});
+
+  final AnalysisCard card;
+  final List<CardSectionKind> kinds;
+  final Set<String> removed;
+  final int notes;
+  final ValueChanged<CardSectionKind> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final p = context.palette;
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          for (final kind in kinds)
+            ActionChip(
+              key: ValueKey('quick-${kind.name}-${card.id}'),
+              avatar: Icon(sectionIcon(kind), size: 18, color: p.accentText),
+              label: Text(sectionQuickLabel(l10n, card, removed, kind), style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () {
+                Haptics.select();
+                onOpen(kind);
+              },
+            ),
+          if (notes > 0) Text(l10n.summaryNotes(notes), style: text.bodyMedium?.copyWith(color: p.textMuted)),
+        ],
+      ),
     );
   }
 }
@@ -425,6 +543,7 @@ class _SectionBlock extends StatelessWidget {
     required this.copyText,
     required this.child,
     this.empty,
+    this.divider = true,
     super.key,
   });
 
@@ -436,15 +555,18 @@ class _SectionBlock extends StatelessWidget {
   /// Shown instead of the content when the section has nothing.
   final String? empty;
 
+  /// The line that separates it from the section above (on the card, not in the sheet).
+  final bool divider;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final p = context.palette;
     final text = Theme.of(context).textTheme;
     return Container(
-      margin: const EdgeInsets.only(top: 12),
+      margin: EdgeInsets.only(top: divider ? 12 : 4),
       padding: const EdgeInsets.only(top: 10),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: p.border))),
+      decoration: divider ? BoxDecoration(border: Border(top: BorderSide(color: p.border))) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -630,8 +752,9 @@ class _DescriptionChip extends StatelessWidget {
 
 /// The seller's answer (D-196): "Evet" (on the menu, as the chips were left), "Düşünecek", "Hayır". The chosen one
 /// stays marked; another tap changes it — sellers change their minds during a call.
-class _Answers extends StatelessWidget {
-  const _Answers({
+class CardAnswers extends StatelessWidget {
+  const CardAnswers({
+    super.key,
     required this.card,
     required this.removed,
     required this.busy,

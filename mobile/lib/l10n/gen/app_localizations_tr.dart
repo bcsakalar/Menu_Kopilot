@@ -901,14 +901,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get modeQuickHint =>
-      '6–7 yeni ürün önerisi; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 10 saniye.';
+      '10 yeni ürün: fotoğraftaki ürünlere dayalı alternatifler ve eksik kategoriler; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 15 saniye.';
 
   @override
   String get modeFullTitle => 'Tam';
 
   @override
   String get modeFullHint =>
-      'Menü mutfağın hedef ürün sayısına tamamlanır; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.';
+      'Fotoğraftaki ürünlere dayalı alternatifler ve mutfağın hedefine kadar yeni ürün; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.';
 
   @override
   String get debugToggle => 'Ayrıntılı kayıt';
@@ -1086,7 +1086,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tapToRemove =>
-      'Ürüne dokun, kartı aç. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.';
+      'Opsiyon, malzeme ya da açıklamaya tek dokunuşla bak. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.';
 
   @override
   String get answerYes => 'Evet';
@@ -1289,4 +1289,54 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errorRetry => 'Analiz tamamlanamadı. Tekrar dene.';
+
+  @override
+  String alternativeOf(String name) {
+    return '$name alternatifi';
+  }
+
+  @override
+  String quickOptions(int count) {
+    return 'Opsiyon $count';
+  }
+
+  @override
+  String quickRemovables(int count) {
+    return 'Çıkar $count';
+  }
+
+  @override
+  String quickExtras(int count) {
+    return 'Ekstra $count';
+  }
+
+  @override
+  String get quickDescription => 'Açıklama';
+
+  @override
+  String get expandAll => 'Tümünü aç';
+
+  @override
+  String get collapseAll => 'Tümünü kapat';
+
+  @override
+  String get searchProducts => 'Ürün ara';
+
+  @override
+  String get noSearchResults => 'Bu aramaya uyan ürün yok.';
+
+  @override
+  String alternativesOnly(int count) {
+    return 'Alternatifler $count';
+  }
+
+  @override
+  String get allProducts => 'Tümü';
+
+  @override
+  String get deviceAccount => 'Ekip hesabı';
+
+  @override
+  String get deviceAccountHint =>
+      'Bu cihaz ekip hesabına otomatik bağlı; giriş gerekmez.';
 }

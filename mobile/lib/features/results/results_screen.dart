@@ -13,9 +13,11 @@ import '../../core/utils/wakelock.dart';
 import '../../core/widgets/common.dart';
 import '../../data/models/analysis.dart';
 import '../../data/models/template_payload.dart';
+import '../history/history_repository.dart' show foldForSearch;
 import '../home/cuisine_picker.dart';
 import 'analysis_controller.dart';
 import 'card_editor_screen.dart';
+import 'card_sections_sheet.dart';
 import 'product_card.dart';
 
 /// The one result screen, built for someone on a phone call who is not a technical person.
@@ -45,6 +47,33 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
   bool _isOpen(String key, {required bool byDefault}) => _open[key] ?? byDefault;
 
+  /// The search over the active tab's products (shown on long lists): name, the panel's spelling, what it is built on.
+  String _query = '';
+  final TextEditingController _search = TextEditingController();
+
+  /// New products: only the alternatives built on the menu's own products (D-198).
+  bool _onlyAlternatives = false;
+
+  bool _matches(List<String?> fields) {
+    final needle = foldForSearch(_query.trim());
+    if (needle.isEmpty) return true;
+    return foldForSearch(fields.whereType<String>().join(' ')).contains(needle);
+  }
+
+  /// One section of a card over the list; an answer given there closes the card behind it, like on the card.
+  void _openSections(AnalysisCard card, String title, CardSectionKind kind, String openKey) {
+    final controller = ref.read(analysisControllerProvider.notifier);
+    showCardSections(
+      context,
+      cardId: card.id,
+      title: title,
+      initial: kind,
+      onYes: () => _act(card.id, () => controller.accept(card.id), accept: true, collapse: openKey),
+      onLater: () => _act(card.id, () => controller.later(card.id), accept: false, collapse: openKey),
+      onNo: () => _act(card.id, () => controller.skip(card.id), accept: false, collapse: openKey),
+    ).ignore();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +95,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   @override
   void dispose() {
     _wakelock.disable().ignore();
+    _search.dispose();
     super.dispose();
   }
 
@@ -189,21 +219,106 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   List<Widget> _tabContent(AnalysisViewState state, AnalysisController controller) {
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
-    final hint = Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpace.page, 10, AppSpace.page, 2),
-      child: Text(l10n.tapToRemove, style: text.bodyMedium?.copyWith(color: context.palette.textMuted)),
-    );
     Widget empty(String message) => Padding(
           padding: const EdgeInsets.fromLTRB(AppSpace.page, 24, AppSpace.page, 8),
           child: Text(message, textAlign: TextAlign.center, style: text.bodyLarge?.copyWith(color: context.palette.textMuted)),
         );
 
+    /// The hint, "Tümünü aç / kapat", and on a long list the search box: everything on the list is one tap away.
+    List<Widget> header({required List<String> keys, required int total, required bool Function(String key) isOpen}) {
+      final allOpen = keys.isNotEmpty && keys.every(isOpen);
+      return [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, 6, AppSpace.sm, 0),
+          child: Row(
+            children: [
+              Expanded(child: Text(l10n.tapToRemove, style: text.bodyMedium?.copyWith(color: context.palette.textMuted))),
+              if (keys.length > 1)
+                TextButton.icon(
+                  key: const Key('toggle-all'),
+                  onPressed: () {
+                    Haptics.select();
+                    setState(() {
+                      for (final key in keys) {
+                        _open[key] = !allOpen;
+                      }
+                    });
+                  },
+                  icon: Icon(allOpen ? Icons.unfold_less_rounded : Icons.unfold_more_rounded, size: 20),
+                  label: Text(allOpen ? l10n.collapseAll : l10n.expandAll),
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 44)),
+                ),
+            ],
+          ),
+        ),
+        if (total > 6)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpace.page, 6, AppSpace.page, 2),
+            child: TextField(
+              key: const Key('result-search'),
+              controller: _search,
+              onChanged: (value) => setState(() => _query = value),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                isDense: true,
+                prefixIcon: const Icon(Icons.search_rounded),
+                hintText: l10n.searchProducts,
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () => setState(() {
+                          _search.clear();
+                          _query = '';
+                        }),
+                        icon: const Icon(Icons.close_rounded),
+                        tooltip: l10n.clearFilters,
+                      ),
+              ),
+            ),
+          ),
+      ];
+    }
+
     switch (state.activeTab) {
       case ResultTab.newProducts:
-        final cards = state.newProducts;
-        if (cards.isEmpty) return [if (!state.isStreaming) empty(l10n.tabNewProductsEmpty)];
+        final all = state.newProducts;
+        if (all.isEmpty) return [if (!state.isStreaming) empty(l10n.tabNewProductsEmpty)];
+        final alternatives = all.where((c) => c.basedOn != null).length;
+        final onlyAlternatives = _onlyAlternatives && alternatives > 0;
+        final cards = [
+          for (final card in all)
+            if ((!onlyAlternatives || card.basedOn != null) && _matches([card.name, card.basedOn, card.categoryLabel])) card,
+        ];
         return [
-          hint,
+          ...header(
+            keys: [for (final card in cards) card.id],
+            total: all.length,
+            isOpen: (key) => _isOpen(key, byDefault: all.length == 1),
+          ),
+          // The alternatives built on the photo's products, apart from the category fill (D-198).
+          if (alternatives > 0 && alternatives < all.length)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, 8, AppSpace.page, 0),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    key: const Key('filter-all'),
+                    label: Text('${l10n.allProducts} ${all.length}'),
+                    selected: !onlyAlternatives,
+                    onSelected: (_) => setState(() => _onlyAlternatives = false),
+                  ),
+                  ChoiceChip(
+                    key: const Key('filter-alternatives'),
+                    avatar: const Icon(Icons.alt_route_rounded, size: 18),
+                    label: Text(l10n.alternativesOnly(alternatives)),
+                    selected: onlyAlternatives,
+                    onSelected: (_) => setState(() => _onlyAlternatives = true),
+                  ),
+                ],
+              ),
+            ),
+          if (cards.isEmpty) empty(l10n.noSearchResults),
           for (final card in cards)
             ProductCard(
               key: ValueKey(card.id),
@@ -211,8 +326,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               title: card.name,
               removed: state.removedOf(card.id),
               busy: _busy.contains(card.id),
-              expanded: _isOpen(card.id, byDefault: cards.length == 1),
+              expanded: _isOpen(card.id, byDefault: all.length == 1),
               onExpandedChanged: (open) => setState(() => _open[card.id] = open),
+              onOpenSection: (kind) => _openSections(card, card.name, kind, card.id),
               onToggle: (key) => controller.toggleItem(card.id, key),
               onAccept: () => _act(card.id, () => controller.accept(card.id), accept: true, collapse: card.id),
               onSkip: () => _act(card.id, () => controller.skip(card.id), accept: false, collapse: card.id),
@@ -221,12 +337,21 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             ),
         ];
       case ResultTab.menuProducts:
-        final entries = state.menuEntries;
-        if (entries.isEmpty) return [if (!state.isStreaming) empty(l10n.tabMenuProductsEmpty)];
+        final all = state.menuEntries;
+        if (all.isEmpty) return [if (!state.isStreaming) empty(l10n.tabMenuProductsEmpty)];
         // "Ürün ekle" with one product: its card opens by itself. A note-only row has nothing to fold.
-        final single = entries.where((e) => e.card != null).length == 1;
+        final single = all.where((e) => e.card != null).length == 1;
+        final entries = [
+          for (final entry in all)
+            if (_matches([entry.title, entry.card?.name, entry.card?.targetName])) entry,
+        ];
         return [
-          hint,
+          ...header(
+            keys: [for (final entry in entries) if (entry.card != null) 'entry-${entry.key}'],
+            total: all.length,
+            isOpen: (key) => _isOpen(key, byDefault: single),
+          ),
+          if (entries.isEmpty) empty(l10n.noSearchResults),
           for (final entry in entries)
             ProductCard(
               key: ValueKey('entry-${entry.key}'),
@@ -237,6 +362,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               busy: entry.card != null && _busy.contains(entry.card!.id),
               expanded: _isOpen('entry-${entry.key}', byDefault: single),
               onExpandedChanged: (open) => setState(() => _open['entry-${entry.key}'] = open),
+              onOpenSection: entry.card == null
+                  ? null
+                  : (kind) => _openSections(entry.card!, entry.title, kind, 'entry-${entry.key}'),
               onToggle: (key) {
                 if (entry.card != null) controller.toggleItem(entry.card!.id, key);
               },

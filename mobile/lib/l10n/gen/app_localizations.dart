@@ -1656,7 +1656,7 @@ abstract class AppLocalizations {
   /// No description provided for @modeQuickHint.
   ///
   /// In tr, this message translates to:
-  /// **'6–7 yeni ürün önerisi; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 10 saniye.'**
+  /// **'10 yeni ürün: fotoğraftaki ürünlere dayalı alternatifler ve eksik kategoriler; menüdeki 7 ürüne opsiyon, malzeme ve açıklama. Yaklaşık 15 saniye.'**
   String get modeQuickHint;
 
   /// No description provided for @modeFullTitle.
@@ -1668,7 +1668,7 @@ abstract class AppLocalizations {
   /// No description provided for @modeFullHint.
   ///
   /// In tr, this message translates to:
-  /// **'Menü mutfağın hedef ürün sayısına tamamlanır; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.'**
+  /// **'Fotoğraftaki ürünlere dayalı alternatifler ve mutfağın hedefine kadar yeni ürün; her ürüne opsiyon, malzeme ve açıklama. 20–30 saniye.'**
   String get modeFullHint;
 
   /// No description provided for @debugToggle.
@@ -1992,7 +1992,7 @@ abstract class AppLocalizations {
   /// No description provided for @tapToRemove.
   ///
   /// In tr, this message translates to:
-  /// **'Ürüne dokun, kartı aç. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.'**
+  /// **'Opsiyon, malzeme ya da açıklamaya tek dokunuşla bak. Satıcının cevabını “Evet”, “Düşünecek” ya da “Hayır” ile işaretle.'**
   String get tapToRemove;
 
   /// No description provided for @answerYes.
@@ -2318,6 +2318,84 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Analiz tamamlanamadı. Tekrar dene.'**
   String get errorRetry;
+
+  /// No description provided for @alternativeOf.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} alternatifi'**
+  String alternativeOf(String name);
+
+  /// No description provided for @quickOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Opsiyon {count}'**
+  String quickOptions(int count);
+
+  /// No description provided for @quickRemovables.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkar {count}'**
+  String quickRemovables(int count);
+
+  /// No description provided for @quickExtras.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekstra {count}'**
+  String quickExtras(int count);
+
+  /// No description provided for @quickDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama'**
+  String get quickDescription;
+
+  /// No description provided for @expandAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü aç'**
+  String get expandAll;
+
+  /// No description provided for @collapseAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü kapat'**
+  String get collapseAll;
+
+  /// No description provided for @searchProducts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ürün ara'**
+  String get searchProducts;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu aramaya uyan ürün yok.'**
+  String get noSearchResults;
+
+  /// No description provided for @alternativesOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alternatifler {count}'**
+  String alternativesOnly(int count);
+
+  /// No description provided for @allProducts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get allProducts;
+
+  /// No description provided for @deviceAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip hesabı'**
+  String get deviceAccount;
+
+  /// No description provided for @deviceAccountHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihaz ekip hesabına otomatik bağlı; giriş gerekmez.'**
+  String get deviceAccountHint;
 }
 
 class _AppLocalizationsDelegate

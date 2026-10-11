@@ -125,14 +125,16 @@ class SettingsScreen extends ConsumerWidget {
           Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), child: SectionLabel(l10n.account)),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: Text(session?.user.name ?? ''),
-            subtitle: Text(session?.user.email ?? ''),
+            title: Text(session?.user.name ?? (deviceSignIn ? l10n.deviceAccount : '')),
+            subtitle: Text(deviceSignIn ? l10n.deviceAccountHint : (session?.user.email ?? '')),
           ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: Text(l10n.logout),
-            onTap: () => ref.read(authControllerProvider.notifier).logout(),
-          ),
+          // A build that signs itself in has nothing to sign out of: it would only sign in again (D-199).
+          if (!deviceSignIn)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: Text(l10n.logout),
+              onTap: () => ref.read(authControllerProvider.notifier).logout(),
+            ),
           const Divider(),
           ListTile(leading: const Icon(Icons.info_outline), title: Text(l10n.about), subtitle: Text(l10n.version(appVersion))),
           const Padding(padding: EdgeInsets.all(16), child: DisclaimerBanner()),

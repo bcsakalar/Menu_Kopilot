@@ -91,6 +91,9 @@ class ApiClient {
     required String baseUrl,
     required this.tokens,
     this.onSessionExpired,
+    this.onSessionChanged,
+    this.appKey = '',
+    this.deviceName = 'menu-kopilot',
     HttpClientAdapter? adapter,
   }) {
     final options = BaseOptions(
@@ -112,8 +115,39 @@ class ApiClient {
 
   final TokenStore tokens;
   final void Function()? onSessionExpired;
+
+  /// A session opened or replaced by the client itself (device sign-in, D-199).
+  final void Function(AuthSession session)? onSessionChanged;
+
+  /// The key the app was built with (`--dart-define=APP_ACCESS_KEY`). Set: the device signs itself in to the team
+  /// account — no login screen, ever. Empty (a development build): e-mail and password as before.
+  final String appKey;
+  final String deviceName;
   late final Dio _dio;
   late final Dio _refreshDio;
+  Future<AuthSession?>? _enrolling;
+
+  static bool _isAuthPath(String path) =>
+      path.startsWith('/auth/login') || path.startsWith('/auth/refresh') || path.startsWith('/auth/device');
+
+  /// The stored session, or — in a build with the app key — a new one opened for this device. Concurrent callers
+  /// share one sign-in. Throws [DioException] when the server cannot be reached.
+  Future<AuthSession?> ensureSession() async {
+    final session = await tokens.read();
+    if (session != null || appKey.isEmpty) return session;
+    return _enrollOnce();
+  }
+
+  Future<AuthSession?> _enrollOnce() => _enrolling ??= _enroll().whenComplete(() => _enrolling = null);
+
+  Future<AuthSession?> _enroll() async {
+    final response = await _refreshDio.post<Json>('/auth/device', data: {'appKey': appKey, 'deviceName': deviceName});
+    final session = AuthSession.fromJson(response.data ?? const {});
+    if (session.accessToken.isEmpty) return null;
+    await tokens.write(session);
+    onSessionChanged?.call(session);
+    return session;
+  }
 
   static String _normalizeBase(String base) {
     final trimmed = base.trim().replaceAll(RegExp(r'/+$'), '');
@@ -121,8 +155,15 @@ class ApiClient {
   }
 
   Future<void> _attachToken(RequestOptions options, RequestInterceptorHandler handler) async {
-    if (!options.path.startsWith('/auth/login') && !options.path.startsWith('/auth/refresh')) {
-      final session = await tokens.read();
+    if (!_isAuthPath(options.path)) {
+      AuthSession? session;
+      try {
+        session = await ensureSession();
+      } on DioException {
+        // Offline on the very first start: the request goes without a token and fails as a network error, which the
+        // screens already handle (the analysis is queued); the next request signs in.
+        session = null;
+      }
       if (session != null) options.headers['authorization'] = 'Bearer ${session.accessToken}';
     }
     handler.next(options);
@@ -136,22 +177,42 @@ class ApiClient {
       return;
     }
     final session = await tokens.read();
-    if (session == null) {
+    if (session == null && appKey.isEmpty) {
+      handler.next(error);
+      return;
+    }
+    AuthSession? fresh;
+    if (session != null) {
+      try {
+        final response = await _refreshDio.post<Json>('/auth/refresh', data: {'refreshToken': session.refreshToken});
+        fresh = AuthSession.fromJson(response.data ?? const {});
+        await tokens.write(fresh);
+      } on DioException {
+        fresh = null;
+      }
+    }
+    // D-199: a session the server no longer knows (revoked, expired) is replaced by a new device sign-in.
+    if (fresh == null && appKey.isNotEmpty) {
+      await tokens.clear();
+      try {
+        fresh = await _enrollOnce();
+      } on DioException {
+        fresh = null;
+      }
+    }
+    if (fresh == null) {
+      await tokens.clear();
+      onSessionExpired?.call();
       handler.next(error);
       return;
     }
     try {
-      final response = await _refreshDio.post<Json>('/auth/refresh', data: {'refreshToken': session.refreshToken});
-      final refreshed = AuthSession.fromJson(response.data ?? const {});
-      await tokens.write(refreshed);
       final request = error.requestOptions
         ..extra['auth_retry'] = true
-        ..headers['authorization'] = 'Bearer ${refreshed.accessToken}';
+        ..headers['authorization'] = 'Bearer ${fresh.accessToken}';
       handler.resolve(await _dio.fetch<Object?>(request));
-    } on DioException {
-      await tokens.clear();
-      onSessionExpired?.call();
-      handler.next(error);
+    } on DioException catch (e) {
+      handler.next(e);
     }
   }
 

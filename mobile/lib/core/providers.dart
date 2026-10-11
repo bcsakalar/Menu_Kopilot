@@ -18,6 +18,14 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
 /// Build-time default (e.g. `--dart-define=API_BASE_URL=https://api.example.com`); editable at login/settings.
 const String defaultServerUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+
+/// D-199: the key the release build carries (`--dart-define=APP_ACCESS_KEY=…`, the server's APP_ACCESS_KEY). With it
+/// the app signs itself in to the team account and opens straight to work — no e-mail, no password. Without it (a
+/// development build) the login screen is used as before.
+const String appAccessKey = String.fromEnvironment('APP_ACCESS_KEY', defaultValue: '');
+
+/// True when this build signs itself in.
+bool get deviceSignIn => appAccessKey.isNotEmpty;
 const String serverUrlKey = 'server.url';
 
 class ServerUrlController extends AsyncNotifier<String> {
@@ -39,12 +47,29 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     baseUrl: url.isEmpty ? 'http://localhost' : url,
     tokens: ref.watch(tokenStoreProvider),
     onSessionExpired: () => ref.read(authControllerProvider.notifier).sessionExpired(),
+    onSessionChanged: (session) => ref.read(authControllerProvider.notifier).sessionChanged(session),
+    appKey: appAccessKey,
+    deviceName: 'menu-kopilot-${Platform.operatingSystem}',
   );
 });
 
 class AuthController extends AsyncNotifier<AuthSession?> {
   @override
-  Future<AuthSession?> build() => ref.read(tokenStoreProvider).read();
+  Future<AuthSession?> build() async {
+    final stored = await ref.read(tokenStoreProvider).read();
+    if (stored != null || !deviceSignIn) return stored;
+    try {
+      return await ref.read(apiClientProvider).ensureSession();
+    } on Object {
+      // Offline on the first start: the app opens anyway, and the first request that reaches the server signs in.
+      return null;
+    }
+  }
+
+  /// The client opened a new device session by itself (D-199).
+  void sessionChanged(AuthSession session) {
+    state = AsyncData(session);
+  }
 
   Future<void> login({required String serverUrl, required String email, required String password}) async {
     state = const AsyncLoading();

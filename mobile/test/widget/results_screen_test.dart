@@ -471,7 +471,10 @@ void main() {
       final soup = find.byKey(const ValueKey('product-card-soup'));
       expect(find.descendant(of: soup, matching: find.text('Mercimek Çorbası')), findsOneWidget);
       expect(find.descendant(of: soup, matching: find.text('Yeni ürün')), findsOneWidget);
-      expect(find.descendant(of: soup, matching: find.text('1 opsiyon grubu · 2 çıkarılabilir · 2 ekstra · açıklama')), findsOneWidget);
+      // D-198: a closed card shows its sections as buttons with their counts — one tap away during the call.
+      for (final label in ['Opsiyon 1', 'Çıkar 2', 'Ekstra 2', 'Açıklama']) {
+        expect(find.descendant(of: soup, matching: find.text(label)), findsOneWidget, reason: label);
+      }
       expect(find.descendant(of: soup, matching: find.text('Opsiyonlar')), findsNothing);
       expect(find.byKey(const ValueKey('accept-card-soup')), findsNothing);
 
@@ -488,12 +491,22 @@ void main() {
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('chip-r|Pul Biber')));
       await openCard(tester, 'card-soup');
-      expect(find.text('1 opsiyon grubu · 1 çıkarılabilir · 2 ekstra · açıklama'), findsOneWidget);
+      expect(find.text('Çıkar 1'), findsOneWidget);
 
       await openCard(tester, 'card-soup');
       await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
       expect(find.text('Evet dedi'), findsOneWidget);
       expect(find.byKey(const ValueKey('chip-r|Tereyağlı Sos')), findsNothing);
+    });
+
+    testWidgets('a quick button opens that section over the list, with the answer at hand (D-198)', (tester) async {
+      await open(tester);
+      await tapOn(tester, find.byKey(const ValueKey('quick-extras-card-soup')));
+      expect(find.byKey(const Key('sheet-tabs')), findsOneWidget);
+      expect(find.text('Ekstra malzemeler'), findsWidgets);
+      await tapOn(tester, find.byKey(const ValueKey('accept-card-soup')));
+      expect(find.byKey(const Key('sheet-tabs')), findsNothing);
+      expect(find.text('Evet dedi'), findsOneWidget);
     });
 
     testWidgets('a tab with a single product shows it open', (tester) async {
