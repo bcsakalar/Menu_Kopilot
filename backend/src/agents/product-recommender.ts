@@ -305,7 +305,7 @@ function alternativesFromPool(
     if (taken(row.normalized, row.id) || picked.some((p) => p.normalized === row.normalized || sameProductName(p.normalized, row.normalized))) continue;
     perType.set(row.typeKey, (perType.get(row.typeKey) ?? 0) + 1);
     picked.push(
-      poolItem(row, row.categoryKey, row.sameType ? `${row.basedOn} ile aynı ocaktan çıkar` : `${row.basedOn} malzemesiyle yapılır`, {
+      poolItem(row, row.categoryKey, row.sameType ? `${row.basedOn} yapan mutfağın ürünü` : `${row.basedOn} malzemesiyle yapılır`, {
         basedOn: row.basedOn,
         alternative: true,
       }),

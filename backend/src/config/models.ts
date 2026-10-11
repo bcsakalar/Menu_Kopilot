@@ -250,8 +250,10 @@ export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = 
     // D-198: low effort. With medium, six products with their options ran past the 8 s attempt on both providers
     // (the reasoning tokens also eat Groq's free 8 K tokens a minute); the kitchen brief does the thinking now.
     { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 8000 } },
-    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
+    // Flash-Lite before Flash: measured on production, Flash needed more than the 8 s attempt for six products with
+    // their options even at low thinking, so a rate-limited Groq left the run to the pool; Flash-Lite answers in 2-4 s.
     { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
+    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
   ],
   // Option groups are long output but a well-understood shape: low reasoning, high token ceiling.
   'agent.options': [

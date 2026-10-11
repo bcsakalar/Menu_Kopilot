@@ -146,6 +146,12 @@ export const GENERIC_TYPE = 'tabak-yemek';
 
 /** The two categories a stray keyword most often gets wrong — and the two that change what a card may carry. */
 const DECISIVE_CATEGORIES = new Set(['icecek', 'tatli']);
+/**
+ * D-198: the sides a main dish gets filed under because of the bread or the meze it comes with — "Tam Ekmek Kokoreç"
+ * as a side ("ekmek"), "Atom Kokoreç" as a meze ("atom"). Counted there, a kokoreç shop read as "no main course at
+ * all" and was offered Turşu Tabağı and Mısır as mains.
+ */
+const SIDE_CATEGORIES = new Set(['yan-urun', 'salata-meze']);
 
 /**
  * The menu category of a product, reconciled with its type (D-183). The keyword index takes the first category any word of
@@ -162,6 +168,7 @@ export function reconcileCategory(
 ): string {
   const typeCategory = resolved.type.categoryKey;
   if (headingDecided || !resolved.byName || typeCategory === keywordCategory || !known(typeCategory)) return keywordCategory;
+  if (typeCategory === 'ana-yemek' && SIDE_CATEGORIES.has(keywordCategory)) return typeCategory;
   return DECISIVE_CATEGORIES.has(keywordCategory) || DECISIVE_CATEGORIES.has(typeCategory) ? typeCategory : keywordCategory;
 }
 

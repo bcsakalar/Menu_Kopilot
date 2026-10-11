@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { KitchenProfile } from '../../src/agents/kitchen.js';
 import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
-import { ProductTypeIndex } from '../../src/domain/product-type.js';
+import { ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
 
 const index = new ProductTypeIndex(
   SEED_PRODUCT_TYPES,
@@ -58,5 +58,11 @@ describe('kitchen profile — only what this kitchen can make', () => {
     expect(brief.makes).toContain('Adana Kebap');
     expect(brief.avoid).toContain('döner');
     expect(brief.avoid).not.toContain('kebap');
+  });
+
+  it('a main dish served in bread is counted as a main, not as a side', () => {
+    expect(reconcileCategory('yan-urun', false, index.resolve('Tam Ekmek Kokoreç'), () => true)).toBe('ana-yemek');
+    // The restaurant's own heading still decides.
+    expect(reconcileCategory('yan-urun', true, index.resolve('Tam Ekmek Kokoreç'), () => true)).toBe('yan-urun');
   });
 });
