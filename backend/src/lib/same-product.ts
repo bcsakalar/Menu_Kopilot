@@ -53,6 +53,8 @@ const SYNONYMS: Readonly<Record<string, string>> = {
   durumu: 'durum',
   wrap: 'durum',
   suyu: 'su',
+  // "Taze Sıkılmış Portakal Suyu" is the pool's "Taze Sıkma Portakal Suyu" (D-198: suggested next to it on production).
+  sikilmis: 'sikma',
 };
 
 /** "sucuklu" → "sucuk", "kasarli" → "kasar", "firinda" → "firin": the word the family lists. */

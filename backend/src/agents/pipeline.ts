@@ -11,6 +11,7 @@ import type { CategoryGap } from '../domain/category.js';
 import { reconcileCategory } from '../domain/product-type.js';
 import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, type MergedItem } from './dedupe.js';
+import { KitchenProfile } from './kitchen.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
 import { runOptionModifier, type OptionModifierResult } from './option-modifier.js';
@@ -278,6 +279,13 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   }));
   input.emit({ type: 'menu', items: menu });
 
+  // What this kitchen can make, read off its own products (D-198): every new product must fit it.
+  const kitchen = new KitchenProfile(
+    existing.map((item) => ({ name: item.canonicalName ?? item.rawName })),
+    deps.productTypes,
+    cuisineSlug,
+  );
+
   // ---- 3. Gap Analyst -----------------------------------------------------------------------------------------
   const analysis = await safely(
     'gap_analyst',
@@ -331,7 +339,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     agent: 'product_recommender',
     message:
       plan.mode === 'full'
-        ? `${plan.products} ürün ve ${plan.optionTargets} ürün için opsiyon hazırlanıyor`
+        ? `${plan.products + plan.alternatives} ürün ve ${plan.optionTargets} ürün için opsiyon hazırlanıyor`
         : 'Eksik ürünler ve opsiyonlar hazırlanıyor',
   });
 
@@ -352,15 +360,18 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
         runProductRecommender(
           deps,
           {
-            cuisine: { id: classification.cuisine.id, name: classification.cuisine.name },
+            cuisine: { id: classification.cuisine.id, name: classification.cuisine.name, slug: cuisineSlug },
             graph: input.graph,
             priceSegment: classification.priceSegment,
             existing,
+            kitchen,
+            categories: analysis.categories.map((c) => ({ key: c.key, label: c.label })),
             quota: quotaRows(analysis.categories, plan.quota),
             current: analysis.current,
             target: analysis.target,
             notes: input.notes,
             limit: plan.products,
+            alternatives: plan.alternatives,
             attemptTimeoutMs: plan.attemptTimeoutMs,
             aiUsable,
             fillUp: plan.mode === 'quick',
@@ -411,6 +422,8 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
           target: analysis.target,
           cuisineSlug,
           templatePayloads: recommendation.templatePayloads,
+          kitchen,
+          alternatives: plan.alternatives,
         },
         run,
       ),
@@ -499,6 +512,8 @@ function newProductCard(
     importance: item.source === 'db' ? item.importance : 0,
     plain: deps.productTypes.get(item.productType)?.plain === true,
     answers: deps.feedback.productStats(context.cuisineId, item.name),
+    basedOn: item.alternative ? item.basedOn : null,
+    reason: item.reason,
   });
   return {
     section: 'new_product',
@@ -526,6 +541,7 @@ function newProductCard(
     payload: item.payload,
     productType: item.productType,
     confidence: item.confidence,
+    basedOn: item.alternative ? item.basedOn : null,
     // Without a solid fact to say, the recommender's own reason is still better than silence.
     pitch: pitch.text || item.reason,
     priority: pitch.priority,
@@ -575,6 +591,7 @@ function optionCard(
     payload: null,
     productType: card.productType,
     confidence: card.confidence,
+    basedOn: null,
     pitch: pitch.text,
     priority: pitch.priority,
     status: 'pending',
@@ -613,6 +630,7 @@ function fixCards(deps: Pick<AgentDeps, 'categories'>, items: readonly ExistingI
       payload: null,
       productType: item.productType,
       confidence: null,
+      basedOn: null,
       pitch: '',
       priority: 0,
       status: 'pending' as const,

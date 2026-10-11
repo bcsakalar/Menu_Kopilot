@@ -4,7 +4,8 @@ import type { CategoryGap } from '../domain/category.js';
  * The run plan — how much work one analysis does, and how that work is split between the cuisine's categories.
  *
  * Two modes, chosen by the user on the home screen:
- *   quick — "öneri versen yeter": a handful of products from DIFFERENT categories plus a few option cards.
+ *   quick — "öneri versen yeter": ten products — alternatives built on the menu's own products plus a few from
+ *           DIFFERENT categories — and a few option cards.
  *   full  — "hakikaten işimizi yapalım": recommend until the menu would actually reach the cuisine's minimum,
  *           and ask for options/ingredients on every product whose options are not already known.
  *
@@ -16,14 +17,23 @@ export const ANALYSIS_MODES = ['quick', 'full'] as const;
 export type AnalysisMode = (typeof ANALYSIS_MODES)[number];
 export const DEFAULT_MODE: AnalysisMode = 'full';
 
-/** Quick mode: "5-6 ürün, ayrı kategorilerden". */
-const QUICK_PRODUCTS = 6;
+/**
+ * Quick mode, D-198: ten new products — six ALTERNATIVES built on the products in the photo (the same meat, dough or
+ * dessert base in a form the menu lacks: Adana → Beyti, kokoreç → kokoreç dürüm) and four from the categories the
+ * menu is short of, spread over different ones. Before it was six from the category gaps alone, which is how a
+ * kokoreç shop was offered waffle and kumpir.
+ */
+const QUICK_PRODUCTS = 4;
+const QUICK_ALTERNATIVES = 6;
+/** Full mode: on top of the category quota, alternatives built on the menu's own products. */
+const FULL_ALTERNATIVES = 8;
 /**
  * D-181. A menu this small is the "ürün ekle" case — one or two products typed in. It gets one more suggestion, and a
  * category may give two: with one product on the menu there is no "second pide" to avoid, only a menu to start.
  */
 const SMALL_MENU = 3;
-const QUICK_PRODUCTS_SMALL_MENU = 7;
+const QUICK_PRODUCTS_SMALL_MENU = 5;
+const QUICK_ALTERNATIVES_SMALL_MENU = 5;
 /**
  * D-181. Quick mode asks the MODEL about this many menu products; every other product still gets its card, from the pool
  * or the knowledge base, at no model cost. "Yalandan olan" mode is the old shape plus a little more: three cards
@@ -58,7 +68,7 @@ const LAST_RESORT_WEIGHT = 0.01;
  * longer because it is explicitly the "do the whole job" button, and the phone shows counts and the menu long
  * before this fires.
  */
-const QUICK_DEADLINE_MS = 11_000;
+const QUICK_DEADLINE_MS = 14_000;
 const FULL_DEADLINE_MS = 26_000;
 
 /**
@@ -67,7 +77,9 @@ const FULL_DEADLINE_MS = 26_000;
  * and measured on production the primary provider needs longer than 6 s for that; cutting it off there wasted the
  * call AND the fallback, so the run came back with pool cards only.
  */
-const QUICK_ATTEMPT_MS = 6_000;
+// D-198: one quick answer now carries ten products with their options and ingredients — measured at 3–5 s on the
+// primary provider, so 6 s cut off the healthy-but-long ones.
+const QUICK_ATTEMPT_MS = 8_000;
 const FULL_ATTEMPT_MS = 11_000;
 
 /**
@@ -75,14 +87,20 @@ const FULL_ATTEMPT_MS = 11_000;
  * gives the recommender a longer list to fill, so it needs room for those calls; quick mode is the old shape.
  */
 export function modeBudget(mode: AnalysisMode): { extraLlmCalls: number; extraInputTokens: number } {
-  // Quick mode's second option batch is the "biraz daha fazlası": one call on top of the old shape.
-  return mode === 'full' ? { extraLlmCalls: 6, extraInputTokens: 20_000 } : { extraLlmCalls: 1, extraInputTokens: 4_000 };
+  // Quick mode's second option batch is the "biraz daha fazlası"; the alternatives (D-198) add one recommend call in
+  // full mode and a longer prompt — the kitchen brief — in both.
+  return mode === 'full' ? { extraLlmCalls: 7, extraInputTokens: 26_000 } : { extraLlmCalls: 2, extraInputTokens: 8_000 };
 }
 
 export interface RunPlan {
   mode: AnalysisMode;
-  /** How many new products this run aims for — the sum of the quota below. */
+  /** How many new products this run aims for from the category quota — the sum of the quota below. */
   products: number;
+  /**
+   * How many new products are built on the menu's own products (D-198), on top of the quota: alternatives the
+   * kitchen can make with what it already has. They are not counted against a category.
+   */
+  alternatives: number;
   /** How many menu products get a card (options, ingredients, description) — all of them, up to the cap. */
   optionTargets: number;
   /** How many of those the model is asked about; the rest are completed from the pool and the knowledge base. */
@@ -193,6 +211,7 @@ export function planRun(input: PlanInput): RunPlan {
     return {
       mode: 'quick',
       products: sum(quota),
+      alternatives: small ? QUICK_ALTERNATIVES_SMALL_MENU : QUICK_ALTERNATIVES,
       optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
       modelOptionTargets: Math.min(QUICK_OPTION_TARGETS, input.needOptions),
       optionBatches: QUICK_OPTION_BATCHES,
@@ -221,6 +240,7 @@ export function planRun(input: PlanInput): RunPlan {
   return {
     mode: 'full',
     products: sum(quota),
+    alternatives: FULL_ALTERNATIVES,
     optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
     modelOptionTargets: Math.min(FULL_OPTION_BATCHES * OPTION_BATCH_SIZE, input.needOptions),
     optionBatches: FULL_OPTION_BATCHES,

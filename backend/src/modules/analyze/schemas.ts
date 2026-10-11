@@ -71,6 +71,11 @@ export const cardDtoSchema = z.object({
   productType: z.string().nullable().default(null),
   /** 0-100: how sure the pipeline is about the card. Null on fix cards and on older cards. */
   confidence: z.number().int().nullable().default(null),
+  /**
+   * Section A (D-198): the menu product this new product is an alternative of ("Adana Kebap" for "Beyti"), as the
+   * menu spells it; null for a product that fills a category, and on older cards.
+   */
+  basedOn: z.string().nullable().default(null),
   /** One sentence to say to the seller on the call — why this card (D-196). '' on older cards. */
   pitch: z.string().default(''),
   /** The order of the call: higher first (D-196). The cards are also stored in this order. */

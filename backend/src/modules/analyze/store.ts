@@ -165,6 +165,8 @@ export class AnalyzeStore {
         // …nor, before the call screen, a sentence for the seller and a place in the call.
         pitch: (row.payload as { pitch?: string }).pitch ?? '',
         priority: (row.payload as { priority?: number }).priority ?? 0,
+        // …nor, before D-198, the menu product an alternative is built on.
+        basedOn: (row.payload as { basedOn?: string | null }).basedOn ?? null,
         id: row.id,
         runId,
         status: statusOf(row.answer, row.accepted),
@@ -350,6 +352,7 @@ export class AnalyzeStore {
       ...card,
       pitch: card.pitch ?? '',
       priority: card.priority ?? 0,
+      basedOn: card.basedOn ?? null,
       productType: row.item.productType ?? card.productType ?? null,
       confidence: row.item.confidence ?? card.confidence ?? null,
       id: row.item.id,

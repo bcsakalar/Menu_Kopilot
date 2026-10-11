@@ -166,9 +166,11 @@ describe('run plan — how many products and from which categories', () => {
     ]),
   );
 
-  it('quick mode: six suggestions spread over six different categories, no combos, every menu product completed', () => {
+  it('quick mode: ten suggestions — six alternatives, four spread over different categories, no combos, every menu product completed', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 8, missing: 20, needOptions: 10 });
-    expect(plan.products).toBe(6);
+    // D-198: alternatives built on the menu's own products, on top of the category spread.
+    expect(plan.alternatives).toBe(6);
+    expect(plan.products).toBe(4);
     // Every menu product gets its four sections; the model is asked about seven, in two parallel calls at most,
     // and the pool and the knowledge base complete the rest at no model cost.
     expect(plan.optionTargets).toBe(10);
@@ -176,11 +178,11 @@ describe('run plan — how many products and from which categories', () => {
     expect(plan.optionBatches).toBe(2);
     // One per category — the user's "5 farklı kategoriden 5-6 ürün".
     expect([...plan.quota.values()].every((v) => v <= 1)).toBe(true);
-    expect(quotaRows(kebap, plan.quota)).toHaveLength(6);
+    expect(quotaRows(kebap, plan.quota)).toHaveLength(4);
     expect(plan.quota.get('menu-kampanya')).toBe(0);
   });
 
-  it('quick mode still gives six when the cuisine has fewer categories than that', () => {
+  it('quick mode still spreads its four category products when the cuisine has few categories', () => {
     // A döner shop: five categories besides the combo, one of them already full.
     const doner = categoryGaps(
       [
@@ -198,14 +200,15 @@ describe('run plan — how many products and from which categories', () => {
       ]),
     );
     const plan = planRun({ mode: 'quick', categories: doner, current: 7, missing: 7, needOptions: 5 });
-    expect(plan.products).toBe(6);
-    expect([...plan.quota.values()].every((v) => v <= 2)).toBe(true);
+    expect(plan.products).toBe(4);
+    expect(plan.alternatives).toBe(6);
     expect(plan.quota.get('menu-kampanya')).toBe(0);
-    // Still spread first: every usable category has one before any has two.
-    expect(['ana-yemek', 'ara-sicak', 'salata-meze', 'yan-urun', 'icecek'].every((key) => (plan.quota.get(key) ?? 0) >= 1)).toBe(true);
+    // Still spread first: four different categories, none with two.
+    expect([...plan.quota.values()].every((v) => v <= 1)).toBe(true);
+    expect(quotaRows(doner, plan.quota)).toHaveLength(4);
   });
 
-  it('quick mode gives six to a kitchen with only two categories', () => {
+  it('quick mode gives its four category products to a kitchen with only two categories', () => {
     // An ice-cream shop: desserts and drinks, nothing else.
     const icecream = categoryGaps(
       [
@@ -218,17 +221,18 @@ describe('run plan — how many products and from which categories', () => {
       ]),
     );
     const plan = planRun({ mode: 'quick', categories: icecream, current: 4, missing: 5, needOptions: 3 });
-    expect(plan.products).toBe(6);
-    expect(plan.quota.get('tatli')).toBe(3);
-    expect(plan.quota.get('icecek')).toBe(3);
+    expect(plan.products).toBe(4);
+    expect(plan.quota.get('tatli')).toBe(2);
+    expect(plan.quota.get('icecek')).toBe(2);
     // A kitchen with nothing but combos to offer gets none: the loop ends instead of spinning.
     const combos = categoryGaps([{ key: 'menu-kampanya', label: 'Menü & Kampanya', minItems: 1, sortOrder: 1 }], new Map());
     expect(planRun({ mode: 'quick', categories: combos, current: 4, missing: 1, needOptions: 0 }).products).toBe(0);
   });
 
-  it('quick mode on a one-product menu ("ürün ekle"): seven suggestions, a category may give two', () => {
+  it('quick mode on a one-product menu ("ürün ekle"): ten suggestions, half of them alternatives', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 1, missing: 19, needOptions: 1 });
-    expect(plan.products).toBe(7);
+    expect(plan.products).toBe(5);
+    expect(plan.alternatives).toBe(5);
     expect([...plan.quota.values()].every((v) => v <= 2)).toBe(true);
     expect(plan.quota.get('menu-kampanya')).toBe(0);
     expect(plan.optionTargets).toBe(1);

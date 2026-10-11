@@ -7,6 +7,7 @@ import { containsPriceAmount, stripPriceAmounts } from '../lib/price-guard.js';
 import { sameProductName } from '../lib/same-product.js';
 import { trigramSimilarity } from '../lib/trigram.js';
 import { ground } from './grounding.js';
+import type { KitchenProfile } from './kitchen.js';
 import type { OptionCard } from './option-modifier.js';
 import type { RecommendedItem } from './product-recommender.js';
 import type { AgentDeps, AgentRunContext, ExistingItem } from './types.js';
@@ -113,6 +114,13 @@ export interface ValidatorInput {
   cuisineSlug?: string | null | undefined;
   /** Pool templates the recommendations point at; a template-backed card carries the whole template. */
   templatePayloads?: ReadonlyMap<string, TemplatePayload> | undefined;
+  /**
+   * What the menu shows this kitchen can make (D-198). The recommender already filters by it; checked again here
+   * because a model answer may have been renamed to a pool template on the way.
+   */
+  kitchen?: KitchenProfile | undefined;
+  /** The plan's alternatives (D-198): part of the run's total that a quick fill-up may reach. */
+  alternatives?: number | undefined;
 }
 
 /** Index of everything already on the menu or already accepted in this run. */
@@ -241,7 +249,7 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
       // The last line of defence for the rule the whole redesign exists for: never more of a category than the
       // menu is actually short of. Both recommender paths already respect it; this makes it impossible to skip.
       const quota = new Map(input.categoryQuota);
-      const runTotal = [...input.categoryQuota.values()].reduce((sum, want) => sum + want, 0);
+      const runTotal = [...input.categoryQuota.values()].reduce((sum, want) => sum + want, 0) + (input.alternatives ?? 0);
       const newProducts: ValidatedNewProduct[] = [];
       for (const raw of input.recommended) {
         const pool = raw.templateId ? input.templatePayloads?.get(raw.templateId) : undefined;
@@ -256,7 +264,20 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           dropped.push({ card: raw.name, reason: 'menüde zaten var' });
           continue;
         }
-        const left = quota.get(raw.categoryKey);
+        if (input.kitchen) {
+          const { type, byName } = input.kitchen.typeOf(name, raw.categoryKey);
+          const fit = input.kitchen.fit(name, type.key, byName);
+          if (!fit.ok) {
+            dropped.push({ card: raw.name, reason: `bu mutfakta yapılamaz (${fit.reason ?? type.key})` });
+            continue;
+          }
+          if (input.kitchen.coversDrink(name, type.key)) {
+            dropped.push({ card: raw.name, reason: 'menüde zaten var (içecek)' });
+            continue;
+          }
+        }
+        // An alternative of a menu product (D-198) is outside the category quota: the plan counted it separately.
+        const left = raw.alternative ? Number.POSITIVE_INFINITY : quota.get(raw.categoryKey);
         if (left === undefined) {
           dropped.push({ card: raw.name, reason: `kategori bu mutfakta yok (${raw.categoryKey})` });
           continue;
@@ -272,7 +293,7 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           continue;
         }
         grounding.push(...built.notes.map((n) => `${name}: ${n}`));
-        quota.set(raw.categoryKey, Math.max(0, left - 1));
+        if (!raw.alternative) quota.set(raw.categoryKey, Math.max(0, left - 1));
         taken.add(normalized, raw.templateId);
         newProducts.push({
           ...raw,

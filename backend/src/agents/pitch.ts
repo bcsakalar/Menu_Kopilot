@@ -21,6 +21,13 @@ export interface Pitch {
 const MIN_ANSWERS = 3;
 
 const lowerTr = (text: string): string => text.toLocaleLowerCase('tr-TR');
+/** "Aynı harçla…" → "aynı harçla…", but "Adana…" stays: only a plain first word is lowered. */
+const lowerFirst = (text: string): string => {
+  const [first = '', ...rest] = text.split(' ');
+  return /^[A-ZÇĞİÖŞÜ][a-zçğıöşü]+$/u.test(first) && rest.length > 0 && !/^[A-ZÇĞİÖŞÜ]/u.test(rest[0] ?? '')
+    ? [lowerTr(first), ...rest].join(' ')
+    : text;
+};
 
 /** "menünüzde hiç tatlı yok; …" → "Menünüzde hiç tatlı yok; …." */
 function sentence(parts: readonly string[]): string {
@@ -40,6 +47,10 @@ export interface NewProductPitchInput {
   plain: boolean;
   /** What sellers of this cuisine answered about this product before ("Evet" / "Hayır"). */
   answers: Tally | undefined;
+  /** D-198: the menu product this one is an alternative of; null for a category product. */
+  basedOn?: string | null;
+  /** The recommender's one-line reason; said after the alternative, when there is room. */
+  reason?: string;
 }
 
 /**
@@ -58,6 +69,14 @@ export function newProductPitch(input: NewProductPitchInput): Pitch {
   } else if (gap && label && gap.missing > 0) {
     parts.push(`${lowerTr(label)} tarafınız az (${gap.present}/${gap.minItems})`);
     priority = 80;
+  }
+
+  // An alternative is the strongest "neden" after an empty category: the seller already makes its base (D-198).
+  if (input.basedOn) {
+    parts.push(`${input.basedOn} ürününüzün alternatifi`);
+    const why = (input.reason ?? '').trim().replace(/[.!]+$/u, '');
+    if (why) parts.push(lowerFirst(why));
+    priority = Math.max(priority, 85);
   }
 
   const answered = input.answers ? input.answers.accepted + input.answers.removed : 0;

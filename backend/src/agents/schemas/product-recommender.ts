@@ -27,6 +27,12 @@ export const recommendedProductSchema = z.object({
     .max(40)
     .describe('Görüşmede satıcıya sorulacak tahmini aralık, ör. "40–60 TL". Emin değilsen boş bırak.'),
   reason: z.string().max(200).describe('Tek satır: bu ürün bu mutfakta neden olmalı'),
+  /**
+   * D-198. The menu product an ALTERNATIVE is built on ("Adana Kebap" for "Beyti"), spelled as the menu spells it;
+   * empty for a product that only fills a category. The agent checks it against the menu — a name that is not there
+   * makes the item an ordinary category suggestion.
+   */
+  basedOn: z.string().max(120).nullish().describe('Alternatifse dayandığı menü ürününün adı (menüdeki yazımıyla); değilse boş'),
   importance: z.number().describe('0–100; bu mutfakta ne kadar vazgeçilmez'),
   /**
    * The product's own options, in the same answer. A separate call per new product would cost a second round

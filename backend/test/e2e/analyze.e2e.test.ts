@@ -118,10 +118,18 @@ describe('POST /analyze — typed menu', () => {
     expect(gaps.get('ana-yemek')?.missing).toBe(1);
 
     const perCategory = new Map<string, number>();
+    const alternatives = bySection(result, 'new_product').filter((card) => card.basedOn !== null);
     for (const card of bySection(result, 'new_product')) {
       expect(card.categoryKey).not.toBeNull();
+      // D-198: the alternatives are built on the menu's own products and counted apart from the category spread.
+      if (card.basedOn !== null) continue;
       perCategory.set(card.categoryKey!, (perCategory.get(card.categoryKey!) ?? 0) + 1);
     }
+    // Every alternative names a product that is on the menu — and the menu does not get six more pides that way
+    // either: at most two of one product type.
+    const menuNames = new Set(['Kıymalı Pide', 'Kaşarlı Pide', 'Kuşbaşılı Pide', 'Karışık Pide', 'Sucuklu Yumurtalı Pide']);
+    for (const card of alternatives) expect(menuNames.has(card.basedOn!), `${card.name} ← ${card.basedOn}`).toBe(true);
+    expect(alternatives.filter((card) => card.productType === 'pide').length).toBeLessThanOrEqual(2);
     // "Öneri versen yeter": six products spread over the categories — the old recommender answered this menu with
     // six more pides. With fewer usable categories than six, a category may give a second, an open gap first (the
     // drinks here, D-189); the mains, already served by the menu, never do.
@@ -404,7 +412,8 @@ describe('degraded modes', () => {
         .cards.filter((c) => c.section === 'new_product')
         .map((c) => c.name.toLocaleLowerCase('tr-TR'));
       expect(new Set(soupNames).size, soupNames.join(', ')).toBe(soupNames.length);
-      expect(soupNames.length, soupNames.join(', ')).toBe(6);
+      // D-198: ten in quick mode — alternatives built on the menu plus the category products.
+      expect(soupNames.length, soupNames.join(', ')).toBe(10);
 
       // A home-cooking menu whose salad category has nothing left in the pool: without a model the slot used to stay
       // empty (five). Quick mode fills it from the other open categories — six, never past the run's total.
@@ -424,8 +433,8 @@ describe('degraded modes', () => {
       });
       expect(homeRes.statusCode, homeRes.body).toBe(200);
       const homeNew = homeRes.json<AnalyzeResult>().cards.filter((c) => c.section === 'new_product');
-      expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(6);
-      expect(new Set(homeNew.map((c) => c.name)).size).toBe(6);
+      expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(10);
+      expect(new Set(homeNew.map((c) => c.name)).size).toBe(10);
 
       // Two variants of one pool product stay two products: listed by their own names, never "renamed" to the pool's
       // bare "Gözleme", and not asked the filling their name already chose (D-188).
