@@ -99,6 +99,10 @@ Token economy — the database and caches answer first, the LLM is the last reso
 - The app authenticates with a short-lived JWT + rotating refresh token (hashed server side). There is a single
   account (created by the seed from `ADMIN_EMAIL` / `ADMIN_PASSWORD`); production refuses to start with the
   development defaults.
+- **No login screen in release builds (D-199):** the APK is built with `--dart-define=APP_ACCESS_KEY=<key>` (the same
+  value as `APP_ACCESS_KEY` on the server, ≥ 24 characters, e.g. `openssl rand -hex 24`) and signs itself in to the
+  team account with `POST /auth/device`. Rotating the key on the server shuts out every build that carries the old
+  one. A build without the key shows the e-mail/password screen.
 - Photos and screenshots are never stored on the server — only their SHA-256 (for caching). EXIF/GPS is stripped on
   the phone before upload.
 - Release builds of the app talk to remote servers over **HTTPS only** (plain `http://` is accepted for `localhost`,
@@ -327,7 +331,7 @@ flutter build apk --debug                       # quick test build — installs 
 flutter build apk --release                     # fat APK (all ABIs, ~65 MB)
 flutter build apk --release --split-per-abi     # smaller per-ABI APKs; most phones need app-arm64-v8a-release.apk
 # the office build: arm64 only, production server prefilled, signed with the release key
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com
+flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com --dart-define=APP_ACCESS_KEY=$env:APP_ACCESS_KEY
 ```
 
 Release signing: the production key lives in `%USERPROFILE%\.android-keys\menu-kopilot\` (`menu-kopilot-upload.jks` + a copy of

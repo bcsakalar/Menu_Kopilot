@@ -887,3 +887,38 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   and the original spec. The rules the app works with (at least 10 products, a target per cuisine, drinks as plain
   rows) stay: they are the team's own settings, editable from the app. The repository and the production database
   were searched for personal-data notices too: there were none.
+- **D-198** — **Alternatives the kitchen can make, ten in quick mode, every section one tap away** (user, testing on
+  the phone: "fotoğraf veriyorum, olmayacak ürünler öneriyor"; quick mode should give more, and options, ingredients,
+  extras and descriptions must be reachable at once during the call). Production showed why: quick mode never asked
+  the model for new products — the pool filled its six slots per cuisine by importance, so every "Sokak Lezzetleri"
+  menu (a kokoreççi, a midyeci, a dürümcü) got the same Waffle, Kumpir, Midye Tava, Et Tantuni Dürüm, and kebap
+  shops got Tavuk Döner Dürüm. (1) *Kitchen profile* (`agents/kitchen.ts`): the product types the menu sells by name,
+  what each of them can also make with the same equipment and stock (a kebap shop: dürüm, lahmacun, çorba, künefe —
+  never döner), the ingredient/form words of its products, and speciality words that need their own machine or
+  master (döner, tantuni, kokoreç, midye, kumpir, waffle, künefe, dondurma, sushi, çiğ köfte, işkembe, kelle paça,
+  katmer) — offered only to a menu that shows them. Every new product, from the pool or the model, must fit it; the
+  Validator checks again after a model answer is renamed to a pool template. Packaged drinks the menu already lists
+  under a brand ("Ayran Özerhisar", Coca Cola for "Kutu İçecek") are not suggested again; "Taze Sıkılmış" is
+  "Taze Sıkma". (2) *Alternatives*: new products built on a product of the menu — the same meat, dough or dessert
+  base in a form the menu lacks (Adana → Beyti, kokoreç → kokoreç dürüm, şam tatlısı → revani) or what is always
+  sold with it. The model is asked for them on EVERY run (recommender system v8, user v6: the kitchen brief, the
+  specialities to avoid, `basedOn`); an answer whose `basedOn` is not on the menu is judged as a category product;
+  the pool's closest products stand in when the model cannot answer. Alternatives are outside the category quota.
+  (3) *Counts*: quick = 6 alternatives + 4 category products (small menus 5 + 5), full = 8 alternatives on top of the
+  quota; quick attempt 8 s / deadline 14 s (ten products with options measured at 3–5 s), budget +1 call. The pool
+  ranks makeable products closest-to-the-menu first. (4) *Phone*: a new product built on a menu product says so
+  ("Adana Kebap alternatifi") and its sentence for the seller leads with it ("Adana Kebap ürününüzün alternatifi;
+  aynı harçla…", priority 85); a closed card shows its sections as buttons — "Opsiyon 2 · Çıkar 3 · Ekstra 4 ·
+  Açıklama" — and one tap opens that section in a sheet with tabs for the other three, "Kopyala" and the seller's
+  answer; "Tümünü aç / kapat", a search box on lists longer than six, and "Alternatifler" as a filter. App 1.6.0.
+- **D-199** — **No login screen: the app signs itself in** (user: "e-posta ve şifre gerek yok, direkt kullanıma hazır
+  olsun"; confirmed after the auto-mode check flagged it, with the trade-off below). A release build carries an app
+  key (`--dart-define=APP_ACCESS_KEY`, the server's `APP_ACCESS_KEY`, ≥ 24 characters); on the first request the
+  phone calls `POST /auth/device` with it and gets its own device session on the team account (`ADMIN_EMAIL`) —
+  rotating refresh token, revocable like any session — so history, pool and learning stay one. A session the server
+  no longer knows is replaced by a new device sign-in transparently; offline on the first start the app still opens
+  (the first request that reaches the server signs in). No login, no splash, no "Çıkış yap" in such a build; a
+  development build without the key keeps e-mail and password. *Trade-off:* the API is still closed to anyone
+  without the key (AI quota, data), but someone who extracts it from the APK can use it; rotating `APP_ACCESS_KEY`
+  on the server shuts out every build that carries the old one (then ship a new APK). The key is compared in
+  constant time and rate-limited (10/min in the API and in nginx, like the login).

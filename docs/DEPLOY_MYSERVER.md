@@ -132,7 +132,7 @@ The release APK (signed with the key in `%USERPROFILE%\.android-keys\menu-kopilo
 
 ```powershell
 cd mobile
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com
+flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com --dart-define=APP_ACCESS_KEY=$env:APP_ACCESS_KEY
 adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 ```
 
