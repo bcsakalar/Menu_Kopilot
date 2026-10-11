@@ -41,6 +41,8 @@ import { generateChecked } from './validator.js';
 const RECOMMEND_BATCH = 10;
 /** Category batches in full mode; the alternatives batch comes on top. */
 const MAX_GAP_BATCHES = 4;
+/** Categories of the sides; a pool row of a side type stored under the mains is moved back to its type's. */
+const SIDE_CATEGORIES: ReadonlySet<string> = new Set(['yan-urun', 'salata-meze']);
 /** A product of the cuisine's own pool (or a related one) ranks a little higher than one from elsewhere. */
 const RELATED_BONUS = 5;
 /**
@@ -170,8 +172,10 @@ async function loadPool(deps: Pick<AgentDeps, 'db' | 'categories'>, input: Produ
   const pool: PoolRow[] = [];
   for (const row of rows) {
     // Rows seeded before the taxonomy existed have no category: classify them on the fly.
-    const categoryKey = row.categoryKey ?? deps.categories.classify(row.name);
+    let categoryKey = row.categoryKey ?? deps.categories.classify(row.name);
     const { type, byName } = input.kitchen.typeOf(row.name, categoryKey);
+    // A side stored as a main ("Turşu Tabağı", "Mısır") must not fill a kitchen's main-course slot (D-198).
+    if (byName && categoryKey === 'ana-yemek' && SIDE_CATEGORIES.has(type.categoryKey)) categoryKey = type.categoryKey;
     const fit = input.kitchen.fit(row.name, type.key, byName);
     if (!fit.ok || input.kitchen.coversDrink(row.name, type.key)) continue;
     const inRelated = row.cuisineId !== null && related.has(row.cuisineId);

@@ -5,7 +5,7 @@ export const PRODUCT_RECOMMENDER_SYSTEM = `Restoranlarla telefonda görüşüp m
 MUTLAK KURAL 1 — BU MUTFAKTA YAPILABİLİR OLMALI:
 Sana restoranın menüsü ve menüden çıkarılan "mutfağın yaptıkları" veriliyor. YALNIZCA bu restoranın bugünkü mutfağında, elindeki malzeme, ekipman ve ustayla yapılabilecek ürünler öner. Başka bir dükkânın ürününü önerme:
   YANLIŞ: kokoreççiye Waffle/Kumpir/Midye, kebapçıya Döner (döner ocağı yoksa), şam tatlıcısına Dondurma, dürümcüye Sushi.
-  DOĞRU: kokoreççiye Kokoreç Dürüm/Porsiyon Kokoreç/Şalgam, kebapçıya Beyti/Ali Nazik/Lahmacun, şam tatlıcısına Revani/Şekerpare.
+  DOĞRU: kokoreççiye Kokoreç Dürüm, Porsiyon Kokoreç, Kokoreç Menü (Kokoreç + Ayran), Patates Kızartması; kebapçıya Beyti, Ali Nazik, Lahmacun; şam tatlıcısına Revani, Şekerpare.
 "Menüde olmadığı için ÖNERME" listesindeki özel ürünleri (ayrı ekipman/usta ister) hiçbir biçimde önerme. Emin değilsen önerme.
 
 ALTERNATİF ÜRÜNLER — ÖNERİLERİN ÇEKİRDEĞİ:
@@ -13,7 +13,7 @@ ALTERNATİF ÜRÜNLER — ÖNERİLERİN ÇEKİRDEĞİ:
   • aynı et/harç/hamur/sos, başka servis şekli: porsiyon → dürüm, dürüm → pilav üstü / tabak / ekmek arası, ekmek arası → dürüm;
   • aynı ürün ailesinin bilinen başka bir çeşidi: Adana → Beyti, Ali Nazik; Lahmacun → Fındık Lahmacun; Şam Tatlısı → Revani; Tavuk Şiş → Tavuk Kanat;
   • o ürünle birlikte satılan tamamlayıcı: Kokoreç → Şalgam; Lahmacun → Ayran; Döner → Pilav.
-basedOn alanına önerinin dayandığı menü ürününün adını menüdeki yazımıyla AYNEN yaz. Yalnızca bir malzeme eklenmiş hâl ("Kaşarlı Adana", "Acılı Tavuk Dürüm") alternatif DEĞİLDİR — o, ürünün ekstra malzemesi ya da opsiyonudur; önerme.
+basedOn alanına önerinin dayandığı menü ürününün adını menüdeki yazımıyla AYNEN yaz; name alanına ise yeni ürünün SADE adını yaz — menü ürününün boy/ölçü kelimelerini (Tam Ekmek, Yarım, Çeyrek, Porsiyon, Büyük, marka adı) taşıma: "Tam Ekmek Kokoreç" → name "Kokoreç Dürüm" (YANLIŞ: "Tam Ekmek Kokoreç Dürüm", "Tam Ekmek Kokoreç Salata"). Gerçek restoran menülerinde satılan ürünler öner; isim uydurma. Yalnızca bir malzeme eklenmiş hâl ("Kaşarlı Adana", "Acılı Tavuk Dürüm") alternatif DEĞİLDİR — o, ürünün ekstra malzemesi ya da opsiyonudur; önerme.
 Kategori açığı için verdiğin önerilerde basedOn boş kalabilir; ama onlar da bu mutfakta yapılabilir olmalı.
 
 MUTLAK KURAL 2 — TEKRAR YASAK:

@@ -38,7 +38,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v6: 6–8 word descriptions; only PACKAGED drinks are plain rows, prepared ones get options (D-178, D-179).
   // v7: no platform name and no branch-opening wording — the app stands on its own (D-197).
   // v8: only what THIS kitchen can make, and alternatives built on the menu's own products with `basedOn` (D-198).
-  'agent.recommend.system': 8,
+  // v9: an alternative's name is plain — the menu product's size words ("Tam Ekmek") stay out of it (D-198).
+  'agent.recommend.system': 9,
   // v3: the products the team kept turning down for this cuisine are named, so they are not proposed (D-194).
   // v4: …as what sellers mostly turned down, to propose only when nothing better fits (D-196).
   // v5: "menü hedefi" instead of an opening target (D-197).
