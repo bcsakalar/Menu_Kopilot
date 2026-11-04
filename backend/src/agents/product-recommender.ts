@@ -43,6 +43,8 @@ const RECOMMEND_BATCH = 10;
 const MAX_GAP_BATCHES = 4;
 /** Categories of the sides; a pool row of a side type stored under the mains is moved back to its type's. */
 const SIDE_CATEGORIES: ReadonlySet<string> = new Set(['yan-urun', 'salata-meze']);
+/** Kitchen fit of a same-type product that also shares a word with a menu product (40 + 15, see KitchenProfile.fit). */
+const SHARES_A_WORD = 55;
 /** A product of the cuisine's own pool (or a related one) ranks a little higher than one from elsewhere. */
 const RELATED_BONUS = 5;
 /**
@@ -95,6 +97,10 @@ export interface ProductRecommenderInput {
   current: number;
   target: number;
   notes: string | undefined;
+  /** A special request ("vegan", "çocuk menüsü"): the pool knows nothing of it, so the model answers first. */
+  preferModel?: boolean | undefined;
+  /** Products already offered in this conversation (D-200): judged like the menu's own. */
+  exclude?: readonly string[] | undefined;
   /** How many category products to aim for overall (the sum of the quota). */
   limit: number;
   /** How many alternatives built on the menu's own products to aim for, on top of `limit` (D-198). */
@@ -300,11 +306,14 @@ function alternativesFromPool(
   taken: (normalized: string, templateId: string | null) => boolean,
   perType: Map<string, number>,
   maxPerType: number,
+  familyOnly: boolean,
 ): RecommendedItem[] {
   const picked: RecommendedItem[] = [];
   for (const row of pool) {
     if (picked.length >= count) break;
-    if (!row.basedOn || (!row.sameType && row.score < 30)) continue;
+    // Outside the cuisine's family a shared type is not enough: Mercimek Çorbası is a soup, but no alternative to the
+    // sushi bar's Miso Çorbası. When the model answered, its list is only topped up from the family itself.
+    if (!row.basedOn || (!row.sameType && row.score < 30) || (!row.related && (familyOnly || row.score < SHARES_A_WORD))) continue;
     if ((perType.get(row.typeKey) ?? 0) >= maxPerType) continue;
     if (taken(row.normalized, row.id) || picked.some((p) => p.normalized === row.normalized || sameProductName(p.normalized, row.normalized))) continue;
     perType.set(row.typeKey, (perType.get(row.typeKey) ?? 0) + 1);
@@ -319,7 +328,7 @@ function alternativesFromPool(
 }
 
 /** The menu product a model's `basedOn` names, however the model spelled it ("Adana" for "Adana Kebap"). */
-function menuProduct(existing: readonly ExistingItem[], name: string | null | undefined): ExistingItem | undefined {
+export function menuProduct(existing: readonly ExistingItem[], name: string | null | undefined): ExistingItem | undefined {
   const wanted = normalizeTr(name ?? '');
   if (wanted.length < 2) return undefined;
   const spellings = (item: ExistingItem): string[] => [item.normalized, ...(item.canonicalName ? [normalizeTr(item.canonicalName)] : [])];
@@ -361,6 +370,7 @@ export async function runProductRecommender(
         if (item.canonicalName) takenNames.add(normalizeTr(item.canonicalName));
         if (item.matchedTemplateId) takenTemplates.add(item.matchedTemplateId);
       }
+      for (const name of input.exclude ?? []) takenNames.add(normalizeTr(name));
       // What the sellers of this kitchen kept turning down is named to the model and goes to the back (D-196).
       const rejectedProducts = deps.feedback.rejectedProducts(input.cuisine.id);
       const isTaken = (normalized: string, templateId: string | null): boolean =>
@@ -381,7 +391,7 @@ export async function runProductRecommender(
       });
 
       const pool = await loadPool(deps, input);
-      const dbItems = fromTemplates(deps, input, pool, input.quota, input.limit, isTaken);
+      const dbItems = input.preferModel && input.aiUsable ? [] : fromTemplates(deps, input, pool, input.quota, input.limit, isTaken);
       for (const item of dbItems) take(item.normalized, item.templateId);
 
       const remainingGaps = input.quota
@@ -395,7 +405,7 @@ export async function runProductRecommender(
       const maxPerType = alternativesPerType(input.alternatives);
       /** The pool's alternatives, for whatever the model did not cover. */
       const poolAlternatives = (have: number): RecommendedItem[] => {
-        const items = alternativesFromPool(pool, input.alternatives - have, isTaken, perType, maxPerType);
+        const items = alternativesFromPool(pool, input.alternatives - have, isTaken, perType, maxPerType, have > 0);
         for (const item of items) take(item.normalized, item.templateId);
         return items;
       };
@@ -403,7 +413,9 @@ export async function runProductRecommender(
       const fillUp = (items: RecommendedItem[]): RecommendedItem[] => {
         if (!input.fillUp || items.length >= total || run.signal.aborted) return items;
         const open = input.quota.map((gap) => ({ ...gap, want: total }));
-        const extra = fromTemplates(deps, input, pool, open, total - items.length, isTaken);
+        // Not a third pide to a pide shop: a type the alternatives already filled is no filler.
+        const varied = pool.filter((row) => (perType.get(row.typeKey) ?? 0) < maxPerType);
+        const extra = fromTemplates(deps, input, varied, open, total - items.length, isTaken);
         for (const item of extra) take(item.normalized, item.templateId);
         return [...items, ...extra.map((item) => ({ ...item, overQuota: true }))];
       };
@@ -478,7 +490,7 @@ export async function runProductRecommender(
               segment: input.priceSegment,
               current: input.current,
               target: input.target,
-              existing: input.existing.map((i) => i.canonicalName ?? i.rawName).join(', ') || '-',
+              existing: [...input.existing.map((i) => i.canonicalName ?? i.rawName), ...(input.exclude ?? [])].join(', ') || '-',
               kitchen: kitchenBrief.makes,
               avoid: kitchenBrief.avoid,
               alternatives: batch.alternatives,

@@ -52,7 +52,8 @@ services:
 
   api:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     image: ${API_IMAGE:-menu-kopilot-api:local}
     restart: unless-stopped
     env_file:

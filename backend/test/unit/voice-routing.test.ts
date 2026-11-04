@@ -2,47 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GroqProvider } from '../../src/ai/providers/groq.provider.js';
 import type { AudioInput } from '../../src/ai/types.js';
 import { MODELS, eligibleModels } from '../../src/config/models.js';
-import { sniffAudio, toAudioInput } from '../../src/lib/audio.js';
 import { parseMenuText } from '../../src/modules/analyze/service.js';
-
-const bytes = (...values: number[]) => Buffer.from([...values, ...new Array<number>(16).fill(0)]);
-const withAscii = (text: string, offset = 0) => {
-  const buf = Buffer.alloc(32);
-  buf.write(text, offset, 'latin1');
-  return buf;
-};
-
-describe('sniffAudio', () => {
-  it('recognizes the containers Whisper accepts', () => {
-    const m4a = Buffer.alloc(32);
-    m4a.write('ftypM4A ', 4, 'latin1');
-    expect(sniffAudio(m4a)).toEqual({ mimeType: 'audio/mp4', ext: 'm4a' });
-    expect(sniffAudio(withAscii('OggS'))?.ext).toBe('ogg');
-    const wav = withAscii('RIFF');
-    wav.write('WAVE', 8, 'latin1');
-    expect(sniffAudio(wav)?.ext).toBe('wav');
-    expect(sniffAudio(withAscii('fLaC'))?.ext).toBe('flac');
-    expect(sniffAudio(bytes(0x1a, 0x45, 0xdf, 0xa3))?.ext).toBe('webm');
-    expect(sniffAudio(withAscii('ID3'))?.ext).toBe('mp3');
-    expect(sniffAudio(bytes(0xff, 0xfb, 0x90))?.ext).toBe('mp3');
-  });
-
-  it('rejects photos in the same container family, AAC ADTS and junk', () => {
-    const heic = Buffer.alloc(32);
-    heic.write('ftypheic', 4, 'latin1');
-    expect(sniffAudio(heic)).toBeUndefined();
-    expect(sniffAudio(bytes(0xff, 0xf1, 0x50))).toBeUndefined();
-    expect(sniffAudio(Buffer.from('hello world, not audio'))).toBeUndefined();
-    expect(sniffAudio(Buffer.from('short'))).toBeUndefined();
-  });
-
-  it('builds an upload with a hash-based file name', () => {
-    const ogg = withAscii('OggS');
-    const audio = toAudioInput(ogg);
-    expect(audio?.mimeType).toBe('audio/ogg');
-    expect(audio?.fileName).toMatch(/^note-[0-9a-f]{12}\.ogg$/);
-  });
-});
 
 describe('dictated and typed product lists', () => {
   it('splits on commas, newlines and semicolons and drops one-character noise', () => {

@@ -23,12 +23,6 @@ const envSchema = z
 
     JWT_SECRET: z.string().min(32).default(DEV_JWT_SECRET),
     JWT_ACCESS_TTL: z.string().default('12h'),
-    REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(90),
-    /**
-     * D-199. The key the app is built with (`--dart-define=APP_ACCESS_KEY=…`): a phone that presents it is signed in
-     * to the team account without an e-mail and password. Unset = device sign-in is off.
-     */
-    APP_ACCESS_KEY: z.string().min(24).optional(),
 
     ADMIN_EMAIL: z.email().default('admin@menukopilot.local'),
     ADMIN_PASSWORD: z.string().min(8).default(DEV_ADMIN_PASSWORD),
@@ -41,6 +35,8 @@ const envSchema = z
 
     DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(300),
     DAILY_TOKEN_QUOTA: z.coerce.number().int().min(0).default(1_500_000),
+    /** The site is open to anyone: a cleared cookie gets a fresh per-visitor quota, this ceiling it cannot reset. */
+    GLOBAL_DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(3000),
     QUOTA_TIMEZONE: z.string().default('Europe/Istanbul'),
     REQUEST_MAX_LLM_CALLS: z.coerce.number().int().min(1).default(6),
     REQUEST_MAX_INPUT_TOKENS: z.coerce.number().int().min(1000).default(25_000),
@@ -76,9 +72,6 @@ export interface AppConfig {
   auth: {
     jwtSecret: string;
     accessTtl: string;
-    refreshTtlDays: number;
-    /** Device sign-in key (D-199); undefined = off. */
-    appAccessKey: string | undefined;
   };
   admin: { email: string; password: string; name: string };
   seedOnStart: boolean;
@@ -90,6 +83,7 @@ export interface AppConfig {
   quota: {
     dailyCalls: number;
     dailyTokens: number;
+    globalDailyCalls: number;
     timezone: string;
   };
   budget: {
@@ -133,8 +127,6 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
     auth: {
       jwtSecret: env.JWT_SECRET,
       accessTtl: env.JWT_ACCESS_TTL,
-      refreshTtlDays: env.REFRESH_TOKEN_TTL_DAYS,
-      appAccessKey: emptyToUndefined(env.APP_ACCESS_KEY),
     },
     admin: { email: env.ADMIN_EMAIL.toLowerCase(), password: env.ADMIN_PASSWORD, name: env.ADMIN_NAME },
     seedOnStart: env.SEED_ON_START,
@@ -146,6 +138,7 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
     quota: {
       dailyCalls: env.DAILY_LLM_CALL_QUOTA,
       dailyTokens: env.DAILY_TOKEN_QUOTA,
+      globalDailyCalls: env.GLOBAL_DAILY_LLM_CALL_QUOTA,
       timezone: env.QUOTA_TIMEZONE,
     },
     budget: {

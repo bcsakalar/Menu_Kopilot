@@ -29,10 +29,10 @@ describe('migrations', () => {
     await handle.close();
   });
 
-  it('applies all migrations (19 tables + extensions)', async () => {
+  it('applies all migrations (21 tables + extensions)', async () => {
     await handle.migrate();
     const tables = await publicTables(handle);
-    expect(tables).toHaveLength(19);
+    expect(tables).toHaveLength(21);
     // 0004: the product-type knowledge base and the feedback log of the learning loop.
     expect(tables).toEqual(expect.arrayContaining(['product_types', 'suggestion_feedback']));
     expect(tables).toContain('menu_items');
@@ -68,8 +68,9 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003 to 0006 sit on top of 0002, so all five come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 5)).map((r) => r.tag)).toEqual([
+    // 0003 to 0007 sit on top of 0002, so all six come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 6)).map((r) => r.tag)).toEqual([
+      '0007_web_chat',
       '0006_seller_answers',
       '0005_learning_history',
       '0004_product_types',
@@ -91,7 +92,8 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 5)).map((r) => r.tag)).toEqual([
+    expect((await rollbackMigrations(handle.db, 6)).map((r) => r.tag)).toEqual([
+      '0007_web_chat',
       '0006_seller_answers',
       '0005_learning_history',
       '0004_product_types',
@@ -108,6 +110,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
+    // 0007 takes the two chat tables with it.
+    const chat = await rollbackMigrations(handle.db, 1);
+    expect(chat.map((r) => r.tag)).toEqual(['0007_web_chat']);
+    expect(await publicTables(handle)).toHaveLength(19);
+
     // 0006 and 0005 only add columns.
     const answers = await rollbackMigrations(handle.db, 1);
     expect(answers.map((r) => r.tag)).toEqual(['0006_seller_answers']);
@@ -143,7 +150,7 @@ describe('migrations', () => {
     expect(await rollbackMigrations(handle.db, 1)).toEqual([]);
 
     await handle.migrate();
-    expect(await publicTables(handle)).toHaveLength(19);
+    expect(await publicTables(handle)).toHaveLength(21);
   });
 
   it('splits statements on drizzle breakpoints and drops comment-only chunks', () => {

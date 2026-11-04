@@ -56,9 +56,11 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
     return reply.send(await service.snapshot(getAuthUser(request).id, started.runId));
   };
 
+  // Admin only: the public door is /chat/messages, which is rate limited.
   app.post(
     '/analyze',
     {
+      onRequest: [app.authenticateAdmin],
       schema: {
         tags: ['analyze'],
         summary: 'Analyse a menu (multipart: cuisineId?, menuText?, notes?, mode?, fromRunId?, debug?, images[] ≤5)',
@@ -188,7 +190,10 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
         response: { 200: cardDtoSchema },
       },
     },
-    async (request) => service.accept(getAuthUser(request).id, request.params.id, request.body),
+    async (request) => {
+      const user = getAuthUser(request);
+      return service.accept(user.id, request.params.id, request.body, user.role === 'admin');
+    },
   );
 
   app.post(

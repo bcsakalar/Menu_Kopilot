@@ -13,29 +13,19 @@ export type UserDto = z.infer<typeof userDtoSchema>;
 export const loginBodySchema = z.object({
   email: z.email().max(200),
   password: z.string().min(1).max(200),
-  deviceName: z.string().trim().min(1).max(100).default('Bilinmeyen cihaz'),
-});
-
-export const deviceBodySchema = z.object({
-  appKey: z.string().min(1).max(200),
-  deviceName: z.string().trim().min(1).max(100).default('Bilinmeyen cihaz'),
-});
-
-export const refreshBodySchema = z.object({
-  refreshToken: z.string().min(20).max(200),
+  deviceName: z.string().trim().min(1).max(100).default('Admin paneli'),
 });
 
 export const tokenResponseSchema = z.object({
   accessToken: z.string(),
-  refreshToken: z.string(),
-  /** Access token lifetime in seconds. */
+  /** Token lifetime in seconds. */
   expiresIn: z.number().int(),
   deviceId: z.uuid(),
   user: userDtoSchema,
 });
 export type TokenResponse = z.infer<typeof tokenResponseSchema>;
 
-/** Claims inside the access JWT. */
+/** Claims inside the session JWT. */
 export interface AccessTokenClaims {
   sub: string;
   role: z.infer<typeof userRoleSchema>;

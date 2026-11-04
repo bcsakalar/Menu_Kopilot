@@ -132,9 +132,10 @@ describe('POST /analyze — typed menu', () => {
     expect(alternatives.filter((card) => card.productType === 'pide').length).toBeLessThanOrEqual(2);
     // "Öneri versen yeter": six products spread over the categories — the old recommender answered this menu with
     // six more pides. With fewer usable categories than six, a category may give a second, an open gap first (the
-    // drinks here, D-189); the mains, already served by the menu, never do.
+    // drinks here, D-189); a main past the first is another kind of main (Lahmacun), never one more pide.
     for (const [key, count] of perCategory) expect(count, `${key} en fazla iki ürün almalı`).toBeLessThanOrEqual(2);
-    expect(perCategory.get('ana-yemek') ?? 0, 'ikinci pide yok').toBeLessThanOrEqual(1);
+    const morePide = bySection(result, 'new_product').filter((card) => card.basedOn === null && card.productType === 'pide');
+    expect(morePide.length, 'ikinci pide yok').toBeLessThanOrEqual(1);
     expect(perCategory.size).toBeGreaterThanOrEqual(3);
     // And the emptiest category is the one that actually gets filled.
     expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);

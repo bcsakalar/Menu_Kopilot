@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Brand "paprika" = primary actions (lib/core/theme.dart); background of the launcher icon. -->
-    <color name="ic_launcher_background">#C2410C</color>
-    <!-- Anthracite canvas of the dark theme; launch splash background. -->
-    <color name="splash_background">#0E1116</color>
-</resources>

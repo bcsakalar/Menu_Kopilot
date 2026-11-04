@@ -1,3 +1,4 @@
+import { CHAT_SYSTEM, CHAT_USER } from './chat.js';
 import { CLASSIFIER_SYSTEM, CLASSIFIER_USER } from './classifier.js';
 import { EXTRACTOR_SYSTEM, EXTRACTOR_USER } from './extractor.js';
 import { OPTION_MODIFIER_SYSTEM, OPTION_MODIFIER_USER } from './option-modifier.js';
@@ -18,6 +19,8 @@ export const AGENT_PROMPT_KEYS = [
   'agent.recommend.user',
   'agent.options.system',
   'agent.options.user',
+  'agent.chat.system',
+  'agent.chat.user',
 ] as const;
 export type AgentPromptKey = (typeof AGENT_PROMPT_KEYS)[number];
 
@@ -39,7 +42,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v7: no platform name and no branch-opening wording — the app stands on its own (D-197).
   // v8: only what THIS kitchen can make, and alternatives built on the menu's own products with `basedOn` (D-198).
   // v9: an alternative's name is plain — the menu product's size words ("Tam Ekmek") stay out of it (D-198).
-  'agent.recommend.system': 9,
+  // v10: the rep opens a delivery platform branch and leads the call; the proactive stance replaces D-197's neutral one (D-200).
+  'agent.recommend.system': 10,
   // v3: the products the team kept turning down for this cuisine are named, so they are not proposed (D-194).
   // v4: …as what sellers mostly turned down, to propose only when nothing better fits (D-196).
   // v5: "menü hedefi" instead of an opening target (D-197).
@@ -50,9 +54,12 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v4: four sections per product (options, removable, extras, 6–8 word description), grounded in the product-type
   //     guide; groups the type can never have are named (D-179).
   // v5: no platform name and no branch-opening wording (D-197).
-  'agent.options.system': 5,
+  // v6: the rep opens a delivery platform branch; every product should leave the call with options and extras (D-200).
+  'agent.options.system': 6,
   // v3: each product carries its type, and the batch carries the type guide.
   'agent.options.user': 3,
+  'agent.chat.system': 1,
+  'agent.chat.user': 1,
 };
 
 export const AGENT_PROMPTS: Readonly<Record<AgentPromptKey, string>> = {
@@ -64,4 +71,6 @@ export const AGENT_PROMPTS: Readonly<Record<AgentPromptKey, string>> = {
   'agent.recommend.user': PRODUCT_RECOMMENDER_USER,
   'agent.options.system': OPTION_MODIFIER_SYSTEM,
   'agent.options.user': OPTION_MODIFIER_USER,
+  'agent.chat.system': CHAT_SYSTEM,
+  'agent.chat.user': CHAT_USER,
 };

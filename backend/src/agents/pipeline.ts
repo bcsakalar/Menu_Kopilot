@@ -10,14 +10,14 @@ import { namesVariant, variantConflict } from '../lib/same-product.js';
 import type { CategoryGap } from '../domain/category.js';
 import { reconcileCategory } from '../domain/product-type.js';
 import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
-import { addTypedItems, type MergedItem } from './dedupe.js';
+import { addTypedItems, joinItems, type MergedItem } from './dedupe.js';
 import { KitchenProfile } from './kitchen.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
 import { runOptionModifier, type OptionModifierResult } from './option-modifier.js';
 import { menuProductPitch, newProductPitch } from './pitch.js';
-import { modeBudget, planRun, quotaRows, type AnalysisMode } from './plan.js';
-import { runProductRecommender, type ProductRecommenderResult } from './product-recommender.js';
+import { focusPlan, modeBudget, planRun, quotaRows, type AnalysisMode, type RunFocus } from './plan.js';
+import { menuProduct, runProductRecommender, type ProductRecommenderResult } from './product-recommender.js';
 import { AGENT_LABELS, type AgentDeps, type AgentName, type AgentRunContext, type ExistingItem } from './types.js';
 import { runValidator, type ValidatedNewProduct, type ValidatedOptionCard, type ValidationResult } from './validator.js';
 
@@ -62,6 +62,8 @@ export interface AnalyzeRunInput {
    * cuisine's opening minimum and asks for options on everything. The user picks it on the home screen.
    */
   mode: AnalysisMode;
+  /** A chat follow-up: only this slice of the run (D-200). */
+  focus?: RunFocus | undefined;
   /** The cuisine the user picked; the Classifier fills the blank when it is undefined. */
   selectedCuisine: CuisineNode | undefined;
   cuisineOptions: readonly CuisineOption[];
@@ -145,15 +147,16 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   const extraction = await safely(
     'extractor',
     async () => {
-      if (reuse) {
+      if (reuse && input.images.length === 0) {
         await deps.tracer.skip('extractor', AGENT_LABELS.extractor, 'önceki analizin ürün listesi kullanıldı');
         return { items: addTypedItems([...reuse], input.typedNames), imagesRead: 0, imagesFailed: 0, extractedRaw: 0, attempts: [], llmCalls: 0 };
       }
-      return aiUsable
+      const read = await (aiUsable
         ? runExtractor(deps, { images: input.images, typedNames: input.typedNames, cuisineName: cuisineNameForExtract }, run, (done, total) =>
             input.emit({ type: 'progress', agent: 'extractor', message: 'Menü okunuyor', done, total }),
           )
-        : runExtractor(deps, { images: [], typedNames: input.typedNames, cuisineName: cuisineNameForExtract }, run);
+        : runExtractor(deps, { images: [], typedNames: input.typedNames, cuisineName: cuisineNameForExtract }, run));
+      return reuse ? { ...read, items: joinItems(reuse, read.items) } : read;
     },
     // The typed products need no model: they survive even when image reading blows up.
     () => ({
@@ -195,7 +198,9 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     llmCalls: 0,
   });
   const classification =
-    aiUsable && merged.length > 0
+    input.focus
+      ? { ...keepSelection('önceki analizin mutfak türü'), priceSegment: input.focus.priceSegment }
+      : aiUsable && merged.length > 0
       ? await safely(
           'classifier',
           () => runClassifier(deps, { itemNames: merged.map((i) => i.name), options: input.cuisineOptions, selected: selectedOption, guess }, run),
@@ -324,16 +329,27 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
    * reach the cuisine's opening target — a 10-product menu in a 30-product cuisine is 20 products short, and
    * before this the answer was capped at three cards by the category gaps alone.
    */
-  const plan = planRun({
+  const fullPlan = planRun({
     mode: input.mode,
     categories: analysis.categories,
     current: analysis.current,
     missing: analysis.missing,
     needOptions: analysis.needOptions.length,
   });
-  const categoryQuota = plan.quota;
+  const focus = input.focus;
+  // "Tatlı öner" to a cuisine whose table has no dessert row is still a fair question.
+  const gaps: readonly CategoryGap[] =
+    focus?.categoryKey && !analysis.categories.some((c) => c.key === focus.categoryKey)
+      ? [...analysis.categories, { key: focus.categoryKey, label: deps.categories.label(focus.categoryKey), present: 0, minItems: 1, missing: 1 }]
+      : analysis.categories;
   /** The menu products this run completes: options, removable and extra ingredients, description. */
-  const optionTargets = analysis.needOptions.slice(0, plan.optionTargets);
+  const optionTargets = !focus
+    ? analysis.needOptions.slice(0, fullPlan.optionTargets)
+    : focus.newItemsOnly
+      ? existing.filter((item) => !reuse?.some((known) => known.normalized === item.normalized))
+      : [...new Set(focus.targets.map((name) => menuProduct(existing, name)).filter((item) => item !== undefined))];
+  const plan = focus ? focusPlan(fullPlan, focus, gaps, optionTargets.length) : fullPlan;
+  const categoryQuota = plan.quota;
   input.emit({
     type: 'progress',
     agent: 'product_recommender',
@@ -365,16 +381,18 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
             priceSegment: classification.priceSegment,
             existing,
             kitchen,
-            categories: analysis.categories.map((c) => ({ key: c.key, label: c.label })),
-            quota: quotaRows(analysis.categories, plan.quota),
+            categories: gaps.map((c) => ({ key: c.key, label: c.label })),
+            quota: quotaRows(gaps, plan.quota),
             current: analysis.current,
             target: analysis.target,
             notes: input.notes,
+            exclude: focus?.exclude,
+            preferModel: focus !== undefined && input.notes !== undefined,
             limit: plan.products,
             alternatives: plan.alternatives,
             attemptTimeoutMs: plan.attemptTimeoutMs,
             aiUsable,
-            fillUp: plan.mode === 'quick',
+            fillUp: plan.mode === 'quick' && !focus,
           },
           boundedRun,
         ),
@@ -436,7 +454,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
       targetUnreachable: analysis.current < analysis.target,
     }),
   );
-  if (validated.targetUnreachable) {
+  if (validated.targetUnreachable && !focus) {
     warn(
       'target_unreachable',
       `Öneriler kabul edilse bile ${validated.reachable}/${analysis.target} ürün olur — hedefe ${analysis.target - validated.reachable} ürün kalıyor.`,
@@ -459,7 +477,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   const pitchContext = { gaps: analysis.categories, cuisineId: classification.cuisine.id, cuisineName: classification.cuisine.name };
   for (const card of callOrder(validated.newProducts.map((item) => newProductCard(deps, item, pitchContext)))) await push(card);
   for (const card of callOrder(validated.options.map((card) => optionCard(deps, card, existing)))) await push(card);
-  for (const card of fixCards(deps, analysis.needFixes)) await push(card);
+  if (!focus) for (const card of fixCards(deps, analysis.needFixes)) await push(card);
 
   // ---- finalize -----------------------------------------------------------------------------------------------
   const llmCalls = deps.tracer.totals.llmCalls;

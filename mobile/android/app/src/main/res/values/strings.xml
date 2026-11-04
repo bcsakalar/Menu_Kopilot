@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Native toast (shown before Flutter starts): a share whose files the sender did not allow the app to read. -->
-    <string name="share_unreadable">Paylaşılan dosya açılamadı: gönderen uygulama okuma izni vermedi.</string>
-</resources>

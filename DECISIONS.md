@@ -922,3 +922,32 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   without the key (AI quota, data), but someone who extracts it from the APK can use it; rotating `APP_ACCESS_KEY`
   on the server shuts out every build that carries the old one (then ship a new APK). The key is compared in
   constant time and rate-limited (10/min in the API and in nginx, like the login).
+- **D-200** — **From a phone app to a website, with a chat** (user: "telefon uygulaması olmaktan çıkarıcaz, sitede
+  olacak"; Ctrl+V ile ekran görüntüsü, yazışma, güzel ve sade arayüz; admin paneli girişli, sitenin kendisi girişsiz, cookie
+  ile, herkes kullanabilir; iş çağrı içinde yapılıyor; bir yemek sipariş platformunda şube açan proaktif temsilci kafası). (1) *Removed:*
+  `mobile/`, its CI and release jobs, device sign-in and refresh tokens (D-199), the voice route. (2) *Site:* `web/`,
+  React + Vite + plain CSS, built into the one image and served by Fastify; the anthracite/paprika/Manrope identity is
+  carried over (`DESIGN.md`). (3) *No login:* a browser's first message creates a user row with no password and a
+  year-long HttpOnly cookie, so every ownership check, history and quota keeps working per visitor. Created in a
+  preHandler, after the rate limit, and only on a message, so a page view or a flood creates nobody. The admin cookie is
+  separate (SameSite=Strict, 12 h), and every write of shared data sits behind it. (4) *Open site, so three limits:* 20
+  messages a minute per IP, the per-visitor quota, and `GLOBAL_DAILY_LLM_CALL_QUOTA` for the site, which a cleared cookie
+  cannot reset. `POST /analyze` became admin only: the chat is the public door. A visitor's "Evet" records the answer,
+  teaches the feedback loop and leaves a draft of a new product (`approved=false`) instead of writing the approved
+  pool. (5) *Chat without a second pipeline:* the chat agent (`agent.chat`, Flash-Lite first) writes no product; it decides
+  to answer, or to run a slice of the agents (`RunFocus`: a category, named menu products, what a later screenshot
+  added), so a product asked for in chat passes the same kitchen and duplicate guards. A follow-up reuses the run's
+  product list, skips the Classifier, never offers a product twice in a conversation, and takes what the restaurant said
+  yes to into the menu. Its sentence is written from the run's cards, not by the model: the model's lead-in named
+  products the guards then dropped ("Humus ekleyelim" with Humus already on the menu). A special request ("vegan") skips
+  the pool, which knows nothing of it. (6) *Call:* the first analysis is `quick`; more is one message away. (7) *Gemini
+  first* on the recommend and option routes (migration 0007 moves the production rows), Groq second so parallel batches
+  still spread over two providers. Measured on the eval images with Flash-Lite first: 6–11 s per menu screenshot, 1.5–5 s
+  per follow-up. (8) *Stance:* the recommend and option prompts now name the rep opening a delivery platform branch, reversing
+  D-197 for the prompts only; the site itself carries no platform branding. (9) *Pool alternatives* outside the cuisine's
+  family must share a word with the menu product, and when the model answered the top-up comes from the family alone
+  (a sushi bar was offered Mercimek Çorbası as an alternative of Miso Çorbası); quick mode's fill-up no longer repeats a
+  type the alternatives filled. *Trade-offs:* anyone with the address can use the site and spend the day's quota; visitors'
+  answers feed the shared learning loop (the admin can take a verdict back); a reload during a running analysis shows
+  the answer only when the conversation is opened again; a card's options cannot be struck out one by one before "Evet" as
+  on the phone.

@@ -9,7 +9,7 @@ import type { UsageSummary } from './schemas.js';
 
 const ratio = (part: number, total: number) => (total === 0 ? 0 : Math.round((part / total) * 1000) / 1000);
 
-/** Usage screen: provider calls (per model / task / error), cache and DB hit ratios, quota — for the signed-in user. */
+/** Admin panel: provider calls (per model / task / error), cache and DB hit ratios across every visitor. */
 export class UsageService {
   constructor(
     private readonly db: Database,
@@ -21,7 +21,7 @@ export class UsageService {
   async summary(userId: string, range: UsageSummary['range']): Promise<UsageSummary> {
     const now = this.now();
     const from = range === 'today' ? startOfDay(now, this.config.timezone) : startOfMonth(now, this.config.timezone);
-    const inRange = and(eq(usageLog.userId, userId), gte(usageLog.createdAt, from));
+    const inRange = gte(usageLog.createdAt, from);
     const counters = {
       calls: sql<number>`count(*)::int`,
       failed: sql<number>`(count(*) filter (where not ${usageLog.success}))::int`,
@@ -58,7 +58,7 @@ export class UsageService {
         cacheHit: sql<number>`(count(*) filter (where ${suggestionRuns.cacheHit}))::int`,
       })
       .from(suggestionRuns)
-      .where(and(eq(suggestionRuns.userId, userId), gte(suggestionRuns.createdAt, from)));
+      .where(gte(suggestionRuns.createdAt, from));
     const [cards] = await this.db
       .select({
         total: sql<number>`count(*)::int`,
@@ -68,7 +68,7 @@ export class UsageService {
       })
       .from(suggestionItems)
       .innerJoin(suggestionRuns, eq(suggestionItems.runId, suggestionRuns.id))
-      .where(and(eq(suggestionRuns.userId, userId), gte(suggestionItems.createdAt, from)));
+      .where(gte(suggestionItems.createdAt, from));
 
     const quota = await this.quota.status(userId);
     const runTotals = runs ?? { total: 0, suggest: 0, gap: 0, cacheHit: 0 };

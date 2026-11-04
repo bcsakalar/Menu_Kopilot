@@ -1,4 +1,4 @@
-import { and, gte, isNull, sql } from 'drizzle-orm';
+import { gte, sql } from 'drizzle-orm';
 import type { Database } from '../db/client.js';
 import { usageLog } from '../db/schema/index.js';
 
@@ -80,29 +80,37 @@ export interface QuotaStatus {
   dailyTokens: number;
 }
 
-/** Daily per-user quota (config). When exceeded the pipelines fall back to DB/cache-only answers. */
+/** Daily quota per visitor and for the whole site (config). When exceeded the pipelines answer from DB/cache only. */
 export class QuotaService {
   constructor(
     private readonly db: Database,
-    private readonly config: { dailyCalls: number; dailyTokens: number; timezone: string },
+    private readonly config: { dailyCalls: number; dailyTokens: number; globalDailyCalls?: number; timezone: string },
     private readonly now: () => Date = () => new Date(),
   ) {}
 
+  /** Today's calls of the whole site against its ceiling, for the admin panel. */
+  async site(): Promise<{ callsToday: number; dailyCalls: number }> {
+    const since = startOfDay(this.now(), this.config.timezone);
+    const [row] = await this.db.select({ calls: sql<number>`count(*)::int` }).from(usageLog).where(gte(usageLog.createdAt, since));
+    return { callsToday: row?.calls ?? 0, dailyCalls: this.config.globalDailyCalls ?? 0 };
+  }
+
   async status(userId: string | undefined): Promise<QuotaStatus> {
     const since = startOfDay(this.now(), this.config.timezone);
+    const mine = userId ? sql`${usageLog.userId} = ${userId}` : sql`${usageLog.userId} is null`;
     const [row] = await this.db
       .select({
-        calls: sql<number>`count(*)::int`,
-        tokens: sql<number>`coalesce(sum(${usageLog.tokensIn} + ${usageLog.tokensOut}), 0)::int`,
+        calls: sql<number>`(count(*) filter (where ${mine}))::int`,
+        tokens: sql<number>`coalesce(sum(${usageLog.tokensIn} + ${usageLog.tokensOut}) filter (where ${mine}), 0)::int`,
+        siteCalls: sql<number>`count(*)::int`,
       })
       .from(usageLog)
-      .where(
-        and(gte(usageLog.createdAt, since), userId ? sql`${usageLog.userId} = ${userId}` : isNull(usageLog.userId)),
-      );
+      .where(gte(usageLog.createdAt, since));
     const callsToday = row?.calls ?? 0;
     const tokensToday = row?.tokens ?? 0;
+    const siteOpen = (row?.siteCalls ?? 0) < (this.config.globalDailyCalls ?? Number.POSITIVE_INFINITY);
     return {
-      allowed: callsToday < this.config.dailyCalls && tokensToday < this.config.dailyTokens,
+      allowed: siteOpen && callsToday < this.config.dailyCalls && tokensToday < this.config.dailyTokens,
       callsToday,
       tokensToday,
       dailyCalls: this.config.dailyCalls,

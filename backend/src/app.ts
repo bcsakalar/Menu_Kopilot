@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import fastifyJwt from '@fastify/jwt';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyStatic from '@fastify/static';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
@@ -22,12 +25,16 @@ import { durationToSeconds } from './lib/duration.js';
 import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
 import { RunRegistry } from './lib/run-registry.js';
+import { adminRoutes } from './modules/admin/routes.js';
+import { AdminService } from './modules/admin/service.js';
 import { analyzeRoutes } from './modules/analyze/routes.js';
 import type { AnalyzeEvent } from './modules/analyze/schemas.js';
 import { AnalyzeService } from './modules/analyze/service.js';
 import { AnalyzeStore } from './modules/analyze/store.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
+import { chatRoutes } from './modules/chat/routes.js';
+import { ChatService } from './modules/chat/service.js';
 import { cuisineRoutes } from './modules/cuisines/routes.js';
 import { CuisineService } from './modules/cuisines/service.js';
 import { VisionExtractor } from './modules/extraction/vision-extractor.js';
@@ -42,13 +49,13 @@ import { templateRoutes } from './modules/templates/routes.js';
 import { TemplateService } from './modules/templates/service.js';
 import { usageRoutes } from './modules/usage/routes.js';
 import { UsageService } from './modules/usage/service.js';
-import { voiceRoutes } from './modules/voice/routes.js';
-import { VoiceService } from './modules/voice/service.js';
 import { authPlugin } from './plugins/auth.js';
 
 export const APP_VERSION = '0.2.0';
 const JWT_ISSUER = 'menu-kopilot';
-const JWT_AUDIENCE = 'menu-kopilot-mobile';
+const JWT_AUDIENCE = 'menu-kopilot-web';
+/** The built site (web/dist in the image). Absent in tests and backend-only development. */
+const WEB_ROOT = fileURLToPath(new URL('../public', import.meta.url));
 
 export interface AppDeps {
   config: AppConfig;
@@ -120,9 +127,12 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     return reply.code(500).send(envelope('INTERNAL_ERROR', 'Beklenmeyen bir hata oluştu', request.id));
   });
 
-  app.setNotFoundHandler((request, reply) =>
-    reply.code(404).send(envelope('NOT_FOUND', 'Kaynak bulunamadı', request.id)),
-  );
+  const hasWeb = existsSync(WEB_ROOT);
+  app.setNotFoundHandler((request, reply) => {
+    // /admin and any deep link are the same page: the client decides what to show.
+    if (hasWeb && request.method === 'GET' && !request.url.startsWith('/api/')) return reply.sendFile('index.html');
+    return reply.code(404).send(envelope('NOT_FOUND', 'Kaynak bulunamadı', request.id));
+  });
 
   await app.register(fastifySwagger, {
     openapi: {
@@ -158,13 +168,11 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   });
 
   const authService = new AuthService(deps.db.db, {
-    refreshTtlDays: config.auth.refreshTtlDays,
     accessTtlSeconds: durationToSeconds(config.auth.accessTtl),
-    signAccessToken: (claims) => app.jwt.sign(claims),
-    appAccessKey: config.auth.appAccessKey,
-    deviceAccountEmail: config.admin.email,
+    signAccessToken: (claims, expiresIn) => app.jwt.sign(claims, expiresIn === undefined ? {} : { expiresIn }),
   });
-  await app.register(authPlugin, { service: authService });
+  const secureCookies = config.nodeEnv === 'production';
+  await app.register(authPlugin, { service: authService, secureCookies });
 
   await app.register(healthRoutes, {
     version: APP_VERSION,
@@ -193,6 +201,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   });
   const extractor = new VisionExtractor(ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
   const analyzeStore = new AnalyzeStore(db);
+  const uploads = config.uploads;
   const analyzeService = new AnalyzeService({
     db,
     store: analyzeStore,
@@ -213,35 +222,52 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   });
   app.decorate('services', { ai, queue, embedding, analyze: analyzeService });
 
+  const chatService = new ChatService({
+    db,
+    analyze: analyzeService,
+    store: analyzeStore,
+    router: ai.router,
+    prompts: ai.prompts,
+    onError: (err) => app.log.error({ err }, 'chat message failed'),
+  });
+
   await app.register(
     async (api) => {
-      await api.register(authRoutes, { service: authService });
-      // Everything below requires a valid access token.
-      await api.register(async (secured) => {
-        secured.addHook('onRequest', secured.authenticate);
-        await secured.register(settingsRoutes, { service: settingsService });
-        await secured.register(promptRoutes, { prompts: ai.prompts });
-        await secured.register(analyzeRoutes, { service: analyzeService, uploads: config.uploads });
-        await secured.register(cuisineRoutes, { service: new CuisineService(db) });
-        await secured.register(templateRoutes, { service: new TemplateService(db, queue) });
-        await secured.register(learningRoutes, { service: new LearningService(db) });
-        await secured.register(usageRoutes, {
+      await api.register(authRoutes, { service: authService, secureCookies });
+      // Open to anyone: a browser's cookie is all the identity there is (D-200).
+      await api.register(chatRoutes, { service: chatService, uploads });
+      await api.register(async (session) => {
+        session.addHook('onRequest', session.authenticate);
+        await session.register(analyzeRoutes, { service: analyzeService, uploads });
+      });
+      await api.register(async (admin) => {
+        admin.addHook('onRequest', admin.authenticateAdmin);
+        await admin.register(settingsRoutes, { service: settingsService });
+        await admin.register(promptRoutes, { prompts: ai.prompts });
+        await admin.register(cuisineRoutes, { service: new CuisineService(db) });
+        await admin.register(templateRoutes, { service: new TemplateService(db, queue) });
+        await admin.register(learningRoutes, { service: new LearningService(db) });
+        await admin.register(usageRoutes, {
           service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),
         });
-        await secured.register(voiceRoutes, {
-          service: new VoiceService({
-            db,
-            router: ai.router,
-            prompts: ai.prompts,
-            cache: deps.cache,
-            ttlSeconds: config.cacheTtlSeconds,
-          }),
-          maxFileBytes: config.uploads.maxFileBytes,
+        await admin.register(adminRoutes, {
+          service: new AdminService(db, chatService, ai.quota, { timezone: config.quota.timezone }),
         });
       });
     },
     { prefix: '/api/v1' },
   );
+
+  if (hasWeb) {
+    await app.register(fastifyStatic, {
+      root: WEB_ROOT,
+      wildcard: false,
+      // Vite puts a content hash in every asset name; only index.html can change under the same name.
+      setHeaders: (res, path) => {
+        void res.header('cache-control', path.includes('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
+      },
+    });
+  }
 
   return app;
 }

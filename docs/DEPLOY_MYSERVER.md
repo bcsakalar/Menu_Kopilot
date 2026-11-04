@@ -87,8 +87,8 @@ nginx -t && systemctl reload nginx
 Copied, not symlinked into the clone: a `git pull` must never change the live proxy without `nginx -t`. After a pull
 that changes `deploy/nginx/`, repeat the three copies. `nginx -t` runs before the reload, so a mistake never reaches the
 running sites. To back out: `rm /etc/nginx/sites-enabled/menu-kopilot.conf && nginx -t && systemctl reload nginx`.
-The site sends HSTS, `nosniff`, `X-Frame-Options: DENY`, a no-referrer policy and a `default-src 'none'` CSP (the API
-serves only JSON and SSE), limits logins to 10/min and the API to 120/min per visitor IP, and hides `/docs`.
+The site sends HSTS, `nosniff`, `X-Frame-Options: DENY`, a no-referrer policy and a same-origin CSP (`blob:` for pasted
+screenshots), limits logins to 10/min and everything else to 120/min per visitor IP, and hides `/docs`.
 
 ## 5. Deploy and update
 
@@ -122,24 +122,8 @@ pnpm -C backend live:check --url https://menu.example.com
 Remove-Item Env:ADMIN_PASSWORD
 ```
 
-Server-Sent Events through Cloudflare + nginx: start a suggestion in the app — cards must appear one by one, not
-all at the end (`proxy_buffering off` in `mk-proxy.conf`).
-
-## 7. Phone
-
-The release APK (signed with the key in `%USERPROFILE%\.android-keys\menu-kopilot\`, see the README) opens with
-`https://menu.example.com` prefilled:
-
-```powershell
-cd mobile
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com --dart-define=APP_ACCESS_KEY=$env:APP_ACCESS_KEY
-adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-```
-
-A phone that has a debug-signed build installed must uninstall it first (Android refuses an update signed with a
-different key). A phone that was used against the local server keeps that address: change it under **Ayarlar → Sunucu
-adresi** (or "Değiştir" on the login screen). Release builds only accept `https://` addresses (plus
-`http://localhost` for USB testing).
+Server-Sent Events through Cloudflare + nginx: paste a menu on the site — the status line must move while the analysis
+runs, not jump at the end (`proxy_buffering off` in `mk-proxy.conf`).
 
 ## 8. Roll back
 

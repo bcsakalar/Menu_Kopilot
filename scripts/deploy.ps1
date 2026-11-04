@@ -1,5 +1,5 @@
 # Deploys (or updates) the production stack from Windows. The server runs a git clone of the repository
-# (read-only deploy key) and pulls it; the API image is built on this PC - the server is too small for pnpm + tsc.
+# (read-only deploy key) and pulls it; the image (site + API) is built on this PC - the server is too small for pnpm + tsc.
 #
 #   powershell -File scripts/deploy.ps1                          # push first; pull on the server, build + copy the image
 #   powershell -File scripts/deploy.ps1 -SkipBuild -Tag 3f2a1bc  # roll back to an image already on the server
@@ -34,7 +34,7 @@ if ($ImageSource -eq 'local') {
   $image = 'menu-kopilot-api'
   if (-not $Tag) {
     if ($SkipBuild) { throw '-SkipBuild needs -Tag (an image tag that is already on the server)' }
-    if (git -C $root status --porcelain -- backend deploy) { throw 'backend/ or deploy/ has uncommitted changes: commit and push first.' }
+    if (git -C $root status --porcelain -- backend web deploy) { throw 'backend/, web/ or deploy/ has uncommitted changes: commit and push first.' }
     $Tag = (git -C $root rev-parse --short HEAD).Trim()
   }
 } else {
@@ -73,7 +73,7 @@ if ($ImageSource -eq 'ghcr') {
 } elseif (-not $SkipBuild) {
   # Built here (the server has too little memory for pnpm install + tsc) for the server's architecture.
   Write-Output "==> Building $image`:$Tag on this PC"
-  Invoke-Local 'docker' @('build', '--platform', 'linux/amd64', '-t', "${image}:$Tag", (Join-Path $root 'backend'))
+  Invoke-Local 'docker' @('build', '--platform', 'linux/amd64', '-t', "${image}:$Tag", '-f', (Join-Path $root 'backend/Dockerfile'), $root)
 
   $work = Join-Path $env:TEMP 'menu-kopilot-image'
   New-Item -ItemType Directory -Force $work | Out-Null

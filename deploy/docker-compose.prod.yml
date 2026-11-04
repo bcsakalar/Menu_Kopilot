@@ -1,4 +1,4 @@
-# Menü Kopilot — production stack for a small droplet. Nothing is built on the server: the API image is built on the
+# Menü Kopilot — production stack for a small droplet. Nothing is built on the server: the image (site + API) is built on the
 # PC and loaded over ssh (scripts/deploy.ps1) or pulled from GHCR (.github/workflows/release.yml). Secrets live in
 # /etc/menu-kopilot/env (chmod 600), outside the deploy directory, so a redeploy cannot overwrite them.
 #

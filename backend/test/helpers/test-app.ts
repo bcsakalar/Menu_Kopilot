@@ -74,15 +74,14 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestC
   };
 }
 
-export async function loginAs(ctx: TestContext): Promise<{ accessToken: string; refreshToken: string }> {
+export async function loginAs(ctx: TestContext): Promise<{ accessToken: string }> {
   const res = await ctx.app.inject({
     method: 'POST',
     url: '/api/v1/auth/login',
     payload: { email: TEST_ADMIN.email, password: TEST_ADMIN.password, deviceName: 'vitest' },
   });
   if (res.statusCode !== 200) throw new Error(`login failed: ${res.statusCode} ${res.body}`);
-  const body = res.json<{ accessToken: string; refreshToken: string }>();
-  return { accessToken: body.accessToken, refreshToken: body.refreshToken };
+  return { accessToken: res.json<{ accessToken: string }>().accessToken };
 }
 
 export const bearer = (token: string) => ({ authorization: `Bearer ${token}` });

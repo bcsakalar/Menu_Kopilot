@@ -1,5 +1,5 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import { and, eq, gt, isNull } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { and, eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { devices, users } from '../../db/schema/index.js';
 import { AppError } from '../../lib/errors.js';
@@ -7,17 +7,15 @@ import { hashPassword, verifyPassword } from '../../lib/password.js';
 import type { AccessTokenClaims, AuthUser, TokenResponse, UserDto } from './schemas.js';
 
 export interface AuthServiceOptions {
-  refreshTtlDays: number;
   accessTtlSeconds: number;
-  signAccessToken: (claims: AccessTokenClaims) => string;
-  /** D-199: the key the app is built with; undefined = device sign-in is off. */
-  appAccessKey?: string | undefined;
-  /** The account a device signs in to: the team account the seed creates (`ADMIN_EMAIL`). */
-  deviceAccountEmail?: string | undefined;
+  signAccessToken: (claims: AccessTokenClaims, expiresInSeconds?: number) => string;
   now?: () => Date;
 }
 
-const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
+/** A browser keeps its conversations for a year; it renews nothing, so a cleared cookie just starts a new visitor. */
+export const VISITOR_SESSION_SECONDS = 365 * 86_400;
+/** `verifyPassword` refuses anything that is not a scrypt hash: a visitor row can never be logged in to. */
+const NO_PASSWORD = '!';
 
 type UserRow = typeof users.$inferSelect;
 
@@ -37,38 +35,8 @@ export class AuthService {
     this.now = options.now ?? (() => new Date());
   }
 
-  private refreshExpiry(): Date {
-    return new Date(this.now().getTime() + this.options.refreshTtlDays * 86_400_000);
-  }
-
-  private issue(user: UserRow, deviceId: string, refreshToken: string): TokenResponse {
-    const accessToken = this.options.signAccessToken({
-      sub: user.id,
-      role: user.role,
-      tv: user.tokenVersion,
-      did: deviceId,
-    });
-    return { accessToken, refreshToken, expiresIn: this.options.accessTtlSeconds, deviceId, user: toDto(user) };
-  }
-
-  /**
-   * D-199. "Kurulunca hazır": the app signs itself in with the key it was built with — no e-mail, no password on the
-   * phone. The device gets its own session (a rotating refresh token, revocable on the server like any other) on the
-   * team account, so the history, the template pool and what the team taught stay one. Off unless APP_ACCESS_KEY is
-   * set; changing the key on the server shuts out every build that carries the old one.
-   */
-  async enrollDevice(appKey: string, deviceName: string): Promise<TokenResponse> {
-    const expected = this.options.appAccessKey;
-    // Compared as hashes: equal length, constant time, and a wrong key of any length costs the same.
-    if (!expected || !timingSafeEqual(Buffer.from(sha256(appKey), 'hex'), Buffer.from(sha256(expected), 'hex'))) {
-      throw new AppError('UNAUTHORIZED', 'Uygulama anahtarı geçersiz');
-    }
-    const email = this.options.deviceAccountEmail?.toLowerCase();
-    const [user] = email
-      ? await this.db.select().from(users).where(eq(users.email, email)).limit(1)
-      : await this.db.select().from(users).where(eq(users.role, 'admin')).limit(1);
-    if (!user) throw new AppError('INTERNAL_ERROR', 'Ekip hesabı bulunamadı');
-    return this.openDevice(user, deviceName);
+  private claims(user: UserRow, deviceId: string): AccessTokenClaims {
+    return { sub: user.id, role: user.role, tv: user.tokenVersion, did: deviceId };
   }
 
   async login(email: string, password: string, deviceName: string): Promise<TokenResponse> {
@@ -81,56 +49,44 @@ export class AuthService {
     if (!(await verifyPassword(password, user.passwordHash))) {
       throw new AppError('UNAUTHORIZED', 'E-posta veya şifre hatalı');
     }
-    return this.openDevice(user, deviceName);
+    const deviceId = await this.openDevice(user.id, deviceName);
+    return {
+      accessToken: this.options.signAccessToken(this.claims(user, deviceId)),
+      expiresIn: this.options.accessTtlSeconds,
+      deviceId,
+      user: toDto(user),
+    };
   }
 
-  /** A new device session on the account: a rotating refresh token (stored hashed) and an access token. */
-  private async openDevice(user: UserRow, deviceName: string): Promise<TokenResponse> {
-    const refreshToken = randomBytes(32).toString('base64url');
-    const [device] = await this.db
-      .insert(devices)
-      .values({
-        userId: user.id,
-        deviceName,
-        refreshTokenHash: sha256(refreshToken),
-        refreshExpiresAt: this.refreshExpiry(),
-        lastSeen: this.now(),
-      })
-      .returning({ id: devices.id });
-    if (!device) throw new AppError('INTERNAL_ERROR', 'Cihaz kaydı oluşturulamadı');
-    return this.issue(user, device.id, refreshToken);
+  /**
+   * The site has no sign-in (D-200): a browser's first message creates a user of its own, so every existing ownership
+   * check, quota and history keeps working per visitor, and the cookie is all that identifies it.
+   */
+  async createVisitor(): Promise<{ token: string; user: AuthUser }> {
+    const id = randomUUID();
+    const [user] = await this.db
+      .insert(users)
+      .values({ id, email: `${id}@visitor.invalid`, name: 'Ziyaretçi', role: 'uzman', passwordHash: NO_PASSWORD })
+      .returning();
+    if (!user) throw new AppError('INTERNAL_ERROR', 'Oturum oluşturulamadı');
+    const deviceId = await this.openDevice(user.id, 'Web');
+    return {
+      token: this.options.signAccessToken(this.claims(user, deviceId), VISITOR_SESSION_SECONDS),
+      user: { ...toDto(user), deviceId },
+    };
   }
 
-  async refresh(refreshToken: string): Promise<TokenResponse> {
-    const [row] = await this.db
-      .select({ device: devices, user: users })
-      .from(devices)
-      .innerJoin(users, eq(devices.userId, users.id))
-      .where(
-        and(
-          eq(devices.refreshTokenHash, sha256(refreshToken)),
-          isNull(devices.revokedAt),
-          gt(devices.refreshExpiresAt, this.now()),
-        ),
-      )
-      .limit(1);
-    if (!row) throw new AppError('UNAUTHORIZED', 'Oturum süresi doldu, tekrar giriş yap');
-    const rotated = randomBytes(32).toString('base64url');
-    await this.db
-      .update(devices)
-      .set({ refreshTokenHash: sha256(rotated), refreshExpiresAt: this.refreshExpiry(), lastSeen: this.now() })
-      .where(eq(devices.id, row.device.id));
-    return this.issue(row.user, row.device.id, rotated);
+  private async openDevice(userId: string, deviceName: string): Promise<string> {
+    const [device] = await this.db.insert(devices).values({ userId, deviceName, lastSeen: this.now() }).returning({ id: devices.id });
+    if (!device) throw new AppError('INTERNAL_ERROR', 'Oturum oluşturulamadı');
+    return device.id;
   }
 
   async logout(deviceId: string): Promise<void> {
-    await this.db
-      .update(devices)
-      .set({ revokedAt: this.now(), refreshTokenHash: null })
-      .where(eq(devices.id, deviceId));
+    await this.db.update(devices).set({ revokedAt: this.now() }).where(eq(devices.id, deviceId));
   }
 
-  /** Called on every authenticated request: the token must match the user's token_version and a live device. */
+  /** Called on every authenticated request: the token must match the user's token_version and a live session. */
   async validateAccess(claims: AccessTokenClaims): Promise<AuthUser | undefined> {
     const [row] = await this.db
       .select({ user: users, device: devices })

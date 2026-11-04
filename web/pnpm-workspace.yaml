@@ -1,0 +1,3 @@
+# pnpm 11 settings for this single-package project.
+allowBuilds:
+  esbuild: true

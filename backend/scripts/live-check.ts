@@ -165,18 +165,13 @@ await step('health + health/ready (database, redis)', async () => {
   assert(ready['status'] === 'ready', JSON.stringify(ready));
 });
 
-await step('login + me + refresh rotation', async () => {
+await step('login + me', async () => {
   assert(args.email && args.password, 'ADMIN_EMAIL / ADMIN_PASSWORD missing (put them in ../.env or pass --email/--password)');
   const login = await call('POST', '/auth/login', { email: args.email, password: args.password, deviceName: 'live-check' });
   assert(login.status === 200, `login ${login.status} ${login.text}`);
   token = String(login.json['accessToken']);
   const me = await call('GET', '/auth/me');
   assert(me.status === 200, `me ${me.status}`);
-  const refreshed = await call('POST', '/auth/refresh', { refreshToken: login.json['refreshToken'] });
-  assert(refreshed.status === 200, `refresh ${refreshed.status}`);
-  const reused = await call('POST', '/auth/refresh', { refreshToken: login.json['refreshToken'] });
-  assert(reused.status === 401, `old refresh token must be rejected, got ${reused.status}`);
-  token = String(refreshed.json['accessToken']);
 });
 
 const unauthorized = await fetch(`${api}/analyze/latest`);

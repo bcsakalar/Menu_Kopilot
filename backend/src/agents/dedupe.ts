@@ -114,6 +114,13 @@ export function dedupeExtracted(perImage: readonly (readonly ExtractedItem[])[])
   return entries;
 }
 
+/** A later screenshot of a menu already read: only what the list does not have yet joins it. */
+export function joinItems(known: readonly MergedItem[], read: readonly MergedItem[]): MergedItem[] {
+  const entries = [...known];
+  for (const item of read) if (!findMatch(entries, item.normalized, item.truncated)) entries.push(item);
+  return entries;
+}
+
 /**
  * Products the user typed or dictated join the extracted entries. A name already read from an image (same
  * matching rules) is not counted twice; a new one enters with unknown fields, because typing a name says

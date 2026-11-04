@@ -2,6 +2,9 @@
 node_modules/
 .pnpm-store/
 backend/dist/
+backend/public/
+web/dist/
+web/node_modules/
 backend/coverage/
 backend/exports/
 backend/test/.tmp/
@@ -16,10 +19,8 @@ backend/test/.tmp/
 *.jks
 key.properties
 
-# Flutter / Dart (mobile/.gitignore from `flutter create` covers the rest)
-mobile/.dart_tool/
-mobile/build/
-mobile/coverage/
+# Build output left by the retired Flutter app
+mobile/
 
 # IDE / OS
 .idea/
@@ -28,3 +29,7 @@ mobile/coverage/
 !.vscode/extensions.json
 .DS_Store
 Thumbs.db
+
+# Local preview config of the desktop app
+.claude/
+.impeccable/

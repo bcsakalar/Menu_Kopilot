@@ -1,5 +1,8 @@
 # Analysis API and streaming contract (SSE)
 
+> Since D-200 the site uses `POST /api/v1/chat/messages`: the same events as below, plus `conversation`, `user_message`
+> and a closing `message` that carries the answer's text and the whole result.
+
 One endpoint does what "Öneri" and "Tamamla" used to do separately:
 
 `POST /api/v1/analyze` — multipart (or JSON without images):

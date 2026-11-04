@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-10-11 — live on production (`4d547a4`), app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
+Last update: 2026-11-05 — the phone app is gone: a website with a chat, an open door by cookie and an admin panel (D-200). Backend 734 tests, web 2. Before it, 2026-10-11, app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
 anywhere (D-197). Before it, 1.5.0: call mode (D-196) — cards in call order with
 the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
 learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
@@ -43,6 +43,10 @@ tests, mobile 85, both clean.
       push, deploy (migration 0004 runs on start), release APK
 
 ## Where I am
+**2026-11-05 — the site (D-200).** `web/` (chat at `/`, admin at `/admin`) replaces `mobile/`; the chat module and the
+focused runs are in the backend, migration 0007 adds the conversations and puts Gemini first. Verified on a local server
+with the real keys: paste, typed menus, follow-ups, a second screenshot, the admin pages. Phases below are history.
+
 **2026-10-11 — production on `4d547a4`, app 1.6.0 (D-198, D-199).** User, testing on the phone: new products that a
 restaurant cannot make, quick mode too thin, options/extras/descriptions too far away during the call, and no login.
 Production data showed quick mode never asked the model for new products (the pool filled six slots per cuisine by

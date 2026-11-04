@@ -1,29 +1,28 @@
 # Menü Kopilot
 
-A stand-alone field assistant for a menu specialist, used during the live phone call with the restaurant. **One
-screen, one button:** screenshots of the restaurant's menu panel, a menu photo, or simply the
-products typed/dictated during the call ("adana, urfa, ayran") → **Analiz et** → a result that can be scanned in
-seconds:
+A website for the rep who opens a restaurant branch on a food-delivery platform, used during the live phone call.
+The restaurant comes with nothing but its menu; the site reads it and leads the call:
 
-- pinned on top: `Mevcut 5 ürün / hedef 10 — mutfak türü: Pide & Lahmacun`, the 10-product rule and the categories
-  still short (`İçecek 0/2`); it moves as cards are accepted;
-- **A · YENİ ÜRÜNLER** — products the menu does NOT have (never one it already has): name, a one-line description to
-  paste, category, an estimated price range for the conversation, and why;
-- **B · OPSİYON & MALZEME** — for products already on the menu: option groups (required/optional, single/multi,
-  price effect), removable and extra ingredients;
-- **C · EKSİK / DÜZELTME** — empty descriptions, abbreviated or wrong names, a product under the wrong heading.
+- **Paste a screenshot with Ctrl+V** (from anywhere on the page), drop an image, or type the products. Several
+  screenshots of one panel are merged without duplicates.
+- **The first answer** says where the menu stands (`15 ürün, hedef 20`, `Çorba 0/1`), what to bring up first and the next
+  steps as buttons, with the cards under it in three tabs:
+  **Yeni ürünler** (products the menu lacks and this kitchen can make, each with a sentence to say to the restaurant),
+  **Opsiyon ve malzeme** (option groups, removable and extra ingredients, a description for every product on the menu),
+  **Düzeltmeler** (wrong names, a product under the wrong heading).
+- **It is a chat.** "Tatlı öner", "Adana için opsiyon yaz", "ayran yokmuş", "restoran dürüm istemiyor, ne diyeyim?", or
+  a second screenshot: every follow-up goes through the same agents and guards as the first analysis, and nothing is
+  offered twice in one conversation.
+- **Evet / Düşünecek / Hayır** on every card moves the counter, and **Özet** collects what goes into the panel, ready
+  to copy.
 
-Filter chips, bulk select + copy, one-tap copy per card, and a one-tap re-run with another cuisine when the
-Classifier reads the menu differently. Behind it, six agents (Extractor → Classifier → Gap Analyst → Product
-Recommender ∥ Option/Modifier → Validator) with a trace per step; the category expectations per cuisine live in
-Postgres and are edited from the app. Extras: *Paylaş → Menü Kopilot* (a menu photo from WhatsApp, panel screenshots
-from the gallery, a product list as text) and *Sesli not* (dictate product names; Groq Whisper, off in
-`LOCAL_ONLY_MODE`).
+No account and no password: a browser's first message creates a visitor, and a cookie keeps its conversations.
+The admin panel at `/admin` has a real sign-in.
 
 > **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
-> restaurant; the app shows this warning on every result screen. The tool never talks to any ordering platform:
-> input is manual (typing, photos, screenshots) and output is copy/paste.
-> **Templates never contain a price.** The only amount the app shows is a new product's *estimated* price range
+> restaurant. The tool never talks to any ordering platform: input is manual (typing, screenshots) and output is
+> copy/paste.
+> **Templates never contain a price.** The only amount the site shows is a new product's *estimated* price range
 > (`25–40 TL`), a prompt for the conversation that is never written into the template pool; prices read on photos
 > are never assigned to a product.
 
@@ -33,6 +32,7 @@ from the gallery, a product list as text) and *Sesli not* (dictate product names
 | Provider research (Gemini, Groq) | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) |
 | Streaming contract (SSE) | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) |
 | Deploying next to other apps on `myserver` (nginx + Cloudflare) | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) |
+| Product and design context | [`PRODUCT.md`](PRODUCT.md) · [`DESIGN.md`](DESIGN.md) |
 | Decisions / progress & acceptance status | [`DECISIONS.md`](DECISIONS.md) · [`PROGRESS.md`](PROGRESS.md) |
 
 ## Contents
@@ -44,27 +44,23 @@ from the gallery, a product list as text) and *Sesli not* (dictate product names
 6. [Backend commands](#backend-commands)
 7. [API overview](#api-overview)
 8. [Deploying](#deploying)
-9. [Android APK (build and signing)](#android-apk-build-and-signing)
-10. [CI / release](#ci--release)
-11. [Tests](#tests)
-12. [Troubleshooting](#troubleshooting)
+9. [CI / release](#ci--release)
+10. [Tests](#tests)
+11. [Troubleshooting](#troubleshooting)
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph Phone["Flutter app (no provider keys)"]
-    UI[Analiz · Şablonlar · Ayarlar]
-    Local[(Drift: recent analyses, template pool,<br/>offline queue)]
-  end
+  Browser["Browser (React, no keys)<br/>chat at /, admin at /admin"]
   subgraph VPS["Docker Compose on a small droplet"]
-    Caddy[nginx or Caddy<br/>HTTPS, no buffering] --> API[Fastify API<br/>+ embedding worker]
+    Proxy[nginx or Caddy<br/>HTTPS, no buffering] --> API[Fastify: site + API<br/>+ embedding worker]
     API --> PG[(PostgreSQL 16<br/>pgvector + pg_trgm)]
     API --> Redis[(Redis 7<br/>cache + BullMQ)]
   end
-  UI -- "JWT + SSE" --> Caddy
+  Browser -- "cookie + SSE" --> Proxy
   API -- "keys live here only" --> Gemini[Gemini API]
-  API --> Groq[Groq API]
+  API -. fallback .-> Groq[Groq API]
 ```
 
 Token economy — the database and caches answer first, the LLM is the last resort:
@@ -86,28 +82,25 @@ Token economy — the database and caches answer first, the LLM is the last reso
 | Path | What |
 |---|---|
 | `backend/` | Node.js 22 + TypeScript (strict) + Fastify 5, Drizzle ORM, PostgreSQL + pgvector, Redis + BullMQ, Zod |
-| `mobile/` | Flutter (Android first; iOS kept buildable), Riverpod, go_router, Dio, Drift |
+| `web/` | React 19 + Vite + TypeScript, plain CSS; built into the API image and served by Fastify |
 | `deploy/` | production compose file, nginx site for a shared server, `Caddyfile` for a fresh droplet |
-| `scripts/` | provider-key guard, deploy script (builds the API image locally, copies it over ssh) |
+| `scripts/` | provider-key guard, deploy script (builds the image locally, copies it over ssh) |
 | `docs/` | provider notes, SSE contract, myserver runbook |
 
 ## Security and privacy
 
-- **Provider API keys exist only on the backend.** The mobile app contains no Gemini/Groq key or endpoint — not even
-  in a `.env` (an APK can be decompiled). `scripts/check-no-provider-keys.ps1` and a CI job fail the build if one
+- **Provider API keys exist only on the backend.** The site contains no Gemini/Groq key or endpoint, because everything
+  under `web/` ends up in a public bundle. `scripts/check-no-provider-keys.ps1` and a CI job fail the build if one
   appears.
-- The app authenticates with a short-lived JWT + rotating refresh token (hashed server side). There is a single
-  account (created by the seed from `ADMIN_EMAIL` / `ADMIN_PASSWORD`); production refuses to start with the
-  development defaults.
-- **No login screen in release builds (D-199):** the APK is built with `--dart-define=APP_ACCESS_KEY=<key>` (the same
-  value as `APP_ACCESS_KEY` on the server, ≥ 24 characters, e.g. `openssl rand -hex 24`) and signs itself in to the
-  team account with `POST /auth/device`. Rotating the key on the server shuts out every build that carries the old
-  one. A build without the key shows the e-mail/password screen.
-- Photos and screenshots are never stored on the server — only their SHA-256 (for caching). EXIF/GPS is stripped on
-  the phone before upload.
-- Release builds of the app talk to remote servers over **HTTPS only** (plain `http://` is accepted for `localhost`,
-  i.e. USB testing with `adb reverse`). The app enforces this itself because `dart:io` ignores Android's
-  `usesCleartextTraffic` flag.
+- **The site is open (D-200).** A visitor is a user row with no password, identified by an HttpOnly, SameSite=Lax
+  cookie. That is what keeps ownership checks, history and quotas per browser. Anyone with the address can use it, so
+  it is limited three ways: 20 messages a minute per IP, `DAILY_LLM_CALL_QUOTA` per visitor and
+  `GLOBAL_DAILY_LLM_CALL_QUOTA` for the whole site, past which answers come from the template pool only.
+- **A visitor cannot write the shared pool.** Their "Evet" is recorded and teaches the learning loop; a new product
+  becomes a draft that the admin approves under *Şablon havuzu*. Everything under the admin panel needs the admin
+  cookie (HttpOnly, SameSite=Strict, 12 h), and production refuses to start with the development defaults.
+- Screenshots are never stored on the server, only their SHA-256 (for caching). The browser re-encodes them before
+  upload, which also drops EXIF/GPS.
 - **`LOCAL_ONLY_MODE=true`** turns off every external API call: answers come only from the database and the caches
   (a photo read once is still usable from the cache; new photos cannot be read in this mode).
 
@@ -125,38 +118,29 @@ reliability and abuse investigations unless **Zero Data Retention** is enabled i
 key (or keep Gemini for text-only tasks), enable Groq ZDR, never photograph documents with personal data, and switch
 on `LOCAL_ONLY_MODE` when external processing is not acceptable. Policies change — re-check the linked pages.
 
-Voice notes are sent to Groq for transcription and are not stored by this backend (only a hash for the cache); the
-phone deletes the recording after upload.
-
 ## Local setup
 
-Prerequisites (Windows 11 + PowerShell shown): Node.js ≥ 22, pnpm 11 (`corepack enable`), Docker Desktop, Flutter
-(stable channel), JDK 17 and the Android SDK for the app.
+Prerequisites (Windows 11 + PowerShell shown): Node.js ≥ 22, pnpm 11 (`corepack enable`), Docker Desktop.
 
 ```powershell
 # 1. configuration (optional for a first run: compose has development defaults)
 Copy-Item .env.example .env
 #    edit .env: JWT_SECRET (openssl rand -base64 48), ADMIN_PASSWORD, GEMINI_API_KEY / GROQ_API_KEY
 
-# 2. full stack: api + postgres(pgvector) + redis + caddy
+# 2. full stack: site + api + postgres(pgvector) + redis
 docker compose up -d --build
+#    http://localhost:3000/              → the site (admin: /admin)
 #    http://localhost:3000/health/ready  → {"status":"ready"}
 #    http://localhost:3000/docs          → Swagger UI (OpenAPI at /openapi.json)
 ```
 
-### One command on the office PC (phone on USB)
+### One command on the office PC
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1                   # Docker, stack, health check, USB bridge
-powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -Build            # after pulling new backend code
+powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1                   # Docker, stack, health check
+powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -Build            # after pulling new code
 powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -FixDockerSocket  # Docker Desktop hangs while starting
 ```
-
-[`scripts/dev-up.ps1`](scripts/dev-up.ps1) starts Docker Desktop when the engine does not answer, runs
-`docker compose up -d`, waits for `/health/ready` and runs `adb reverse tcp:<API_PORT> tcp:<API_PORT>` for every phone
-on USB, so the app's server address is `http://localhost:<API_PORT>` (3030 here). Release builds accept plain http
-only for `localhost`/`127.0.0.1` — over the USB bridge the traffic never leaves the cable; any other server must be
-https. Run it again after the phone was unplugged or the PC slept: the bridge does not survive that.
 
 Backend development with hot reload (databases from compose):
 
@@ -169,16 +153,13 @@ pnpm db:seed          # 27 cuisines, 316 templates, prompts v1, provider routes,
 pnpm dev              # http://localhost:3000
 ```
 
-The app (debug builds allow plain HTTP to a local backend):
+The site with hot reload (the dev server proxies `/api` to port 3000, so cookies work as in production):
 
 ```powershell
-cd mobile
-flutter pub get
-# emulator → host machine is 10.0.2.2; a real phone needs the PC's LAN IP
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+cd web
+pnpm install
+pnpm dev              # http://localhost:5173
 ```
-
-The server address can also be typed on the login screen and changed later in **Ayarlar → Sunucu**.
 
 ## Environment variables
 
@@ -195,13 +176,14 @@ All keys are listed in [`.env.example`](.env.example) (a test keeps it in sync w
 | `DATABASE_URL` / `REDIS_URL` | local URLs | compose overrides them with the internal service names |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `menu` / `menu` / `menu_kopilot` | database container |
 | `JWT_SECRET` | — | ≥ 32 random characters; required in production |
-| `JWT_ACCESS_TTL`, `REFRESH_TOKEN_TTL_DAYS` | `12h`, `90` | token lifetimes |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | — | the single account, created by the seed |
+| `JWT_ACCESS_TTL` | `12h` | admin session lifetime (a visitor's cookie lasts a year) |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | — | the admin panel's account, created by the seed |
 | `SEED_ON_START` | `true` | run migrations + idempotent seed when the API starts |
 | `GEMINI_API_KEY`, `GROQ_API_KEY` | — | provider keys (server only); a missing key just removes that provider from the chains |
 | `LOCAL_ONLY_MODE` | `false` | never call external APIs |
 | `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA`, `QUOTA_TIMEZONE` | `300`, `1500000`, `Europe/Istanbul` | per-user daily quota; after it the app answers from DB/cache only |
 | `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | what the agents may spend per analysis; every image adds one call and 4 000 tokens on top; past it the remaining sections come from the database |
+| `GLOBAL_DAILY_LLM_CALL_QUOTA` | `3000` | ceiling for the whole site: the site is open and a cleared cookie gets a fresh per-visitor quota |
 | `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | DB match thresholds |
 | `CACHE_TTL_DAYS` | `30` | Redis cache lifetime |
 | `UPLOAD_MAX_FILES`, `UPLOAD_MAX_FILE_MB` | `5`, `8` | photo upload limits |
@@ -209,11 +191,11 @@ All keys are listed in [`.env.example`](.env.example) (a test keeps it in sync w
 | `SITE_ADDRESS` | `:80` | Caddy site; a hostname (e.g. `api.example.com`) enables automatic HTTPS |
 
 Model IDs and fallback chains are in `backend/src/config/models.ts`; the primary model per task can be changed from
-**Ayarlar → Görev bazlı modeller** without a redeploy.
+the admin panel (**Modeller**) without a redeploy.
 
 ## Getting the API keys
 
-Keys go **only** into the server's environment file — never into the app.
+Keys go **only** into the server's environment file — never into `web/`.
 
 - **Gemini:** open [Google AI Studio → API keys](https://aistudio.google.com/apikey), sign in, *Create API key*
   (choose or create a Google Cloud project) → `GEMINI_API_KEY`. The free tier works for trying things out; see the
@@ -244,29 +226,30 @@ Run from `backend/` (PowerShell: chain commands with `;`).
 
 ## API overview
 
-Everything is under `/api/v1` and needs `Authorization: Bearer <access token>` except login/refresh. Errors always
-have the shape `{ "error": { "code", "message", "details?", "requestId" } }`. Interactive docs: `/docs` (blocked by
-the production nginx site). Endpoints that are nothing but an AI call answer `AI_NOT_CONFIGURED` (409, names the
-missing key), `LOCAL_ONLY_MODE` (409), `QUOTA_EXCEEDED` (429) or `PROVIDER_UNAVAILABLE` (503).
+Everything is under `/api/v1`. The chat routes are open and identified by the visitor cookie; everything else needs the
+admin cookie or `Authorization: Bearer <token>`. Errors always have the shape
+`{ "error": { "code", "message", "details?", "requestId" } }`. Interactive docs: `/docs` (blocked by the production nginx
+site).
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me` |
+| Chat (open) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; the answer streams as SSE), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /suggestion-items/:id/accept\|skip\|later` |
+| Admin | `GET /admin/overview?range=today\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id` |
+| Auth | `POST /auth/login` (sets the admin cookie), `POST /auth/logout`, `GET /auth/me` |
 | Analysis | `POST /analyze` (multipart: `images[]` ≤ 5, `menuText?`, `cuisineId?`, `notes?`, `fromRunId?`, `debug?`; SSE with `Accept: text/event-stream`, `?async=1` → 202, otherwise the result), `GET /analyze/latest`, `GET /analyze/:runId`, `GET /analyze/:runId/events`, `GET /analyze/:runId/trace`, `POST /analyze/:runId/cancel`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
 | Categories | `GET /categories`, `PATCH /categories/:key` (label, order, keywords), `GET/PUT /cuisines/:id/categories` (which categories a cuisine needs, with a minimum each) |
 | Template pool | `GET /templates?q=&cuisineId=&source=&approved=&sort=usage\|name\|updated`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
-| Voice | `POST /transcribe` (multipart: `audio` m4a/mp3/ogg/wav/webm/flac, `language?`, `cuisineId?` → text + product names) |
 | Settings | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary?range=today\|month`, `GET/POST /prompts`, `POST /prompts/:id/activate` (admin) |
 | Health | `GET /health`, `GET /health/ready` (database + Redis) |
 
 Streaming events and payload shapes: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md). An analysis streams
 `run → classification → menu → counts → item* → done` (plus `trace` per agent step and `warning`), so the count
-reaches the phone before the first card.
+reaches the browser before the first card.
 
 ## Deploying
 
 Nothing is built on the server — `pnpm install`/`tsc` would be OOM-killed on a small droplet. `scripts/deploy.ps1`
-builds the API image on the PC (Docker Desktop), copies it over ssh, starts the stack and waits for `/health/ready`.
+builds the image (site + API) on the PC (Docker Desktop), copies it over ssh, starts the stack and waits for `/health/ready`.
 Migrations and the idempotent seed run when the API container starts (`SEED_ON_START`). Memory limits in
 [`deploy/docker-compose.prod.yml`](deploy/docker-compose.prod.yml): Postgres 256 MB, API 384 MB, Redis 128 MB.
 
@@ -303,7 +286,7 @@ from GHCR (`.github/workflows/release.yml` on a `v*` tag): `-ImageSource ghcr -T
 - `curl -fsS https://<host>/health/ready` → `{"status":"ready",...}`
 - `pnpm -C backend live:check --url https://<host>` (see the runbook for passing the admin password safely)
 - `docker stats --no-stream` — the stack stays well below its limits; `free -m` shows swap
-- SSE through the proxy: analysis cards appear one by one, not all at the end
+- SSE through the proxy: the status line of a running analysis moves, it does not jump at the end
 
 **Windows → Linux pitfalls (already handled, keep it that way)**
 
@@ -323,45 +306,12 @@ cat > /etc/cron.d/menu-kopilot-backup <<'EOF'
 EOF
 ```
 
-## Android APK (build and signing)
-
-```powershell
-cd mobile
-flutter build apk --debug                       # quick test build — installs next to the release app as "Kopilot TEST"
-flutter build apk --release                     # fat APK (all ABIs, ~65 MB)
-flutter build apk --release --split-per-abi     # smaller per-ABI APKs; most phones need app-arm64-v8a-release.apk
-# the office build: arm64 only, production server prefilled, signed with the release key
-flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://menu.example.com --dart-define=APP_ACCESS_KEY=$env:APP_ACCESS_KEY
-```
-
-Release signing: the production key lives in `%USERPROFILE%\.android-keys\menu-kopilot\` (`menu-kopilot-upload.jks` + a copy of
-`key.properties`, created 2026-09-21 on the `old-pc` machine, certificate `CN=Menu Kopilot, O=bcsakalar, C=TR`, SHA-256
-`DE:00:43:5B:E8:64:85:7C:A6:CB:B9:59:5F:BF:BC:09:9F:E9:0B:99:FE:48:5E:E9:98:38:9F:25:48:52:14:E6`); `mobile/android/key.properties`
-points at it and is git-ignored. Builds up to 1.0.0 were signed with an earlier key that stayed on another PC
-(DECISIONS D-166): a phone with such a build uninstalls it once before installing 1.1.0. On a new machine copy that folder back and the same `key.properties` into `mobile/android/`. For a brand-new key
-`powershell -File mobile/scripts/create-keystore.ps1` asks for a password and writes both files. Without `key.properties` a release build is signed with the debug key (fine for your own phone, not for
-distribution). **Back up the keystore and its password** — an app signed with a different key cannot be installed
-over the existing one.
-
-Install on the phone: copy the APK and allow "install unknown apps" for the file manager, or
-`adb install -r build\app\outputs\flutter-apk\app-release.apk`. Set the default server with
-`--dart-define=API_BASE_URL=https://menu.example.com` (release builds only allow HTTPS; `http://localhost`
-works for USB testing: `adb reverse tcp:3030 tcp:3030` and `--dart-define=API_BASE_URL=http://localhost:3030`).
-
-App icon and splash: the adaptive launcher icon is a vector
-(`android/app/src/main/res/drawable/ic_launcher_foreground.xml`, plus a monochrome variant for Android 13 themed
-icons); `powershell -File mobile/scripts/generate-app-icons.ps1` renders the legacy Android and the iOS PNG icons from
-the same geometry.
-
-iOS: the project stays buildable, but building requires macOS/Xcode (not possible on Windows).
-
 ## CI / release
 
-- [`ci.yml`](.github/workflows/ci.yml) — on push/PR: backend `lint` + `typecheck` + `test` + `build` (Node 22), mobile
-  `flutter analyze` + `flutter test` (stable channel), and the provider-key guard.
-- [`release.yml`](.github/workflows/release.yml) — on a `v*` tag or manually: signed release APK as a workflow
-  artifact (secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD`,
-  `ANDROID_KEY_ALIAS`; optional repository variable `API_BASE_URL`) and the API image pushed to GHCR (linux/amd64).
+- [`ci.yml`](.github/workflows/ci.yml) — on push/PR: backend `lint` + `typecheck` + `test` + `build` (Node 22), web `test` +
+  `build`, and the provider-key guard.
+- [`release.yml`](.github/workflows/release.yml) — on a `v*` tag or manually: the image (site + API) pushed to GHCR
+  (linux/amd64).
 
 ## Tests
 
@@ -370,19 +320,15 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
   → up, the agents one by one (dedupe across screenshots, category classification and gaps, name cleaning, option
   merge on accept) and end-to-end runs of the pipeline against recorded fixtures: three sections, no new product
   that is already on the menu, category quotas, a failing agent → partial result, re-run with another cuisine without
-  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, voice notes, the product-type knowledge base
+  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, the product-type knowledge base
   and grounding (absurd groups removed, ingredients separated from options, 6–8 word descriptions, coverage), the
   matching guard, the learning loop (products turned down per cuisine, favoured suggestions first, "Geri al"), the
   analysis history (filters, paging by time), the call (call order, the sentence for the seller, "Evet / Düşünecek /
   Hayır" with the last answer counting) and the hedged photo read. Fixtures are hand-written stand-ins; see
-  `backend/test/fixtures/llm/README.md`.
-- Mobile: `cd mobile; flutter analyze; flutter test` — ~85 tests: SSE parser, models, error texts, HTTPS rule,
-  offline queue (re-runs, requests queued by older versions), template pool cache, photo limits, the history
-  database upgrade, and widget tests (result screen: pinned counter, the two tabs, the four sections of a product
-  card, one-tap removal and "Evet" sending only what was kept, "Düşünecek" / "Hayır" and changed answers, the
-  sentence for the seller, per-section copy, cards that open and close, notes, live counter, cuisine re-run;
-  "Ofiste girilecekler" — ticks, follow-ups, the message for the seller, the call note; the analysis history — days,
-  times, filters, offline; "Öğrenilenler" with "Geri al"; category settings; voice note button; sharing into the app).
+  `backend/test/fixtures/llm/README.md`. `test/e2e/chat.e2e.test.ts` covers the site's door: the visitor cookie, one
+  visitor kept out of another's conversation and of the admin routes, follow-ups that run only what was asked, and a
+  visitor's "Evet" leaving a draft instead of an approved template.
+- Web: `cd web; pnpm test` — the SSE frame parser and the text copied into the panel.
 - AI quality: `tests/ai_eval/` — 141 scenarios over all 27 cuisines, scored by independent rules
   ([`tests/ai_eval/README.md`](tests/ai_eval/README.md); reports in [`docs/ai-eval/`](docs/ai-eval/)).
 - Live: `cd backend; pnpm live:check` against the running stack (see Backend commands).
@@ -392,27 +338,20 @@ iOS: the project stays buildable, but building requires macOS/Xcode (not possibl
 
 - **Cards do not stream / arrive all at once** — a proxy is buffering. With Caddy keep `flush_interval -1`; with
   another proxy disable response buffering for `text/event-stream`.
-- **`quota_exceeded` / `local_only` warnings** — the daily quota is used up or `LOCAL_ONLY_MODE` is on; the app keeps
-  answering from the database and caches. **Ayarlar → Kullanım** shows calls, errors and cache/DB hit ratios.
+- **`quota_exceeded` / `local_only` warnings** — the daily quota is used up or `LOCAL_ONLY_MODE` is on; the site keeps
+  answering from the database and caches. The admin panel's **Genel bakış** shows calls, errors and quota.
 - **"AI anahtarı tanımlı değil"** — no `GEMINI_API_KEY` / `GROQ_API_KEY` on the server. Typed products and the
   seed/approved templates keep working (all three sections, answered from the database). Add a key to the server's
-  env file and redeploy (Ayarlar → Görev bazlı modeller shows provider status).
+  env file and redeploy (the admin panel's **Modeller** shows provider status).
 - **A key is rejected (403 `PERMISSION_DENIED`, "Your project has been denied access")** — the provider disabled the
   project behind the key; its routes fail and the chains fall back to the other provider. Create a new key in a
   healthy project and replace it in the env file.
 - **Photos are not read** — no provider key (above), or both providers are down (circuit breaker opens for 60 s
   after 3 failures).
-- **The app still talks to the old server** — the address is stored on the phone after the first login; change it in
-  **Ayarlar → Sunucu adresi**.
-- **Sesli not does nothing** — it needs `GROQ_API_KEY` (Whisper exists only on Groq), is refused in
-  `LOCAL_ONLY_MODE` and needs the microphone permission on the phone.
 - **A photo is sometimes not read on a free tier** — Groq's free per-minute limit for the vision model is reached
   after a few images in a row; with a working Gemini key the chain falls back to it, otherwise that image is skipped
   with a warning. For daily office use prefer Groq's Dev tier and Gemini Tier 1.
-- **The app shows skeletons forever on a USB phone** — the `adb reverse` bridge dropped (cable replugged, PC slept):
-  run `scripts/dev-up.ps1` again.
-- **Release build warns about the Kotlin Gradle Plugin** (`flutter_image_compress_common`, `workmanager_android`) —
-  upstream plugin issue, the build still succeeds; upgrade the plugins before upgrading Flutter (DECISIONS D-088).
-- **Docker Desktop fails to start on Windows** — a stale `sailor-ingest.sock` in `%LOCALAPPDATA%\Docker\run` cannot be
-  deleted (DECISIONS D-056, D-132): `scripts/dev-up.ps1 -FixDockerSocket` stops Docker Desktop, moves the folder aside
-  and starts it again. The backend tests do not need Docker.
+- **Docker Desktop fails to start on Windows** — a stale socket in `%LOCALAPPDATA%\Docker\run` or
+  `%LOCALAPPDATA%\docker-secrets-engine` cannot be deleted (DECISIONS D-056, D-132, D-200): stop Docker Desktop, rename
+  both folders and start it again (`scripts/dev-up.ps1 -FixDockerSocket` does the first one). The backend tests do not
+  need Docker.

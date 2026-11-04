@@ -1,6 +1,5 @@
 import type { FastifyRequest } from 'fastify';
-import type { AudioInput, ImageInput } from '../ai/types.js';
-import { toAudioInput } from './audio.js';
+import type { ImageInput } from '../ai/types.js';
 import { AppError } from './errors.js';
 import { toImageInput } from './images.js';
 
@@ -63,26 +62,10 @@ const IMAGE_KIND: FileKind<ImageInput> = {
   tooManyMessage: (max) => `En fazla ${max} fotoğraf gönderilebilir`,
 };
 
-const AUDIO_KIND: FileKind<AudioInput> = {
-  parse: toAudioInput,
-  sha: (audio) => audio.sha256,
-  unsupportedMessage: 'Ses kaydı m4a, mp3, ogg, wav, webm veya flac olmalı',
-  tooLargeMessage: (mb) => `Ses kaydı çok büyük (en fazla ${mb} MB)`,
-  tooManyMessage: () => 'Tek bir ses kaydı gönder',
-};
-
 export async function readFieldsAndImages(
   request: FastifyRequest,
   limits: { maxFiles: number; maxFileBytes: number },
 ): Promise<{ fields: Record<string, string>; images: ImageInput[] }> {
   const { fields, files } = await readFieldsAndFiles(request, limits, IMAGE_KIND);
   return { fields, images: files };
-}
-
-export async function readFieldsAndAudio(
-  request: FastifyRequest,
-  limits: { maxFileBytes: number },
-): Promise<{ fields: Record<string, string>; audio: AudioInput | undefined }> {
-  const { fields, files } = await readFieldsAndFiles(request, { maxFiles: 1, maxFileBytes: limits.maxFileBytes }, AUDIO_KIND);
-  return { fields, audio: files[0] };
 }

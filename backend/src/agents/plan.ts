@@ -251,6 +251,35 @@ export function planRun(input: PlanInput): RunPlan {
   };
 }
 
+/**
+ * What a chat follow-up asks of a run (D-200): the same agents and the same guards as a first analysis, on the menu the
+ * conversation already has, for only what was asked — "tatlı öner", "Adana'ya opsiyon yaz", a second screenshot.
+ */
+export interface RunFocus {
+  /** How many new products to ask for; 0 = none. */
+  products: number;
+  /** Only this category gets them; null = spread over the menu's gaps. */
+  categoryKey: string | null;
+  /** Menu products to complete, as the chat names them. */
+  targets: readonly string[];
+  /** Complete only the products this run's images added to the list. */
+  newItemsOnly: boolean;
+  /** Everything already offered in this conversation: it is not offered twice. */
+  exclude: readonly string[];
+  /** The segment the first analysis read; a follow-up does not ask the Classifier again. */
+  priceSegment: string;
+}
+
+/** A quick run narrowed to the focus. Half of an open request goes to alternatives, as in a first analysis. */
+export function focusPlan(plan: RunPlan, focus: RunFocus, categories: readonly CategoryGap[], targets: number): RunPlan {
+  const alternatives = focus.categoryKey ? 0 : Math.ceil(focus.products / 2);
+  const inCategories = focus.products - alternatives;
+  const quota = focus.categoryKey
+    ? new Map([[focus.categoryKey, focus.products]])
+    : allocate(categories, inCategories, (c) => (LAST_RESORT.has(c.key) ? 0 : Math.max(2, inCategories)));
+  return { ...plan, products: sum(quota), alternatives, optionTargets: targets, modelOptionTargets: targets, quota };
+}
+
 function sum(quota: ReadonlyMap<string, number>): number {
   let total = 0;
   for (const value of quota.values()) total += value;

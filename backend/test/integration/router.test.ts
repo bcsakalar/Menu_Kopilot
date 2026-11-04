@@ -55,6 +55,8 @@ describe('AiRouter', () => {
   beforeAll(async () => {
     handle = await createTestDb();
     await seedDatabase(handle.db, {});
+    // These tests exercise the routing itself: a chain that starts on Groq and falls back to Gemini.
+    await handle.db.execute(sql`update provider_configs set priority = case model when 'openai/gpt-oss-120b' then 0 when 'gemini-3.5-flash-lite' then 1 else 2 end where task_key = 'agent.recommend'`);
   });
 
   afterAll(async () => {

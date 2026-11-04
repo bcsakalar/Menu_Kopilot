@@ -19,6 +19,7 @@ export const TASK_KEYS = [
   'agent.recommend',
   'agent.options',
   'agent.validate',
+  'agent.chat',
   'embed',
   'audio.transcribe',
 ] as const;
@@ -245,24 +246,28 @@ export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = 
     { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'minimal', maxOutputTokens: 1024 } },
     { provider: 'groq', model: MODELS.groqGptOss20b, params: { reasoningEffort: 'low', maxOutputTokens: 1024 } },
   ],
-  // Recommendation quality is the whole point of the redesign: strongest model first.
+  // D-200: Gemini first, Groq as the fallback. Flash-Lite before Flash: measured on production, Flash needed more than
+  // the 8 s attempt for six products with their options even at low thinking; Flash-Lite answers in 2-4 s. Groq sits
+  // second so the parallel batches (routeOffset) spread over two providers instead of 429-ing one.
   'agent.recommend': [
-    // D-198: low effort. With medium, six products with their options ran past the 8 s attempt on both providers
-    // (the reasoning tokens also eat Groq's free 8 K tokens a minute); the kitchen brief does the thinking now.
-    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 8000 } },
-    // Flash-Lite before Flash: measured on production, Flash needed more than the 8 s attempt for six products with
-    // their options even at low thinking, so a rate-limited Groq left the run to the pool; Flash-Lite answers in 2-4 s.
     { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 8000 } },
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 8000 } },
   ],
   // Option groups are long output but a well-understood shape: low reasoning, high token ceiling.
   'agent.options': [
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 12_000 } },
     { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 12_000 } },
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 12_000 } },
-    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 12_000 } },
   ],
   // Only ever used for the single repair round after invalid JSON.
   'agent.validate': cheapTextChain,
+  // One short decision per chat message: a person is waiting on the phone.
+  'agent.chat': [
+    { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 2000 } },
+    { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 2000 } },
+    { provider: 'groq', model: MODELS.groqGptOss20b, params: { reasoningEffort: 'low', maxOutputTokens: 2000 } },
+  ],
   embed: [{ provider: 'gemini', model: MODELS.geminiEmbedding, params: { dim: 768 } }],
   // Voice notes (Faz 7): turbo is faster and cheaper; v3 is the fallback.
   'audio.transcribe': [
@@ -285,6 +290,7 @@ export const TASK_TIMEOUT_MS: Readonly<Record<TaskKey, number>> = {
   'agent.recommend': 6_000,
   'agent.options': 6_000,
   'agent.validate': 8_000,
+  'agent.chat': 8_000,
   embed: 15_000,
   'audio.transcribe': 30_000,
 };

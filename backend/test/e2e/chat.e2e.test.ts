@@ -1,0 +1,268 @@
+import { eq } from 'drizzle-orm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { menuItems, users } from '../../src/db/schema/index.js';
+import type { CardDto } from '../../src/modules/analyze/schemas.js';
+import type { ConversationDetail } from '../../src/modules/chat/schemas.js';
+import { looksLikeProductList } from '../../src/modules/chat/service.js';
+import { FakeProvider, hashEmbedding, okJson, type FakeResponder } from '../helpers/fake-provider.js';
+import { fixtureResponder, loadFixtures, multipartBody, parseSse, type Fixtures } from '../helpers/fixtures.js';
+import { bearer, createTestApp, loginAs, type TestContext } from '../helpers/test-app.js';
+
+/** The site's door: a browser with no account, its cookie, and what a chat message turns into. */
+
+const noDecision = {
+  categoryKey: null,
+  productCount: 0,
+  targets: [],
+  addProducts: [],
+  removeProducts: [],
+  cuisineSlug: null,
+  note: '',
+  quickReplies: [],
+};
+
+let ctx: TestContext;
+let fx: Fixtures;
+let decision: Record<string, unknown>;
+let chatPrompts: string[];
+let recommended: unknown[];
+
+const responder = (fallback: FakeResponder): FakeResponder => (request, call) => {
+  if (request.task === 'agent.recommend' && recommended.length > 0) return okJson({ items: recommended });
+  if (request.task !== 'agent.chat') return fallback(request, call);
+  chatPrompts.push(request.user);
+  return okJson(decision);
+};
+
+interface Sent {
+  status: number;
+  cookie: string | undefined;
+  events: ReturnType<typeof parseSse>;
+}
+
+async function send(fields: Record<string, string>, cookie?: string): Promise<Sent> {
+  const body = multipartBody(fields, []);
+  const res = await ctx.app.inject({
+    method: 'POST',
+    url: '/api/v1/chat/messages',
+    headers: { ...body.headers, ...(cookie ? { cookie } : {}) },
+    payload: body.payload,
+  });
+  const header = res.headers['set-cookie'];
+  return { status: res.statusCode, cookie: header ? String(header).split(';')[0] : undefined, events: parseSse(res.body) };
+}
+
+const eventOf = <T>(sent: Sent, type: string): T[] => sent.events.filter((e) => e.event === type).map((e) => e.data as T);
+const conversationIdOf = (sent: Sent): string => eventOf<{ conversation: { id: string } }>(sent, 'conversation')[0]!.conversation.id;
+
+async function detail(id: string, cookie: string): Promise<ConversationDetail> {
+  const res = await ctx.app.inject({ method: 'GET', url: `/api/v1/chat/conversations/${id}`, headers: { cookie } });
+  expect(res.statusCode, res.body).toBe(200);
+  return res.json<ConversationDetail>();
+}
+
+beforeAll(async () => {
+  fx = loadFixtures();
+  chatPrompts = [];
+  recommended = [];
+  const fallback = fixtureResponder(fx);
+  const gemini = new FakeProvider('gemini', responder(fallback), (texts, opts) => texts.map((t) => hashEmbedding(t, opts.dim)));
+  const groq = new FakeProvider('groq', responder(fallback));
+  ctx = await createTestApp({ providers: { gemini, groq } });
+});
+
+afterAll(async () => {
+  await ctx.close();
+});
+
+describe('a typed product list', () => {
+  it('needs no model to be understood', () => {
+    expect(looksLikeProductList('adana, urfa, ayran')).toBe(true);
+    expect(looksLikeProductList('Lahmacun\nAyran')).toBe(true);
+    expect(looksLikeProductList('tatlı öner')).toBe(false);
+    expect(looksLikeProductList('adana mı urfa mı, hangisi daha iyi?')).toBe(false);
+  });
+});
+
+describe('the visitor cookie', () => {
+  it('lists nothing and creates nobody before the first message', async () => {
+    const before = await ctx.db.db.select({ id: users.id }).from(users);
+    const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/chat/conversations' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ data: [] });
+    expect(await ctx.db.db.select({ id: users.id }).from(users)).toHaveLength(before.length);
+  });
+
+  it('is set by the first message, on the stream itself, and identifies the browser after that', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran, Lahmacun' });
+    expect(first.status).toBe(200);
+    expect(first.cookie).toMatch(/^mk_visitor=/);
+
+    const id = conversationIdOf(first);
+    const second = await send({ conversationId: id, text: 'Selam' }, first.cookie);
+    expect(second.cookie).toBeUndefined();
+
+    const mine = await ctx.app.inject({ method: 'GET', url: '/api/v1/chat/conversations', headers: { cookie: first.cookie! } });
+    expect(mine.json<{ data: { id: string }[] }>().data.map((c) => c.id)).toEqual([id]);
+  });
+
+  it('keeps one visitor out of another one\'s conversation', async () => {
+    const owner = await send({ text: 'Mercimek Çorbası, Ezogelin' });
+    const stranger = await send({ text: 'Ayran, Kola' });
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/v1/chat/conversations/${conversationIdOf(owner)}`,
+      headers: { cookie: stranger.cookie! },
+    });
+    expect(res.statusCode).toBe(404);
+    const posted = multipartBody({ conversationId: conversationIdOf(owner), text: 'merhaba' }, []);
+    const write = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/v1/chat/messages',
+      headers: { ...posted.headers, cookie: stranger.cookie! },
+      payload: posted.payload,
+    });
+    expect(write.statusCode).toBe(404);
+  });
+
+  it('opens nothing of the admin side', async () => {
+    const { cookie } = await send({ text: 'Tost, Ayran' });
+    for (const url of ['/api/v1/templates', '/api/v1/cuisines', '/api/v1/admin/overview', '/api/v1/prompts', '/api/v1/settings/providers', '/api/v1/usage/summary']) {
+      const res = await ctx.app.inject({ method: 'GET', url, headers: { cookie: cookie! } });
+      expect(res.statusCode, url).toBe(401);
+    }
+  });
+});
+
+describe('a conversation', () => {
+  it('answers the first menu with a summary, cards and next steps', async () => {
+    const sent = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    const [answer] = eventOf<{ message: ConversationDetail['messages'][number] }>(sent, 'message');
+    expect(answer?.message.text).toContain('ürün okudum');
+    expect(answer?.message.quickReplies.length).toBeGreaterThan(0);
+    expect(answer?.message.result?.cards.some((c) => c.section === 'new_product')).toBe(true);
+    expect(answer?.message.result?.cards.some((c) => c.section === 'option')).toBe(true);
+
+    const stored = await detail(conversationIdOf(sent), sent.cookie!);
+    expect(stored.messages.map((m) => m.role)).toEqual(['user', 'assistant']);
+    expect(stored.messages[1]?.result?.runId).toBe(answer?.message.runId);
+    expect(stored.title).toContain('ürün');
+  });
+
+  it('answers a question directly and with the menu in front of the model', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'answer', reply: 'Şunu söyle: paket servis için dürüm iyi gider.' };
+    chatPrompts.length = 0;
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'Restoran dürüm istemiyor, ne diyeyim?' }, first.cookie);
+    const [answer] = eventOf<{ message: { text: string; runId: string | null } }>(sent, 'message');
+    expect(answer?.message.text).toContain('dürüm');
+    expect(answer?.message.runId).toBeNull();
+    expect(chatPrompts[0]).toContain('Adana Kebap');
+  });
+
+  it('asks for a menu instead of recommending into the air', async () => {
+    decision = { ...noDecision, action: 'recommend', reply: 'Hemen öneriyorum.', productCount: 5 };
+    const sent = await send({ text: 'tatlı öner' });
+    const [answer] = eventOf<{ message: { runId: string | null } }>(sent, 'message');
+    expect(answer?.message.runId).toBeNull();
+  });
+
+  it('a follow-up runs only the slice that was asked for, and never offers a product twice', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    const id = conversationIdOf(first);
+    const offered = (await detail(id, first.cookie!)).messages[1]!.result!.cards.filter((c) => c.section === 'new_product').map((c) => c.name);
+
+    decision = { ...noDecision, action: 'recommend', reply: 'Tatlılara bakalım.', categoryKey: 'tatli', productCount: 3 };
+    const sent = await send({ conversationId: id, text: 'Tatlı öner' }, first.cookie);
+    const [answer] = eventOf<{ message: { text: string; result: { cards: CardDto[] } } }>(sent, 'message');
+    const cards = answer?.message.result.cards ?? [];
+    // The sentence comes from the cards, never from the model's guess before the guards ran.
+    expect(answer?.message.text).not.toContain('Tatlılara bakalım');
+    expect(cards.filter((c) => c.section === 'fix')).toHaveLength(0);
+    expect(cards.filter((c) => c.section === 'option')).toHaveLength(0);
+    for (const card of cards) {
+      expect(card.categoryKey).toBe('tatli');
+      expect(offered).not.toContain(card.name);
+    }
+  });
+
+  it('completes one named product of the menu', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'complete', reply: 'Hazırlıyorum.', targets: ['Adana'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'Adana için opsiyon yaz' }, first.cookie);
+    const [answer] = eventOf<{ message: { result: { cards: CardDto[] } } }>(sent, 'message');
+    const cards = answer?.message.result.cards ?? [];
+    expect(cards.map((c) => c.section)).toEqual(['option']);
+    expect(cards[0]?.targetName).toContain('Adana');
+  });
+
+  it('takes what it learned about the menu into the count', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'update_menu', reply: 'Menüyü güncelledim.', addProducts: ['Lahmacun'], removeProducts: ['Ayran'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'Lahmacun da varmış, ayran yokmuş' }, first.cookie);
+    const [answer] = eventOf<{ message: { result: { menu: { name: string }[]; counts: { current: number } } } }>(sent, 'message');
+    const names = answer?.message.result.menu.map((m) => m.name) ?? [];
+    expect(names).toContain('Lahmacun');
+    expect(names).not.toContain('Ayran');
+    expect(answer?.message.result.counts.current).toBe(3);
+  });
+});
+
+describe('what a visitor may write', () => {
+  it('records an answer and leaves a draft, not an approved template', async () => {
+    recommended = [
+      {
+        name: 'Fıstıklı Özel Şiş',
+        categoryKey: 'ana-yemek',
+        shortDescription: 'Antep fıstıklı kıymadan hazırlanan özel şiş kebap',
+        portionInfo: '1 porsiyon',
+        priceRangeHint: '',
+        reason: 'Menüdeki kıymadan yapılır',
+        importance: 70,
+        basedOn: 'Adana Kebap',
+      },
+    ];
+    const first = await send({ text: 'Adana Kebap, Kuzu Şiş, Tavuk Kanat, Ayran' });
+    recommended = [];
+    const [answer] = eventOf<{ message: { result: { cards: CardDto[] } } }>(first, 'message');
+    const card = answer?.message.result.cards.find((c) => c.name === 'Fıstıklı Özel Şiş');
+    if (!card) throw new Error('no AI card in the fixture answer');
+
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/v1/suggestion-items/${card.id}/accept`,
+      headers: { cookie: first.cookie!, 'content-type': 'application/json' },
+      payload: {},
+    });
+    expect(res.statusCode, res.body).toBe(200);
+    expect(res.json<CardDto>().status).toBe('accepted');
+
+    const rows = await ctx.db.db.select().from(menuItems).where(eq(menuItems.canonicalName, card.name));
+    expect(rows.some((row) => row.approved && row.source !== 'seed')).toBe(false);
+    expect(rows.some((row) => !row.approved && row.needsReview)).toBe(true);
+  });
+
+  it('cannot start a run around the rate limited door', async () => {
+    const { cookie } = await send({ text: 'Tost, Ayran' });
+    const res = await ctx.app.inject({ method: 'POST', url: '/api/v1/analyze', headers: { cookie: cookie! }, payload: { menuText: 'Tost, Ayran' } });
+    expect(res.statusCode).toBe(401);
+  });
+});
+
+describe('the admin panel', () => {
+  it('sees every visitor\'s conversations and the day in numbers', async () => {
+    const sent = await send({ text: 'Adana Kebap, Ayran' });
+    const { accessToken } = await loginAs(ctx);
+    const overview = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/overview', headers: bearer(accessToken) });
+    expect(overview.statusCode, overview.body).toBe(200);
+    expect(overview.json<{ conversations: number; runs: number }>().conversations).toBeGreaterThan(0);
+
+    const list = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/conversations', headers: bearer(accessToken) });
+    const rows = list.json<{ data: { id: string; visitor: string }[] }>().data;
+    expect(rows.map((r) => r.id)).toContain(conversationIdOf(sent));
+
+    const one = await ctx.app.inject({ method: 'GET', url: `/api/v1/admin/conversations/${conversationIdOf(sent)}`, headers: bearer(accessToken) });
+    expect(one.statusCode, one.body).toBe(200);
+    expect(one.json<ConversationDetail>().messages.length).toBeGreaterThan(1);
+  });
+});

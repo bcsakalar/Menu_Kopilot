@@ -1,9 +1,9 @@
-# Fails when anything that looks like an AI provider key or a direct provider endpoint appears in the mobile app.
-# Provider keys must live ONLY on the backend (the APK can be decompiled).
+# Fails when anything that looks like an AI provider key or a direct provider endpoint appears in the site's source.
+# Provider keys must live ONLY on the backend: everything under web/ ends up in a public bundle.
 # Usage (repo root):  powershell -File scripts/check-no-provider-keys.ps1   (also runs under pwsh in CI)
 param(
   # Built with Join-Path twice so the separator is right on Windows and on Linux (CI runs this under pwsh).
-  [string]$Root = (Join-Path (Join-Path $PSScriptRoot '..') 'mobile')
+  [string]$Root = (Join-Path (Join-Path $PSScriptRoot '..') 'web')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,7 +16,7 @@ $patterns = @(
   'api\.groq\.com'
 )
 # Build outputs are skipped without descending into them (their paths can exceed the Windows path limit).
-$excludedDirs = @('build', '.dart_tool', '.gradle', 'Pods', '.symlinks', 'ephemeral', '.idea', '.cxx')
+$excludedDirs = @('node_modules', 'dist')
 
 function Get-SourceFiles([string]$Path) {
   foreach ($item in Get-ChildItem -LiteralPath $Path -Force) {
@@ -34,7 +34,7 @@ $hits = foreach ($pattern in $patterns) {
 }
 
 if ($hits) {
-  Write-Output 'Provider key or endpoint found in the mobile app:'
+  Write-Output 'Provider key or endpoint found in the web source:'
   $hits | ForEach-Object { Write-Output "  $_" }
   exit 1
 }

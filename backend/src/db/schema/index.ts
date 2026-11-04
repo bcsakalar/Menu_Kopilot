@@ -7,4 +7,5 @@ export * from './suggestions.js';
 export * from './agents.js';
 export * from './knowledge.js';
 export * from './system.js';
+export * from './chat.js';
 export * from './relations.js';

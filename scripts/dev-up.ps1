@@ -1,14 +1,12 @@
 <#
 .SYNOPSIS
-  One command for a local Menu Kopilot session: Docker engine, the compose stack (Postgres, Redis, API) and the USB
-  bridge for a connected Android phone.
+  One command for a local Menu Kopilot session: Docker engine and the compose stack (Postgres, Redis, API + site).
 
 .DESCRIPTION
   1. Starts Docker Desktop when the engine does not answer. With -FixDockerSocket it first stops Docker Desktop and
      moves %LOCALAPPDATA%\Docker\run aside: a stale sailor-ingest.sock there keeps the engine from starting and cannot
      be deleted (D-132). Docker recreates the folder.
   2. docker compose up -d (-Build also rebuilds the API image) and waits for /health/ready.
-  3. adb reverse tcp:<port> tcp:<port> for every connected phone, so the app reaches http://localhost:<port>.
 
   The API port comes from API_PORT in the repository's .env (3000 when unset). Nothing else is read from .env.
 
@@ -54,17 +52,6 @@ function Wait-Until([scriptblock]$Condition, [int]$Seconds) {
 }
 
 function Test-Engine { (Invoke-Native 'docker' @('info', '--format', '{{.ServerVersion}}') -Quiet) -eq 0 }
-
-function Find-Adb {
-  $onPath = Get-Command 'adb' -ErrorAction SilentlyContinue
-  if ($onPath) { return $onPath.Source }
-  foreach ($sdk in @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT, (Join-Path $env:LOCALAPPDATA 'Android\Sdk'))) {
-    if (-not $sdk) { continue }
-    $candidate = Join-Path $sdk 'platform-tools\adb.exe'
-    if (Test-Path -LiteralPath $candidate) { return $candidate }
-  }
-  return $null
-}
 
 if ($Port -eq 0) {
   $Port = 3000
@@ -124,29 +111,7 @@ $ready = Wait-Until {
 if (-not $ready) { throw 'The API is not ready. Logs: docker compose logs api --tail 80' }
 Write-Host '    API, database and Redis are ready'
 
-# 3. Phone over USB --------------------------------------------------------------------------------------------------
-$adb = Find-Adb
-$phones = @()
-if ($adb) {
-  Write-Step 'Bridging USB phones (adb reverse)'
-  $previous = $ErrorActionPreference
-  $ErrorActionPreference = 'Continue'
-  try {
-    $phones = @(& $adb devices 2>$null | Select-Object -Skip 1 | Where-Object { $_ -match "`tdevice$" } | ForEach-Object { ($_ -split "`t")[0] })
-  } finally {
-    $ErrorActionPreference = $previous
-  }
-  foreach ($serial in $phones) {
-    $code = Invoke-Native $adb @('-s', $serial, 'reverse', "tcp:$Port", "tcp:$Port") -Quiet
-    if ($code -eq 0) { Write-Host "    $serial -> http://localhost:$Port" } else { Write-Host "    ${serial}: adb reverse failed" -ForegroundColor Yellow }
-  }
-  if ($phones.Count -eq 0) { Write-Host '    no phone connected (USB debugging on? accept the RSA prompt on the phone)' -ForegroundColor Yellow }
-} else {
-  Write-Host '    adb not found; install Android platform-tools to use a phone over USB' -ForegroundColor Yellow
-}
-
 Write-Host ''
 Write-Host 'Menu Kopilot is running.' -ForegroundColor Green
-Write-Host "  API             http://127.0.0.1:$Port   (OpenAPI: /docs)"
-Write-Host "  App server URL  http://localhost:$Port   (phone on USB, after the bridge above)"
-Write-Host '  Stop            docker compose stop'
+Write-Host "  Site   http://localhost:$Port   (admin: /admin, OpenAPI: /docs)"
+Write-Host '  Stop   docker compose stop'

@@ -4,6 +4,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import { runAnalysis, type AnalyzePipelineDeps } from '../../agents/pipeline.js';
 import { loadCategoryIndex } from '../../agents/gap-analyst.js';
 import { loadFeedbackIndex, loadProductTypeIndex } from '../../agents/knowledge.js';
+import type { RunFocus } from '../../agents/plan.js';
 import { AgentTracer } from '../../agents/tracer.js';
 import type { ImageInput } from '../../ai/types.js';
 import type { Database, Executor } from '../../db/client.js';
@@ -12,6 +13,7 @@ import { templatePayloadSchema, type TemplatePayload } from '../../domain/templa
 import type { JobQueue } from '../../jobs/queue.js';
 import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
+import { sameProductName } from '../../lib/same-product.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
@@ -52,11 +54,18 @@ export function parseMenuText(text: string | undefined): string[] {
 export class AnalyzeService {
   constructor(private readonly deps: AnalyzeServiceDeps) {}
 
-  async start(userId: string, fields: AnalyzeFields, images: ImageInput[]): Promise<StartedRun> {
+  async start(
+    userId: string,
+    fields: AnalyzeFields,
+    images: ImageInput[],
+    chat: { focus?: RunFocus | undefined; remove?: readonly string[] | undefined } = {},
+  ): Promise<StartedRun> {
     const { db, store, registry } = this.deps;
     const typedNames = parseMenuText(fields.menuText);
     // A re-run (another cuisine picked on the result screen) starts from the product list the earlier run read.
-    const reuseItems = fields.fromRunId ? await store.extractedItems(userId, fields.fromRunId) : undefined;
+    const earlierItems = fields.fromRunId ? await store.extractedItems(userId, fields.fromRunId) : undefined;
+    const removed = chat.remove?.map(normalizeTr) ?? [];
+    const reuseItems = earlierItems?.filter((item) => !removed.some((name) => sameProductName(name, item.normalized)));
     if (fields.fromRunId && !reuseItems) {
       throw new AppError('CONFLICT', 'Önceki analizin ürün listesi yok; fotoğrafları veya ürün adlarını yeniden gönder');
     }
@@ -114,6 +123,7 @@ export class AnalyzeService {
         reuseItems: reuseItems ?? undefined,
         notes: fields.notes,
         mode: fields.mode,
+        focus: chat.focus,
         selectedCuisine,
         cuisineOptions,
         graph,
@@ -202,8 +212,11 @@ export class AnalyzeService {
    * it targets, and a `fix` card is a note for the call, not a pool write. The payload, when sent, is the card as
    * the user kept it (suggestions tapped away are missing from it); what was kept and what was removed is also
    * recorded for the learning loop (D-180).
+   *
+   * The site is open to anyone (D-200), so only an admin (`trusted`) writes the pool; a visitor's "Evet" is recorded,
+   * teaches the feedback loop and leaves a draft of a new product for the admin panel.
    */
-  async accept(userId: string, cardId: string, body: { payload?: TemplatePayload | undefined }): Promise<CardDto> {
+  async accept(userId: string, cardId: string, body: { payload?: TemplatePayload | undefined }, trusted = true): Promise<CardDto> {
     const { db, store } = this.deps;
     const existing = await store.setAnswer(userId, cardId, 'yes', body.payload);
     if (!existing) throw notFound('Kart');
@@ -214,6 +227,11 @@ export class AnalyzeService {
     const run = await store.snapshot(userId, existing.runId);
     const cuisineId = run?.counts?.cuisineId;
     if (!cuisineId) throw new AppError('CONFLICT', 'Mutfak türü bilinmiyor');
+
+    if (!trusted) {
+      await this.proposeToPool(existing, body.payload, cuisineId, userId);
+      return existing;
+    }
 
     let templateId: string | null;
     try {
@@ -246,6 +264,37 @@ export class AnalyzeService {
     await db.update(suggestionItems).set({ matchedItemId: templateId }).where(eq(suggestionItems.id, cardId));
     await this.deps.queue.enqueueEmbedding([templateId]);
     return { ...existing, matchedTemplateId: templateId };
+  }
+
+  private async proposeToPool(card: CardDto, edited: TemplatePayload | undefined, cuisineId: string, userId: string): Promise<void> {
+    const { db } = this.deps;
+    await db.transaction(async (tx) => {
+      await forgetCardFeedback(tx, card.id, userId);
+      await recordFeedback(tx, {
+        userId,
+        card,
+        cuisineId,
+        rows: [
+          ...(card.section === 'new_product' ? [{ kind: 'product' as const, value: card.name, action: 'accepted' as const }] : []),
+          ...diffFeedback(card, edited ?? keptAsSuggested(card)),
+        ],
+      });
+    });
+    const source = edited ?? card.payload;
+    if (card.section !== 'new_product' || !source || card.matchedTemplateId) return;
+    try {
+      await insertTemplate(db, {
+        cuisineId,
+        payload: templatePayloadSchema.parse(source),
+        source: 'ai',
+        approved: false,
+        needsReview: true,
+        createdBy: userId,
+      });
+    } catch (err) {
+      // One draft per product and cuisine is enough for the admin to look at.
+      if (!isUniqueViolation(err)) throw err;
+    }
   }
 
   async skip(userId: string, cardId: string): Promise<CardDto> {
