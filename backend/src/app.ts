@@ -41,7 +41,6 @@ import { VisionExtractor } from './modules/extraction/vision-extractor.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { learningRoutes } from './modules/learning/routes.js';
 import { LearningService } from './modules/learning/service.js';
-import { promptRoutes } from './modules/prompts/routes.js';
 import { RetrievalService } from './modules/retrieval/retrieval.service.js';
 import { settingsRoutes } from './modules/settings/routes.js';
 import { SettingsService } from './modules/settings/service.js';
@@ -243,7 +242,6 @@ export async function buildApp(deps: AppDeps): Promise<App> {
       await api.register(async (admin) => {
         admin.addHook('onRequest', admin.authenticateAdmin);
         await admin.register(settingsRoutes, { service: settingsService });
-        await admin.register(promptRoutes, { prompts: ai.prompts });
         await admin.register(cuisineRoutes, { service: new CuisineService(db) });
         await admin.register(templateRoutes, { service: new TemplateService(db, queue) });
         await admin.register(learningRoutes, { service: new LearningService(db) });

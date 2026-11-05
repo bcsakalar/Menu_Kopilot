@@ -267,6 +267,8 @@ export const DEFAULT_ROUTES: Readonly<Record<TaskKey, readonly RouteEntry[]>> = 
     { provider: 'gemini', model: MODELS.geminiFlashLite, params: { thinkingLevel: 'low', maxOutputTokens: 2000 } },
     { provider: 'gemini', model: MODELS.geminiFlash, params: { thinkingLevel: 'low', maxOutputTokens: 2000 } },
     { provider: 'groq', model: MODELS.groqGptOss20b, params: { reasoningEffort: 'low', maxOutputTokens: 2000 } },
+    // Groq limits per model, so this one is still open when Gemini is overloaded and the small model is spent.
+    { provider: 'groq', model: MODELS.groqGptOss120b, params: { reasoningEffort: 'low', maxOutputTokens: 2000 } },
   ],
   embed: [{ provider: 'gemini', model: MODELS.geminiEmbedding, params: { dim: 768 } }],
   // Voice notes (Faz 7): turbo is faster and cheaper; v3 is the fallback.

@@ -66,35 +66,6 @@ describe('settings & prompts API', () => {
     expect(res.json()).toMatchObject({ allowed: true, callsToday: 0, dailyCalls: 300, timezone: 'Europe/Istanbul' });
   });
 
-  it('versions prompts without a redeploy', async () => {
-    // Whatever version the seed is on, writing from the app lands on the next one — and stays above the seed.
-    const before = await ctx.app.inject({ method: 'GET', url: '/api/v1/prompts', headers: bearer(token) });
-    const seeded = Math.max(
-      ...before
-        .json<{ data: { key: string; version: number }[] }>()
-        .data.filter((p) => p.key === 'agent.recommend.user')
-        .map((p) => p.version),
-    );
-    const created = await ctx.app.inject({
-      method: 'POST',
-      url: '/api/v1/prompts',
-      headers: bearer(token),
-      payload: { key: 'agent.recommend.user', content: 'Yeni sürüm: {{cuisine}}\n{{gaps}}' },
-    });
-    expect(created.statusCode).toBe(201);
-    expect(created.json()).toMatchObject({ key: 'agent.recommend.user', version: seeded + 1, isActive: true });
-    const active = await ctx.ai.prompts.render('agent.recommend.user', { cuisine: 'Kebap', gaps: 'icecek | İçecek | 0/2 | 2 eksik' });
-    expect(active).toEqual({ text: 'Yeni sürüm: Kebap\nicecek | İçecek | 0/2 | 2 eksik', version: seeded + 1 });
-
-    const list = await ctx.app.inject({ method: 'GET', url: '/api/v1/prompts', headers: bearer(token) });
-    const previous = list
-      .json<{ data: { id: string; key: string; version: number }[] }>()
-      .data.find((p) => p.key === 'agent.recommend.user' && p.version === seeded);
-    const back = await ctx.app.inject({ method: 'POST', url: `/api/v1/prompts/${previous?.id}/activate`, headers: bearer(token) });
-    expect(back.statusCode).toBe(200);
-    expect((await ctx.ai.prompts.get('agent.recommend.user')).version).toBe(seeded);
-  });
-
   it('protects settings routes', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/settings/providers' });
     expect(res.statusCode).toBe(401);

@@ -67,8 +67,11 @@ export const chatRoutes: FastifyPluginAsyncZod<{
 
       reply.hijack();
       const channel = openSse(reply.raw);
-      await service.answer(user.id, outgoing, (event) => channel.send(event.type, event));
-      channel.close();
+      try {
+        await service.answer(user.id, outgoing, (event) => channel.send(event.type, event));
+      } finally {
+        channel.close();
+      }
       return reply;
     },
   );

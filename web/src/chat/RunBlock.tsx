@@ -1,110 +1,89 @@
-import { useState } from 'react';
-import { formatCard, formatCards, formatGroup, groupRule, priceLabel } from '../format';
-import type { Answer, Card, RunResult, Section } from '../types';
+import { Info } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { formatCard, formatCards, formatGroup } from '../format';
+import type { Card, RunResult, Section } from '../types';
 import { CopyButton } from './ui';
 
-const ANSWERS: { answer: Answer; status: Card['status']; label: string }[] = [
-  { answer: 'accept', status: 'accepted', label: 'Evet' },
-  { answer: 'later', status: 'later', label: 'Düşünecek' },
-  { answer: 'skip', status: 'skipped', label: 'Hayır' },
-];
+/** Says nothing the rep can act on during the call: the header already shows how far the menu is from its target. */
+const QUIET_WARNINGS: ReadonlySet<string> = new Set(['target_unreachable']);
 
-function AnswerButtons({ card, onAnswer }: { card: Card; onAnswer: (card: Card, answer: Answer) => void }) {
+function SpecRow({ label, copy, children }: { label: string; copy: string; children: ReactNode }) {
   return (
-    <div className="answers" role="group" aria-label={`${card.name}: restoranın cevabı`}>
-      {ANSWERS.map(({ answer, status, label }) => (
-        <button key={answer} type="button" className={`answer ${status}`} aria-pressed={card.status === status} onClick={() => onAnswer(card, answer)}>
-          {label}
-        </button>
-      ))}
+    <div className="spec-row">
+      <dt>{label}</dt>
+      <dd>{children}</dd>
+      <dd className="spec-copy">
+        <CopyButton text={copy} label={`${label} kopyala`} compact />
+      </dd>
     </div>
   );
 }
 
-function Column({ title, copy, children }: { title: string; copy: string; children: React.ReactNode }) {
-  return (
-    <div className="detail-column">
-      <div className="detail-title">
-        <span>{title}</span>
-        <CopyButton text={copy} label={`${title} kopyala`} compact />
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Details({ card }: { card: Card }) {
-  const { optionGroups, removableIngredients: removable, extraIngredients: extras } = card;
-  if (optionGroups.length === 0 && removable.length === 0 && extras.length === 0) return null;
-  return (
-    <div className="details">
-      {optionGroups.length > 0 && (
-        <Column title="Opsiyonlar" copy={optionGroups.map(formatGroup).join('\n')}>
-          {optionGroups.map((group) => (
-            <div key={group.name} className="group">
-              <div className="group-name">
-                {group.name} <small>{groupRule(group)}</small>
-              </div>
-              <div className="group-options">{group.options.map((o) => o.name).join(', ')}</div>
-              <small>{priceLabel(group)}</small>
-            </div>
-          ))}
-        </Column>
-      )}
-      {removable.length > 0 && (
-        <Column title="Çıkarılabilir" copy={removable.join('\n')}>
-          <p>{removable.join(', ')}</p>
-        </Column>
-      )}
-      {extras.length > 0 && (
-        <Column title="Ekstra malzeme" copy={extras.join('\n')}>
-          <p>{extras.join(', ')}</p>
-        </Column>
-      )}
-    </div>
-  );
-}
-
-function ProductRow({ card, onAnswer }: { card: Card; onAnswer?: ((card: Card, answer: Answer) => void) | undefined }) {
+function ProductCard({ card }: { card: Card }) {
   const title = card.section === 'option' ? (card.targetName ?? card.name) : card.name;
+  const meta = [card.basedOn ? `${card.basedOn} alternatifi` : card.categoryLabel, card.portionInfo, card.priceRangeHint && `tahmini ${card.priceRangeHint}`].filter(Boolean).join(' · ');
+  const { optionGroups: groups, removableIngredients: removable, extraIngredients: extras } = card;
   return (
-    <li className={`card status-${card.status}`}>
+    <li className="card">
       <div className="card-head">
         <div className="card-title">
           <h4>{title}</h4>
-          <span className="card-meta">
-            {[card.basedOn ? `${card.basedOn} alternatifi` : card.categoryLabel, card.priceRangeHint && `tahmini ${card.priceRangeHint}`, card.portionInfo]
-              .filter(Boolean)
-              .join(' · ')}
-          </span>
+          {meta && <p className="card-meta">{meta}</p>}
         </div>
-        <div className="card-actions">
-          <CopyButton text={formatCard(card)} label={`${title} kartını kopyala`} compact />
-          {onAnswer && <AnswerButtons card={card} onAnswer={onAnswer} />}
-        </div>
+        <CopyButton text={formatCard(card)} label={`${title} kartını kopyala`} compact />
       </div>
-      {card.shortDescription && <p className="card-description">{card.shortDescription}</p>}
-      {card.pitch && <p className="card-pitch">{card.pitch}</p>}
-      <Details card={card} />
+      {card.pitch && (
+        <p className="card-pitch">
+          <span>Söyle</span>
+          {card.pitch}
+        </p>
+      )}
+      <dl className="spec">
+        {card.shortDescription && (
+          <SpecRow label="Açıklama" copy={card.shortDescription}>
+            {card.shortDescription}
+          </SpecRow>
+        )}
+        {groups.length > 0 && (
+          <SpecRow label="Opsiyon" copy={groups.map(formatGroup).join('\n')}>
+            {groups.map((group) => (
+              <p key={group.name} className="spec-group">
+                <b>{group.name}</b> {group.options.map((o) => o.name).join(', ')}
+                {group.isRequired && <small>zorunlu</small>}
+              </p>
+            ))}
+          </SpecRow>
+        )}
+        {removable.length > 0 && (
+          <SpecRow label="Çıkarılabilir" copy={removable.join('\n')}>
+            {removable.join(', ')}
+          </SpecRow>
+        )}
+        {extras.length > 0 && (
+          <SpecRow label="Ekstra" copy={extras.join('\n')}>
+            {extras.join(', ')}
+          </SpecRow>
+        )}
+      </dl>
     </li>
   );
 }
 
-function FixRow({ card, onAnswer }: { card: Card; onAnswer?: ((card: Card, answer: Answer) => void) | undefined }) {
+function FixCard({ card }: { card: Card }) {
   return (
-    <li className={`card status-${card.status}`}>
+    <li className="card">
       <div className="card-head">
         <div className="card-title">
           <h4>{card.targetName ?? card.name}</h4>
-          <span className="card-meta">{card.reason}</span>
+          <p className="card-meta">{card.reason}</p>
         </div>
-        <div className="card-actions">{onAnswer && <AnswerButtons card={card} onAnswer={onAnswer} />}</div>
+        <CopyButton text={formatCard(card)} label={`${card.targetName ?? card.name} düzeltmesini kopyala`} compact />
       </div>
-      {card.suggestedValue ? (
-        <p className="card-description">
-          {card.currentValue} → <strong>{card.suggestedValue}</strong>
+      {card.suggestedValue && (
+        <p className="card-fix">
+          {card.currentValue} → <b>{card.suggestedValue}</b>
         </p>
-      ) : null}
+      )}
     </li>
   );
 }
@@ -116,37 +95,34 @@ const SECTIONS: { key: Section; label: string }[] = [
 ];
 
 /** One analysis in the conversation. Sections are tabs: a 30-card answer must not bury the composer on a call. */
-export function RunBlock({ result, onAnswer }: { result: RunResult; onAnswer?: (card: Card, answer: Answer) => void }) {
+export function RunBlock({ result }: { result: RunResult }) {
   const tabs = SECTIONS.map((section) => ({ ...section, cards: result.cards.filter((c) => c.section === section.key) })).filter((s) => s.cards.length > 0);
   const [selected, setSelected] = useState<Section | null>(null);
   const active = tabs.find((tab) => tab.key === selected) ?? tabs[0];
+  // With no card there is nothing to qualify: the answer above already says what happened.
+  if (!active) return null;
 
   return (
     <section className="run" aria-label="Analiz sonucu">
-      {result.warnings.map((warning) => (
-        <p key={warning.code} className="notice">
-          {warning.message}
-        </p>
-      ))}
-      {active && (
-        <>
-          <div className="tabs" role="tablist">
-            {tabs.map((tab) => (
-              <button key={tab.key} type="button" role="tab" aria-selected={tab.key === active.key} className="tab" onClick={() => setSelected(tab.key)}>
-                {tab.label} <span>{tab.cards.length}</span>
-              </button>
-            ))}
-            <span className="tabs-end">
-              <CopyButton text={formatCards(active.cards)} label="Tümünü kopyala" />
-            </span>
-          </div>
-          <ul className="cards">
-            {active.cards.map((card) =>
-              card.section === 'fix' ? <FixRow key={card.id} card={card} onAnswer={onAnswer} /> : <ProductRow key={card.id} card={card} onAnswer={onAnswer} />,
-            )}
-          </ul>
-        </>
-      )}
+      <div className="tabs" role="tablist">
+        {tabs.map((tab) => (
+          <button key={tab.key} type="button" role="tab" aria-selected={tab.key === active.key} className="tab" onClick={() => setSelected(tab.key)}>
+            {tab.label} <span>{tab.cards.length}</span>
+          </button>
+        ))}
+        <span className="tabs-end">
+          <CopyButton text={formatCards(active.cards)} label="Tümünü kopyala" />
+        </span>
+      </div>
+      {result.warnings
+        .filter((warning) => !QUIET_WARNINGS.has(warning.code))
+        .map((warning) => (
+          <p key={warning.code} className="run-note">
+            <Info size={14} aria-hidden />
+            {warning.message}
+          </p>
+        ))}
+      <ul className="cards">{active.cards.map((card) => (card.section === 'fix' ? <FixCard key={card.id} card={card} /> : <ProductCard key={card.id} card={card} />))}</ul>
     </section>
   );
 }

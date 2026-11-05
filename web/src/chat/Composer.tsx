@@ -1,8 +1,10 @@
 import { ArrowUp, ImagePlus, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type DragEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type Dispatch, type DragEvent, type KeyboardEvent, type SetStateAction } from 'react';
 import { shrinkImage } from '../format';
 
 const MAX_IMAGES = 5;
+/** The API's limit for one message. */
+const MAX_TEXT = 4000;
 
 export interface Attachment {
   id: number;
@@ -15,6 +17,9 @@ interface Props {
   draft: string;
   onDraft: (text: string) => void;
   onSend: (text: string, attachments: Attachment[]) => void;
+  /** Held by the page: a failed send gives them back, and the first send moves this form to another place in the tree. */
+  attachments: Attachment[];
+  setAttachments: Dispatch<SetStateAction<Attachment[]>>;
   placeholder: string;
 }
 
@@ -24,8 +29,7 @@ const imagesIn = (data: DataTransfer | null): File[] =>
 let nextId = 0;
 
 /** Ctrl+V works from anywhere on the page: the rep comes back from the panel with a screenshot and nothing focused. */
-export function Composer({ busy, draft, onDraft, onSend, placeholder }: Props) {
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+export function Composer({ busy, draft, onDraft, onSend, attachments, setAttachments, placeholder }: Props) {
   const [problem, setProblem] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -44,7 +48,7 @@ export function Composer({ busy, draft, onDraft, onSend, placeholder }: Props) {
     } catch {
       setProblem('Bu görüntü okunamadı. PNG veya JPEG dene.');
     }
-  }, []);
+  }, [setAttachments]);
 
   useEffect(() => {
     const onPaste = (event: globalThis.ClipboardEvent) => {
@@ -82,7 +86,6 @@ export function Composer({ busy, draft, onDraft, onSend, placeholder }: Props) {
   const send = () => {
     if (!canSend) return;
     onSend(draft.trim(), attachments);
-    setAttachments([]);
     setProblem(null);
   };
 
@@ -122,6 +125,7 @@ export function Composer({ busy, draft, onDraft, onSend, placeholder }: Props) {
         ref={input}
         autoFocus
         rows={1}
+        maxLength={MAX_TEXT}
         value={draft}
         placeholder={placeholder}
         aria-label="Mesaj"

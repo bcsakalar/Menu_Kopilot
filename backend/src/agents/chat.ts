@@ -22,11 +22,11 @@ export interface ChatContext {
   message: string;
 }
 
+export const AI_BUSY = 'Yapay zekâ servisleri şu an çok yoğun. Birkaç saniye sonra tekrar dene.';
 const CHAT_LLM_CALLS = 2;
 const CHAT_INPUT_TOKENS = 6000;
-const NO_AI: ChatDecision = {
-  action: 'answer',
-  reply: 'Şu an yapay zekâya ulaşamıyorum. Menünün ekran görüntüsünü yapıştırırsan hazır şablonlardan önerilerle devam ederim.',
+const NO_RETRY_CHARS = 60;
+const NOTHING = {
   categoryKey: null,
   productCount: 0,
   targets: [],
@@ -35,7 +35,20 @@ const NO_AI: ChatDecision = {
   cuisineSlug: null,
   note: '',
   quickReplies: [],
-};
+} as const;
+
+/** What the next-step buttons ask for needs no model: they work, and at once, when the providers are overloaded. */
+export const recommendDecision = (categoryKey: string | null): ChatDecision => ({ ...NOTHING, targets: [], addProducts: [], removeProducts: [], quickReplies: [], action: 'recommend', reply: '', categoryKey, productCount: 5 });
+
+const noAi = (message: string): ChatDecision => ({
+  ...NOTHING,
+  targets: [],
+  addProducts: [],
+  removeProducts: [],
+  action: 'answer',
+  reply: AI_BUSY,
+  quickReplies: message.length <= NO_RETRY_CHARS ? [message] : [],
+});
 
 export async function runChatAgent(
   deps: { router: AiRouter; prompts: PromptRepository },
@@ -49,5 +62,5 @@ export async function runChatAgent(
     { task: 'agent.chat', schema: chatDecisionSchema, schemaName: CHAT_SCHEMA_NAME, system, user },
     { userId, budget: new RequestBudget(CHAT_LLM_CALLS, CHAT_INPUT_TOKENS) },
   );
-  return result.ok ? result.value : NO_AI;
+  return result.ok ? result.value : noAi(context.message);
 }

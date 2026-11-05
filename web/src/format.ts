@@ -24,11 +24,6 @@ const PRICE_LABEL: Record<OptionGroup['options'][number]['priceMode'], string> =
   sets_base: 'fiyatı belirler',
 };
 
-export const priceLabel = (group: OptionGroup): string => {
-  const modes = new Set(group.options.map((o) => PRICE_LABEL[o.priceMode]));
-  return [...modes].join(', ');
-};
-
 export const groupRule = (group: OptionGroup): string =>
   `${group.selectionType === 'single' ? 'tek seçim' : `en çok ${group.maxSelect}`}, ${group.isRequired ? 'zorunlu' : 'isteğe bağlı'}`;
 
@@ -37,6 +32,7 @@ export const formatGroup = (group: OptionGroup): string =>
 
 /** What gets pasted into the restaurant panel: plain text, in the order the panel asks for it. */
 export function formatCard(card: Card): string {
+  if (card.section === 'fix') return `${card.targetName ?? card.name}: ${card.suggestedValue ? `${card.currentValue} → ${card.suggestedValue}` : card.reason}`;
   const lines = [card.targetName ?? card.name];
   if (card.shortDescription) lines.push(`Açıklama: ${card.shortDescription}`);
   if (card.portionInfo) lines.push(`Porsiyon: ${card.portionInfo}`);
@@ -53,3 +49,6 @@ export function timeLabel(iso: string): string {
   const sameDay = date.toDateString() === new Date().toDateString();
   return new Intl.DateTimeFormat('tr-TR', sameDay ? { hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short' }).format(date);
 }
+
+export const dateTimeLabel = (iso: string): string =>
+  new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));

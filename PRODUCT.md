@@ -10,7 +10,7 @@ quality of that menu, so the rep has to raise it during the call instead of just
 
 The rep pastes a screenshot of the menu (Ctrl+V) or types the products. The site reads the menu, finds what is missing and
 leads the call: what to offer first, a sentence to say, options, removable and extra ingredients for every product, and a
-fix list. Follow-up requests go in the same chat. At the end, what the restaurant said yes to is one copy away.
+fix list. Follow-up requests go in the same chat, and everything is one copy away from the restaurant panel.
 
 ## What success looks like
 

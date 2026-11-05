@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import type { Database } from '../db/client.js';
 import { promptTemplates } from '../db/schema/index.js';
 import type { PromptKey } from '../db/seed/prompts.js';
@@ -61,51 +61,5 @@ export class PromptRepository {
   async versionTag(keys: readonly PromptKey[]): Promise<string> {
     const prompts = await this.load();
     return keys.map((k) => `${k}@${prompts.get(k)?.version ?? 0}`).join(',');
-  }
-
-  // --- admin operations -------------------------------------------------------------------------
-
-  async list() {
-    return this.db
-      .select()
-      .from(promptTemplates)
-      .orderBy(asc(promptTemplates.key), desc(promptTemplates.version));
-  }
-
-  async createVersion(key: string, content: string, activate: boolean) {
-    const created = await this.db.transaction(async (tx) => {
-      const [latest] = await tx
-        .select({ version: promptTemplates.version })
-        .from(promptTemplates)
-        .where(eq(promptTemplates.key, key))
-        .orderBy(desc(promptTemplates.version))
-        .limit(1);
-      const version = (latest?.version ?? 0) + 1;
-      if (activate) {
-        await tx.update(promptTemplates).set({ isActive: false }).where(eq(promptTemplates.key, key));
-      }
-      const [row] = await tx.insert(promptTemplates).values({ key, version, content, isActive: activate }).returning();
-      return row;
-    });
-    this.invalidate();
-    if (!created) throw new AppError('INTERNAL_ERROR', 'Prompt kaydedilemedi');
-    return created;
-  }
-
-  async activate(id: string) {
-    const activated = await this.db.transaction(async (tx) => {
-      const [target] = await tx.select().from(promptTemplates).where(eq(promptTemplates.id, id)).limit(1);
-      if (!target) return undefined;
-      await tx.update(promptTemplates).set({ isActive: false }).where(eq(promptTemplates.key, target.key));
-      const [row] = await tx
-        .update(promptTemplates)
-        .set({ isActive: true })
-        .where(and(eq(promptTemplates.id, id)))
-        .returning();
-      return row;
-    });
-    this.invalidate();
-    if (!activated) throw new AppError('NOT_FOUND', 'Prompt bulunamadı');
-    return activated;
   }
 }

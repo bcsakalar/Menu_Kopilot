@@ -1,3 +1,5 @@
+import { followUp } from '../../src/modules/chat/summary.js';
+import type { AnalyzeResult } from '../../src/modules/analyze/schemas.js';
 import { describe, expect, it } from 'vitest';
 import { addTypedItems, dedupeExtracted, mergeFlag } from '../../src/agents/dedupe.js';
 import { looksAbbreviated } from '../../src/agents/gap-analyst.js';
@@ -391,5 +393,15 @@ describe('merging an option card into a template', () => {
     expect(merged.extraIngredients.map((e) => e.name)).toEqual(['Ekstra Lavaş', 'Ekstra Közlenmiş Biber']);
     // And it is still a valid template.
     expect(templatePayloadSchema.safeParse(merged).success).toBe(true);
+  });
+});
+
+describe('a follow-up that came back empty', () => {
+  const empty = { cards: [], warnings: [] } as unknown as AnalyzeResult;
+
+  it('blames the providers when they failed, and the menu only when they answered', () => {
+    expect(followUp({ ...empty, warnings: [{ code: 'recommend_failed', message: '' }] })).toContain('yoğun');
+    expect(followUp({ ...empty, warnings: [{ code: 'target_unreachable', message: '' }] })).toContain('uygun bir sonuç çıkmadı');
+    expect(followUp(empty)).toContain('uygun bir sonuç çıkmadı');
   });
 });

@@ -1,15 +1,19 @@
-import { ClipboardList, Menu, Plus, Trash2, X } from 'lucide-react';
+import { Menu, Plus, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api, ApiError, post, sendMessage } from '../api';
-import { formatCards, timeLabel } from '../format';
-import type { Answer, Card, ChatEvent, Conversation, ConversationRow, Message, RunResult } from '../types';
+import { api, ApiError, sendMessage } from '../api';
+import { timeLabel } from '../format';
+import type { ChatEvent, Conversation, ConversationRow, Message, RunResult } from '../types';
 import { Composer, type Attachment } from './Composer';
 import { RunBlock } from './RunBlock';
-import { CopyButton, CountMeter, RichText } from './ui';
+import { CountMeter, RichText } from './ui';
 
 const FIRST_PROMPT = 'Menünün ekran görüntüsünü yapıştır ya da ürünleri yaz…';
 const NEXT_PROMPT = 'Sor, iste ya da yeni ekran görüntüsü yapıştır…';
 const EXAMPLES = ['Adana, Urfa, Lahmacun, Ayran', 'Kaşarlı Pide, Kıymalı Pide, Çay'];
+const SAVED_CONVERSATION = 'conversation';
+/** Long enough for a full analysis, which has a 26 s deadline on top of reading the images. */
+const WAIT_TRIES = 30;
+const WAIT_MS = 2000;
 
 interface Live {
   status: string;
@@ -20,18 +24,9 @@ interface Live {
 
 const IDLE_LIVE: Live = { status: 'Düşünüyorum', cuisine: null, menuCount: null, warnings: [] };
 
-/** Everything the rep has seen in this call, oldest first. */
-const allCards = (messages: readonly Message[]): Card[] => messages.flatMap((m) => m.result?.cards ?? []);
-
 function latestRun(messages: readonly Message[]): RunResult | null {
   for (const message of [...messages].reverse()) if (message.result?.counts) return message.result;
   return null;
-}
-
-/** The latest analysis already counts what was accepted before it; only what was accepted since moves the meter. */
-function acceptedSince(run: RunResult | null, cards: readonly Card[]): number {
-  const onMenu = new Set(run?.menu.map((item) => item.name.toLocaleLowerCase('tr-TR')));
-  return cards.filter((c) => c.section === 'new_product' && c.status === 'accepted' && !onMenu.has(c.name.toLocaleLowerCase('tr-TR'))).length;
 }
 
 function MessageBubble({ message }: { message: Message }) {
@@ -68,77 +63,21 @@ function LiveStatus({ live }: { live: Live }) {
       <div className="skeleton" aria-hidden>
         <i />
         <i />
-        <i />
       </div>
     </div>
   );
 }
 
-function Summary({ cards, onClose }: { cards: Card[]; onClose: () => void }) {
-  const yes = cards.filter((c) => c.status === 'accepted');
-  const later = cards.filter((c) => c.status === 'later');
-  const list = (title: string, items: Card[]) => (
-    <section>
-      <div className="summary-head">
-        <h3>
-          {title} <span>{items.length}</span>
-        </h3>
-        {items.length > 0 && <CopyButton text={formatCards(items)} label="Kopyala" />}
-      </div>
-      <ul>
-        {items.map((card) => (
-          <li key={card.id}>
-            {card.targetName ?? card.name}
-            {card.section === 'option' && <small>opsiyon ve malzeme</small>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-  return (
-    <aside className="summary" aria-label="Görüşme özeti">
-      <header>
-        <h2>Panele girilecekler</h2>
-        <button type="button" className="icon-button" aria-label="Özeti kapat" onClick={onClose}>
-          <X size={18} />
-        </button>
-      </header>
-      {yes.length === 0 && later.length === 0 ? (
-        <p className="summary-empty">Kartlarda Evet veya Düşünecek dediklerin burada toplanır. Görüşme bitince tek seferde kopyalarsın.</p>
-      ) : (
-        <>
-          {list('Evet dedi', yes)}
-          {later.length > 0 && list('Düşünecek', later)}
-        </>
-      )}
-    </aside>
-  );
-}
-
-function CallHeader({ title, run, cards, onSummary }: { title: string; run: RunResult | null; cards: Card[]; onSummary: () => void }) {
+function CallHeader({ title, run }: { title: string; run: RunResult | null }) {
   const counts = run?.counts ?? null;
-  const yes = cards.filter((c) => c.status === 'accepted').length;
-  const later = cards.filter((c) => c.status === 'later').length;
   const gaps = counts?.categories.filter((c) => c.missing > 0) ?? [];
   return (
     <header className="call-header">
       <div className="call-title">
         <h1>{counts?.cuisineName ?? title}</h1>
-        {gaps.length > 0 && (
-          <p className="gaps">
-            {gaps.slice(0, 5).map((gap) => (
-              <span key={gap.key}>
-                {gap.label} {gap.present}/{gap.minItems}
-              </span>
-            ))}
-          </p>
-        )}
+        {gaps.length > 0 && <p className="gaps">Eksik: {gaps.map((gap) => `${gap.label} ${gap.present}/${gap.minItems}`).join(' · ')}</p>}
       </div>
-      {counts && <CountMeter current={counts.current + acceptedSince(run, cards)} target={counts.target} />}
-      <button type="button" className="button ghost" onClick={onSummary}>
-        <ClipboardList size={16} />
-        Özet{yes + later > 0 ? ` ${yes + later}` : ''}
-      </button>
+      {counts && <CountMeter current={counts.current} target={counts.target} />}
     </header>
   );
 }
@@ -148,22 +87,17 @@ export function ChatApp() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [live, setLive] = useState<Live | null>(null);
   const [draft, setDraft] = useState('');
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showSummary, setShowSummary] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const lastAnswer = useRef<HTMLDivElement>(null);
   // Answers to a stream arrive after a React render; this is the conversation the stream belongs to.
   const activeId = useRef<string | null>(null);
-
-  useEffect(() => {
-    void api<{ data: ConversationRow[] }>('/chat/conversations')
-      .then((res) => setRows(res.data))
-      .catch(() => undefined);
-  }, []);
+  // Bumped when the rep leaves a conversation: an answer still on its way must not land in the one now on screen.
+  const view = useRef(0);
 
   const messages = useMemo(() => conversation?.messages ?? [], [conversation]);
-  const cards = useMemo(() => allCards(messages), [messages]);
   const run = useMemo(() => latestRun(messages), [messages]);
   const lastMessage = messages.at(-1);
 
@@ -174,28 +108,58 @@ export function ChatApp() {
   }, [messages.length, live !== null, lastMessage?.role]);
 
   const open = useCallback(async (id: string) => {
+    view.current += 1;
+    const mine = view.current;
     setError(null);
+    setLive(null);
     setSidebarOpen(false);
-    setShowSummary(false);
     try {
-      const loaded = await api<Conversation>(`/chat/conversations/${id}`);
+      let loaded = await api<Conversation>(`/chat/conversations/${id}`);
+      if (mine !== view.current) return;
       activeId.current = id;
+      sessionStorage.setItem(SAVED_CONVERSATION, id);
       setConversation(loaded);
+      // The answer keeps running on the server after a reload or a lost connection: wait for it here.
+      for (let tries = 0; loaded.messages.at(-1)?.role === 'user' && tries < WAIT_TRIES; tries += 1) {
+        setLive(IDLE_LIVE);
+        await new Promise((resolve) => setTimeout(resolve, WAIT_MS));
+        if (mine !== view.current) return;
+        loaded = await api<Conversation>(`/chat/conversations/${id}`);
+        if (mine !== view.current) return;
+        setConversation(loaded);
+      }
+      setLive(null);
     } catch (err) {
+      if (mine !== view.current) return;
+      setLive(null);
       setError(err instanceof ApiError ? err.message : 'Görüşme açılamadı.');
     }
   }, []);
 
+  useEffect(() => {
+    void api<{ data: ConversationRow[] }>('/chat/conversations')
+      .then((res) => {
+        setRows(res.data);
+        // A reload in the middle of a call comes back to the same conversation.
+        const saved = sessionStorage.getItem(SAVED_CONVERSATION);
+        if (res.data.some((row) => row.id === saved) && saved) void open(saved);
+      })
+      .catch(() => undefined);
+  }, [open]);
+
   const startNew = () => {
+    view.current += 1;
     activeId.current = null;
+    sessionStorage.removeItem(SAVED_CONVERSATION);
     setConversation(null);
+    setLive(null);
     setDraft('');
     setError(null);
-    setShowSummary(false);
     setSidebarOpen(false);
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string, title: string) => {
+    if (!window.confirm(`"${title}" görüşmesi silinsin mi?`)) return;
     await api(`/chat/conversations/${id}`, { method: 'DELETE' }).catch(() => undefined);
     setRows((current) => current.filter((row) => row.id !== id));
     if (activeId.current === id) startNew();
@@ -206,7 +170,7 @@ export function ChatApp() {
       case 'conversation': {
         const row = event.conversation;
         activeId.current = row.id;
-        setRows((current) => [row, ...current.filter((r) => r.id !== row.id)]);
+        sessionStorage.setItem(SAVED_CONVERSATION, row.id);
         setConversation((current) => ({ messages: [], ...current, ...row }));
         break;
       }
@@ -233,63 +197,70 @@ export function ChatApp() {
   }, []);
 
   const send = useCallback(
-    async (text: string, attachments: Attachment[]) => {
+    async (text: string, sent: Attachment[]) => {
+      const mine = view.current;
       setDraft('');
+      setAttachments([]);
       setError(null);
-      setLive({ ...IDLE_LIVE, status: attachments.length > 0 ? 'Menüyü okuyorum' : 'Düşünüyorum' });
+      setLive({ ...IDLE_LIVE, status: sent.length > 0 ? 'Menüyü okuyorum' : 'Düşünüyorum' });
       const local: Message = {
         id: `local-${Date.now()}`,
         role: 'user',
         text,
-        imageCount: attachments.length,
+        imageCount: sent.length,
         runId: null,
         quickReplies: [],
         createdAt: new Date().toISOString(),
         result: null,
-        previews: attachments.map((a) => a.url),
+        previews: sent.map((a) => a.url),
       };
       setConversation((current) => (current ? { ...current, messages: [...current.messages, local] } : { id: '', title: '', updatedAt: '', messages: [local] }));
 
       const form = new FormData();
       if (activeId.current) form.append('conversationId', activeId.current);
       if (text) form.append('text', text);
-      attachments.forEach((attachment, index) => form.append('images', attachment.blob, `menu-${index}.jpg`));
+      sent.forEach((attachment, index) => form.append('images', attachment.blob, `menu-${index}.jpg`));
+
+      let started = false;
+      let answered = false;
       try {
-        await sendMessage(form, onEvent);
+        await sendMessage(form, (event) => {
+          if (event.type === 'conversation') {
+            started = true;
+            const row = event.conversation;
+            setRows((current) => [row, ...current.filter((r) => r.id !== row.id)]);
+          }
+          if (event.type === 'message') answered = true;
+          if (mine === view.current) onEvent(event);
+        });
       } catch (err) {
-        setDraft(text);
-        setError(err instanceof ApiError ? err.message : 'Mesaj gönderilemedi. Tekrar dene.');
-      } finally {
-        setLive(null);
+        // Once the stream has started the message is on the server, and sending it again would answer it twice.
+        if (!started && mine === view.current) {
+          setConversation((current) => current && { ...current, messages: current.messages.filter((m) => m.id !== local.id) });
+          setDraft(text);
+          setAttachments(sent);
+          setError(err instanceof ApiError ? err.message : 'Mesaj gönderilemedi. Tekrar dene.');
+        }
       }
+      if (mine !== view.current) return;
+      if (started && !answered && activeId.current) await open(activeId.current);
+      else setLive(null);
     },
-    [onEvent],
+    [onEvent, open],
   );
 
-  const answer = useCallback(async (card: Card, choice: Answer) => {
-    const status = { accept: 'accepted', skip: 'skipped', later: 'later' }[choice] as Card['status'];
-    const patchCard = (next: Card['status']) =>
-      setConversation(
-        (current) =>
-          current && {
-            ...current,
-            messages: current.messages.map((m) =>
-              m.result ? { ...m, result: { ...m.result, cards: m.result.cards.map((c) => (c.id === card.id ? { ...c, status: next } : c)) } } : m,
-            ),
-          },
-      );
-    patchCard(status);
-    try {
-      await post(`/suggestion-items/${card.id}/${choice}`);
-    } catch (err) {
-      patchCard(card.status);
-      setError(err instanceof ApiError ? err.message : 'Cevap kaydedilemedi.');
-    }
-  }, []);
-
   const hasConversation = messages.length > 0;
+  const replies = !live && lastMessage?.role === 'assistant' ? lastMessage.quickReplies : [];
   const composer = (
-    <Composer busy={live !== null} draft={draft} onDraft={setDraft} onSend={(text, attachments) => void send(text, attachments)} placeholder={hasConversation ? NEXT_PROMPT : FIRST_PROMPT} />
+    <Composer
+      busy={live !== null}
+      draft={draft}
+      onDraft={setDraft}
+      onSend={(text, sent) => void send(text, sent)}
+      attachments={attachments}
+      setAttachments={setAttachments}
+      placeholder={hasConversation ? NEXT_PROMPT : FIRST_PROMPT}
+    />
   );
 
   return (
@@ -315,7 +286,7 @@ export function ChatApp() {
                   <span>{row.title}</span>
                   <small>{timeLabel(row.updatedAt)}</small>
                 </button>
-                <button type="button" className="icon-button small remove" aria-label={`${row.title} görüşmesini sil`} onClick={() => void remove(row.id)}>
+                <button type="button" className="icon-button small remove" aria-label={`${row.title} görüşmesini sil`} onClick={() => void remove(row.id, row.title)}>
                   <Trash2 size={14} />
                 </button>
               </li>
@@ -331,7 +302,7 @@ export function ChatApp() {
         </button>
         {hasConversation ? (
           <>
-            <CallHeader title={conversation?.title ?? ''} run={run} cards={cards} onSummary={() => setShowSummary((v) => !v)} />
+            <CallHeader title={conversation?.title ?? ''} run={run} />
             <div className="scroller" ref={scroller}>
               <div className="thread">
                 {messages.map((message) =>
@@ -340,16 +311,7 @@ export function ChatApp() {
                   ) : (
                     <div key={message.id} className="message assistant" ref={message === lastMessage ? lastAnswer : undefined}>
                       <RichText text={message.text} />
-                      {message === lastMessage && !live && message.quickReplies.length > 0 && (
-                        <div className="quick-replies">
-                          {message.quickReplies.map((reply) => (
-                            <button key={reply} type="button" className="chip" onClick={() => void send(reply, [])}>
-                              {reply}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {message.result && <RunBlock result={message.result} onAnswer={(card, choice) => void answer(card, choice)} />}
+                      {message.result && <RunBlock result={message.result} />}
                     </div>
                   ),
                 )}
@@ -361,6 +323,15 @@ export function ChatApp() {
                 <p className="error" role="alert">
                   {error}
                 </p>
+              )}
+              {replies.length > 0 && (
+                <div className="quick-replies">
+                  {replies.map((reply) => (
+                    <button key={reply} type="button" className="chip" onClick={() => void send(reply, [])}>
+                      {reply}
+                    </button>
+                  ))}
+                </div>
               )}
               {composer}
             </div>
@@ -385,7 +356,6 @@ export function ChatApp() {
           </div>
         )}
       </main>
-      {showSummary && <Summary cards={cards} onClose={() => setShowSummary(false)} />}
     </div>
   );
 }

@@ -181,6 +181,7 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
   app.post(
     '/suggestion-items/:id/accept',
     {
+      onRequest: [app.authenticateAdmin],
       schema: {
         tags: ['analyze'],
         summary: 'Approve a card (optionally edited): new_product cards are saved as approved templates',
@@ -190,21 +191,19 @@ export const analyzeRoutes: FastifyPluginAsyncZod<{
         response: { 200: cardDtoSchema },
       },
     },
-    async (request) => {
-      const user = getAuthUser(request);
-      return service.accept(user.id, request.params.id, request.body, user.role === 'admin');
-    },
+    async (request) => service.accept(getAuthUser(request).id, request.params.id, request.body),
   );
 
   app.post(
     '/suggestion-items/:id/skip',
-    { schema: { tags: ['analyze'], summary: 'The seller said no ("Hayır")', security, params: itemIdParams, response: { 200: cardDtoSchema } } },
+    { onRequest: [app.authenticateAdmin], schema: { tags: ['analyze'], summary: 'The seller said no ("Hayır")', security, params: itemIdParams, response: { 200: cardDtoSchema } } },
     async (request) => service.skip(getAuthUser(request).id, request.params.id),
   );
 
   app.post(
     '/suggestion-items/:id/later',
     {
+      onRequest: [app.authenticateAdmin],
       schema: {
         tags: ['analyze'],
         summary: 'The seller will think about it ("Düşünecek"); nothing is learned or written to the pool',

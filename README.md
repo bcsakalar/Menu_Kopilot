@@ -13,8 +13,7 @@ The restaurant comes with nothing but its menu; the site reads it and leads the 
 - **It is a chat.** "Tatlı öner", "Adana için opsiyon yaz", "ayran yokmuş", "restoran dürüm istemiyor, ne diyeyim?", or
   a second screenshot: every follow-up goes through the same agents and guards as the first analysis, and nothing is
   offered twice in one conversation.
-- **Evet / Düşünecek / Hayır** on every card moves the counter, and **Özet** collects what goes into the panel, ready
-  to copy.
+- **Everything is one copy away:** a card, one of its rows, or a whole tab, as plain text for the restaurant panel.
 
 No account and no password: a browser's first message creates a visitor, and a cookie keeps its conversations.
 The admin panel at `/admin` has a real sign-in.
@@ -96,9 +95,8 @@ Token economy — the database and caches answer first, the LLM is the last reso
   cookie. That is what keeps ownership checks, history and quotas per browser. Anyone with the address can use it, so
   it is limited three ways: 20 messages a minute per IP, `DAILY_LLM_CALL_QUOTA` per visitor and
   `GLOBAL_DAILY_LLM_CALL_QUOTA` for the whole site, past which answers come from the template pool only.
-- **A visitor cannot write the shared pool.** Their "Evet" is recorded and teaches the learning loop; a new product
-  becomes a draft that the admin approves under *Şablon havuzu*. Everything under the admin panel needs the admin
-  cookie (HttpOnly, SameSite=Strict, 12 h), and production refuses to start with the development defaults.
+- **A visitor cannot write anything shared.** The template pool, the learning loop and every setting sit behind the
+  admin cookie (HttpOnly, SameSite=Strict, 12 h), and production refuses to start with the development defaults.
 - Screenshots are never stored on the server, only their SHA-256 (for caching). The browser re-encodes them before
   upload, which also drops EXIF/GPS.
 - **`LOCAL_ONLY_MODE=true`** turns off every external API call: answers come only from the database and the caches
@@ -233,7 +231,7 @@ site).
 
 | Area | Endpoints |
 |---|---|
-| Chat (open) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; the answer streams as SSE), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id`, `POST /suggestion-items/:id/accept\|skip\|later` |
+| Chat (open) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; the answer streams as SSE), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id` |
 | Admin | `GET /admin/overview?range=today\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id` |
 | Auth | `POST /auth/login` (sets the admin cookie), `POST /auth/logout`, `GET /auth/me` |
 | Analysis | `POST /analyze` (multipart: `images[]` ≤ 5, `menuText?`, `cuisineId?`, `notes?`, `fromRunId?`, `debug?`; SSE with `Accept: text/event-stream`, `?async=1` → 202, otherwise the result), `GET /analyze/latest`, `GET /analyze/:runId`, `GET /analyze/:runId/events`, `GET /analyze/:runId/trace`, `POST /analyze/:runId/cancel`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
@@ -326,8 +324,7 @@ EOF
   analysis history (filters, paging by time), the call (call order, the sentence for the seller, "Evet / Düşünecek /
   Hayır" with the last answer counting) and the hedged photo read. Fixtures are hand-written stand-ins; see
   `backend/test/fixtures/llm/README.md`. `test/e2e/chat.e2e.test.ts` covers the site's door: the visitor cookie, one
-  visitor kept out of another's conversation and of the admin routes, follow-ups that run only what was asked, and a
-  visitor's "Evet" leaving a draft instead of an approved template.
+  visitor kept out of another's conversation and of the admin routes, and follow-ups that run only what was asked.
 - Web: `cd web; pnpm test` — the SSE frame parser and the text copied into the panel.
 - AI quality: `tests/ai_eval/` — 141 scenarios over all 27 cuisines, scored by independent rules
   ([`tests/ai_eval/README.md`](tests/ai_eval/README.md); reports in [`docs/ai-eval/`](docs/ai-eval/)).

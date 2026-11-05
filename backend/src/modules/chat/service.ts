@@ -1,5 +1,5 @@
 import { and, asc, desc, eq } from 'drizzle-orm';
-import { runChatAgent, type ChatContext } from '../../agents/chat.js';
+import { recommendDecision, runChatAgent, type ChatContext } from '../../agents/chat.js';
 import type { RunFocus } from '../../agents/plan.js';
 import type { ChatDecision } from '../../agents/schemas/chat.js';
 import type { PromptRepository } from '../../ai/prompt-repository.js';
@@ -8,11 +8,12 @@ import type { ImageInput } from '../../ai/types.js';
 import type { Database } from '../../db/client.js';
 import { chatMessages, conversations, cuisines, menuCategories, suggestionItems } from '../../db/schema/index.js';
 import { AppError, notFound } from '../../lib/errors.js';
+import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { followUp, summarize } from './summary.js';
+import { aiBusy, followUp, MORE_PRODUCTS, nextSteps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -25,7 +26,6 @@ const LIST_MAX_NAME_CHARS = 60;
 /** A later screenshot brings a few new products with it, on top of the cards for what it added. */
 const PRODUCTS_WITH_IMAGES = 4;
 const PRODUCTS_WITH_NEW_ITEMS = 3;
-const MORE_PRODUCTS = 'Daha fazla ürün öner';
 
 /** "adana, urfa, ayran": a list of products, which needs no model to understand. */
 export function looksLikeProductList(text: string): boolean {
@@ -76,19 +76,23 @@ function continueFields(last: AnalyzeResult, typed: readonly string[], notes: st
 function focusOf(decision: ChatDecision): Partial<RunFocus> {
   if (decision.action === 'recommend') return { products: Math.max(1, decision.productCount), categoryKey: decision.categoryKey };
   if (decision.action === 'complete') return { targets: decision.targets };
-  // update_menu: what was just learned gets its cards, and a little of what goes with it.
-  return { targets: decision.addProducts, products: decision.addProducts.length > 0 ? PRODUCTS_WITH_NEW_ITEMS : 0 };
+  // update_menu: what was just learned gets its cards, and a little of what goes with it, but not what just left the menu.
+  return { targets: decision.addProducts, products: decision.addProducts.length > 0 ? PRODUCTS_WITH_NEW_ITEMS : 0, exclude: decision.removeProducts };
+}
+
+/** One of the buttons of `nextSteps`, typed or clicked. */
+function shortcut(text: string, last: AnalyzeResult | null): ChatDecision | undefined {
+  if (!last) return undefined;
+  const wanted = normalizeTr(text);
+  if (wanted === normalizeTr(MORE_PRODUCTS)) return recommendDecision(null);
+  const category = last.counts?.categories.find((c) => wanted === normalizeTr(`${c.label} öner`));
+  return category ? recommendDecision(category.key) : undefined;
 }
 
 function titleOf(conversation: ConversationRow, text: string, result: AnalyzeResult | null): string {
   if (result?.counts) return `${result.counts.cuisineName} · ${result.counts.current} ürün`;
   if (conversation.title !== NEW_TITLE) return conversation.title;
   return text.slice(0, TITLE_CHARS) || NEW_TITLE;
-}
-
-function answerLabel(accepted: boolean | null): string {
-  if (accepted === null) return 'cevap bekliyor';
-  return accepted ? 'kabul edildi' : 'reddedildi';
 }
 
 /** The site's only door: a conversation per restaurant call, each message answered directly or by a run of the agents. */
@@ -159,7 +163,9 @@ export class ChatService {
     emit({ type: 'conversation', conversation: toConversation(conversation) });
     emit({ type: 'user_message', message: toMessage(outgoing.message, null) });
     try {
-      const last = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
+      const snapshot = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
+      // A run that read nothing is no menu: the next screenshot is the first analysis, not an addition to an empty list.
+      const last = snapshot && snapshot.menu.length > 0 ? snapshot : null;
       if (images.length > 0 || (!last && looksLikeProductList(text))) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
     } catch (err) {
@@ -178,7 +184,7 @@ export class ChatService {
       return;
     }
     const focus = await this.focus(conversation.id, last, { products: PRODUCTS_WITH_IMAGES, newItemsOnly: true });
-    const fields = continueFields(last, await this.acceptedNames(conversation.id), text);
+    const fields = continueFields(last, [], text);
     const result = await this.runAgents(userId, outgoing, fields, { focus }, emit);
     const current = result.counts?.current ?? 0;
     const added = current - (last.counts?.current ?? 0);
@@ -188,7 +194,8 @@ export class ChatService {
 
   private async follow(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const conversationId = outgoing.conversation.id;
-    const decision = await runChatAgent(this.deps, await this.context(outgoing, last), userId);
+    const quick = shortcut(outgoing.text, last);
+    const decision = quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId));
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
     if (decision.action === 'update_menu' && !last && decision.addProducts.length > 0) {
@@ -202,17 +209,17 @@ export class ChatService {
       return;
     }
 
-    const accepted = await this.acceptedNames(conversationId);
     if (cuisineId) {
-      const result = await this.runAgents(userId, outgoing, { ...continueFields(last, accepted, ''), cuisineId }, {}, emit);
+      const result = await this.runAgents(userId, outgoing, { ...continueFields(last, [], ''), cuisineId }, {}, emit);
       await this.reply(outgoing, summarize(result), result, emit);
       return;
     }
     const focus = await this.focus(conversationId, last, focusOf(decision));
-    const fields = continueFields(last, [...accepted, ...decision.addProducts], decision.note);
+    const fields = continueFields(last, decision.addProducts, decision.note);
     const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts }, emit);
     const lead = decision.action === 'update_menu' ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.` : '';
-    await this.reply(outgoing, { ...answer, text: followUp(result, lead) }, result, emit);
+    const quickReplies = aiBusy(result) ? [outgoing.text] : quick ? nextSteps(result) : answer.quickReplies;
+    await this.reply(outgoing, { quickReplies, text: followUp(result, lead) }, result, emit);
   }
 
   private async focus(conversationId: string, last: AnalyzeResult, want: Partial<RunFocus>): Promise<RunFocus> {
@@ -221,9 +228,9 @@ export class ChatService {
       categoryKey: null,
       targets: [],
       newItemsOnly: false,
-      exclude: await this.offeredNames(conversationId),
       priceSegment: last.classification?.priceSegment ?? 'orta',
       ...want,
+      exclude: [...(await this.offeredNames(conversationId)), ...(want.exclude ?? [])],
     };
   }
 
@@ -267,7 +274,7 @@ export class ChatService {
       .where(eq(chatMessages.conversationId, conversationId))
       .orderBy(desc(chatMessages.createdAt))
       .limit(HISTORY_MESSAGES + 1);
-    const cards = await this.offeredCards(conversationId);
+    const offered = await this.offeredNames(conversationId);
     const categoryRows = await db.select({ key: menuCategories.key, label: menuCategories.label }).from(menuCategories);
     const cuisineRows = await db.select({ slug: cuisines.slug, name: cuisines.name }).from(cuisines);
     const gaps = last?.counts?.categories.filter((c) => c.missing > 0) ?? [];
@@ -277,7 +284,7 @@ export class ChatService {
       counts: last?.counts ? `${last.counts.current} / hedef ${last.counts.target}` : 'menü henüz yok',
       gaps: gaps.map((g) => `${g.label} ${g.present}/${g.minItems}`).join(', ') || '-',
       menu: last?.menu.slice(0, MENU_NAMES).map((m) => m.name).join(', ') || 'menü henüz yok',
-      offered: cards.slice(0, OFFERED_NAMES).map((c) => `${c.name} (${answerLabel(c.accepted)})`).join(', ') || '-',
+      offered: offered.slice(0, OFFERED_NAMES).join(', ') || '-',
       categories: categoryRows.map((c) => `${c.key} | ${c.label}`).join(', '),
       cuisines: cuisineRows.map((c) => `${c.slug} | ${c.name}`).join(', '),
       history:
@@ -290,21 +297,13 @@ export class ChatService {
     };
   }
 
-  private offeredCards(conversationId: string) {
-    return this.deps.db
-      .select({ name: suggestionItems.rawName, accepted: suggestionItems.accepted })
+  private async offeredNames(conversationId: string): Promise<string[]> {
+    const rows = await this.deps.db
+      .select({ name: suggestionItems.rawName })
       .from(suggestionItems)
       .innerJoin(chatMessages, eq(chatMessages.runId, suggestionItems.runId))
       .where(and(eq(chatMessages.conversationId, conversationId), eq(suggestionItems.section, 'new_product')));
-  }
-
-  private async offeredNames(conversationId: string): Promise<string[]> {
-    return (await this.offeredCards(conversationId)).map((c) => c.name);
-  }
-
-  /** What the seller said yes to is on the menu from here on: it counts, and it can be asked about. */
-  private async acceptedNames(conversationId: string): Promise<string[]> {
-    return (await this.offeredCards(conversationId)).filter((c) => c.accepted === true).map((c) => c.name);
+    return rows.map((row) => row.name);
   }
 
   private async cuisineId(slug: string | null): Promise<string | undefined> {

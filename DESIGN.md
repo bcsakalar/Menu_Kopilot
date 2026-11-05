@@ -1,7 +1,7 @@
 # Design
 
-The identity carried over from the phone app: anthracite surfaces separated by hairlines, paprika for actions, amber for
-counts, Manrope. Tokens live in [`web/src/styles.css`](web/src/styles.css); nothing outside that file picks a color.
+The identity carried over from the phone app: anthracite surfaces separated by hairlines, Manrope, amber for the count,
+and paprika only for the main action and the current tab. Tokens live in [`web/src/styles.css`](web/src/styles.css); nothing outside that file picks a color.
 
 ## Principles
 
@@ -15,8 +15,8 @@ counts, Manrope. Tokens live in [`web/src/styles.css`](web/src/styles.css); noth
 ## Color
 
 Follows the machine's light or dark setting; light is the base because a call center is usually lit. Restrained: neutrals
-plus paprika for primary actions, selection and focus. Amber means "still short of the target", green means "reached" or
-"Evet". Hayır strikes the card through and hides its details.
+plus paprika for the main action, the current tab and the "Söyle" label. Selection is neutral. Amber means "still short of the
+target", green means "reached". Nothing else is colored.
 
 ## Type
 
@@ -27,11 +27,13 @@ names and numbers.
 ## Components
 
 - **CountMeter:** `15 / 20 ürün` over one segment per product, up to 24; a continuous bar above that.
-- **Card row:** name and meta, copy, the Evet / Düşünecek / Hayır segmented control; description; the sentence to say in
-  bold; three columns of details (2fr 1fr 1fr), one column under 900 px.
+- **Card row:** name and meta, copy; the sentence to say; then a spec list with one aligned line per field (Açıklama, Opsiyon,
+  Çıkarılabilir, Ekstra), each copied on its own.
+- **Next steps:** the chips stay above the composer, so they are in reach whatever the scroll position.
 - **Composer:** the page's only input. Paste works from anywhere; dropped or pasted images appear as thumbnails with a short
   drop-in, the one authored motion.
-- **Admin:** the same tokens, with tables instead of cards.
+- **Admin:** the same tokens. Overview is a stat strip and two panels; a conversation reads as a timeline with each analysis
+  folded under its own line.
 
 ## Motion
 

@@ -10,10 +10,8 @@ const overviewSchema = z.object({
   visitors: z.number().int(),
   conversations: z.number().int(),
   runs: z.number().int(),
-  cards: z.object({ total: z.number().int(), accepted: z.number().int(), rejected: z.number().int(), later: z.number().int() }),
+  cards: z.number().int(),
   llm: z.object({ calls: z.number().int(), failed: z.number().int(), tokens: z.number().int() }),
-  /** New products visitors said yes to, waiting for the admin. */
-  drafts: z.number().int(),
   topCuisines: z.array(z.object({ name: z.string(), runs: z.number().int() })),
   site: z.object({ callsToday: z.number().int(), dailyCalls: z.number().int() }),
 });

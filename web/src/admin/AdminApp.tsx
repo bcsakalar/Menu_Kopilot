@@ -1,7 +1,7 @@
-import { BarChart3, BookOpenCheck, Brain, ChefHat, Cpu, LogOut, MessagesSquare, ScrollText } from 'lucide-react';
+import { BarChart3, BookOpenCheck, Brain, ChefHat, Cpu, LogOut, MessagesSquare } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { api, ApiError, post } from '../api';
-import { Conversations, Cuisines, Learning, Models, Overview, Prompts, Templates } from './pages';
+import { Conversations, Cuisines, Learning, Models, Overview, Templates } from './pages';
 
 const PAGES: { key: string; label: string; icon: ReactNode; page: ReactNode }[] = [
   { key: 'overview', label: 'Genel bakış', icon: <BarChart3 size={17} />, page: <Overview /> },
@@ -10,7 +10,6 @@ const PAGES: { key: string; label: string; icon: ReactNode; page: ReactNode }[] 
   { key: 'cuisines', label: 'Mutfak türleri', icon: <ChefHat size={17} />, page: <Cuisines /> },
   { key: 'learning', label: 'Öğrenilenler', icon: <Brain size={17} />, page: <Learning /> },
   { key: 'models', label: 'Modeller', icon: <Cpu size={17} />, page: <Models /> },
-  { key: 'prompts', label: 'Promptlar', icon: <ScrollText size={17} />, page: <Prompts /> },
 ];
 
 function Login({ onDone }: { onDone: () => void }) {

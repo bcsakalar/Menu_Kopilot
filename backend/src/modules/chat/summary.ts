@@ -1,7 +1,19 @@
+import { AI_BUSY } from '../../agents/chat.js';
 import type { AnalyzeResult } from '../analyze/schemas.js';
 
 const TOP_PRODUCTS = 3;
 const MAX_REPLIES = 3;
+export const MORE_PRODUCTS = 'Daha fazla ürün öner';
+/** The run had no model to ask: saying "nothing fits" then would be a wrong verdict on the menu. */
+const AI_TROUBLE: ReadonlySet<string> = new Set(['recommend_failed', 'options_failed', 'slow_providers', 'agent_failed', 'extract_failed']);
+
+export const aiBusy = (result: AnalyzeResult): boolean => result.cards.length === 0 && result.warnings.some((w) => AI_TROUBLE.has(w.code));
+
+/** The next steps as buttons: the categories the menu is short of, then more of anything. */
+export function nextSteps(result: AnalyzeResult): string[] {
+  const gaps = result.counts?.categories.filter((c) => c.missing > 0) ?? [];
+  return [...gaps.slice(0, MAX_REPLIES - 1).map((g) => `${g.label} öner`), MORE_PRODUCTS];
+}
 
 /**
  * The first thing the rep reads on the call, written without a model so it arrives with the cards: where the menu
@@ -11,23 +23,18 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   const { counts, cards } = result;
   if (!counts || result.menu.length === 0) {
     return {
-      text: 'Bu görüntüde menü okuyamadım. Ürünlerin göründüğü bir ekran görüntüsü yapıştır ya da ürün adlarını virgülle yaz.',
+      text: aiBusy(result)
+        ? `${AI_BUSY} Görüntüyü yeniden yapıştır ya da ürün adlarını virgülle yaz.`
+        : 'Bu görüntüde menü okuyamadım. Ürünlerin göründüğü bir ekran görüntüsü yapıştır ya da ürün adlarını virgülle yaz.',
       quickReplies: [],
     };
   }
   const products = cards.filter((c) => c.section === 'new_product');
-  const options = cards.filter((c) => c.section === 'option');
-  const fixes = cards.filter((c) => c.section === 'fix');
-  const gaps = counts.categories.filter((c) => c.missing > 0);
-
+  // The gaps stand in the header and the card counts on the tabs: this answer says only what they cannot.
   const lines = [`**${counts.cuisineName}** menüsü: ${counts.current} ürün okudum, hedef ${counts.target}.`];
-  if (gaps.length > 0) lines.push(`Eksik: ${gaps.map((g) => `${g.label} ${g.present}/${g.minItems}`).join(', ')}.`);
   if (products.length > 0) lines.push(`Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`);
-  if (options.length > 0) lines.push(`${options.length} ürüne opsiyon, çıkarılabilir ve ekstra malzeme hazırladım.`);
-  if (fixes.length > 0) lines.push(`${fixes.length} düzeltme var; görüşme bitmeden sor.`);
 
-  const quickReplies = [...gaps.slice(0, MAX_REPLIES - 1).map((g) => `${g.label} öner`), 'Daha fazla ürün öner'];
-  return { text: lines.join('\n'), quickReplies };
+  return { text: lines.join('\n'), quickReplies: nextSteps(result) };
 }
 
 /**
@@ -48,5 +55,6 @@ export function followUp(result: AnalyzeResult, lead = ''): string {
     ...(options ? [`**${options}** için opsiyon ve malzemeleri hazırladım.`] : []),
     ...(products ? [`Önerim: **${products}**.`] : []),
   ];
-  return lines.join('\n') || 'Bu istek için yeni ve bu mutfağa uygun bir sonuç çıkmadı. Başka bir kategori dene.';
+  if (lines.length > 0) return lines.join('\n');
+  return aiBusy(result) ? AI_BUSY : 'Bu istek için yeni ve bu mutfağa uygun bir sonuç çıkmadı. Başka bir kategori dene.';
 }

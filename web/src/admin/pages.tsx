@@ -3,8 +3,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { api, ApiError, patch, post, put } from '../api';
 import { RunBlock } from '../chat/RunBlock';
 import { RichText } from '../chat/ui';
-import { groupRule, timeLabel } from '../format';
-import type { Conversation, OptionGroup } from '../types';
+import { dateTimeLabel, groupRule, timeLabel } from '../format';
+import type { Conversation, OptionGroup, RunResult } from '../types';
 
 /** One fetch with its loading and error states; `reload` after a write. */
 function useLoad<T>(path: string): { data: T | null; error: string | null; reload: () => void } {
@@ -20,10 +20,13 @@ function useLoad<T>(path: string): { data: T | null; error: string | null; reloa
   return { data, error, reload };
 }
 
-function Page({ title, intro, children, error }: { title: string; intro?: string; children: ReactNode; error?: string | null }) {
+function Page({ title, intro, actions, children, error }: { title: string; intro?: string; actions?: ReactNode; children: ReactNode; error?: string | null }) {
   return (
     <section className="admin-page">
-      <h1>{title}</h1>
+      <header className="page-head">
+        <h1>{title}</h1>
+        {actions}
+      </header>
       {intro && <p className="admin-intro">{intro}</p>}
       {error && (
         <p className="error" role="alert">
@@ -48,97 +51,108 @@ interface OverviewData {
   visitors: number;
   conversations: number;
   runs: number;
-  cards: { total: number; accepted: number; rejected: number; later: number };
+  cards: number;
   llm: { calls: number; failed: number; tokens: number };
-  drafts: number;
   topCuisines: { name: string; runs: number }[];
   site: { callsToday: number; dailyCalls: number };
+}
+
+const ERROR_LABEL: Record<string, string> = { unavailable: 'yoğunluk', rate_limited: 'hız limiti', timeout: 'zaman aşımı', aborted: 'iptal' };
+
+function Stat({ label, value, note }: { label: string; value: number; note?: string | undefined }) {
+  return (
+    <div className="stat">
+      <span>{label}</span>
+      <strong>{value.toLocaleString('tr-TR')}</strong>
+      {note && <small>{note}</small>}
+    </div>
+  );
 }
 
 export function Overview() {
   const [range, setRange] = useState<'today' | 'month'>('today');
   const { data, error } = useLoad<OverviewData>(`/admin/overview?range=${range}`);
   const { data: usage } = useLoad<UsageData>(`/usage/summary?range=${range}`);
-  const answered = data ? data.cards.accepted + data.cards.rejected + data.cards.later : 0;
-  const rows: [string, string | number][] = data
-    ? [
-        ['Temsilci', data.visitors],
-        ['Görüşme', data.conversations],
-        ['Analiz', data.runs],
-        ['Önerilen kart', data.cards.total],
-        ['Evet oranı', answered ? `%${Math.round((data.cards.accepted / answered) * 100)} (${data.cards.accepted}/${answered})` : 'cevap yok'],
-        ['AI çağrısı', data.llm.failed ? `${data.llm.calls} (${data.llm.failed} hatalı)` : data.llm.calls],
-        ['Token', data.llm.tokens.toLocaleString('tr-TR')],
-      ]
-    : [];
+  const busiest = data?.topCuisines[0]?.runs ?? 1;
+  const dailyShare = data ? Math.min(100, (data.site.callsToday / Math.max(1, data.site.dailyCalls)) * 100) : 0;
   return (
-    <Page title="Genel bakış" error={error}>
-      <div className="segmented" role="group" aria-label="Dönem">
-        <button type="button" aria-pressed={range === 'today'} onClick={() => setRange('today')}>
-          Bugün
-        </button>
-        <button type="button" aria-pressed={range === 'month'} onClick={() => setRange('month')}>
-          Bu ay
-        </button>
-      </div>
+    <Page
+      title="Genel bakış"
+      error={error}
+      actions={
+        <div className="segmented" role="group" aria-label="Dönem">
+          <button type="button" aria-pressed={range === 'today'} onClick={() => setRange('today')}>
+            Bugün
+          </button>
+          <button type="button" aria-pressed={range === 'month'} onClick={() => setRange('month')}>
+            Bu ay
+          </button>
+        </div>
+      }
+    >
       {!data && !error && <Loading />}
       {data && (
-        <div className="overview">
-          <table className="facts">
-            <tbody>
-              {rows.map(([label, value]) => (
-                <tr key={label}>
-                  <th scope="row">{label}</th>
-                  <td>{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div>
-            <h2>Site kotası</h2>
-            <p>
-              Bugün {data.site.callsToday} / {data.site.dailyCalls} AI çağrısı. Dolunca öneriler yalnızca şablon havuzundan gelir.
-            </p>
-            {data.drafts > 0 && <p>Onay bekleyen {data.drafts} yeni ürün var; Şablon havuzundan bakabilirsin.</p>}
-            <h2>En çok çalışılan mutfaklar</h2>
-            {data.topCuisines.length === 0 ? (
-              <p>Bu dönemde analiz yok.</p>
-            ) : (
-              <ol className="plain-list">
-                {data.topCuisines.map((c) => (
-                  <li key={c.name}>
-                    {c.name} <span>{c.runs}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        </div>
-      )}
-      {usage && usage.byModel.length > 0 && (
         <>
-          <h2>Modeller</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th className="number">Çağrı</th>
-                <th className="number">Hata</th>
-                <th className="number">Ortalama süre</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usage.byModel.map((row) => (
-                <tr key={row.model}>
-                  <td>{row.label}</td>
-                  <td className="number">{row.calls}</td>
-                  <td className="number">{row.failed}</td>
-                  <td className="number">{(row.avgLatencyMs / 1000).toFixed(1)} sn</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {usage.errors.length > 0 && <p className="muted">Hatalar: {usage.errors.map((e) => `${e.code} (${e.count})`).join(', ')}</p>}
+          <div className="stats">
+            <Stat label="Temsilci" value={data.visitors} />
+            <Stat label="Görüşme" value={data.conversations} />
+            <Stat label="Analiz" value={data.runs} />
+            <Stat label="Önerilen kart" value={data.cards} />
+            <Stat label="AI çağrısı" value={data.llm.calls} note={data.llm.failed > 0 ? `${data.llm.failed} hatalı` : undefined} />
+          </div>
+          <div className="panels">
+            <section className="panel">
+              <h2>En çok çalışılan mutfaklar</h2>
+              {data.topCuisines.length === 0 ? (
+                <p className="muted">Bu dönemde analiz yok.</p>
+              ) : (
+                <ol className="rank">
+                  {data.topCuisines.map((cuisine) => (
+                    <li key={cuisine.name}>
+                      <span>{cuisine.name}</span>
+                      <b>{cuisine.runs}</b>
+                      <i style={{ width: `${(cuisine.runs / busiest) * 100}%` }} />
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+            <section className="panel">
+              <h2>Yapay zekâ</h2>
+              <div className="quota">
+                <p>
+                  Bugün <b>{data.site.callsToday.toLocaleString('tr-TR')}</b> / {data.site.dailyCalls.toLocaleString('tr-TR')} çağrı
+                </p>
+                <span className="meter-track" aria-hidden>
+                  <b style={{ width: `${dailyShare}%` }} />
+                </span>
+                <small>Kota dolunca öneriler yalnızca şablon havuzundan gelir.</small>
+              </div>
+              {usage && usage.byModel.length > 0 && (
+                <table className="mini-table">
+                  <thead>
+                    <tr>
+                      <th>Model</th>
+                      <th className="number">Çağrı</th>
+                      <th className="number">Hata</th>
+                      <th className="number">Süre</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usage.byModel.map((row) => (
+                      <tr key={row.model}>
+                        <td>{row.label}</td>
+                        <td className="number">{row.calls}</td>
+                        <td className="number">{row.failed}</td>
+                        <td className="number">{(row.avgLatencyMs / 1000).toFixed(1)} sn</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {usage && usage.errors.length > 0 && <p className="muted small">Hatalar: {usage.errors.map((e) => `${ERROR_LABEL[e.code] ?? e.code} ${e.count}`).join(', ')}</p>}
+            </section>
+          </div>
         </>
       )}
     </Page>
@@ -153,64 +167,96 @@ interface ConversationRow {
   messages: number;
   visitor: string;
   updatedAt: string;
+  createdAt: string;
 }
 
-function ConversationView({ id, onBack }: { id: string; onBack: () => void }) {
-  const { data, error } = useLoad<Conversation>(`/admin/conversations/${id}`);
+function runSummary(result: RunResult): string {
+  const count = (section: string) => result.cards.filter((c) => c.section === section).length;
+  return [
+    [count('new_product'), 'yeni ürün'],
+    [count('option'), 'opsiyon kartı'],
+    [count('fix'), 'düzeltme'],
+  ]
+    .filter(([value]) => value)
+    .map(([value, label]) => `${value} ${label}`)
+    .join(' · ');
+}
+
+function ConversationView({ row, onBack }: { row: ConversationRow; onBack: () => void }) {
+  const { data, error } = useLoad<Conversation>(`/admin/conversations/${row.id}`);
   return (
-    <Page title={data?.title ?? 'Görüşme'} error={error}>
-      <button type="button" className="button ghost" onClick={onBack}>
+    <section className="admin-page">
+      <button type="button" className="back" onClick={onBack}>
         <ArrowLeft size={16} />
-        Listeye dön
+        Görüşmeler
       </button>
-      <div className="thread admin-thread">
-        {data?.messages.map((message) =>
-          message.role === 'user' ? (
-            <div key={message.id} className="message user">
-              {message.imageCount > 0 && <p className="image-note">{message.imageCount} ekran görüntüsü</p>}
-              {message.text && <p>{message.text}</p>}
+      <header className="page-head">
+        <div>
+          <h1>{data?.title ?? row.title}</h1>
+          <p className="admin-intro">
+            {dateTimeLabel(row.createdAt)} · {row.messages} mesaj · Tarayıcı {row.visitor}
+          </p>
+        </div>
+      </header>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+      {!data && !error && <Loading />}
+      <ol className="timeline">
+        {data?.messages.map((message, index) => (
+          <li key={message.id} className={`turn ${message.role}`}>
+            <div className="turn-who">
+              <b>{message.role === 'user' ? 'Temsilci' : 'Asistan'}</b>
+              <time dateTime={message.createdAt}>{timeLabel(message.createdAt)}</time>
             </div>
-          ) : (
-            <div key={message.id} className="message assistant">
-              <RichText text={message.text} />
-              {message.result && <RunBlock result={message.result} />}
+            <div className="turn-body">
+              {message.imageCount > 0 && <p className="muted">{message.imageCount} ekran görüntüsü</p>}
+              {message.text && <RichText text={message.text} />}
+              {message.result && message.result.cards.length > 0 && (
+                <details open={index === 1}>
+                  <summary>{runSummary(message.result)}</summary>
+                  <RunBlock result={message.result} />
+                </details>
+              )}
             </div>
-          ),
-        )}
-      </div>
-    </Page>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
 export function Conversations() {
   const { data, error } = useLoad<{ data: ConversationRow[] }>('/admin/conversations?limit=100');
-  const [open, setOpen] = useState<string | null>(null);
-  if (open) return <ConversationView id={open} onBack={() => setOpen(null)} />;
+  const [open, setOpen] = useState<ConversationRow | null>(null);
+  if (open) return <ConversationView row={open} onBack={() => setOpen(null)} />;
   return (
-    <Page title="Görüşmeler" intro="Sitedeki bütün görüşmeler, en yeni üstte. Ekran görüntüleri saklanmaz, yalnızca sayıları görünür." error={error}>
+    <Page title="Görüşmeler" intro="Sitedeki bütün görüşmeler, en yeni üstte." error={error}>
       {!data && !error && <Loading />}
-      {data && data.data.length === 0 && <p>Henüz görüşme yok.</p>}
+      {data && data.data.length === 0 && <p className="muted">Henüz görüşme yok. Sitede ilk menü yapıştırıldığında burada görünür.</p>}
       {data && data.data.length > 0 && (
-        <table className="table">
+        <table className="table rows">
           <thead>
             <tr>
               <th>Görüşme</th>
-              <th>Tarayıcı</th>
+              <th>Başladı</th>
+              <th>Son mesaj</th>
               <th className="number">Mesaj</th>
-              <th>Son</th>
             </tr>
           </thead>
           <tbody>
             {data.data.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} onClick={() => setOpen(row)}>
                 <td>
-                  <button type="button" className="link" onClick={() => setOpen(row.id)}>
+                  <button type="button" className="link" onClick={() => setOpen(row)}>
                     {row.title}
                   </button>
                 </td>
-                <td className="muted">{row.visitor}</td>
+                <td className="muted">{dateTimeLabel(row.createdAt)}</td>
+                <td className="muted">{dateTimeLabel(row.updatedAt)}</td>
                 <td className="number">{row.messages}</td>
-                <td className="muted">{timeLabel(row.updatedAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -268,7 +314,7 @@ export function Templates() {
   return (
     <Page
       title="Şablon havuzu"
-      intro="Temsilcilerin Evet dediği yeni ürünler önce onaya düşer. Onayladığın ürün havuza girer ve sonraki önerilerde AI'sız gelir."
+      intro="Havuzdaki ürünler önerilerde yapay zekâya sorulmadan gelir. Sildiğin ürün arşive düşer, oradan geri alabilirsin."
       error={error ?? actionError}
     >
       <div className="toolbar">
@@ -277,7 +323,7 @@ export function Templates() {
             Havuzdakiler
           </button>
           <button type="button" aria-pressed={view === 'false'} onClick={() => setView('false')}>
-            Onay bekleyenler
+            Arşiv
           </button>
         </div>
         <form
@@ -290,7 +336,7 @@ export function Templates() {
         </form>
       </div>
       {!data && !error && <Loading />}
-      {data && data.data.length === 0 && <p>{view === 'false' ? 'Onay bekleyen ürün yok.' : 'Bu aramayla ürün bulunamadı.'}</p>}
+      {data && data.data.length === 0 && <p>{view === 'false' ? 'Arşivde ürün yok.' : 'Bu aramayla ürün bulunamadı.'}</p>}
       {data && data.data.length > 0 && (
         <table className="table">
           <thead>
@@ -318,7 +364,7 @@ export function Templates() {
                   {!template.approved && (
                     <button type="button" className="button ghost" onClick={() => run(patch(`/templates/${template.id}`, { approved: true }))}>
                       <Check size={15} />
-                      Onayla
+                      Havuza al
                     </button>
                   )}
                   <button
@@ -575,81 +621,6 @@ export function Models() {
             </tbody>
           </table>
         </>
-      )}
-    </Page>
-  );
-}
-
-// ---- Promptlar -----------------------------------------------------------------------------------------------------
-
-interface PromptRow {
-  id: string;
-  key: string;
-  version: number;
-  content: string;
-  isActive: boolean;
-}
-
-function PromptEditor({ prompt, versions, onSaved }: { prompt: PromptRow; versions: PromptRow[]; onSaved: () => void }) {
-  const [content, setContent] = useState(prompt.content);
-  const [state, setState] = useState<string | null>(null);
-  const act = (action: Promise<unknown>) => {
-    action
-      .then(() => {
-        setState('Kaydedildi, en geç bir dakika içinde devreye girer.');
-        onSaved();
-      })
-      .catch((err: unknown) => setState(err instanceof ApiError ? err.message : 'Kaydedilemedi.'));
-  };
-  return (
-    <div className="editor">
-      <h2>{prompt.key}</h2>
-      <textarea aria-label="Prompt metni" rows={18} value={content} onChange={(e) => setContent(e.target.value)} />
-      <div className="editor-actions">
-        <button type="button" className="button primary" disabled={content === prompt.content} onClick={() => act(post('/prompts', { key: prompt.key, content, activate: true }))}>
-          Yeni sürüm olarak kaydet
-        </button>
-        {versions.length > 1 && (
-          <select aria-label="Eski sürüme dön" value={prompt.id} onChange={(e) => act(post(`/prompts/${e.target.value}/activate`))}>
-            {versions.map((v) => (
-              <option key={v.id} value={v.id}>
-                Sürüm {v.version}
-                {v.isActive ? ' (aktif)' : ''}
-              </option>
-            ))}
-          </select>
-        )}
-        {state && <span className="muted">{state}</span>}
-      </div>
-    </div>
-  );
-}
-
-export function Prompts() {
-  const { data, error, reload } = useLoad<{ data: PromptRow[] }>('/prompts');
-  const [key, setKey] = useState<string | null>(null);
-  const active = data?.data.filter((p) => p.isActive) ?? [];
-  const selected = active.find((p) => p.key === key);
-  return (
-    <Page title="Promptlar" intro="Modellere giden metinler. Kaydetmek yeni sürüm açar, eskisi silinmez." error={error}>
-      {!data && !error && <Loading />}
-      {data && (
-        <div className="split">
-          <ul className="prompt-list">
-            {active.map((prompt) => (
-              <li key={prompt.id}>
-                <button type="button" className={prompt.key === key ? 'active' : ''} onClick={() => setKey(prompt.key)}>
-                  {prompt.key} <span>v{prompt.version}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {selected ? (
-            <PromptEditor key={selected.id} prompt={selected} versions={data.data.filter((p) => p.key === selected.key)} onSaved={reload} />
-          ) : (
-            <p className="muted">Düzenlemek için bir prompt seç.</p>
-          )}
-        </div>
       )}
     </Page>
   );

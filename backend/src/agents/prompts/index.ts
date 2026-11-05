@@ -58,7 +58,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   'agent.options.system': 6,
   // v3: each product carries its type, and the batch carries the type guide.
   'agent.options.user': 3,
-  'agent.chat.system': 1,
+  // v2: an objection is answered with the sentence to read out.
+  'agent.chat.system': 2,
   'agent.chat.user': 1,
 };
 

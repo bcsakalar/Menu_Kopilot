@@ -1,7 +1,7 @@
 import { desc, eq, gte, lt, sql } from 'drizzle-orm';
 import { startOfDay, startOfMonth, type QuotaService } from '../../ai/usage.js';
 import type { Database } from '../../db/client.js';
-import { chatMessages, conversations, cuisines, menuItems, suggestionItems, suggestionRuns, usageLog, users } from '../../db/schema/index.js';
+import { chatMessages, conversations, cuisines, suggestionItems, suggestionRuns, usageLog, users } from '../../db/schema/index.js';
 import { notFound } from '../../lib/errors.js';
 import type { ChatService } from '../chat/service.js';
 
@@ -27,15 +27,7 @@ export class AdminService {
       .from(conversations)
       .where(gte(conversations.createdAt, from));
     const [runRow] = await this.db.select({ runs: count }).from(suggestionRuns).where(gte(suggestionRuns.createdAt, from));
-    const [cardRow] = await this.db
-      .select({
-        total: count,
-        accepted: sql<number>`(count(*) filter (where ${suggestionItems.answer} = 'yes'))::int`,
-        rejected: sql<number>`(count(*) filter (where ${suggestionItems.answer} = 'no'))::int`,
-        later: sql<number>`(count(*) filter (where ${suggestionItems.answer} = 'later'))::int`,
-      })
-      .from(suggestionItems)
-      .where(gte(suggestionItems.createdAt, from));
+    const [cardRow] = await this.db.select({ cards: count }).from(suggestionItems).where(gte(suggestionItems.createdAt, from));
     const [llmRow] = await this.db
       .select({
         calls: count,
@@ -44,7 +36,6 @@ export class AdminService {
       })
       .from(usageLog)
       .where(gte(usageLog.createdAt, from));
-    const [draftRow] = await this.db.select({ drafts: count }).from(menuItems).where(sql`${menuItems.approved} = false and ${menuItems.needsReview}`);
     const topCuisines = await this.db
       .select({ name: cuisines.name, runs: count })
       .from(suggestionRuns)
@@ -60,9 +51,8 @@ export class AdminService {
       visitors: conversationRow?.visitors ?? 0,
       conversations: conversationRow?.conversations ?? 0,
       runs: runRow?.runs ?? 0,
-      cards: cardRow ?? { total: 0, accepted: 0, rejected: 0, later: 0 },
+      cards: cardRow?.cards ?? 0,
       llm: llmRow ?? { calls: 0, failed: 0, tokens: 0 },
-      drafts: draftRow?.drafts ?? 0,
       topCuisines,
       site,
     };

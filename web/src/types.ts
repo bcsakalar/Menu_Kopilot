@@ -1,8 +1,6 @@
 /** What the site reads from the API; backend/src/modules/{analyze,chat}/schemas.ts are the source of truth. */
 
 export type Section = 'new_product' | 'option' | 'fix';
-export type CardStatus = 'pending' | 'accepted' | 'skipped' | 'later';
-export type Answer = 'accept' | 'skip' | 'later';
 
 export interface OptionGroup {
   name: string;
@@ -33,7 +31,6 @@ export interface Card {
   suggestedValue: string | null;
   basedOn: string | null;
   pitch: string;
-  status: CardStatus;
 }
 
 export interface CategoryCount {

@@ -306,14 +306,15 @@ function alternativesFromPool(
   taken: (normalized: string, templateId: string | null) => boolean,
   perType: Map<string, number>,
   maxPerType: number,
-  familyOnly: boolean,
+  cuisineId: string,
 ): RecommendedItem[] {
   const picked: RecommendedItem[] = [];
   for (const row of pool) {
     if (picked.length >= count) break;
-    // Outside the cuisine's family a shared type is not enough: Mercimek Çorbası is a soup, but no alternative to the
-    // sushi bar's Miso Çorbası. When the model answered, its list is only topped up from the family itself.
-    if (!row.basedOn || (!row.sameType && row.score < 30) || (!row.related && (familyOnly || row.score < SHARES_A_WORD))) continue;
+    // Only the cuisine's own family, and a shared type alone only within the cuisine itself: Mercimek Çorbası is no
+    // alternative to the sushi bar's Miso Çorbası, nor Bulgur Pilavı to the pizza shop's Sarımsaklı Ekmek.
+    if (!row.basedOn || !row.related || (!row.sameType && row.score < 30)) continue;
+    if (row.sameType && row.score < SHARES_A_WORD && row.cuisineId !== cuisineId) continue;
     if ((perType.get(row.typeKey) ?? 0) >= maxPerType) continue;
     if (taken(row.normalized, row.id) || picked.some((p) => p.normalized === row.normalized || sameProductName(p.normalized, row.normalized))) continue;
     perType.set(row.typeKey, (perType.get(row.typeKey) ?? 0) + 1);
@@ -405,7 +406,7 @@ export async function runProductRecommender(
       const maxPerType = alternativesPerType(input.alternatives);
       /** The pool's alternatives, for whatever the model did not cover. */
       const poolAlternatives = (have: number): RecommendedItem[] => {
-        const items = alternativesFromPool(pool, input.alternatives - have, isTaken, perType, maxPerType, have > 0);
+        const items = alternativesFromPool(pool, input.alternatives - have, isTaken, perType, maxPerType, input.cuisine.id);
         for (const item of items) take(item.normalized, item.templateId);
         return items;
       };

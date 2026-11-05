@@ -951,3 +951,31 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   answers feed the shared learning loop (the admin can take a verdict back); a reload during a running analysis shows
   the answer only when the conversation is opened again; a card's options cannot be struck out one by one before "Evet" as
   on the phone.
+- **D-201** — **What the full run before going live found** (user: "canlıya almadan önce tam anlamıyla çalıştır"). Run on the
+  real image behind Caddy with the production CSP, driven in real Chromium, including a real Ctrl+V from the Windows
+  clipboard. *Measured:* Gemini answered 503 "high demand" on both models for long stretches (a direct probe: 200 in 1 s,
+  then 13 s, then 503), which opens the provider's circuit for 60 s and leaves everything to Groq's free per-model limits.
+  So a run can fall back to the pool, and that path has to be good. (1) The next-step buttons ("Çorba öner", "Daha fazla
+  ürün öner") no longer call the chat model. (2) `agent.chat` got GPT-OSS 120B as a last fallback. (3) When the providers
+  fail the answer says so and offers the same request as a button, instead of a verdict on the menu ("uygun sonuç çıkmadı")
+  or a request to paste a menu that is already there. (4) Pool alternatives come from the cuisine's own family only, and a
+  shared type alone counts only within the cuisine itself; this replaces point 9 of D-200 (Bulgur Pilavı was the pizza
+  shop's "Sarımsaklı Ekmek alternatifi"). (5) A run that read nothing is no menu: the next screenshot is the first analysis.
+  (6) A product just taken off the menu is not offered back in the same answer. (7) *Browser:* the conversation survives a
+  reload and waits for an answer still running on the server; leaving a conversation mid-answer no longer writes into the
+  next one; a failed send gives the text and the images back; deleting a conversation asks first. (8) `agent.chat.system`
+  v2: an objection is answered with the sentence to read out.
+- **D-202** — **No seller answers, no prompt screen, a calmer page** (user, after testing: "düşünecek evet hayır falan
+  kaldıralım", "daha düzenli okunaklı ve sade", "promptlar neden var silelim"). (1) The Evet / Düşünecek / Hayır buttons, the
+  Özet panel and everything that fed on them leave the site: the meter shows the menu as read, the chat no longer takes
+  accepted products into the menu. The `/suggestion-items` routes stay for an admin bearer token only (the learning tests and
+  `live:check`), so a visitor writes nothing shared; the visitor's draft path is gone, and the panel's second template tab is
+  simply the archive. *Trade-off:* nothing teaches the learning loop any more. What production already learned keeps
+  working and can be taken back under Öğrenilenler. (2) `/prompts` and its repository operations are deleted; prompts change
+  through a version bump in the code, which the seed activates. (3) *Cards:* one aligned spec list instead of three
+  uneven columns; the sentence to say comes first and is regular weight with a small label; paprika only on the main action,
+  the current tab and that label; selection is neutral; the next-step chips sit above the composer. The first answer says
+  only what the header and tabs do not (the gaps and card counts left it), and the "target unreachable" notice is gone.
+  (4) *Admin:* overview as a stat strip and two panels; conversations as a table with whole-row click; a conversation as a
+  timeline with each analysis folded. (5) *Domain:* `menu.example.com` stays: it is already in Cloudflare and under
+  the origin certificate, next to `qr.example.com`.

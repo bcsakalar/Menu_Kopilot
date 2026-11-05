@@ -46,7 +46,6 @@ describe('formatCard', () => {
     suggestedValue: null,
     basedOn: null,
     pitch: '',
-    status: 'pending',
   };
 
   it('titles the card with the menu spelling and skips empty sections', () => {

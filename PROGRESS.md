@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last update: 2026-11-05 — the phone app is gone: a website with a chat, an open door by cookie and an admin panel (D-200). Backend 734 tests, web 2. Before it, 2026-10-11, app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
+Last update: 2026-11-05 — the phone app is gone: a website with a chat, an open door by cookie and an admin panel (D-200 to D-202). Backend 737 tests, web 2. Before it, 2026-10-11, app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
 anywhere (D-197). Before it, 1.5.0: call mode (D-196) — cards in call order with
 the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
 learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
