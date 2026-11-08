@@ -1,354 +1,44 @@
-# PROGRESS
+# Durum
 
-Last update: 2026-11-05 — the phone app is gone: a website with a chat, an open door by cookie and an admin panel (D-200 to D-202). Backend 737 tests, web 2. Before it, 2026-10-11, app 1.6.0: alternatives the kitchen can make, every card section one tap away, no login (D-198, D-199). Before it, 1.5.1: the app stands on its own — no platform name
-anywhere (D-197). Before it, 1.5.0: call mode (D-196) — cards in call order with
-the sentence to say to the seller, "Evet / Düşünecek / Hayır" on every card, "Ofiste girilecekler" after the call,
-learning from the sellers' answers — and a slow menu-photo read raced by the next provider after 7 s (D-195).
-Before: history, cards that open and close, the learning loop's second pass (D-192…D-194, 1.4.0). Backend 716
-tests, mobile 85, both clean.
+Son güncelleme: 2026-11-08 · Canlı sürüm: `fbce03b` · https://menu.example.com
 
-## How to resume after a context reset
-1. Read this file (especially **Where I am**), then `DECISIONS.md`, then `git log --oneline`.
-2. The approved plan is mirrored in the phase list below; the spec is `claude-code-prompt-menu-asistani.md`.
-3. Continue with the first unchecked item of the current phase. Never ask the user; log assumptions in DECISIONS.md.
-4. At the end of each phase: lint/typecheck/test → update this file + DECISIONS.md → commit → 3-line summary.
-5. Backend commands (PowerShell, from `backend/`): `pnpm exec vitest run`, `pnpm exec tsc -p tsconfig.json --noEmit`,
-   `pnpm exec eslint .`, `pnpm exec tsc -p tsconfig.build.json`. Tests use PGlite — no Docker needed.
+## Bugün ne çalışıyor
 
-## Phases
-- [x] **Faz 0** — git init, `.gitignore`/`.gitattributes`, `docs/PROVIDER_NOTES.md`, DECISIONS, PROGRESS, README skeleton
-- [x] **Faz 1** — backend skeleton, Docker Compose, Drizzle schema + reversible migrations, health, auth, seed
-      (12 cuisines + 40 templates, `source='seed'`), `pnpm db:export-seed`
-- [x] **Faz 2** — AI layer: provider interface, Gemini + Groq adapters, router, retry/circuit breaker,
-      prompt templates repo, usage_log, smoke tests
-- [x] **Faz 3** — `/suggest` pipeline A→E, SSE, Redis cache, embedding jobs, Zod + repair, fixture e2e
-- [x] **Faz 4** — Flutter app: auth, home, camera + compression, results (copy/edit/accept), offline cache
-- [x] **Faz 5** — Mod 2 gap analysis (backend + Menü Tamamlama screen + call checklist)
-- [x] **Faz 6** — branches, template pool, settings, usage, CSV/JSON export, release APK signing, GitHub Actions
-- [x] **Faz 7** (optional) — Whisper voice note, Groq compound research mode
-- [x] **Teslim** — live test (Docker stack + Galaxy S23 FE over USB), fixes, Mod 2 without screenshots, sharing
-      into the app, icon/splash/login design, deploy files + runbook for `myserver`
-- [x] **Redesign + real keys** — anthracite/paprika design system (Manrope, count meters, skeletons, action dock,
-      haptics), vision routing after real-key measurements, device run with keys, share fixes, `scripts/dev-up.ps1`,
-      `scripts/new-prod-env.ps1`
-- [x] **FAZ 0–3 (2026-09-21)** — diagnosis (`docs/FAZ0_TESHIS.md`), Şubeler + research removed, Tamamla merged into
-      one `/analyze` screen with sections A/B/C, agent pipeline with trace + debug screen, categories in Postgres and
-      editable from the app, before/after measurement, report (`docs/FAZ3_RAPOR.md`)
-- [ ] **FAZ 0–3 follow-up (user)** — compile + test the app (CI on a PR or a machine with Flutter), device walk-through
-      with screenshots, a working Gemini key, commit + deploy (migration 0003 runs on start)
-- [x] **AI menu assistant (2026-09-24/25)** — evaluation harness (141 cases) and baseline
-      report, realistic cuisine targets, product-type knowledge base + grounding + coverage guarantee + learning loop,
-      one simple card per product on the phone, after report (D-177…D-190)
-- [ ] **AI menu assistant follow-up (user)** — device screenshots (phone locked / not attached during the work),
-      push, deploy (migration 0004 runs on start), release APK
+- **Site:** sohbet ekranı (Ctrl+V, sürükle-bırak, dosya seçme, yazarak ürün listesi), takip mesajları, kopyalama, sayfa
+  yenilenince kaldığı yerden devam, analiz sürerken görüşme değiştirme.
+- **Analiz:** altı ajanlık hat, ilk cevap normalde 6–11 saniye; hazır düğmeler ("Çorba öner") modelsiz, 1–3 saniye.
+- **Yönetim paneli:** genel bakış, görüşmeler (zaman çizelgesi), şablon havuzu ve arşivi, mutfak türleri, öğrenilenler,
+  modeller.
+- **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
+  yazamaması.
+- **Testler:** backend 737, web 2; hepsi geçiyor.
+- **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
-## Where I am
-**2026-11-05 — the site (D-200).** `web/` (chat at `/`, admin at `/admin`) replaces `mobile/`; the chat module and the
-focused runs are in the backend, migration 0007 adds the conversations and puts Gemini first. Verified on a local server
-with the real keys: paste, typed menus, follow-ups, a second screenshot, the admin pages. Phases below are history.
+## Bilinen sorunlar
 
-**2026-10-11 — production on `4d547a4`, app 1.6.0 (D-198, D-199).** User, testing on the phone: new products that a
-restaurant cannot make, quick mode too thin, options/extras/descriptions too far away during the call, and no login.
-Production data showed quick mode never asked the model for new products (the pool filled six slots per cuisine by
-importance: Waffle/Kumpir/Midye Tava to a kokoreççi, Tavuk Döner Dürüm to a kebapçı). Now: a kitchen profile gates
-every new product (`agents/kitchen.ts`); alternatives built on the menu's own products (`basedOn`) are asked of the
-model on every run, in a call of their own (recommender system v9 / user v6, route Groq low → Flash-Lite → Flash, also
-in the production rows); quick = 6 alternatives + 4 category products, full = 8 alternatives on top; a main filed as a
-side by its bread word counts as a main. Measured live after the last deploy: kebap menu 10 products in 8.2 s, all model
-calls answered (Beyti Sarma ← Adana, Ali Nazik ← Urfa, Köfte Dürüm ← Izgara Köfte…); kokoreç menu 5 fitting products,
-none of another shop. Phone: "X alternatifi" on the card, Opsiyon/Çıkar/Ekstra/Açıklama buttons on a closed card that
-open a sheet with tabs, "Kopyala" and the answer; "Tümünü aç/kapat", search, "Alternatifler" filter; no login screen
-(`POST /auth/device` with `APP_ACCESS_KEY`, set in `/etc/menu-kopilot/env`; the key file is
-`%USERPROFILE%\.android-keys\menu-kopilot\app-access-key.txt`, also in the local `.env.production`). nginx site copied
-(`/auth/device` rate-limited like the login). Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d198.dump`. Signed
-`MenuKopilot-1.6.0-arm64.apk` (release key) on the Desktop. Backend 723 tests, mobile results screen 19 (full mobile
-suite green before the last UI test change). Next: watch real calls — how often alternatives get "Evet".
+- **Gemini zaman zaman aşırı yoğun.** 503 "high demand" ve hız limiti verdiğinde zincir Groq'a düşer; Groq'un ücretsiz
+  katmanı da limite takılınca öneriler hazır havuzdan gelir ve kartın üstünde bir not görünür. Yoğun anlarda ilk analiz
+  20–30 saniyeyi bulabilir. Kalıcı çözüm ücretli Gemini katmanı.
+- **Öğrenme döngüsü yeni veri almıyor.** Evet / Düşünecek / Hayır kaldırıldığı için (D-202) sistem restoranların tercihini
+  artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
+- **Cloudflare Web Analytics betiği CSP'ye takılıyor.** Siteyi etkilemez, yalnızca tarayıcı konsolunda hata görünür.
+  Cloudflare panelinden kapatılabilir.
+- **GitHub Actions sonucu son iki sürüm için doğrulanmadı.** Yerelde bütün kontroller geçiyor; Actions sekmesine bakmak lazım.
 
-**2026-09-28 (night) — production on `a860b2b`, app 1.5.1 (D-197).** User: the app must work on its own and not look
-tied to any company's systems. Every platform name, the platform's internal system names and the branch-opening
-wording are gone from the phone's texts, the server's messages, the prompts (recommender system v7 / user v5,
-options system v5, activated by the seed on deploy), comments, tests, docs and the original spec; no personal-data notice
-existed anywhere. Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d197.dump`. Signed `MenuKopilot-1.5.1-arm64.apk` on
-the Desktop and sent to the user. Left as they were (the user's call): inactive old prompt versions and three unused
-legacy prompt keys in `prompt_templates` still carry the old wording; the private repository's history too.
+## Sıradaki işler için fikirler
 
-**2026-09-28 — production on `8749d16`, app 1.5.0 (D-195, D-196).** Deployed with `scripts/deploy.ps1` (migration
-0006 `suggestion_items.answer/answered_at` ran, recommender user prompt v4 activated; pre-deploy dump
-`/opt/yedek/menu-kopilot-pre-0006.dump`); the later commits touch only the phone and the docs, and the server clone
-is pulled to them. Signed APK `MenuKopilot-1.5.0-arm64.apk` (built from `f2fe630`: an answer changed offline is
-queued once) on the Desktop and sent to the user, who uses it in the office from 2026-09-28. New:
-`POST /suggestion-items/:id/later`, `pitch`/`priority` on every card, `later` in the history; phone: the answer
-buttons, the call strip ("Evet 2 · Düşünecek 1 · Hayır 3"), "Ofiste girilecekler" (results → app bar or the strip),
-Ayarlar → Öğrenilenler (was "Ekibin sildikleri"); local database v3. Next: watch the first real calls — how often
-"Düşünecek" turns into "Evet", and whether the order of the call matches what the experts say first.
+- **Havuz kalitesi:** Türk mutfakları dışındaki mutfaklarda (Uzak Doğu, Dünya Mutfağı, Burger) hazır şablon az. Yapay zekâ
+  yoğunken öneriler havuza düştüğü için buraya şablon eklemek kaliteyi doğrudan artırır (`backend/src/db/seed/templates-*.ts`).
+- **İlk cevabın hızı:** kartlar ancak doğrulamadan sonra geliyor. Havuzdan gelen kartları erkenden göstermek ilk cevabı
+  hızlandırır (`agents/pipeline.ts`, `item` olayları).
+- **Öğrenme için hafif bir sinyal:** temsilcinin kopyaladığı kartlar "işe yaradı" sinyali olarak kaydedilebilir.
+- **Kullanılmayan kod:** sesli not uç noktası kaldırıldı ama `audio.transcribe` görevi ve Groq Whisper kodu
+  (`ai/router.ts`, `ai/providers/groq.provider.ts`) duruyor; temizlenebilir.
 
-**2026-09-25 (evening) — production on `cc80e0c`, app 1.4.0 (D-192…D-194).** Deployed with `scripts/deploy.ps1`
-(migration 0005 + seed ran; pre-deploy dump `/opt/yedek/menu-kopilot-pre-0005.dump`), signed APK
-`MenuKopilot-1.4.0-arm64.apk` on the Desktop and sent to the user. New: `GET /analyze/history`, `GET /learning`,
-`POST /learning/forget`; phone: Analiz geçmişi (home → "Tümünü gör"), Ayarlar → Ekibin sildikleri, cards that open
-and close. The user tests on the phone against production.
+## Nereden başlamalı
 
-**Earlier on 2026-09-25 — AI menu assistant (D-177…D-191).** Task in five stages; all done except the
-device walk-through.
-- Harness `tests/ai_eval/` (27 hand-written menus, photos in five styles incl. blurred/skewed, 3 repository photos,
-  141 cases; scoring independent of the backend; seeded manual sample). Baseline `docs/ai-eval/baseline-report.md`:
-  0.1 complete products per case, 0 % of cases with ≥ 6, 202 option/ingredient mix-ups, 130 prepared drinks without
-  a description, 10 of 40 sampled products with a wrong item.
-- Realistic cuisine targets in Postgres (`docs/ai-eval/cuisine-targets.md`, D-177). Algorithm
-  (`docs/ai-eval/algorithm.md`): product-type knowledge base (48 types, versioned, editable), grounding of every card
-  (separation, fit, shape, completion, 6–8 word description, confidence), coverage guarantee (every menu product gets
-  a card; quick = 6 new products, full = up to the cuisine target), cuisine read off the menu when the model cannot,
-  learning from accept/remove (`suggestion_feedback`). Mobile: one card per product with the four sections, one tap
-  per suggestion, "Hepsini kabul et", "Kopyala" per section; debug screen, badges and filters removed; debug build
-  "Kopilot TEST" installs next to the release app.
-- After `docs/ai-eval/after-report.md` (final code `9612d30`, providers out of free-tier quota → fallback path):
-  10.8 complete products per case, 98.6 % of cases with ≥ 6, 0 mix-ups, 99.8 % with a 6–8 word description,
-  0 prepared drinks without one, quick mode exactly 6 new products in 52 of 54 cases, manual sample 0 of 40 wrong.
-  A model-path subset (54 text cases, fresh model answers) runs when the Gemini quota resets (07:10 UTC) and is added
-  to the report.
-- Commits `ba111ce` … `9612d30` (+ harness and docs); not pushed, not deployed.
-- Open (user): connect and unlock the phone, log in to "Kopilot TEST" (server `http://127.0.0.1:3030`,
-  `adb reverse tcp:3030 tcp:3030`) for the screenshots of the old and the new app; push; deploy (migration 0004 runs
-  on start); a release APK.
+1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
+2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-202 kayıtları son ayların neden öyle olduğunu anlatır.
 
-**Before that — 2026-09-22 — suggestion engine rework (D-171…D-173).** The user's complaint on the 1.1.0 build was reproduced
-first (local stack, real keys) and then fixed:
-
-| Senaryo | Önce | Sonra |
-| --- | --- | --- |
-| El yazısı menü fotoğrafı (10 ürün okundu) | 0 opsiyon kartı, 3 yeni ürün | 10 opsiyon kartı, 8 yeni ürün (hepsi opsiyonlu) |
-| 10 ürünlük menü, mutfak minimumu 30 | 3 yeni ürün + `target_unreachable` | 22 yeni ürün, kabul edilirse 32/30 |
-| 5 ürünlük menü, mutfak minimumu 30 | 8 yeni ürün | 25 yeni ürün, 30/30 |
-| "Yeter" modu (yeni) | — | 6 farklı kategoriden 6 ürün + 3 opsiyon kartı, ~1,5 sn |
-
-New: `backend/src/agents/plan.ts` (modes + per-category quota, D'Hondt apportionment), `mode` on `POST /analyze`,
-prompt versions that actually reach the database, option/ingredient data on section A cards, the mode selector on
-the home screen and a fold-out "opsiyon ve malzemeler" block on new-product cards.
-
-Then measured on **production** and fixed what only real providers show (D-174): recommendations go out in
-batches of ~10, parallel batches start on different providers in the chain, a request carries its own attempt
-timeout (11 s in full mode), the wire schemas are wider than a card so one bad item costs one card, and a
-category's ceiling follows the cuisine's minimum. Production, kafe-icecek (minimum 50) with a 7-product menu:
-36 new products, option cards for 7/7 products, 43/50 reachable, 19 s — from 12 products, `partial`, 33 s.
-App 1.2.0+3 signed and installed on the phone over USB.
-
-**Same evening (D-175, D-176):** drinks are entered as plain rows — no description, no options, no "açıklama
-boş" fix — and the template pool went from 316 to 424: combos (the menü & kampanya category had no templates at
-all), 40 plain drink rows, and the soups, sides, ara sıcak and desserts the thinnest kitchens lacked. Backend
-655 tests.
-
-**2026-09-21 (later) — deployed:** pushed `57fe3ab..f2e12a2`, `scripts/deploy.ps1` → production on `f2e12a2`
-(migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
-`MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:
-`admin@example.com` (admin), `uzman@example.com` (uzman), `uzman2@example.com` (uzman) —
-passwords handed over in Desktop notes. Gemini key rotated on production the same evening (D-170). Flutter
-3.47.5 / Android SDK / JDK 17 now live in `%USERPROFILE%\dev` and `%LOCALAPPDATA%\Android\Sdk` on this PC.
-
-**2026-09-21 — FAZ 0–3 done in the working tree, uncommitted.** Backend: 538 tests, lint + typecheck clean, the local
-Docker stack runs the new code, `pnpm live:check` 14/15 (the one failure is a menu photo: the Gemini key is denied
-with 403 and Groq's free vision tier caps output at 1000 tokens/minute — D-164). Quality (`pnpm compare`): new
-products 0 % duplicates, category gap closure 1/11 → 10/11, ~3 s per analysis cold. Mobile: rewritten result screen,
-settings for categories, offline queue fixes — checked statically only (D-162). Next steps are in **Pending
-verification by the user** below.
-
-**Before that (2026-09-18/19):**
-**Production is live on myserver** (2026-09-18): `/opt/menu-kopilot` (git clone, read-only deploy key), API image
-`menu-kopilot-api:<sha>` built on the PC, stack healthy behind nginx for `menu.example.com` (security headers,
-rate limits, Cloudflare real IP), secrets in `/etc/menu-kopilot/env`, nightly `pg_dump` to `/opt/yedek`. Production
-data: 27 common cuisines, 316 seed templates, admin `admin@example.com` (password in the
-desktop note). old-app was retired (stopped + archived; permanent removal steps in `docs/DEPLOY_MYSERVER.md`).
-Signed release APK on the desktop (`MenuKopilot-1.0.0-arm64.apk`, key in `%USERPROFILE%\.android-keys\menu-kopilot\`).
-Left for the user: the Cloudflare DNS record `menu` -> <SUNUCU_IP> (Proxied), uninstalling the old debug build on
-the phone before installing the signed one, deleting the `old-app` DNS record, and paid API tiers for heavy use.
-Update flow: commit -> `git push` -> `powershell -File scripts/deploy.ps1`.
-
-### FAZ 0–3 inventory (2026-09-21)
-- Backend new: `src/agents/` (six agents, prompts, schemas, tracer, dedupe, pipeline), `src/modules/analyze/`
-  (`/analyze`, SSE, snapshot/latest/events/trace, accept/skip with merge semantics, `fromRunId` re-run),
-  `src/domain/category.ts`, `src/db/schema/{categories,agents}.ts`, `src/db/seed/categories.ts`, migration
-  `0003_agents_categories` (+ down), category API in `src/modules/cuisines/`, `scripts/{measure-quality,
-  compare-quality,probe-recommender}.ts`, rewritten `scripts/live-check.ts`, frozen menus in `test/fixtures/menus/`.
-- Backend removed: `modules/{branches,gap,suggest,research,export/branch-export}`, `lib/contact-guard.ts`, the
-  branch schema, Groq compound, their tests and fixtures.
-- Mobile: `data/models/analysis.dart`, `features/results/{analysis_controller,section_cards,results_screen,
-  pipeline_debug_screen}.dart`, `features/settings/category_settings_screen.dart`, home = single input screen with
-  recent analyses; removed `features/{branches,gap,research}`, `run_controller`, `suggestion_card`,
-  `models/{branch,gap,suggestion}`; `models/voice_research.dart` → `transcription.dart`; l10n regenerated.
-- Docs: `docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, `docs/SSE_EVENTS.md` (analysis contract), README, D-150…D-164.
-
-### Delivery inventory (2026-09-18/19)
-- Design: tokens + components in `mobile/lib/core/design/` (D-133…D-140), every screen moved over; 61 widget/unit tests,
-  `flutter analyze` clean. Release APK `app-arm64-v8a-release.apk` (22.9 MB, arm64 only, debug-signed, no provider
-  keys or endpoints inside — scanned).
-- Real keys (`pnpm live:check --runs 5`, 14/14): Mod 1 photo → first card 3.8 s (15 cards); Mod 2 two screenshots →
-  2.6 s; research → clear plan-limit error. Smoke 8 passed / 4 skipped on plan limits. Fixes: Gemini schema without
-  `minItems`/`maxItems`, vision chain Flash-Lite → qwen3.8 (1000 tokens) → 3.8 Flash, qwen3.6 removed, migration 0002,
-  route token caps, Groq 413 message, extra fallbacks (D-141, D-142). Backend tests → 292 passing.
-- Phone (Galaxy S23 FE, release APK, keys on): Samsung HEIC shared from Gallery → Öneri → scan skeleton → 15 cards
-  (12 DB, 3 AI, no prices); accept + haptics; text share → Öneri (4 DB cards, 0 AI calls); two panel screenshots shared
-  one by one → one draft → Tamamla 12/10 with 2 typed products, 15-line checklist, DB recommendations → "Kart hazırla" →
-  accept → 13/10 live; keyboard hides the dock; camera (one-time permission) → photo → removed unsent; CSV + JSON
-  export open the share sheet; no crash/ANR in logcat, memory plateaus (PSS 302 → 313 MB over 7 runs, 1 activity).
-  Bugs found and fixed: share crash on unreadable streams + one app copy per share (D-143), thumbnail delete
-  semantics/hit area (D-144).
-- Ops: `scripts/dev-up.ps1` (Docker incl. the `sailor-ingest.sock` recovery, stack, health, `adb reverse`),
-  `scripts/new-prod-env.ps1` (random secrets, keys from `.env`, LF, no output of secrets); image has no secrets and
-  runs as `app`; repo/APK secret scans clean.
-
-### Delivery inventory (2026-09-16/17)
-- Live test: `docker compose up -d --build` on this PC (API `127.0.0.1:3030`), `pnpm live:check` 13/13 without keys.
-  Release APK on a Galaxy S23 FE (Android 16) over `adb reverse`: login, Öneri (7 DB cards, 0 LLM calls), accept →
-  template became `source=user`, Tamamla with a new branch + 2 panel screenshots (no AI: count, warning, 12-line
-  checklist, 10 DB recommendations, "Kart hazırla" → accept → branch 1/10), Şubeler (detail, CSV share sheet),
-  Şablonlar (Turkish-insensitive search), Ayarlar (providers "anahtar yok", quota, usage). Bugs found → D-125/D-124.
-- Backend: `not_configured` state + `AI_NOT_CONFIGURED` (D-124), `menuText` / typed products in gap analysis (D-127),
-  `scripts/live-check.ts`, pnpm pin (D-119). Tests → 286 passing.
-- Mobile: l10n error texts + typed failures (D-121), HEIC fallback + per-photo failures (D-122), HTTPS rule (D-123),
-  device fixes (D-125), gap live sync (D-126), typed products UI (D-127), share intake (D-128), brand icon/splash/login
-  + photo buttons (D-129). Tests → 52 passing, `flutter analyze` clean.
-- Ops: compose API on loopback + Caddy profile, nginx site + proxy snippet, `scripts/deploy.ps1` (local image over
-  ssh, rollback), `docs/DEPLOY_MYSERVER.md` (D-130).
-
-### Faz 7 inventory
-- Backend: `config/models.ts` (tasks `audio.transcribe`, `research.web`; whisper v3, compound, compound-mini),
-  `ai/providers/groq.provider.ts` (`transcribe`, compound tools + `executed_tools` sources), `ai/router.ts`
-  (`transcribe`), `ai/errors.ts` (`providerFailure`), `lib/{audio,contact-guard,uploads}.ts`, `modules/voice/*`
-  (`POST /transcribe`), `modules/research/*` (`POST /research`), prompts `transcribe.vocabulary`, `research.system`,
-  `research.user`, dictation-aware `suggest/prompt-parse.ts`. Tests `test/unit/voice-research.test.ts`,
-  `test/e2e/voice-research.e2e.test.ts`, smoke tests for Whisper + compound → 279 passing.
-- Mobile: `features/voice/{voice_recorder,voice_note_button}.dart` (home prompt + gap notes),
-  `features/research/{research_controller,research_screen}.dart` (`/branches/:id/research`),
-  `data/models/voice_research.dart`, API `transcribe` / `research`, packages `record`, `url_launcher`.
-  Tests `test/widget/voice_research_test.dart` → 41 passing.
-
-### Faz 6 inventory
-- Backend: `modules/branches/service.ts` (+ menu, status change, delete item, export), `modules/export/branch-export.ts`,
-  `modules/templates/{schemas,service,routes}.ts` (pool API; seed delete = archive), `modules/usage/*`
-  (`GET /usage/summary`), `lib/csv.ts` (formula-injection guard), `lib/errors.ts` (`isUniqueViolation` through `cause`),
-  seed skips archived seeds; `gap/menu-merge.ts` + `attachAcceptedCard` (a card and its panel row = one product,
-  D-111). Tests `test/e2e/{templates,branch-menu}.e2e.test.ts`, `test/unit/csv.test.ts` → 261 passing.
-- Mobile: `features/branches/{branches_screen,branch_detail_screen}.dart`, `features/templates/{template_pool,
-  templates_screen}.dart`, `features/settings/{settings_screen,cuisine_settings_screen,model_settings_screen}.dart`,
-  `features/usage/usage_screen.dart`, `core/utils/file_sharer.dart`, `data/models/{settings,template_item}.dart`,
-  persisted theme (`app.dart`, `main.dart`). Tests `test/unit/pool_and_settings_test.dart`,
-  `test/widget/branch_detail_screen_test.dart` → 37 passing, `flutter analyze` clean, `flutter build apk --release` OK
-  (debug-signed without `key.properties`, 64.5 MB universal APK).
-- Release/ops: `mobile/scripts/create-keystore.ps1`, `.github/workflows/{ci,release}.yml`, `deploy/docker-compose.prod.yml`,
-  `scripts/deploy.ps1`, `scripts/check-no-provider-keys.ps1` (cross-platform path), README complete.
-
-### Faz 5 inventory
-- Backend `src/modules/gap/`: `schemas.ts` (panel item tri-state flags, DTOs, events), `dedupe.ts`,
-  `completeness.ts`, `questions.ts`, `recommend.ts` (MenuIndex, DB + AI recommendations), `pipeline.ts`,
-  `store.ts`, `service.ts`, `routes.ts`; `src/modules/branches/{schemas,service,routes}.ts` (CRUD) and
-  `branch-menu.ts` (`upsertScreenshotItem`, `replaceRecommendations`); Turkish texts in `src/i18n/tr.ts` (`GAP_TEXT`).
-- API: `POST /api/v1/gap-analysis` (SSE | `?async=1` | sync), `GET /gap-analysis/:runId`, `GET /gap-analysis/:runId/events`,
-  `POST /gap-analysis/:runId/cancel`, `GET /branches/:id/gap/latest`, `GET/POST /branches`, `GET/PATCH/DELETE /branches/:id`.
-  SSE contract in `docs/SSE_EVENTS.md`.
-- Fixtures `test/fixtures/llm/panel/panel-{1,2}.json`; tests `test/unit/gap-helpers.test.ts`, `test/e2e/gap.e2e.test.ts`
-  → backend 243 tests passing.
-- Mobile: `data/models/{gap,branch}.dart`, `core/utils/wakelock.dart`, `features/gap/{gap_controller,gap_screen,
-  gap_result_screen}.dart`, `features/branches/{branch_providers,branch_form}.dart`, routes `/gap`, `/gap/result`,
-  `/gap/card`; run controller is now a family per tab slot. Tests `test/unit/gap_test.dart`,
-  `test/widget/gap_result_screen_test.dart` → 27 passing, `flutter analyze` clean.
-
-### Faz 4 inventory (mobile/)
-- `lib/core/`: `providers.dart` (db, tokens, server URL, API client, auth, connectivity, cuisines, recent cuisines),
-  `network/{api_client,api_exception,sse}.dart`, `storage/{app_database(.g),token_store}.dart`,
-  `utils/{image_compressor,copy_format}.dart`, `widgets/common.dart`, `theme.dart`.
-- `lib/data/models/{json,template_payload,suggestion,common}.dart`.
-- `lib/features/`: `auth/login_screen.dart`, `home/{home_screen,home_controller,cuisine_picker}.dart`,
-  `camera/camera_capture_screen.dart`, `results/{results_screen,run_controller,suggestion_card,card_editor_screen}.dart`,
-  `offline/{pending_queue,background}.dart`, `settings/settings_screen.dart` (minimal), `shell/app_shell.dart`.
-- `lib/router.dart`, `lib/app.dart`, `lib/main.dart`, `lib/l10n/app_tr.arb` (+ `gen/`).
-- Tests: 19 passing (`test/unit/*`, `test/widget/*`); `flutter analyze` clean; `scripts/check-no-provider-keys.ps1` OK.
-
-### Faz 3 inventory (backend/src)
-- `modules/suggest/`: `schemas.ts` (LLM schemas, CardDto, RunDto, events), `prompt-parse.ts`, `sanitize.ts`,
-  `canonicalize.ts`, `enrichment.ts`, `pipeline.ts`, `store.ts`, `run-registry.ts`, `service.ts` (start/continue/
-  cancel/snapshot/accept/skip), `routes.ts`.
-- `modules/retrieval/` (`retrieval.service.ts`, `cuisine-graph.ts`), `modules/extraction/vision-extractor.ts`,
-  `modules/branches/branch-menu.ts`, `jobs/{embedding.service,queue}.ts`, `lib/{sse,uploads,images,trigram,clean-name,concurrency}.ts`.
-- API: `POST /api/v1/suggest` (multipart/JSON; SSE | `?async=1` | sync), `GET /suggest/:runId`,
-  `GET /suggest/:runId/events`, `POST /suggest/:runId/cancel`, `POST /suggest/:runId/continue`,
-  `POST /suggestion-items/:id/accept|skip`. SSE contract: `docs/SSE_EVENTS.md`.
-- Fixtures: `test/fixtures/images/*` (3 menus + 2 panels, generated), `test/fixtures/llm/*` (recorded stand-ins).
-- Tests: 211 passing incl. `test/e2e/suggest.e2e.test.ts` (14 scenarios).
-
-### Faz 2 inventory (backend/src/ai/)
-- `types.ts` (LLMProvider — spec signature + optional extensions), `errors.ts` (ProviderError kinds),
-  `json-schema.ts` (Zod→JSON Schema, `forGemini`, `forGroqStrict`), `rate-limit.ts` (headers, RetryInfo, cooldowns,
-  backoff), `circuit-breaker.ts`, `budget.ts` (RequestBudget + token estimates), `usage.ts` (UsageLogger,
-  QuotaService, startOfDay/Month), `prompt-repository.ts` (active prompt versions, render, admin ops),
-  `route-repository.ts` (provider_configs chain + setPrimary), `router.ts` (AiRouter: generate / generateOnRoute /
-  embed / availability), `index.ts` (createAiServices), `providers/{gemini,groq,shared}.ts`.
-- API: `GET/PUT /api/v1/settings/providers[/:taskKey]`, `GET /api/v1/settings/quota`, `GET/POST /api/v1/prompts`,
-  `POST /api/v1/prompts/:id/activate` (admin).
-- Tests: 179 passing (+ `test/smoke/providers.smoke.test.ts`, skipped without keys). Test helpers:
-  `test/helpers/fake-provider.ts` (FakeProvider, hashEmbedding), `test/helpers/test-app.ts` (createTestApp with fakes).
-
-### Faz 1 inventory (backend/)
-- `src/config/env.ts` (Zod env, only reader of process.env), `src/config/models.ts` (all model IDs + routes)
-- `src/db/schema/*` (17 tables), `drizzle/0000_extensions.sql`, `drizzle/0001_init.sql`, `drizzle/down/*.sql`,
-  `src/db/migrations.ts` (rollback), `src/db/client.ts` (driver-agnostic `Database` type)
-- `src/domain/template.ts` (canonical template payload schema: ≤160 desc, no prices, sets_base rules)
-- `src/lib/normalize-tr.ts`, `price-guard.ts`, `password.ts` (scrypt), `csv.ts`, `duration.ts`, `errors.ts`
-- `src/modules/templates/template-store.ts` (insert/replace/load templates), `src/modules/export/template-csv.ts`
-- `src/db/seed/*` (cuisines, 40 templates, prompts v1, provider routes, admin) + `run.ts`, `export-seed.ts`
-- `src/app.ts` (Fastify + zod provider + swagger `/docs` + error envelope), `src/modules/auth/*`, `src/plugins/auth.ts`,
-  `src/modules/health/routes.ts`, `src/server.ts`, `src/cache/*`
-- Tests: `test/unit/*` (normalizeTr, price guard, env, seed data), `test/integration/*` (migrations round-trip,
-  seed idempotency + CSV, auth API) — 141 passing.
-- Root: `docker-compose.yml`, `deploy/Caddyfile`, `.env.example`, `backend/Dockerfile`.
-
-## Environment facts (checked 2026-09-17)
-- Windows 11 + PowerShell 5.1; node 24, pnpm 11.27, git 2.55, Flutter stable 3.47 / Dart 3.13, JDK 17, Android SDK.
-- Docker Desktop worked on 2026-09-16 (stack verified) but crashed again on 2026-09-17 with the stale
-  `sailor-ingest.sock` (D-056) — reboot or delete the socket file before `docker compose up -d`.
-- Phone: Samsung Galaxy S23 FE (SM-S711B), Android 16; not attached on 2026-09-17.
-- `GEMINI_API_KEY` / `GROQ_API_KEY` not set → AI paths answer with "AI anahtarı tanımlı değil"; smoke tests skip.
-- `myserver`: nginx + Cloudflare in front of 6 apps, ports 3002/3006/3012/3013/3020 taken, ~680 MB RAM available +
-  2 GB swap (2026-09-16).
-
-## Acceptance criteria status
-| # | Criterion | Status |
-|---|---|---|
-| 1 | `docker compose up` brings up api + db + redis; `.env.example` complete | ✅ 2026-09-16: stack up, migrations + seed on real Postgres/pgvector, `pnpm live:check` 13/13 |
-| 2 | No provider key in Flutter (grep) | ✅ `scripts/check-no-provider-keys.ps1` (keys + provider endpoints) |
-| 3 | Known products answered with zero LLM calls | ✅ e2e (`/analyze` with AI off answers all three sections from the pool; `/suggest` was merged into `/analyze`, D-152) |
-| 4 | Photo → editable cards, first card < 6 s (15 items) | ◐ e2e: 15-item photo → 12 DB cards streamed before AI cards; real latency needs keys |
-| 5 | Mod 2: 12-item panel set read without duplicates, x/target, badges, call list, p95 < 8 s | ◐ e2e: 2 screenshots → 12 unique, 12/14, badges, ≤ 15 questions, counts before recommendations, 2 LLM calls; real p95 needs keys |
-| 6 | Same item in two screenshots counted once | ✅ unit + e2e (3 overlapping rows + clipped "Karışık Pi…" merged; `seenIn` = 2) |
-| 7 | No TL amounts; `sets_base` correct | ✅ sanitizer + Zod refine + e2e (flawed fixtures fixed) |
-| 8 | Descriptions ≤ 160 chars (schema-enforced) | ✅ Zod `.max(160)` + DB CHECK + clamp; e2e |
-| 9 | Provider down → fallback keeps working | ✅ router tests + e2e (Gemini 503 → Groq vision; Groq key removed → Gemini enrich) |
-| 10 | Broken JSON → item `needs_review`, request survives | ✅ e2e (one repair, then review cards, run completed) |
-| 11 | Approved item served from DB on second query (`cache_hit=true`) | ✅ e2e (accept → exact DB hit, run.cache_hit=true) |
-| 12 | Release APK builds and runs on a real device | ✅ release APK (debug-signed) exercised on a Galaxy S23 FE / Android 16 (all tabs); the newest build (icon, sharing, typed products) still to be installed; own signing key optional |
-| 13 | README: setup, VPS deploy, key acquisition, APK build | ✅ README (+ privacy paragraph with sources, LOCAL_ONLY_MODE, SSE contract link) |
-| 14 | DECISIONS.md lists all assumptions | ✅ D-001 … D-194 |
-| 15 | FAZ 1: new products never already on the menu; sections A/B/C; pinned counter; < 15 s | ✅ backend (e2e + live: 0/26 duplicates, ~3 s cold); ◐ app screens checked statically, not yet compiled (D-162) |
-
-## Pending verification by the user
-**FAZ 0–3 (2026-09-21), in this order:**
-- Compile and test the app: open a pull request (CI runs `flutter analyze`, `flutter test`, a debug APK) or, on a
-  machine with Flutter: `cd mobile; flutter pub get; flutter analyze; flutter test`.
-- Gemini: the key answers 403 "Your project has been denied access" — check the project in AI Studio / Google Cloud
-  or create a key in a new project, then replace it in `.env` and `/etc/menu-kopilot/env` (D-164).
-- Device walk-through with the phone on USB (`scripts/dev-up.ps1`, `flutter run`): panel screenshots → pinned
-  counter, A/B/C, filter chips, bulk copy, accept moves the counter, cuisine re-run, Ayarlar → Kategoriler.
-- Commit, push, `scripts/deploy.ps1` — migration 0003 drops the branch tables on production (a nightly dump exists;
-  take a fresh one first), then `pnpm live:check --url https://menu.example.com`.
-
-**Earlier items:**
-- Docker Desktop: reboot (or quit it and delete `%LOCALAPPDATA%\Docker\run\sailor-ingest.sock`), then
-  `docker compose up -d` in the repo root and `cd backend; pnpm live:check`.
-- AI keys: put `GEMINI_API_KEY` / `GROQ_API_KEY` into `.env` (local) or `/etc/menu-kopilot/env` (server), then
-  `cd backend; pnpm test:smoke` and `pnpm live:check` — the latter also times a menu photo (first card < 6 s) and the
-  gap analysis p95 (< 8 s).
-- Deploy together: `docs/DEPLOY_MYSERVER.md` (Cloudflare record `menu`, env file, nginx site, `scripts/deploy.ps1`).
-- Phone: install the newest APK
-  (`flutter build apk --release --split-per-abi --dart-define=API_BASE_URL=https://menu.example.com`), check
-  the icon/splash, share a WhatsApp menu photo into the app, run Tamamla with typed products; with a Groq key dictate a
-  voice note (microphone permission) and run "İnternette araştır".
-- Review `backend/exports/seed-templates.csv` (regenerate with `pnpm db:export-seed --from=files`).
-- Optional: own signing key (`mobile/scripts/create-keystore.ps1`), GitHub repository + release secrets.
+Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

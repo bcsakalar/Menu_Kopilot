@@ -1,6 +1,6 @@
 # AI menü asistanı — başlangıç ölçümü (baseline)
 
-AŞAMA 1 çıktısı. Kodda hiçbir değişiklik yapmadan, üretimdeki sürümün (`daed3fa`) davranışı ölçüldü.
+AŞAMA 1 çıktısı. Kodda hiçbir değişiklik yapmadan, üretimdeki sürümün (`a5090ac`) davranışı ölçüldü.
 
 ## Nasıl ölçüldü
 

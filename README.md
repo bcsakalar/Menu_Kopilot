@@ -1,354 +1,354 @@
 # Menü Kopilot
 
-A website for the rep who opens a restaurant branch on a food-delivery platform, used during the live phone call.
-The restaurant comes with nothing but its menu; the site reads it and leads the call:
+Bir yemek sipariş platformunda restoran şubesi açan müşteri temsilcisinin, restoranla telefonda konuşurken kullandığı web sitesi.
+Restoran yalnızca menüsüyle gelir; site menüyü okur ve görüşmeyi yönetir:
 
-- **Paste a screenshot with Ctrl+V** (from anywhere on the page), drop an image, or type the products. Several
-  screenshots of one panel are merged without duplicates.
-- **The first answer** says where the menu stands (`15 ürün, hedef 20`, `Çorba 0/1`), what to bring up first and the next
-  steps as buttons, with the cards under it in three tabs:
-  **Yeni ürünler** (products the menu lacks and this kitchen can make, each with a sentence to say to the restaurant),
-  **Opsiyon ve malzeme** (option groups, removable and extra ingredients, a description for every product on the menu),
-  **Düzeltmeler** (wrong names, a product under the wrong heading).
-- **It is a chat.** "Tatlı öner", "Adana için opsiyon yaz", "ayran yokmuş", "restoran dürüm istemiyor, ne diyeyim?", or
-  a second screenshot: every follow-up goes through the same agents and guards as the first analysis, and nothing is
-  offered twice in one conversation.
-- **Everything is one copy away:** a card, one of its rows, or a whole tab, as plain text for the restaurant panel.
+- **Ekran görüntüsünü Ctrl+V ile yapıştır** (sayfanın herhangi bir yerinde), sürükle-bırak yap ya da ürünleri yaz. Aynı
+  panelin birden fazla ekran görüntüsü tekrarsız birleştirilir.
+- **İlk cevap**, menünün durumunu (`7 ürün, hedef 20`), önce neyin teklif edileceğini ve sıradaki adımları gösterir.
+  Altında üç sekmede kartlar vardır:
+  **Yeni ürünler** (menüde olmayan ve bu mutfağın yapabileceği ürünler, restorana söylenecek cümleyle birlikte),
+  **Opsiyon ve malzeme** (menüdeki her ürün için opsiyon grupları, çıkarılabilir ve ekstra malzemeler, açıklama),
+  **Düzeltmeler** (yanlış yazılmış ad, yanlış başlıkta duran ürün).
+- **Sohbet gibi çalışır.** "Tatlı öner", "Adana için opsiyon yaz", "ayran yokmuş", "restoran dürüm istemiyor, ne
+  diyeyim?" ya da ikinci bir ekran görüntüsü: her takip mesajı ilk analizle aynı ajanlardan ve kontrollerden geçer, aynı
+  görüşmede hiçbir ürün iki kez önerilmez.
+- **Her şey tek kopyayla panele hazır:** bir kart, kartın bir satırı ya da bütün sekme düz metin olarak kopyalanır.
 
-No account and no password: a browser's first message creates a visitor, and a cookie keeps its conversations.
-The admin panel at `/admin` has a real sign-in.
+Sitede hesap ve şifre yoktur: tarayıcının ilk mesajı bir ziyaretçi oluşturur, görüşmeleri bir çerez tutar. `/admin`
+adresindeki yönetim panelinin gerçek bir girişi vardır.
 
-> **Decision support, not an authority.** Suggestions come from templates and AI and must be confirmed with the
-> restaurant. The tool never talks to any ordering platform: input is manual (typing, screenshots) and output is
-> copy/paste.
-> **Templates never contain a price.** The only amount the site shows is a new product's *estimated* price range
-> (`25–40 TL`), a prompt for the conversation that is never written into the template pool; prices read on photos
-> are never assigned to a product.
+**Canlı:** https://menu.example.com · **Yönetim:** https://menu.example.com/admin
 
-| | |
-|---|---|
-| Spec | [`claude-code-prompt-menu-asistani.md`](claude-code-prompt-menu-asistani.md) |
-| Provider research (Gemini, Groq) | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) |
-| Streaming contract (SSE) | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) |
-| Deploying next to other apps on `myserver` (nginx + Cloudflare) | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) |
-| Product and design context | [`PRODUCT.md`](PRODUCT.md) · [`DESIGN.md`](DESIGN.md) |
-| Decisions / progress & acceptance status | [`DECISIONS.md`](DECISIONS.md) · [`PROGRESS.md`](PROGRESS.md) |
+> **Karar desteğidir, otorite değil.** Öneriler şablonlardan ve yapay zekâdan gelir, restoranla teyit edilmelidir. Site
+> hiçbir sipariş platformuna bağlanmaz: giriş elle yapılır (yazı, ekran görüntüsü), çıkış kopyala-yapıştırdır.
+> **Şablonlarda fiyat olmaz.** Sitenin gösterdiği tek tutar yeni ürünün *tahmini* fiyat aralığıdır (`25–40 TL`); bu yalnızca
+> konuşmayı açmak içindir, şablon havuzuna yazılmaz. Fotoğraftan okunan fiyatlar hiçbir ürüne atanmaz.
 
-## Contents
-1. [Architecture](#architecture)
-2. [Security and privacy](#security-and-privacy)
-3. [Local setup](#local-setup)
-4. [Environment variables](#environment-variables)
-5. [Getting the API keys](#getting-the-api-keys)
-6. [Backend commands](#backend-commands)
-7. [API overview](#api-overview)
-8. [Deploying](#deploying)
-9. [CI / release](#ci--release)
-10. [Tests](#tests)
-11. [Troubleshooting](#troubleshooting)
+## İçindekiler
 
-## Architecture
+1. [Hızlı başlangıç](#hızlı-başlangıç)
+2. [Mimari](#mimari)
+3. [Proje yapısı: neyi nerede değiştiririm?](#proje-yapısı-neyi-nerede-değiştiririm)
+4. [Sık yapılan işler](#sık-yapılan-işler)
+5. [Çalışma kuralları](#çalışma-kuralları)
+6. [Ortam değişkenleri](#ortam-değişkenleri)
+7. [API özeti](#api-özeti)
+8. [Testler](#testler)
+9. [Canlıya alma](#canlıya-alma)
+10. [Güvenlik ve gizlilik](#güvenlik-ve-gizlilik)
+11. [Sorun giderme](#sorun-giderme)
+12. [Belgeler](#belgeler)
 
-```mermaid
-flowchart LR
-  Browser["Browser (React, no keys)<br/>chat at /, admin at /admin"]
-  subgraph VPS["Docker Compose on a small droplet"]
-    Proxy[nginx or Caddy<br/>HTTPS, no buffering] --> API[Fastify: site + API<br/>+ embedding worker]
-    API --> PG[(PostgreSQL 16<br/>pgvector + pg_trgm)]
-    API --> Redis[(Redis 7<br/>cache + BullMQ)]
-  end
-  Browser -- "cookie + SSE" --> Proxy
-  API -- "keys live here only" --> Gemini[Gemini API]
-  API -. fallback .-> Groq[Groq API]
-```
+## Hızlı başlangıç
 
-Token economy — the database and caches answer first, the LLM is the last resort:
-
-1. **Retrieval without AI:** exact name → alias → `pg_trgm` similarity → pgvector (only approved templates). The
-   316 seed templates in 27 common kitchen categories (`source='seed'`, badge **Hazır şablon**)
-   and every card the user approves (badge **DB'den**)
-   come back with zero LLM calls (`cache_hit=true`).
-2. **Caches (Redis, 30 days):** per-image extraction, recommender answers per gap set and voice transcriptions —
-   the same photo or menu never costs twice.
-3. **AI with a budget:** at most 6 agent calls / 25 k input tokens per analysis (plus one call per image) and a daily quota per user; images are read
-   3 in flight, the two recommendation agents run in parallel under an 11 s deadline, and anything a model could not
-   answer in time or in shape is filled from the database. The Validator checks every model answer in code (schema,
-   dedupe against the menu, cuisine fit, category quotas) and asks the model again at most once.
-4. **Provider router:** a fallback chain per task (e.g. vision: Gemini Flash → Groq Qwen), circuit breaker, rate-limit
-   headers, cooldowns and full-jitter backoff. Prompts are versioned in the database (`prompt_templates`), not in the
-   code.
-
-| Path | What |
-|---|---|
-| `backend/` | Node.js 22 + TypeScript (strict) + Fastify 5, Drizzle ORM, PostgreSQL + pgvector, Redis + BullMQ, Zod |
-| `web/` | React 19 + Vite + TypeScript, plain CSS; built into the API image and served by Fastify |
-| `deploy/` | production compose file, nginx site for a shared server, `Caddyfile` for a fresh droplet |
-| `scripts/` | provider-key guard, deploy script (builds the image locally, copies it over ssh) |
-| `docs/` | provider notes, SSE contract, myserver runbook |
-
-## Security and privacy
-
-- **Provider API keys exist only on the backend.** The site contains no Gemini/Groq key or endpoint, because everything
-  under `web/` ends up in a public bundle. `scripts/check-no-provider-keys.ps1` and a CI job fail the build if one
-  appears.
-- **The site is open (D-200).** A visitor is a user row with no password, identified by an HttpOnly, SameSite=Lax
-  cookie. That is what keeps ownership checks, history and quotas per browser. Anyone with the address can use it, so
-  it is limited three ways: 20 messages a minute per IP, `DAILY_LLM_CALL_QUOTA` per visitor and
-  `GLOBAL_DAILY_LLM_CALL_QUOTA` for the whole site, past which answers come from the template pool only.
-- **A visitor cannot write anything shared.** The template pool, the learning loop and every setting sit behind the
-  admin cookie (HttpOnly, SameSite=Strict, 12 h), and production refuses to start with the development defaults.
-- Screenshots are never stored on the server, only their SHA-256 (for caching). The browser re-encodes them before
-  upload, which also drops EXIF/GPS.
-- **`LOCAL_ONLY_MODE=true`** turns off every external API call: answers come only from the database and the caches
-  (a photo read once is still usable from the cache; new photos cannot be read in this mode).
-
-**Free-tier data use (read this before sending real menus).** Menu photos and panel screenshots belong to the
-restaurant. On the **Gemini API free tier ("Unpaid Services")** Google's terms state that submitted content and
-responses are used to provide, improve and develop Google products and machine-learning technologies, that human
-reviewers may read and annotate API input and output, and they explicitly advise not to submit sensitive,
-confidential or personal information; on paid tiers prompts and responses are not used to improve products and are
-logged only for a limited period for abuse detection ([Gemini API Additional Terms](https://ai.google.dev/gemini-api/terms),
-checked 2026-09-15, last updated 2026-04-28). Independently of the tier this backend sends every Gemini
-interaction with `store: false`, so the Interactions API does not keep conversation state. **Groq** states that by
-default it does not retain customer data for inference requests; inputs/outputs may be logged for up to 30 days for
-reliability and abuse investigations unless **Zero Data Retention** is enabled in the console's Data Controls
-([Groq: Your Data](https://console.groq.com/docs/your-data), checked 2026-09-15). Recommendations: use a paid Gemini
-key (or keep Gemini for text-only tasks), enable Groq ZDR, never photograph documents with personal data, and switch
-on `LOCAL_ONLY_MODE` when external processing is not acceptable. Policies change — re-check the linked pages.
-
-## Local setup
-
-Prerequisites (Windows 11 + PowerShell shown): Node.js ≥ 22, pnpm 11 (`corepack enable`), Docker Desktop.
+Gerekenler: **Node.js 22+**, **pnpm 11** (`corepack enable` yeterli, sürüm `package.json` içinde sabit), **Docker Desktop**,
+git. Komutlar PowerShell içindir; macOS/Linux'ta `Copy-Item` yerine `cp` kullan.
 
 ```powershell
-# 1. configuration (optional for a first run: compose has development defaults)
+git clone git@github.com:bcsakalar/Menu_Kopilot.git
+cd Menu_Kopilot
 Copy-Item .env.example .env
-#    edit .env: JWT_SECRET (openssl rand -base64 48), ADMIN_PASSWORD, GEMINI_API_KEY / GROQ_API_KEY
-
-# 2. full stack: site + api + postgres(pgvector) + redis
-docker compose up -d --build
-#    http://localhost:3000/              → the site (admin: /admin)
-#    http://localhost:3000/health/ready  → {"status":"ready"}
-#    http://localhost:3000/docs          → Swagger UI (OpenAPI at /openapi.json)
 ```
 
-### One command on the office PC
+`.env` içine kendi `GEMINI_API_KEY` ve `GROQ_API_KEY` anahtarlarını yaz (nereden alınacağı aşağıda). Anahtarsız da çalışır:
+yazılan ürün listeleri hazır şablon havuzundan cevaplanır, yalnızca ekran görüntüsü okunamaz. Canlının anahtarlarını
+kullanma, kendine ait anahtar aç.
+
+### Seçenek A: her şey Docker'da (en hızlısı)
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1                   # Docker, stack, health check
-powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -Build            # after pulling new code
-powershell -ExecutionPolicy Bypass -File scripts\dev-up.ps1 -FixDockerSocket  # Docker Desktop hangs while starting
+docker compose up -d --build
 ```
 
-Backend development with hot reload (databases from compose):
+- Site: http://localhost:3000 · Yönetim: http://localhost:3000/admin
+- İlk açılışta veritabanı tabloları ve tohum veriler (27 mutfak, 424 şablon) kendiliğinden kurulur.
+- Yönetim girişi `.env` içindeki `ADMIN_EMAIL` ve `ADMIN_PASSWORD`. Şifreyi boş bırakırsan geliştirmede `change-me-now`
+  olur (e-posta boşsa `admin@menukopilot.local`).
+
+### Seçenek B: anlık yenilemeyle geliştirme (günlük çalışma için)
+
+Veritabanı ve Redis Docker'da, kod senin makinende çalışır; kaydettiğin anda yenilenir.
 
 ```powershell
 docker compose up -d postgres redis
+
 cd backend
 pnpm install
 pnpm db:migrate
-pnpm db:seed          # 27 cuisines, 316 templates, prompts v1, provider routes, admin user
-pnpm dev              # http://localhost:3000
+pnpm db:seed
+pnpm dev            # API: http://localhost:3000
 ```
 
-The site with hot reload (the dev server proxies `/api` to port 3000, so cookies work as in production):
+Ayrı bir terminalde:
 
 ```powershell
 cd web
 pnpm install
-pnpm dev              # http://localhost:5173
+pnpm dev            # Site: http://localhost:5173 (/api isteklerini 3000'e yönlendirir, çerezler canlıdaki gibi çalışır)
 ```
 
-## Environment variables
+İlk denemede http://localhost:5173 adresine gir, örnek düğmelerinden birine tıkla ya da bir menü ekran görüntüsü yapıştır.
 
-All keys are listed in [`.env.example`](.env.example) (a test keeps it in sync with the Zod schema in
-`backend/src/config/env.ts`, the only place that reads `process.env`).
+### API anahtarları
 
-| Variable | Default | Meaning |
+- **Gemini:** [Google AI Studio → API keys](https://aistudio.google.com/apikey) → *Create API key* → `GEMINI_API_KEY`.
+- **Groq:** [Groq Console → API Keys](https://console.groq.com/keys) → *Create API Key* → `GROQ_API_KEY`.
+- Anahtarları denemek için (gerçek istek atar): `cd backend; pnpm test:smoke`. Normal testler anahtar istemez.
+
+## Mimari
+
+```mermaid
+flowchart LR
+  Browser["Tarayıcı (React, anahtar yok)<br/>sohbet: /  ·  yönetim: /admin"]
+  subgraph VPS["Sunucuda Docker Compose"]
+    Proxy[nginx veya Caddy<br/>HTTPS, tamponsuz] --> API[Fastify: site + API<br/>+ embedding işçisi]
+    API --> PG[(PostgreSQL 16<br/>pgvector + pg_trgm)]
+    API --> Redis[(Redis 7<br/>önbellek + BullMQ)]
+  end
+  Browser -- "çerez + SSE" --> Proxy
+  API -- "anahtarlar yalnızca burada" --> Gemini[Gemini API]
+  API -. yedek .-> Groq[Groq API]
+```
+
+**Bir mesajın yolculuğu** (`backend/src/modules/chat/service.ts`):
+
+1. Mesajda görüntü varsa ya da ilk mesaj bir ürün listesiyse **analiz** başlar.
+2. Diğer mesajlarda önce **sohbet ajanı** (`agents/chat.ts`) karar verir: doğrudan cevap mı, yoksa analizin bir parçasını
+   mı çalıştırmalı (bir kategoriden ürün, belirli ürünlere opsiyon, menü güncellemesi, mutfak değişimi). Sohbet ajanı ürün
+   yazmaz; ürünler her zaman aşağıdaki ajanlardan ve kontrollerden geçer. "Çorba öner" gibi hazır düğmeler modele hiç
+   sorulmaz.
+3. Analiz altı adımlık bir hattır (`agents/pipeline.ts`):
+
+   | Adım | Dosya | Ne yapar |
+   |---|---|---|
+   | Menü okuma | `extractor.ts` | Görüntülerden ürünleri okur, tekrarları birleştirir (görsel model) |
+   | Mutfak türü | `classifier.ts` | Mutfağı ve fiyat segmentini tahmin eder (ucuz model) |
+   | Eksik analizi | `gap-analyst.ts` | Mutfağın kategori beklentisine göre eksikleri sayar (model yok) |
+   | Yeni ürün | `product-recommender.ts` | Menüde olmayan, bu mutfağın yapabileceği ürünler (önce havuz, sonra model) |
+   | Opsiyon ve malzeme | `option-modifier.ts` | Menüdeki ürünlere opsiyon, çıkarılabilir, ekstra, açıklama |
+   | Doğrulama | `validator.ts` | Her cevabı kodla kontrol eder: şema, tekrar, mutfağa uygunluk, kota |
+
+   4 ve 5 paralel çalışır. Bir adım hata verirse analiz durmaz, elindekiyle devam eder.
+
+**Token ekonomisi:** önce veritabanı ve önbellek cevap verir, model son çaredir.
+
+- **Havuz:** tam ad → takma ad → `pg_trgm` benzerliği → pgvector. Hazır şablonlar ve onaylı ürünler modelsiz gelir.
+- **Önbellek (Redis, 30 gün):** aynı görüntü ya da aynı menü ikinci kez para harcatmaz.
+- **Bütçe:** analiz başına sınırlı çağrı ve token, ziyaretçi başına ve site geneli günlük kota. Süre dolarsa kalan bölümler
+  havuzdan doldurulur.
+- **Model yönlendirici** (`ai/router.ts`): her görev için yedekli bir zincir (önce Gemini, sonra Groq), devre kesici,
+  hız limiti bekleme süreleri. Promptlar veritabanında sürümlenir.
+
+**Kitchen profile** (`agents/kitchen.ts`): menüdeki ürünlerden mutfağın neyi yapabildiğini çıkarır. Kokoreççiye waffle,
+dönerci olmayana döner önerilmesini bu engeller.
+
+## Proje yapısı: neyi nerede değiştiririm?
+
+| Klasör | İçerik |
+|---|---|
+| `backend/` | Node.js 22 + TypeScript (strict) + Fastify 5, Drizzle ORM, PostgreSQL + pgvector, Redis + BullMQ, Zod |
+| `web/` | React 19 + Vite + TypeScript, düz CSS. Üretimde API imajının içine gömülür ve Fastify tarafından sunulur |
+| `deploy/` | Üretim compose dosyası, paylaşılan sunucu için nginx ayarı, boş sunucu için `Caddyfile`, yedek betiği |
+| `scripts/` | Anahtar taraması, deploy betiği (imajı bilgisayarda kurar, ssh ile kopyalar), yerel başlatma |
+| `docs/` | Deploy kılavuzu, SSE sözleşmesi, sağlayıcı notları, yapay zekâ ölçüm raporları, arşiv |
+| `tests/ai_eval/` | 27 mutfak üzerinde öneri kalitesini ölçen bağımsız düzenek |
+
+| Değiştirmek istediğin | Dosya |
+|---|---|
+| Sohbet ekranı | `web/src/chat/ChatApp.tsx` (sayfa), `RunBlock.tsx` (kartlar), `Composer.tsx` (yapıştırma, mesaj kutusu) |
+| Yönetim paneli | `web/src/admin/AdminApp.tsx` (menü, giriş), `pages.tsx` (sayfalar) |
+| Renkler, yazı, boşluklar | `web/src/styles.css` (bütün renkler en üstteki değişkenlerde; tasarım kuralları `DESIGN.md`) |
+| Panele kopyalanan metin | `web/src/format.ts` |
+| Bir mesajın işlenişi | `backend/src/modules/chat/service.ts`, sabit metinler `summary.ts` |
+| Ajanlar ve analiz hattı | `backend/src/agents/` |
+| Modellere giden metinler (prompt) | `backend/src/agents/prompts/*.ts`, sürümler `prompts/index.ts` |
+| Model, zincir, zaman aşımı | `backend/src/config/models.ts` |
+| Ortam değişkenleri | `backend/src/config/env.ts` (tek okuma yeri) ve `.env.example` |
+| Veritabanı tabloları | `backend/src/db/schema/*.ts`, migration'lar `backend/drizzle/` |
+| Mutfaklar, kategoriler, hazır şablonlar | `backend/src/db/seed/` (`cuisines.ts`, `categories.ts`, `templates-*.ts`, `product-types.ts`) |
+| Giriş ve çerezler | `backend/src/plugins/auth.ts`, `backend/src/modules/auth/` |
+| Rotaların bağlandığı yer | `backend/src/app.ts` (açık sohbet / oturum / yalnızca admin olarak üç kapsam) |
+
+## Sık yapılan işler
+
+### Arayüzde bir değişiklik
+
+Seçenek B ile çalış, `web/src` altında değiştir, tarayıcı anında yenilenir. Bitince `cd web; pnpm test; pnpm build`.
+
+### Bir prompt'u değiştirmek
+
+1. `backend/src/agents/prompts/` altındaki dosyada metni değiştir.
+2. `backend/src/agents/prompts/index.ts` içindeki `AGENT_PROMPT_VERSIONS` tablosunda o anahtarın numarasını bir artır ve
+   yanına tek satır not düş.
+3. Sunucu açılırken tohumlama yeni sürümü ekler ve etkinleştirir. Sürüm önbellek anahtarına girdiği için eski cevaplar
+   kullanılmaz.
+
+Sürümü artırmazsan değişiklik canlıya **yansımaz**, çünkü veritabanında aynı numaralı eski metin durur.
+
+### Modeli ya da zinciri değiştirmek
+
+- Bir görevin birincil modelini anlık değiştirmek: yönetim paneli → **Modeller**.
+- Kalıcı varsayılan: `backend/src/config/models.ts` içindeki `DEFAULT_ROUTES`. Bu yalnızca boş veritabanını etkiler; var
+  olan veritabanındaki sırayı değiştirmek için `0007_web_chat.sql` gibi bir migration yaz.
+
+### Veritabanı şemasını değiştirmek
+
+0003'ten beri migration'lar elle yazılıyor:
+
+1. `backend/src/db/schema/` altında tabloyu değiştir.
+2. `backend/drizzle/000N_ad.sql` (ileri) ve `backend/drizzle/down/000N_ad.sql` (geri) dosyalarını yaz.
+3. `backend/drizzle/meta/_journal.json` sonuna kaydı ekle.
+4. `backend/test/integration/migrations.test.ts` içindeki tablo sayılarını ve geri alma sırasını güncelle.
+5. `pnpm test` ileri → geri → ileri döngüsünü dener. Migration'lar sunucu açılırken kendiliğinden uygulanır.
+
+### Mutfak, kategori ya da hazır şablon eklemek
+
+- Elle ve anında: yönetim paneli → **Mutfak türleri** (hedef ürün sayısı, kategori minimumları) ve **Şablon havuzu**.
+- Kodla, herkes için: `backend/src/db/seed/` dosyaları. Tohumlama her açılışta çalışır ama panelden düzenlenmiş ya da
+  silinmiş kayıtların üzerine yazmaz.
+
+### Yeni bir API ucu
+
+Mevcut modüllerin düzenini izle: `backend/src/modules/<ad>/` altında `schemas.ts` (Zod), `service.ts`, `routes.ts`.
+Rotayı `app.ts` içinde doğru kapsama bağla: ziyaretçiye açık mı, oturum mu istiyor, yalnızca admin mi? Ziyaretçinin ortak
+veriye yazabildiği bir uç açma.
+
+### Test yazmak
+
+`backend/test/helpers/test-app.ts` içindeki `createTestApp`, gerçek veritabanı yerine PGlite, gerçek model yerine
+`FakeProvider` kullanır; Docker ve anahtar gerekmez. Sohbet akışına örnek: `backend/test/e2e/chat.e2e.test.ts`.
+
+## Çalışma kuralları
+
+- **Göndermeden önce** (CI de aynısını yapar):
+  - `cd backend; pnpm lint; pnpm typecheck; pnpm test`
+  - `cd web; pnpm test; pnpm build`
+- **Anahtarlar yalnızca sunucuda.** `web/` altındaki her şey herkese açık pakete girer. `scripts/check-no-provider-keys.ps1`
+  bunu kontrol eder. `.env` ve `.env.production` asla commit edilmez.
+- **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
+- **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
+- **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-203`'ten devam ederek yazılır: ne karar verildi, neden.
+- **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
+
+## Ortam değişkenleri
+
+Hepsi [`.env.example`](.env.example) içindedir. Bir test bu dosyanın `backend/src/config/env.ts` ile aynı kalmasını
+denetler.
+
+| Değişken | Varsayılan | Anlamı |
 |---|---|---|
-| `NODE_ENV` | `production` | `development` / `test` / `production` (production rejects weak secrets) |
-| `HOST`, `PORT` | `0.0.0.0`, `3000` | HTTP listener |
-| `LOG_LEVEL` | `info` | pino level (`silent` in tests) |
-| `TRUST_PROXY` | `true` | trust `X-Forwarded-*` from Caddy |
-| `ROLE` | `all` | `api`, `worker` or `all` (API + embedding worker in one process — best for 1 GB) |
-| `DATABASE_URL` / `REDIS_URL` | local URLs | compose overrides them with the internal service names |
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `menu` / `menu` / `menu_kopilot` | database container |
-| `JWT_SECRET` | — | ≥ 32 random characters; required in production |
-| `JWT_ACCESS_TTL` | `12h` | admin session lifetime (a visitor's cookie lasts a year) |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | — | the admin panel's account, created by the seed |
-| `SEED_ON_START` | `true` | run migrations + idempotent seed when the API starts |
-| `GEMINI_API_KEY`, `GROQ_API_KEY` | — | provider keys (server only); a missing key just removes that provider from the chains |
-| `LOCAL_ONLY_MODE` | `false` | never call external APIs |
-| `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA`, `QUOTA_TIMEZONE` | `300`, `1500000`, `Europe/Istanbul` | per-user daily quota; after it the app answers from DB/cache only |
-| `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | what the agents may spend per analysis; every image adds one call and 4 000 tokens on top; past it the remaining sections come from the database |
-| `GLOBAL_DAILY_LLM_CALL_QUOTA` | `3000` | ceiling for the whole site: the site is open and a cleared cookie gets a fresh per-visitor quota |
-| `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | DB match thresholds |
-| `CACHE_TTL_DAYS` | `30` | Redis cache lifetime |
-| `UPLOAD_MAX_FILES`, `UPLOAD_MAX_FILE_MB` | `5`, `8` | photo upload limits |
-| `API_PORT` | `3000` (production: `3030`) | host port of the API, bound to `127.0.0.1` only (compose) |
-| `SITE_ADDRESS` | `:80` | Caddy site; a hostname (e.g. `api.example.com`) enables automatic HTTPS |
+| `NODE_ENV` | `development` | `production` zayıf sırlarla açılmayı reddeder ve çerezleri `Secure` yapar |
+| `HOST`, `PORT` | `0.0.0.0`, `3000` | HTTP dinleyicisi |
+| `LOG_LEVEL` | `info` | pino seviyesi |
+| `TRUST_PROXY` | `true` | Proxy'den gelen `X-Forwarded-*` başlıklarına güven |
+| `ROLE` | `all` | `api`, `worker` ya da `all` (API ve embedding işçisi tek süreçte) |
+| `DATABASE_URL` / `REDIS_URL` | yerel adresler | compose bunları kendi servis adlarıyla değiştirir |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `menu` / `menu` / `menu_kopilot` | veritabanı konteyneri |
+| `JWT_SECRET` | — | en az 32 rastgele karakter, üretimde zorunlu |
+| `JWT_ACCESS_TTL` | `12h` | admin oturumunun süresi (ziyaretçi çerezi bir yıl yaşar) |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | — | yönetim paneli hesabı, tohumlama oluşturur |
+| `SEED_ON_START` | `true` | açılışta migration ve tohumlamayı çalıştır |
+| `GEMINI_API_KEY`, `GROQ_API_KEY` | — | sağlayıcı anahtarları; eksik olan zincirden düşer |
+| `LOCAL_ONLY_MODE` | `false` | hiçbir dış API'ye gitme, yalnızca havuz ve önbellek |
+| `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA` | `300`, `1500000` | ziyaretçi başına günlük kota |
+| `GLOBAL_DAILY_LLM_CALL_QUOTA` | `3000` | site geneli günlük tavan (çerezi silmek bunu sıfırlamaz) |
+| `QUOTA_TIMEZONE` | `Europe/Istanbul` | "günün" başladığı saat dilimi |
+| `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | analiz başına bütçe; her görüntü bir çağrı ve 4000 token ekler |
+| `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | havuz eşleşme eşikleri |
+| `CACHE_TTL_DAYS` | `30` | Redis önbellek süresi |
+| `UPLOAD_MAX_FILES`, `UPLOAD_MAX_FILE_MB` | `5`, `8` | mesaj başına görüntü sınırları |
+| `API_PORT` | `3000` (üretim `3030`) | compose'un API'yi yalnızca `127.0.0.1` üzerinde açtığı port |
+| `SITE_ADDRESS` | `:80` | Caddy için alan adı (boş sunucuda otomatik HTTPS) |
 
-Model IDs and fallback chains are in `backend/src/config/models.ts`; the primary model per task can be changed from
-the admin panel (**Modeller**) without a redeploy.
+## API özeti
 
-## Getting the API keys
+Hepsi `/api/v1` altındadır. Sohbet uçları açıktır ve ziyaretçi çereziyle tanınır; geri kalanı admin çerezi ya da
+`Authorization: Bearer <token>` ister. Hatalar hep `{ "error": { "code", "message", "details?", "requestId" } }`
+biçimindedir. Etkileşimli belge `/docs` adresindedir (canlıda kapalı).
 
-Keys go **only** into the server's environment file — never into `web/`.
-
-- **Gemini:** open [Google AI Studio → API keys](https://aistudio.google.com/apikey), sign in, *Create API key*
-  (choose or create a Google Cloud project) → `GEMINI_API_KEY`. The free tier works for trying things out; see the
-  privacy note above before using real menus, and enable billing on the project for the paid terms.
-- **Groq:** open [Groq Console → API Keys](https://console.groq.com/keys), *Create API Key* → `GROQ_API_KEY`.
-  Consider enabling Zero Data Retention under *Data Controls*.
-- Verify both (live calls, costs a few requests): `cd backend; pnpm test:smoke`. The smoke tests are skipped when the
-  keys are missing, so the normal test suite never needs them.
-
-## Backend commands
-
-Run from `backend/` (PowerShell: chain commands with `;`).
-
-| Command | What |
+| Alan | Uçlar |
 |---|---|
-| `pnpm dev` | API with hot reload (reads `../.env`) |
-| `pnpm test` / `pnpm test:watch` | unit + integration + e2e (hermetic: PGlite with pgvector/pg_trgm, fake providers) |
-| `pnpm test:smoke` | live provider checks (needs keys) |
-| `pnpm live:check [--url https://…] [--skip-ai]` | end-to-end check of a running server over HTTP, independent of the app: auth rotation, categories, a typed analysis (three sections, no duplicate of the menu, no price in a template, < 15 s), trace, resume/replay, re-run with another cuisine, SSE order; with keys also panel screenshots and a menu photo. Never accepts a card. Uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` from the environment or `../.env` |
-| `pnpm measure --label <name>` · `pnpm compare` | quality measurement on the frozen menu fixtures (`test/fixtures/menus/`: duplicates, irrelevant, directly usable, category coverage, time) → `exports/quality-<name>.json`; `compare` prints the before/after table |
-| `pnpm probe:recommender` | the Product Recommender alone on the fixture gaps (name noise, category fit) |
-| `pnpm lint` · `pnpm typecheck` · `pnpm build` | ESLint (no `any`), `tsc --noEmit`, compile to `dist/` |
-| `pnpm db:migrate` · `pnpm db:rollback` | apply / revert the last migration (every migration has a `drizzle/down/*.sql`) |
-| `pnpm db:generate` | new migration from schema changes (add the matching down file) |
-| `pnpm db:seed` | idempotent seed; never overwrites templates the user edited or seeds the user deleted |
-| `pnpm db:export-seed [--from=files\|db] [--out=exports/seed-templates.csv]` | seed templates as a review CSV (UTF-8 BOM, `;`) |
-| `pnpm fixtures:images` · `pnpm fixtures:record` | regenerate synthetic test images · re-record LLM fixtures with real keys |
+| Sohbet (açık) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; cevap SSE ile akar), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id` |
+| Yönetim | `GET /admin/overview?range=today\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id` |
+| Giriş | `POST /auth/login` (admin çerezini koyar), `POST /auth/logout`, `GET /auth/me` |
+| Analiz | `GET /analyze/:runId`, `/events`, `/trace`, `POST /analyze/:runId/cancel` (oturum sahibi); `POST /analyze` ve `POST /suggestion-items/:id/accept\|skip\|later` yalnızca admin |
+| Kategoriler | `GET /categories`, `PATCH /categories/:key`, `GET/PUT /cuisines/:id/categories` |
+| Şablon havuzu | `GET /templates`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
+| Ayarlar | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary`, `GET /learning`, `POST /learning/forget` |
+| Sağlık | `GET /health`, `GET /health/ready` (veritabanı + Redis) |
 
-## API overview
+Akış olayları ve veri biçimleri: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md).
 
-Everything is under `/api/v1`. The chat routes are open and identified by the visitor cookie; everything else needs the
-admin cookie or `Authorization: Bearer <token>`. Errors always have the shape
-`{ "error": { "code", "message", "details?", "requestId" } }`. Interactive docs: `/docs` (blocked by the production nginx
-site).
+## Testler
 
-| Area | Endpoints |
-|---|---|
-| Chat (open) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; the answer streams as SSE), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id` |
-| Admin | `GET /admin/overview?range=today\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id` |
-| Auth | `POST /auth/login` (sets the admin cookie), `POST /auth/logout`, `GET /auth/me` |
-| Analysis | `POST /analyze` (multipart: `images[]` ≤ 5, `menuText?`, `cuisineId?`, `notes?`, `fromRunId?`, `debug?`; SSE with `Accept: text/event-stream`, `?async=1` → 202, otherwise the result), `GET /analyze/latest`, `GET /analyze/:runId`, `GET /analyze/:runId/events`, `GET /analyze/:runId/trace`, `POST /analyze/:runId/cancel`, `POST /suggestion-items/:id/accept`, `POST /suggestion-items/:id/skip` |
-| Categories | `GET /categories`, `PATCH /categories/:key` (label, order, keywords), `GET/PUT /cuisines/:id/categories` (which categories a cuisine needs, with a minimum each) |
-| Template pool | `GET /templates?q=&cuisineId=&source=&approved=&sort=usage\|name\|updated`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
-| Settings | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary?range=today\|month`, `GET/POST /prompts`, `POST /prompts/:id/activate` (admin) |
-| Health | `GET /health`, `GET /health/ready` (database + Redis) |
+- **Backend:** `cd backend; pnpm test`. 737 test; Docker ve anahtar istemez (PGlite + sahte sağlayıcılar). Ajanlar tek
+  tek, analiz hattının uçtan uca senaryoları, model yönlendiricinin dayanıklılığı (yedek zincir, devre kesici, hız limiti),
+  migration'ların ileri-geri döngüsü, sohbet kapısı (ziyaretçi çerezi, bir ziyaretçinin diğerinin görüşmesine ve admin
+  uçlarına giremeyişi, takip mesajlarının yalnızca isteneni çalıştırması).
+- **Web:** `cd web; pnpm test`. SSE çözümleyici ve panele kopyalanan metin.
+- **Canlı sağlayıcılar:** `cd backend; pnpm test:smoke` (anahtar ister, gerçek istek atar).
+- **Çalışan bir sunucuya karşı:** `cd backend; pnpm live:check --url https://…` (admin bilgilerini ortamdan okur).
+- **Öneri kalitesi:** `tests/ai_eval/` 27 mutfakta 141 senaryo; raporlar `docs/ai-eval/`.
 
-Streaming events and payload shapes: [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md). An analysis streams
-`run → classification → menu → counts → item* → done` (plus `trace` per agent step and `warning`), so the count
-reaches the browser before the first card.
+## Canlıya alma
 
-## Deploying
-
-Nothing is built on the server — `pnpm install`/`tsc` would be OOM-killed on a small droplet. `scripts/deploy.ps1`
-builds the image (site + API) on the PC (Docker Desktop), copies it over ssh, starts the stack and waits for `/health/ready`.
-Migrations and the idempotent seed run when the API container starts (`SEED_ON_START`). Memory limits in
-[`deploy/docker-compose.prod.yml`](deploy/docker-compose.prod.yml): Postgres 256 MB, API 384 MB, Redis 128 MB.
-
-**On `myserver` (nginx + Cloudflare, next to other apps)** — `scripts/new-prod-env.ps1` writes `.env.production`
-(random secrets, keys copied from the local `.env`, LF, nothing printed); the rest step by step in
-[`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md): Cloudflare DNS record, `/etc/menu-kopilot/env`, the nginx site
-from [`deploy/nginx/`](deploy/nginx/), then:
+Sunucuda hiçbir şey derlenmez (küçük sunucuda `pnpm install` + `tsc` bellek yetmezliğinden ölür). Akış:
 
 ```powershell
-powershell -File scripts/deploy.ps1                               # build + copy + start
-powershell -File scripts/deploy.ps1 -SkipBuild -Tag <older tag>   # roll back to an image already on the server
+git push
+ssh myserver "/opt/menu-kopilot/deploy/backup.sh"      # taze veritabanı yedeği
+powershell -File scripts/deploy.ps1                    # imajı kur, kopyala, başlat, /health/ready bekle
 ```
 
-The API listens on `127.0.0.1:3030` only; nginx terminates TLS (Cloudflare origin certificate) and proxies with
-buffering off so SSE cards stream.
+`deploy.ps1` yerel `HEAD`'in `origin/main` ile aynı olduğunu denetler, sunucuda GitHub'dan çeker, imajı bilgisayarda
+kurar ve ssh ile kopyalar. Migration'lar ve tohumlama API açılırken çalışır. `deploy/nginx/` değiştiyse dosyalar sunucuya
+elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri dönüş: [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md).
 
-**On a fresh droplet** (no reverse proxy yet) the same compose file starts Caddy with automatic HTTPS:
+## Güvenlik ve gizlilik
 
-```bash
-# once, as root: Docker, swap, firewall, directories
-curl -fsSL https://get.docker.com | sh
-fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile \
-  && echo '/swapfile none swap sw 0 0' >> /etc/fstab
-ufw allow OpenSSH && ufw allow 80,443/tcp && ufw allow 443/udp && ufw --force enable
-mkdir -p /etc/menu-kopilot /srv/menu-kopilot
-```
+- **Sağlayıcı anahtarları yalnızca sunucuda.** Sitede Gemini/Groq anahtarı ya da adresi yoktur; CI ve
+  `scripts/check-no-provider-keys.ps1` bulunursa derlemeyi durdurur.
+- **Site açıktır (D-200).** Ziyaretçi şifresiz bir kullanıcı kaydıdır ve HttpOnly, SameSite=Lax bir çerezle tanınır. Adresi
+  bilen herkes kullanabildiği için üç sınır vardır: IP başına dakikada 20 mesaj, ziyaretçi başına günlük kota ve site
+  geneli günlük tavan. Tavan dolunca cevaplar yalnızca havuzdan gelir.
+- **Ziyaretçi ortak hiçbir şeye yazamaz.** Şablon havuzu, öğrenme döngüsü ve ayarlar admin çerezinin arkasındadır
+  (HttpOnly, SameSite=Strict, 12 saat). Üretim, geliştirme varsayılanlarıyla açılmayı reddeder.
+- **Ekran görüntüleri saklanmaz**, yalnızca önbellek için SHA-256 özetleri tutulur. Tarayıcı görüntüyü göndermeden önce
+  yeniden kodlar; bu EXIF/GPS bilgisini de siler.
+- **Ücretsiz katman uyarısı:** Gemini'nin ücretsiz katmanında Google gönderilen içeriği ürün geliştirmede kullanabilir ve
+  insanlar okuyabilir ([Gemini API Ek Koşulları](https://ai.google.dev/gemini-api/terms)). Ücretli katmanda bu yoktur.
+  Groq varsayılanda veri saklamaz, kayıtlar 30 güne kadar tutulabilir; konsoldan *Zero Data Retention* açılabilir
+  ([Groq: Your Data](https://console.groq.com/docs/your-data)). Dış işleme kabul edilemezse `LOCAL_ONLY_MODE=true`.
 
-Point a DNS `A` record at the droplet, put `SITE_ADDRESS=api.example.com` into `/etc/menu-kopilot/env` (plus the
-values listed in the runbook) and run `powershell -File scripts/deploy.ps1 -WithCaddy`. Release images can also come
-from GHCR (`.github/workflows/release.yml` on a `v*` tag): `-ImageSource ghcr -Tag 1.0.0`.
+## Sorun giderme
 
-**Checks after every deploy**
+- **`docker compose up` "port is already allocated" ya da "failed to set up container networking" diyor:** 3000
+  portunu başka bir uygulama kullanıyor. `.env` içinde `API_PORT=3100` yap, site http://localhost:3100 olur.
+- **Kartlar akmıyor, hepsi sonda geliyor:** bir proxy tampon kullanıyor. Caddy'de `flush_interval -1`, nginx'te
+  `proxy_buffering off` (bkz. `deploy/nginx/mk-proxy.conf`).
+- **"Yapay zekâ servisleri şu an çok yoğun":** Gemini 503 veriyor ya da hız limitine takıldı. Zincir Groq'a düşer;
+  yönetim panelindeki **Genel bakış** hataları gösterir. Sürerse ücretli katman ya da **Modeller** sayfasından başka bir
+  birincil model.
+- **"AI anahtarı tanımlı değil":** sunucuda anahtar yok. Yazılan ürünler ve hazır şablonlar çalışmaya devam eder.
+- **Anahtar reddediliyor (403 `PERMISSION_DENIED`):** sağlayıcı o projeyi kapatmış; sağlıklı bir projede yeni anahtar aç.
+- **Windows'ta Docker Desktop açılmıyor:** `%LOCALAPPDATA%\Docker\run` ya da `%LOCALAPPDATA%\docker-secrets-engine`
+  içinde silinemeyen eski bir soket dosyası kalmış. Docker Desktop'ı kapat, iki klasörün adını değiştir, yeniden başlat
+  (`scripts/dev-up.ps1 -FixDockerSocket` ilkini yapar). Backend testleri Docker istemez.
+- **Yerelde `production` ile çerez tutmuyor:** `Secure` çerezler yalnızca HTTPS ya da `localhost` üzerinde çalışır;
+  yerelde `NODE_ENV=development` kullan.
 
-- `curl -fsS https://<host>/health/ready` → `{"status":"ready",...}`
-- `pnpm -C backend live:check --url https://<host>` (see the runbook for passing the admin password safely)
-- `docker stats --no-stream` — the stack stays well below its limits; `free -m` shows swap
-- SSE through the proxy: the status line of a running analysis moves, it does not jump at the end
+## Belgeler
 
-**Windows → Linux pitfalls (already handled, keep it that way)**
-
-- Line endings: `.gitattributes` forces LF for everything except `*.ps1`/`*.bat`; the deploy script also converts the
-  uploaded compose file and strips CR characters from the server's env file.
-- Case sensitivity: ext4 is case-sensitive; CI and the Docker build compile on Linux, which catches a wrong-case
-  import before it reaches the server.
-- Paths: code uses `node:path` / `URL` helpers only, never string-concatenated `\` paths.
-- Permissions: `/etc/menu-kopilot/env` is `600`; the API container runs as a non-root user.
-
-**Backups** (Postgres holds the approved templates — the valuable part):
-
-```bash
-# daily dump at 03:30, keep 14 days
-cat > /etc/cron.d/menu-kopilot-backup <<'EOF'
-30 3 * * * root mkdir -p /var/backups/menu-kopilot && docker exec menu-kopilot-postgres-1 pg_dump -U menu -d menu_kopilot -Fc > /var/backups/menu-kopilot/$(date +\%F).dump && find /var/backups/menu-kopilot -name '*.dump' -mtime +14 -delete
-EOF
-```
-
-## CI / release
-
-- [`ci.yml`](.github/workflows/ci.yml) — on push/PR: backend `lint` + `typecheck` + `test` + `build` (Node 22), web `test` +
-  `build`, and the provider-key guard.
-- [`release.yml`](.github/workflows/release.yml) — on a `v*` tag or manually: the image (site + API) pushed to GHCR
-  (linux/amd64).
-
-## Tests
-
-- Backend: `cd backend; pnpm test` — ~700 tests: Turkish normalization, price guard, env, seed data, JSON-schema
-  conversion, provider adapters and router resilience (fallback, circuit breaker, 429 cooldown), migrations up → down
-  → up, the agents one by one (dedupe across screenshots, category classification and gaps, name cleaning, option
-  merge on accept) and end-to-end runs of the pipeline against recorded fixtures: three sections, no new product
-  that is already on the menu, category quotas, a failing agent → partial result, re-run with another cuisine without
-  re-reading the images, typed products without keys, LOCAL_ONLY_MODE, the product-type knowledge base
-  and grounding (absurd groups removed, ingredients separated from options, 6–8 word descriptions, coverage), the
-  matching guard, the learning loop (products turned down per cuisine, favoured suggestions first, "Geri al"), the
-  analysis history (filters, paging by time), the call (call order, the sentence for the seller, "Evet / Düşünecek /
-  Hayır" with the last answer counting) and the hedged photo read. Fixtures are hand-written stand-ins; see
-  `backend/test/fixtures/llm/README.md`. `test/e2e/chat.e2e.test.ts` covers the site's door: the visitor cookie, one
-  visitor kept out of another's conversation and of the admin routes, and follow-ups that run only what was asked.
-- Web: `cd web; pnpm test` — the SSE frame parser and the text copied into the panel.
-- AI quality: `tests/ai_eval/` — 141 scenarios over all 27 cuisines, scored by independent rules
-  ([`tests/ai_eval/README.md`](tests/ai_eval/README.md); reports in [`docs/ai-eval/`](docs/ai-eval/)).
-- Live: `cd backend; pnpm live:check` against the running stack (see Backend commands).
-- Acceptance criteria and what still needs a real device / real keys: [`PROGRESS.md`](PROGRESS.md).
-
-## Troubleshooting
-
-- **Cards do not stream / arrive all at once** — a proxy is buffering. With Caddy keep `flush_interval -1`; with
-  another proxy disable response buffering for `text/event-stream`.
-- **`quota_exceeded` / `local_only` warnings** — the daily quota is used up or `LOCAL_ONLY_MODE` is on; the site keeps
-  answering from the database and caches. The admin panel's **Genel bakış** shows calls, errors and quota.
-- **"AI anahtarı tanımlı değil"** — no `GEMINI_API_KEY` / `GROQ_API_KEY` on the server. Typed products and the
-  seed/approved templates keep working (all three sections, answered from the database). Add a key to the server's
-  env file and redeploy (the admin panel's **Modeller** shows provider status).
-- **A key is rejected (403 `PERMISSION_DENIED`, "Your project has been denied access")** — the provider disabled the
-  project behind the key; its routes fail and the chains fall back to the other provider. Create a new key in a
-  healthy project and replace it in the env file.
-- **Photos are not read** — no provider key (above), or both providers are down (circuit breaker opens for 60 s
-  after 3 failures).
-- **A photo is sometimes not read on a free tier** — Groq's free per-minute limit for the vision model is reached
-  after a few images in a row; with a working Gemini key the chain falls back to it, otherwise that image is skipped
-  with a warning. For daily office use prefer Groq's Dev tier and Gemini Tier 1.
-- **Docker Desktop fails to start on Windows** — a stale socket in `%LOCALAPPDATA%\Docker\run` or
-  `%LOCALAPPDATA%\docker-secrets-engine` cannot be deleted (DECISIONS D-056, D-132, D-200): stop Docker Desktop, rename
-  both folders and start it again (`scripts/dev-up.ps1 -FixDockerSocket` does the first one). The backend tests do not
-  need Docker.
+| Belge | İçerik |
+|---|---|
+| [`PROGRESS.md`](PROGRESS.md) | Güncel durum, açık işler, bilinen sorunlar. **Önce bunu oku.** |
+| [`PRODUCT.md`](PRODUCT.md) · [`DESIGN.md`](DESIGN.md) | Ürünün kimin için olduğu, başarı ölçütü; tasarım kuralları |
+| [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
+| [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
+| [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-202). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
+| [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
+| [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

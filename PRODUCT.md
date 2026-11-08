@@ -1,32 +1,32 @@
-# Product
+# Ürün
 
-## Who it is for
+## Kimin için
 
-A customer representative who opens restaurant branches on a delivery platform. The rep is on the phone with the restaurant owner
-and has a browser open at a desk. The restaurant arrives with only its menu, and the quality of the branch is the
-quality of that menu, so the rep has to raise it during the call instead of just typing it in.
+Bir yemek sipariş platformunda restoran şubesi açan müşteri temsilcisi. Temsilci restoran sahibiyle telefondadır, masasında bir tarayıcı
+açıktır. Restoran yalnızca menüsüyle gelir; şubenin kalitesi o menünün kalitesidir. Temsilci menüyü sadece sisteme girmez,
+görüşme sırasında geliştirir.
 
-## What it does
+## Ne yapar
 
-The rep pastes a screenshot of the menu (Ctrl+V) or types the products. The site reads the menu, finds what is missing and
-leads the call: what to offer first, a sentence to say, options, removable and extra ingredients for every product, and a
-fix list. Follow-up requests go in the same chat, and everything is one copy away from the restaurant panel.
+Temsilci menünün ekran görüntüsünü yapıştırır (Ctrl+V) ya da ürünleri yazar. Site menüyü okur, eksikleri bulur ve görüşmeyi
+yönetir: önce neyin teklif edileceği, söylenecek cümle, her ürün için opsiyon, çıkarılabilir ve ekstra malzeme, bir de
+düzeltme listesi. Takip istekleri aynı sohbette sorulur, her şey restoran paneline tek kopyayla hazırdır.
 
-## What success looks like
+## Başarı neye benzer
 
-- The first answer arrives during the call and can be read in seconds, between two sentences of the conversation.
-- Nothing suggested is something this kitchen cannot make or already sells.
-- The rep never has to think about accounts: open the address and paste.
+- İlk cevap görüşme bitmeden gelir ve konuşmanın iki cümlesi arasında okunabilir.
+- Önerilen hiçbir şey bu mutfağın yapamadığı ya da zaten sattığı bir ürün değildir.
+- Temsilci hesapla uğraşmaz: adresi açar ve yapıştırır.
 
-## What must stay true
+## Değişmemesi gerekenler
 
-- Decision support, not an authority: the restaurant confirms, and prices are the restaurant's to state.
-- Screenshots are not stored.
-- The site carries no platform branding: it is the rep's own tool. The platform shapes how the assistant thinks, in its
-  prompts, not how the site looks.
-- The interface is Turkish.
+- Karar desteğidir, otorite değil: teyidi restoran verir, fiyatı restoran söyler.
+- Ekran görüntüleri saklanmaz.
+- Sitede platform markası yoktur; temsilcinin kendi aracıdır. Platform, asistanın düşünme biçimini promptlarda belirler,
+  sitenin görünüşünü değil.
+- Arayüz Türkçedir.
 
-## Register
+## Kayıt
 
-Product UI. Assumptions (the brief was given in chat, no interview was held): one person at a desk, a Windows PC, a
-Chrome-class browser, office light; phones are a secondary use.
+Ürün arayüzü. Varsayımlar (brief sohbette verildi, kullanıcı görüşmesi yapılmadı): masada tek kişi, Windows bilgisayar,
+Chrome sınıfı tarayıcı, ofis ışığı; telefon ikincil kullanım.
