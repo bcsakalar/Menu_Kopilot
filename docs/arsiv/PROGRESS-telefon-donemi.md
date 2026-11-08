@@ -47,7 +47,7 @@ tests, mobile 85, both clean.
 focused runs are in the backend, migration 0007 adds the conversations and puts Gemini first. Verified on a local server
 with the real keys: paste, typed menus, follow-ups, a second screenshot, the admin pages. Phases below are history.
 
-**2026-10-11 — production on `8181d00`, app 1.6.0 (D-198, D-199).** User, testing on the phone: new products that a
+**2026-10-11 — production on `527522f`, app 1.6.0 (D-198, D-199).** User, testing on the phone: new products that a
 restaurant cannot make, quick mode too thin, options/extras/descriptions too far away during the call, and no login.
 Production data showed quick mode never asked the model for new products (the pool filled six slots per cuisine by
 importance: Waffle/Kumpir/Midye Tava to a kokoreççi, Tavuk Döner Dürüm to a kebapçı). Now: a kitchen profile gates
@@ -64,7 +64,7 @@ open a sheet with tabs, "Kopyala" and the answer; "Tümünü aç/kapat", search,
 `MenuKopilot-1.6.0-arm64.apk` (release key) on the Desktop. Backend 723 tests, mobile results screen 19 (full mobile
 suite green before the last UI test change). Next: watch real calls — how often alternatives get "Evet".
 
-**2026-09-28 (night) — production on `941198a`, app 1.5.1 (D-197).** User: the app must work on its own and not look
+**2026-09-28 (night) — production on `c26354f`, app 1.5.1 (D-197).** User: the app must work on its own and not look
 tied to any company's systems. Every platform name, the platform's internal system names and the branch-opening
 wording are gone from the phone's texts, the server's messages, the prompts (recommender system v7 / user v5,
 options system v5, activated by the seed on deploy), comments, tests, docs and the original spec; no personal-data notice
@@ -72,17 +72,17 @@ existed anywhere. Pre-deploy dump `/opt/yedek/menu-kopilot-pre-d197.dump`. Signe
 the Desktop and sent to the user. Left as they were (the user's call): inactive old prompt versions and three unused
 legacy prompt keys in `prompt_templates` still carry the old wording; the private repository's history too.
 
-**2026-09-28 — production on `b09fe44`, app 1.5.0 (D-195, D-196).** Deployed with `scripts/deploy.ps1` (migration
+**2026-09-28 — production on `05ac623`, app 1.5.0 (D-195, D-196).** Deployed with `scripts/deploy.ps1` (migration
 0006 `suggestion_items.answer/answered_at` ran, recommender user prompt v4 activated; pre-deploy dump
 `/opt/yedek/menu-kopilot-pre-0006.dump`); the later commits touch only the phone and the docs, and the server clone
-is pulled to them. Signed APK `MenuKopilot-1.5.0-arm64.apk` (built from `7840983`: an answer changed offline is
+is pulled to them. Signed APK `MenuKopilot-1.5.0-arm64.apk` (built from `735318f`: an answer changed offline is
 queued once) on the Desktop and sent to the user, who uses it in the office from 2026-09-28. New:
 `POST /suggestion-items/:id/later`, `pitch`/`priority` on every card, `later` in the history; phone: the answer
 buttons, the call strip ("Evet 2 · Düşünecek 1 · Hayır 3"), "Ofiste girilecekler" (results → app bar or the strip),
 Ayarlar → Öğrenilenler (was "Ekibin sildikleri"); local database v3. Next: watch the first real calls — how often
 "Düşünecek" turns into "Evet", and whether the order of the call matches what the experts say first.
 
-**2026-09-25 (evening) — production on `28f7b56`, app 1.4.0 (D-192…D-194).** Deployed with `scripts/deploy.ps1`
+**2026-09-25 (evening) — production on `78cbe2e`, app 1.4.0 (D-192…D-194).** Deployed with `scripts/deploy.ps1`
 (migration 0005 + seed ran; pre-deploy dump `/opt/yedek/menu-kopilot-pre-0005.dump`), signed APK
 `MenuKopilot-1.4.0-arm64.apk` on the Desktop and sent to the user. New: `GET /analyze/history`, `GET /learning`,
 `POST /learning/forget`; phone: Analiz geçmişi (home → "Tümünü gör"), Ayarlar → Ekibin sildikleri, cards that open
@@ -101,12 +101,12 @@ device walk-through.
   learning from accept/remove (`suggestion_feedback`). Mobile: one card per product with the four sections, one tap
   per suggestion, "Hepsini kabul et", "Kopyala" per section; debug screen, badges and filters removed; debug build
   "Kopilot TEST" installs next to the release app.
-- After `docs/ai-eval/after-report.md` (final code `8acb04c`, providers out of free-tier quota → fallback path):
+- After `docs/ai-eval/after-report.md` (final code `fd86cbd`, providers out of free-tier quota → fallback path):
   10.8 complete products per case, 98.6 % of cases with ≥ 6, 0 mix-ups, 99.8 % with a 6–8 word description,
   0 prepared drinks without one, quick mode exactly 6 new products in 52 of 54 cases, manual sample 0 of 40 wrong.
   A model-path subset (54 text cases, fresh model answers) runs when the Gemini quota resets (07:10 UTC) and is added
   to the report.
-- Commits `8d14a33` … `8acb04c` (+ harness and docs); not pushed, not deployed.
+- Commits `f5758b9` … `fd86cbd` (+ harness and docs); not pushed, not deployed.
 - Open (user): connect and unlock the phone, log in to "Kopilot TEST" (server `http://127.0.0.1:3030`,
   `adb reverse tcp:3030 tcp:3030`) for the screenshots of the old and the new app; push; deploy (migration 0004 runs
   on start); a release APK.
@@ -137,7 +137,7 @@ boş" fix — and the template pool went from 316 to 424: combos (the menü & ka
 all), 40 plain drink rows, and the soups, sides, ara sıcak and desserts the thinnest kitchens lacked. Backend
 655 tests.
 
-**2026-09-21 (later) — deployed:** pushed `c5b2b7c..1af83f7`, `scripts/deploy.ps1` → production on `1af83f7`
+**2026-09-21 (later) — deployed:** pushed `6881cbb..4f693e9`, `scripts/deploy.ps1` → production on `4f693e9`
 (migration 0003 + seed ran; pre-deploy dump in `/opt/yedek`), production live check 15/15. APK
 `MenuKopilot-1.1.0-arm64.apk` on the Desktop (new signing key: uninstall the 1.0.0 build first). Accounts:
 `admin@example.com` (admin), `uzman@example.com` (uzman), `uzman2@example.com` (uzman) —

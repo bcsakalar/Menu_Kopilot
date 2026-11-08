@@ -43,7 +43,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v8: only what THIS kitchen can make, and alternatives built on the menu's own products with `basedOn` (D-198).
   // v9: an alternative's name is plain — the menu product's size words ("Tam Ekmek") stay out of it (D-198).
   // v10: the rep opens a delivery platform branch and leads the call; the proactive stance replaces D-197's neutral one (D-200).
-  'agent.recommend.system': 10,
+  // v11: the platform is not named — "bir yemek sipariş platformu" (D-203).
+  'agent.recommend.system': 11,
   // v3: the products the team kept turning down for this cuisine are named, so they are not proposed (D-194).
   // v4: …as what sellers mostly turned down, to propose only when nothing better fits (D-196).
   // v5: "menü hedefi" instead of an opening target (D-197).
@@ -59,7 +60,8 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   // v3: each product carries its type, and the batch carries the type guide.
   'agent.options.user': 3,
   // v2: an objection is answered with the sentence to read out.
-  'agent.chat.system': 2,
+  // v3: the platform is not named — "bir yemek sipariş platformu" (D-203).
+  'agent.chat.system': 3,
   'agent.chat.user': 1,
 };
 

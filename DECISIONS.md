@@ -1,8 +1,9 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-203'ten devam eder. Telefon uygulaması dönemine ait belgeler (`claude-code-prompt-menu-asistani.md`,
-> `docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı.
+> eklenebilir, numaralandırma D-204'ten devam eder. Telefon uygulaması dönemine ait belgeler
+> (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
+> repodan çıkarıldı (D-203).
 
 Every assumption / judgment call made while building Menü Kopilot. Newest at the bottom of each section.
 Format: **D-NNN** — decision. *Why:* rationale. (Phase)
@@ -647,7 +648,7 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   with the password read from stdin — never from the command line — and never overwrites an existing e-mail. There
   is still no sign-up endpoint (D-040). Opened `uzman@example.com`, role `uzman` (everything but prompt
   versioning); the password was generated on the PC, piped to the server, and handed over in a Desktop note.
-- **D-169** — Production deploy of FAZ 0–3 (2026-09-21, `1af83f7`) after a fresh pre-migration dump; the
+- **D-169** — Production deploy of FAZ 0–3 (2026-09-21, `4f693e9`) after a fresh pre-migration dump; the
   post-deploy live check with the new account passed 15/15, the menu photo included — the Gemini key that answers
   403 (D-164) is only the one in this PC's local `.env`; production's key works.
 - **D-170** — 2026-09-21, user request: the Gemini key rotated on production from the local `.env` (only the
@@ -983,3 +984,11 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   (4) *Admin:* overview as a stat strip and two panels; conversations as a table with whole-row click; a conversation as a
   timeline with each analysis folded. (5) *Domain:* `menu.example.com` stays: it is already in Cloudflare and under
   the origin certificate, next to `qr.example.com`.
+- **D-203** — **Repo herkese açık, platform adı ve kişisel bilgi yok, MIT lisansı** (kullanıcı kararı, 2026-11-08: "bağımsız
+  bir uygulama", "publicte özel şey olmasın"). Repo public olmadan önce bütün git geçmişi yeniden yazıldı: belirli bir
+  sipariş platformunun adı "bir yemek sipariş platformu" / "delivery platform" oldu; sunucu IP'si, gerçek e-postalar ve
+  isimler, kişisel alan adı (`example.com`), sunucudaki diğer projelerin adları ve yerel yollar yer tutucuyla değişti;
+  ilk görev tanımı (telefon dönemi) geçmişten tamamen çıkarıldı. Kod davranışı aynı; yalnızca `agent.recommend.system`
+  (v11) ve `agent.chat.system` (v3) promptlarının ilk cümlesi değişti, sürümleri bu yüzden arttı. Lisans MIT.
+  *Bedel:* commit kodları değişti (sunucudaki kopya yeniden eşitlendi); `deploy/nginx/menu-kopilot.conf` artık yer
+  tutucu alan adı ve sertifika yolu taşır, sunucuya kopyalanırken gerçek değerler yazılır.

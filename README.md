@@ -18,8 +18,6 @@ Restoran yalnızca menüsüyle gelir; site menüyü okur ve görüşmeyi yöneti
 Sitede hesap ve şifre yoktur: tarayıcının ilk mesajı bir ziyaretçi oluşturur, görüşmeleri bir çerez tutar. `/admin`
 adresindeki yönetim panelinin gerçek bir girişi vardır.
 
-**Canlı:** https://menu.example.com · **Yönetim:** https://menu.example.com/admin
-
 > **Karar desteğidir, otorite değil.** Öneriler şablonlardan ve yapay zekâdan gelir, restoranla teyit edilmelidir. Site
 > hiçbir sipariş platformuna bağlanmaz: giriş elle yapılır (yazı, ekran görüntüsü), çıkış kopyala-yapıştırdır.
 > **Şablonlarda fiyat olmaz.** Sitenin gösterdiği tek tutar yeni ürünün *tahmini* fiyat aralığıdır (`25–40 TL`); bu yalnızca
@@ -39,6 +37,7 @@ adresindeki yönetim panelinin gerçek bir girişi vardır.
 10. [Güvenlik ve gizlilik](#güvenlik-ve-gizlilik)
 11. [Sorun giderme](#sorun-giderme)
 12. [Belgeler](#belgeler)
+13. [Lisans](#lisans)
 
 ## Hızlı başlangıç
 
@@ -229,7 +228,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-203`'ten devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-204`'ten devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -348,7 +347,11 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-202). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-203). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |
+
+## Lisans
+
+MIT. Ayrıntılar [`LICENSE`](LICENSE) dosyasında.

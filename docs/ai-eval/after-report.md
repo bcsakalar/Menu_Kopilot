@@ -1,7 +1,7 @@
 # AI menü asistanı — sonra ölçümü (after)
 
 AŞAMA 5 çıktısı. Baseline'daki 141 senaryo, aynı menüler, aynı fotoğraflar, aynı puanlama kuralları; son kod
-`8acb04c`. Yöntem ve senaryolar için `baseline-report.md`, yeni algoritma için `algorithm.md`, mutfak hedefleri için
+`fd86cbd`. Yöntem ve senaryolar için `baseline-report.md`, yeni algoritma için `algorithm.md`, mutfak hedefleri için
 `cuisine-targets.md`.
 
 ## Önce okunacak: bu ölçüm hangi yolu ölçtü?

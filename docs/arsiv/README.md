@@ -5,7 +5,6 @@ uygulaması kaldırıldı. Bu klasördeki belgeler o dönemden kalır; tarihçe 
 
 | Dosya | Ne |
 |---|---|
-| `ilk-gorev-tanimi-telefon-uygulamasi.md` | Projenin ilk görev tanımı (telefon uygulaması, 2026-09) |
 | `FAZ0_TESHIS.md` · `FAZ3_RAPOR.md` | Ajan hattına geçiş sırasındaki teşhis ve rapor (2026-09-21) |
 | `PROGRESS-telefon-donemi.md` | Telefon dönemine ait ilerleme günlüğü ve kabul ölçütleri |
 

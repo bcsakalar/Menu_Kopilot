@@ -5,7 +5,10 @@ Ubuntu, 2 GB RAM + 2 GB swap). Menü Kopilot onların yanında Docker Compose il
 `*.example.com` için Cloudflare origin sertifikasıyla sonlandırır ve `menu.example.com` adresini
 `127.0.0.1:3030` üzerindeki uygulamaya yönlendirir. Aynı sunucuda `qr.example.com` (QR menü) de çalışır.
 
-Sunucuda `github.com/bcsakalar/Menu_Kopilot` reposunun (özel) bir **git kopyası** `/opt/menu-kopilot` içindedir ve
+> Bu belgedeki alan adları (`example.com`) ve sertifika yolları yer tutucudur. Gerçek değerler, sunucu adresi ve
+> hesaplar repoda tutulmaz; kurarken kendi değerlerini yaz (`deploy/nginx/menu-kopilot.conf` dahil).
+
+Sunucuda `github.com/bcsakalar/Menu_Kopilot` reposunun bir **git kopyası** `/opt/menu-kopilot` içindedir ve
 salt-okunur bir deploy anahtarıyla çekilir. Uygulama imajı **bilgisayarda kurulur** (Docker Desktop) ve ssh ile kopyalanır:
 diğer uygulamaların yanında `pnpm install` + `tsc` bellek yetmezliğinden ölür. `scripts/deploy.ps1` iki adımı da yapar.
 

@@ -1,6 +1,6 @@
 # Durum
 
-Son güncelleme: 2026-11-08 · Canlı sürüm: `fbce03b` · https://menu.example.com
+Son güncelleme: 2026-11-08 · Canlı sürüm: `921201a`
 
 ## Bugün ne çalışıyor
 
