@@ -1004,3 +1004,6 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   drizzle-kit, vitest içindeki vite) ve üst sürüm bekliyor. (3) *Sunucu:* kullanılmayan `ufw allow 8080` kuralı silindi
   (dinleyen süreç yalnızca 127.0.0.1'de), SSH'te X11 yönlendirmesi kapatıldı. Bilinmeyen alan adlarını reddeden varsayılan
   nginx sunucusu eklenmedi: bazı alt alan adları bugün varsayılan siteye düşüyor.
+  (4) *İşletim sistemi:* Ubuntu 25.10'un güvenlik desteği bitmişti; sunucu 26.04.1 LTS'e yükseltildi. Önce bütün
+  projelerin veritabanları ve `/etc` sunucu dışına yedeklendi; yükseltme mevcut ayar dosyalarını korudu, yeniden
+  başlatmadan sonra bütün konteynerler ve siteler önceki durumuyla aynı yanıt verdi.
