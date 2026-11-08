@@ -20,7 +20,7 @@ diğer uygulamaların yanında `pnpm install` + `tsc` bellek yetmezliğinden öl
 | `/root/.ssh/menu_kopilot_deploy` + `/root/.ssh/config` içinde `Host github-menu-kopilot` | yalnızca bu repoyu okuyabilen deploy anahtarı (GitHub → Settings → Deploy keys → "myserver (read-only)") |
 | `/etc/menu-kopilot/env` (klasör 700, dosya 600) | sırlar; git kopyasının dışında, çekme ya da deploy onlara dokunamaz |
 | `menu-kopilot-postgres-1`, `-redis-1`, `-api-1` konteynerleri | uygulama yalnızca `127.0.0.1:3030`; Postgres ve Redis hiçbir porta açık değil |
-| `/etc/nginx/sites-available/menu-kopilot.conf` + bağlantı, `/etc/nginx/snippets/mk-proxy.conf` | `deploy/nginx/` kopyaları; ortak `ssl-params.conf` ve `cloudflare-realip.conf` dosyalarını kullanır; limit bölgeleri `mk_` önekli; kayıtlar `mk.*.log` (fail2ban `nginx-limit-req` bunları izler) |
+| `/etc/nginx/sites-available/menu-kopilot.conf` + bağlantı, `/etc/nginx/snippets/mk-proxy.conf` | `deploy/nginx/` kopyaları; ortak `ssl-params.conf`, `cloudflare-realip.conf` ve `cloudflare-geo.conf` dosyalarını kullanır (sonuncusu yalnızca Cloudflare'den gelen bağlantıları kabul etmek için; haftalık Cloudflare IP betiği ikisini birlikte yazar, D-204); limit bölgeleri `mk_` önekli; kayıtlar `mk.*.log` (fail2ban `nginx-limit-req` bunları izler) |
 | `/etc/cron.d/menu-kopilot-backup` → `/opt/yedek/menu-kopilot-YYYY-AA-GG.dump` | her gece 03:30, 14 gün saklanır |
 
 Bellek sınırları: Postgres 256 MB, Redis 128 MB, uygulama 384 MB. Ölçülen (2026-11-05): uygulama ~90 MB, Postgres ~35 MB,

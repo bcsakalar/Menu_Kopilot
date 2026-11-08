@@ -996,7 +996,8 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   sitesi IP'yle doğrudan açılıyordu, Cloudflare'in korumaları atlanabiliyordu. `deploy/nginx/menu-kopilot.conf` artık
   `$realip_remote_addr` üzerinden Cloudflare aralıklarını (ve sunucunun kendisini) tanıyan bir `geo` haritası taşır;
   başka her bağlantı `444` ile kapanır. `$remote_addr` kullanılamaz: real_ip onu ziyaretçinin IP'sine çevirir. Aralıklar
-  `cloudflare-realip.conf` ile aynı liste; Cloudflare listeyi değiştirirse ikisi birlikte güncellenir. Güvenlik duvarında
+  `/etc/nginx/snippets/cloudflare-geo.conf` dosyasından gelir; onu sunucudaki haftalık Cloudflare IP güncelleme betiği
+  `cloudflare-realip.conf` ile birlikte yazar, böylece iki liste ayrışmaz. Güvenlik duvarında
   80/443'ü Cloudflare'e kısmak seçilmedi: sunucudaki diğer siteleri ve Let's Encrypt yenilemelerini etkilerdi.
   (2) *Paketler:* fastify, `@fastify/*`, zod ve geçişli `fast-uri`, `ip-address`, `brace-expansion` yamalı sürümlere;
   web'de vitest 3 → 5. Üretim bağımlılıklarında bilinen açık kalmadı; kalanlar yalnızca geliştirme araçlarında (eslint,
