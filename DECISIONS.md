@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-205'ten devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-206'ten devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1007,3 +1007,8 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   (4) *İşletim sistemi:* Ubuntu 25.10'un güvenlik desteği bitmişti; sunucu 26.04.1 LTS'e yükseltildi. Önce bütün
   projelerin veritabanları ve `/etc` sunucu dışına yedeklendi; yükseltme mevcut ayar dosyalarını korudu, yeniden
   başlatmadan sonra bütün konteynerler ve siteler önceki durumuyla aynı yanıt verdi.
+- **D-205** — **Sunucu düzeyinde bakım** (kullanıcı isteği, 2026-11-08). D-204'teki çekince kalktı: sunucuya tanınmayan alan
+  adlarını ve doğrudan IP isteklerini düşüren bir varsayılan nginx sunucusu eklendi (80'de `444`, 443'te el sıkışma reddi;
+  sertifika yenileme yolu açık kalır). Ayrıca sunucudaki bütün projelerin veritabanları her gece yedeklenir, 10 dakikada bir
+  çalışan bir sağlık kontrolü sorunları telefona bildirir. Bunlar sunucuya ait betiklerdir, bu repoda yer almaz; Menü
+  Kopilot'un kendi yedeği (`deploy/backup.sh`) aynen sürer.
