@@ -228,7 +228,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-206`'ten devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-206`'dan devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri

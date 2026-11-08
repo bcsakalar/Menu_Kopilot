@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-206'ten devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-206'dan devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
