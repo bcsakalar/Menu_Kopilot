@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-204'ten devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-205'ten devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -992,3 +992,14 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   (v11) ve `agent.chat.system` (v3) promptlarının ilk cümlesi değişti, sürümleri bu yüzden arttı. Lisans MIT.
   *Bedel:* commit kodları değişti (sunucudaki kopya yeniden eşitlendi); `deploy/nginx/menu-kopilot.conf` artık yer
   tutucu alan adı ve sertifika yolu taşır, sunucuya kopyalanırken gerçek değerler yazılır.
+- **D-204** — **Güvenlik sıkılaştırması** (kullanıcı isteği, 2026-11-08). (1) *Origin yalnızca Cloudflare'e açık:* menü
+  sitesi IP'yle doğrudan açılıyordu, Cloudflare'in korumaları atlanabiliyordu. `deploy/nginx/menu-kopilot.conf` artık
+  `$realip_remote_addr` üzerinden Cloudflare aralıklarını (ve sunucunun kendisini) tanıyan bir `geo` haritası taşır;
+  başka her bağlantı `444` ile kapanır. `$remote_addr` kullanılamaz: real_ip onu ziyaretçinin IP'sine çevirir. Aralıklar
+  `cloudflare-realip.conf` ile aynı liste; Cloudflare listeyi değiştirirse ikisi birlikte güncellenir. Güvenlik duvarında
+  80/443'ü Cloudflare'e kısmak seçilmedi: sunucudaki diğer siteleri ve Let's Encrypt yenilemelerini etkilerdi.
+  (2) *Paketler:* fastify, `@fastify/*`, zod ve geçişli `fast-uri`, `ip-address`, `brace-expansion` yamalı sürümlere;
+  web'de vitest 3 → 5. Üretim bağımlılıklarında bilinen açık kalmadı; kalanlar yalnızca geliştirme araçlarında (eslint,
+  drizzle-kit, vitest içindeki vite) ve üst sürüm bekliyor. (3) *Sunucu:* kullanılmayan `ufw allow 8080` kuralı silindi
+  (dinleyen süreç yalnızca 127.0.0.1'de), SSH'te X11 yönlendirmesi kapatıldı. Bilinmeyen alan adlarını reddeden varsayılan
+  nginx sunucusu eklenmedi: bazı alt alan adları bugün varsayılan siteye düşüyor.
