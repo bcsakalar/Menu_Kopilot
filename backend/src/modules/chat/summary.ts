@@ -1,11 +1,27 @@
 import { AI_BUSY } from '../../agents/chat.js';
-import type { AnalyzeResult } from '../analyze/schemas.js';
+import type { AnalyzeResult, CountsDto } from '../analyze/schemas.js';
 
 const TOP_PRODUCTS = 3;
 const MAX_REPLIES = 3;
 export const MORE_PRODUCTS = 'Daha fazla ürün öner';
 /** The run had no model to ask: saying "nothing fits" then would be a wrong verdict on the menu. */
 const AI_TROUBLE: ReadonlySet<string> = new Set(['recommend_failed', 'options_failed', 'slow_providers', 'agent_failed', 'extract_failed']);
+
+const percent = (part: number, total: number) => `%${Math.round((part / Math.max(1, total)) * 100)}`;
+
+/** The opening rules the menu misses for sure; a rule this input cannot show is left to the checklist (D-206). */
+export function openingGaps(quality: CountsDto['quality']): string[] {
+  if (!quality) return [];
+  const gaps: string[] = [];
+  if (!quality.drinks.ok) gaps.push(`içecek ${quality.drinks.current}/${quality.drinks.target}`);
+  const share = (rule: typeof quality.descriptions, label: string) => {
+    if (rule.ok === false) gaps.push(`${label} ${percent(rule.present, rule.total)} (en az ${percent(rule.share, 1)})`);
+  };
+  share(quality.descriptions, 'açıklama');
+  share(quality.images, 'fotoğraf');
+  if (quality.writing.ok === false) gaps.push('yazım düzeni');
+  return gaps;
+}
 
 export const aiBusy = (result: AnalyzeResult): boolean => result.cards.length === 0 && result.warnings.some((w) => AI_TROUBLE.has(w.code));
 
@@ -33,6 +49,10 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   // The gaps stand in the header and the card counts on the tabs: this answer says only what they cannot.
   const lines = [`**${counts.cuisineName}** menüsü: ${counts.current} ürün okudum, hedef ${counts.target}.`];
   if (products.length > 0) lines.push(`Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`);
+  const missing = openingGaps(counts.quality);
+  if (missing.length > 0) lines.push(`Açılış kurallarında eksik: ${missing.join(', ')}.`);
+  const extra = counts.quality?.extraCuisines ?? [];
+  if (extra.length > 0) lines.push(`Ek mutfak türü olarak seç: **${extra.map((c) => c.name).join(', ')}**.`);
 
   return { text: lines.join('\n'), quickReplies: nextSteps(result) };
 }

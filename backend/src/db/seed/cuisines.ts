@@ -59,7 +59,7 @@ const MIN = 10;
 export const SEED_CUISINES: readonly SeedCuisine[] = [
   {
     slug: 'kebap-izgara',
-    name: 'Kebap & Izgara',
+    name: 'Kebap',
     minItemCount: MIN,
     notes:
       'Bölümler: Çorbalar, Kebaplar, Izgaralar, Dürümler, Salata & Mezeler, İçecekler, Tatlılar. Olmazsa olmaz: Adana, Urfa, Tavuk Şiş, Izgara Köfte, Ayran, Şalgam. Sor: porsiyon (yarım / 1 / 1,5), servis şekli (porsiyon / dürüm / ekmek arası), acı seviyesi, ekmek seçimi, yanında gelenler (közlenmiş sebze, pilav).',
@@ -112,7 +112,7 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
   },
   {
     slug: 'manti-hamur-isleri',
-    name: 'Mantı & Hamur İşleri',
+    name: 'Mantı & Makarna',
     parentSlug: 'ev-yemekleri',
     minItemCount: MIN,
     notes:
@@ -120,7 +120,7 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
   },
   {
     slug: 'tatli',
-    name: 'Tatlı & Künefe',
+    name: 'Tatlı',
     minItemCount: MIN,
     notes:
       'Bölümler: Şerbetli Tatlılar, Sütlü Tatlılar, Künefe & Katmer, Pastalar, Dondurmalar. Olmazsa olmaz: Künefe, Baklava, Sütlaç, Kazandibi, Profiterol, Sufle. Sor: porsiyon / gramaj, dondurma veya kaymak eki, fıstık miktarı, sıcak / soğuk servis.',
@@ -172,13 +172,14 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
   {
     slug: 'makarna',
     name: 'Makarna & İtalyan',
+    parentSlug: 'manti-hamur-isleri',
     minItemCount: MIN,
     notes:
       'Bölümler: Makarnalar, Fırın Makarnalar, Risotto, Salatalar, İçecekler, Tatlılar. Olmazsa olmaz: Bolonez, Alfredo, Arrabbiata, Kremalı Tavuklu, Lazanya. Sor: makarna türü (spagetti / penne / fettuccine), acılık, parmesan, glutensiz seçenek.',
   },
   {
     slug: 'steak',
-    name: 'Steak & Et',
+    name: 'Steak',
     minItemCount: MIN,
     notes:
       'Bölümler: Steakler, Et Yemekleri, Sandviçler, Garnitürler, Soslar, İçecekler. Olmazsa olmaz: Bonfile, Antrikot, Et Sote, Çökertme. Sor: gramaj, pişirme derecesi, garnitür (patates püresi, sebze, pilav), sos (mantar, biberli, chimichurri).',
@@ -215,7 +216,7 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
   },
   {
     slug: 'kafe-icecek',
-    name: 'Kafe & İçecek',
+    name: 'Kahve & İçecek',
     minItemCount: MIN,
     notes:
       'Bölümler: Sıcak Kahveler, Soğuk Kahveler, Çaylar, Soğuk İçecekler, Taze Sıkma, Tatlılar. Olmazsa olmaz: Türk Kahvesi, Latte, Americano, Çay, Limonata, Soğuk içecekler. Sor: boy, süt seçimi (laktozsuz / bitkisel), şurup, şeker, ekstra shot, buz.',
@@ -237,21 +238,21 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
   },
   {
     slug: 'salata-saglikli',
-    name: 'Salata & Sağlıklı',
+    name: 'Salata & Sağlık',
     minItemCount: MIN,
     notes:
       'Bölümler: Salatalar, Bowl Kaseler, Sağlıklı Sandviç / Wrap, Smoothie, İçecekler. Olmazsa olmaz: Sezar, Çoban, Mevsim, Ton Balıklı, Tavuklu Bowl. Sor: sos (ayrı kapta mı), protein seçimi (tavuk, ton, hellim, falafel), glutensiz / vegan seçenek, kalori bilgisi.',
   },
   {
     slug: 'uzak-dogu',
-    name: 'Uzak Doğu & Sushi',
+    name: 'Uzak Doğu',
     minItemCount: MIN,
     notes:
       'Bölümler: Sushi Roll, Nigiri & Maki, Noodle & Wok, Pilavlar, Başlangıçlar, Soslar, İçecekler. Olmazsa olmaz: California Roll, Philadelphia Roll, Tavuklu Noodle, Wok, Çıtır Tavuk, Gyoza. Sor: adet (roll parça sayısı), acılık, soya / wasabi / zencefil, protein seçimi.',
   },
   {
     slug: 'dunya-mutfagi',
-    name: 'Dünya Mutfağı',
+    name: 'Dünya Mutfağı & Cafe',
     minItemCount: MIN,
     notes:
       'Bölümler: Wrap & Burrito, Tacos & Quesadilla, Şinitzel, Falafel, Başlangıçlar, Soslar, İçecekler. Olmazsa olmaz: Tavuklu Wrap, Burrito, Quesadilla, Şinitzel, Nachos. Sor: protein seçimi, acılık, yanında (patates, pilav, salata), sos.',

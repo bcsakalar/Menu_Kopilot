@@ -48,6 +48,19 @@ export const createTemplateSchema = z.object({
 });
 export type CreateTemplateInput = z.infer<typeof createTemplateSchema>;
 
+export const importReportSchema = z.object({
+  dryRun: z.boolean(),
+  rows: z.number().int(),
+  created: z.number().int(),
+  updated: z.number().int(),
+  unchanged: z.number().int(),
+  items: z.array(
+    z.object({ row: z.number().int(), name: z.string(), cuisine: z.string(), action: z.enum(['create', 'update', 'same']) }),
+  ),
+  errors: z.array(z.object({ row: z.number().int(), name: z.string(), message: z.string() })),
+});
+export type ImportReport = z.infer<typeof importReportSchema>;
+
 export const updateTemplateSchema = z.object({
   payload: templatePayloadSchema.optional(),
   cuisineId: z.uuid().optional(),

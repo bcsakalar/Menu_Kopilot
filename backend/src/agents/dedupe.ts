@@ -21,6 +21,7 @@ export interface MergedItem {
   description: TriState;
   options: TriState;
   removables: TriState;
+  image: TriState;
   optionNames: string[];
   /** How many images showed it. 0 = typed or dictated by the user. */
   seenIn: number;
@@ -76,6 +77,7 @@ export function dedupeExtracted(perImage: readonly (readonly ExtractedItem[])[])
           description: item.description,
           options: item.options,
           removables: item.removables,
+          image: item.image,
           optionNames: [...item.optionNames],
           seenIn: 1,
           confidence: item.confidence,
@@ -90,6 +92,7 @@ export function dedupeExtracted(perImage: readonly (readonly ExtractedItem[])[])
       match.description = mergeFlag(match.description, item.description);
       match.options = mergeFlag(match.options, item.options);
       match.removables = mergeFlag(match.removables, item.removables);
+      match.image = mergeFlag(match.image, item.image);
       match.confidence = Math.max(match.confidence, item.confidence);
       match.sectionText ??= item.sectionText;
       match.priceText ??= item.priceText;
@@ -142,6 +145,7 @@ export function addTypedItems(entries: MergedItem[], typed: readonly string[]): 
       description: 'unknown',
       options: 'unknown',
       removables: 'unknown',
+      image: 'unknown',
       optionNames: [],
       seenIn: 0,
       confidence: 1,

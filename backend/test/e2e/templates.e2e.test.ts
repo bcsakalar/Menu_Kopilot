@@ -76,7 +76,7 @@ describe('/templates (template pool)', () => {
     expect((await list(`q=${encodeURIComponent('acılı kebap')}`)).data.map((t) => t.name)).toContain('Adana Kebap');
     const kebap = await list(`cuisineId=${kebapId}&limit=500`);
     expect(kebap.meta.total).toBe(SEED_TEMPLATES.filter((t) => t.cuisine === 'kebap-izgara').length);
-    expect(kebap.data.every((t) => t.cuisineName === 'Kebap & Izgara')).toBe(true);
+    expect(kebap.data.every((t) => t.cuisineName === 'Kebap')).toBe(true);
   });
 
   it('creates a user template (embedded) and rejects a duplicate name', async () => {

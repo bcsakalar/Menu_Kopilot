@@ -1,11 +1,25 @@
-import { desc, eq, gte, lt, sql } from 'drizzle-orm';
+import { type AnyColumn, desc, eq, gte, lt, sql } from 'drizzle-orm';
+import { MIN_BRANCH_ITEMS } from '../../agents/gap-analyst.js';
 import { startOfDay, startOfMonth, type QuotaService } from '../../ai/usage.js';
 import type { Database } from '../../db/client.js';
-import { chatMessages, conversations, cuisines, suggestionItems, suggestionRuns, usageLog, users } from '../../db/schema/index.js';
+import {
+  chatMessages,
+  conversations,
+  cuisines,
+  feedback,
+  menuItems,
+  suggestionItems,
+  suggestionRuns,
+  usageLog,
+  users,
+} from '../../db/schema/index.js';
 import { notFound } from '../../lib/errors.js';
 import type { ChatService } from '../chat/service.js';
 
 const TOP_CUISINES = 8;
+const DAILY_DAYS = 14;
+const THIN_CUISINES = 6;
+const DAY_MS = 86_400_000;
 
 /** The panel's view across every visitor: chat and analyses themselves stay scoped to their owner. */
 export class AdminService {
@@ -17,9 +31,11 @@ export class AdminService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async overview(range: 'today' | 'month') {
+  async overview(range: 'today' | 'week' | 'month') {
     const now = this.now();
-    const from = range === 'today' ? startOfDay(now, this.config.timezone) : startOfMonth(now, this.config.timezone);
+    const today = startOfDay(now, this.config.timezone);
+    const from =
+      range === 'today' ? today : range === 'week' ? new Date(today.getTime() - 6 * DAY_MS) : startOfMonth(now, this.config.timezone);
     const count = sql<number>`count(*)::int`;
 
     const [conversationRow] = await this.db
@@ -55,7 +71,82 @@ export class AdminService {
       llm: llmRow ?? { calls: 0, failed: 0, tokens: 0 },
       topCuisines,
       site,
+      daily: await this.daily(now),
+      quality: await this.qualityShare(from),
+      pool: await this.pool(),
+      feedback: await this.feedbackCounts(),
     };
+  }
+
+  /** Analyses and new conversations per day, the last DAILY_DAYS days in the site's timezone (empty days included). */
+  private async daily(now: Date) {
+    const tz = this.config.timezone;
+    const since = new Date(startOfDay(now, tz).getTime() - (DAILY_DAYS - 1) * DAY_MS);
+    const day = (column: AnyColumn) => sql<string>`to_char(${column} at time zone ${tz}, 'YYYY-MM-DD')`;
+    const runs = await this.db
+      .select({ day: day(suggestionRuns.createdAt), n: sql<number>`count(*)::int` })
+      .from(suggestionRuns)
+      .where(gte(suggestionRuns.createdAt, since))
+      .groupBy(sql`1`);
+    const calls = await this.db
+      .select({ day: day(conversations.createdAt), n: sql<number>`count(*)::int` })
+      .from(conversations)
+      .where(gte(conversations.createdAt, since))
+      .groupBy(sql`1`);
+    const runsBy = new Map(runs.map((r) => [r.day, r.n]));
+    const callsBy = new Map(calls.map((r) => [r.day, r.n]));
+    const format = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+    return Array.from({ length: DAILY_DAYS }, (_, i) => {
+      // Noon of each day keeps DST shifts from landing on the wrong date.
+      const date = format.format(new Date(since.getTime() + i * DAY_MS + 12 * 3_600_000));
+      return { date, runs: runsBy.get(date) ?? 0, conversations: callsBy.get(date) ?? 0 };
+    });
+  }
+
+  /** How many analyses in the range missed each opening rule (D-206); runs stored before the checklist do not count. */
+  private async qualityShare(from: Date) {
+    const missed = (path: string) =>
+      sql<number>`(count(*) filter (where ${suggestionRuns.counts} #>> ${`{quality,${path},ok}`} = 'false'))::int`;
+    const [row] = await this.db
+      .select({
+        runs: sql<number>`(count(*) filter (where ${suggestionRuns.counts} ? 'quality'))::int`,
+        products: missed('products'),
+        drinks: missed('drinks'),
+        descriptions: missed('descriptions'),
+        images: missed('images'),
+        writing: missed('writing'),
+      })
+      .from(suggestionRuns)
+      .where(gte(suggestionRuns.createdAt, from));
+    return row ?? { runs: 0, products: 0, drinks: 0, descriptions: 0, images: 0, writing: 0 };
+  }
+
+  /** The template pool, and the cuisines whose own templates fall furthest short of their opening target. */
+  private async pool() {
+    const rows = await this.db
+      .select({
+        name: cuisines.name,
+        minItemCount: cuisines.minItemCount,
+        templates: sql<number>`(select count(*)::int from ${menuItems} where ${menuItems.cuisineId} = ${cuisines.id} and ${menuItems.approved})`,
+      })
+      .from(cuisines);
+    const [totals] = await this.db
+      .select({
+        templates: sql<number>`(count(*) filter (where ${menuItems.approved}))::int`,
+        imported: sql<number>`(count(*) filter (where ${menuItems.approved} and ${menuItems.source} = 'imported'))::int`,
+      })
+      .from(menuItems);
+    const thin = rows
+      .map((r) => ({ name: r.name, templates: r.templates, target: Math.max(MIN_BRANCH_ITEMS, r.minItemCount) }))
+      .filter((r) => r.templates < r.target)
+      .sort((a, b) => b.target - b.templates - (a.target - a.templates))
+      .slice(0, THIN_CUISINES);
+    return { templates: totals?.templates ?? 0, imported: totals?.imported ?? 0, cuisines: rows.length, thin };
+  }
+
+  private async feedbackCounts() {
+    const rows = await this.db.select({ status: feedback.status, n: sql<number>`count(*)::int` }).from(feedback).groupBy(feedback.status);
+    return { new: rows.find((r) => r.status === 'new')?.n ?? 0, open: rows.filter((r) => r.status !== 'done').reduce((s, r) => s + r.n, 0) };
   }
 
   async conversations(limit: number, before: string | undefined) {

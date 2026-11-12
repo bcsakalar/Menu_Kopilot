@@ -14,6 +14,7 @@ import { addTypedItems, joinItems, type MergedItem } from './dedupe.js';
 import { KitchenProfile } from './kitchen.js';
 import { runExtractor } from './extractor.js';
 import { looksAbbreviated, MIN_BRANCH_ITEMS, runGapAnalyst } from './gap-analyst.js';
+import { menuQuality } from './quality.js';
 import { runOptionModifier, type OptionModifierResult } from './option-modifier.js';
 import { menuProductPitch, newProductPitch } from './pitch.js';
 import { focusPlan, modeBudget, planRun, quotaRows, type AnalysisMode, type RunFocus } from './plan.js';
@@ -264,6 +265,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
       hasDescription: item.description,
       hasOptions: item.options,
       hasRemovables: item.removables,
+      hasImage: item.image,
       typed: item.typed,
       seenIn: item.seenIn,
       priceText: item.priceText,
@@ -319,6 +321,13 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     cuisineName: classification.cuisine.name,
     cuisineId: classification.cuisine.id,
     categories: analysis.categories,
+    quality: menuQuality({
+      items: existing,
+      target: analysis.target,
+      mainCuisineId: classification.cuisine.id,
+      cuisineOf: (item) => matched?.hits.get(item.normalized)?.cuisineId,
+      cuisineName: (id) => input.graph.get(id)?.name,
+    }),
   };
   input.emit({ type: 'counts', counts });
 

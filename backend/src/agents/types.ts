@@ -85,6 +85,8 @@ export interface ExistingItem {
   hasDescription: 'present' | 'absent' | 'unknown';
   hasOptions: 'present' | 'absent' | 'unknown';
   hasRemovables: 'present' | 'absent' | 'unknown';
+  /** A product photo on the panel screenshot (the opening rules count photos, D-206). */
+  hasImage: 'present' | 'absent' | 'unknown';
   /** Typed or dictated by the user rather than read from an image — its panel fields say nothing. */
   typed: boolean;
   /** How many of the supplied images showed it (overlapping scrolls count once). */

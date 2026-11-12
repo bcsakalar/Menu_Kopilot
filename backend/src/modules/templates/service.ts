@@ -5,8 +5,18 @@ import { cuisines, itemAliases, menuItems } from '../../db/schema/index.js';
 import type { JobQueue } from '../../jobs/queue.js';
 import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
+import { MIN_BRANCH_ITEMS } from '../../agents/gap-analyst.js';
+import {
+  type CuisineRef,
+  type RowError,
+  parseTemplateRows,
+  readTemplateSheet,
+  sampleEntries,
+  templateWorkbook,
+} from './excel.js';
 import type {
   CreateTemplateInput,
+  ImportReport,
   TemplateDto,
   TemplateListQuery,
   UpdateTemplateInput,
@@ -183,6 +193,160 @@ export class TemplateService {
     const updated = await this.get(id);
     if (updated.approved) await this.queue.enqueueEmbedding([id]);
     return updated;
+  }
+
+  // ---- Excel (D-206) ------------------------------------------------------------------------------------------
+
+  /** Every cuisine with its approved template count and opening target: the sample's "Mutfaklar" sheet. */
+  async cuisineRefs(): Promise<CuisineRef[]> {
+    const rows = await this.db
+      .select({
+        id: cuisines.id,
+        name: cuisines.name,
+        slug: cuisines.slug,
+        minItemCount: cuisines.minItemCount,
+        templates: sql<number>`(select count(*)::int from ${menuItems} where ${menuItems.cuisineId} = ${cuisines.id} and ${menuItems.approved})`,
+      })
+      .from(cuisines)
+      .orderBy(asc(cuisines.name));
+    return rows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, templates: r.templates, target: Math.max(MIN_BRANCH_ITEMS, r.minItemCount) }));
+  }
+
+  async sampleWorkbook(): Promise<Buffer> {
+    const refs = await this.cuisineRefs();
+    return templateWorkbook(sampleEntries(refs), refs);
+  }
+
+  /** The approved pool (one cuisine or all) in the import layout: edit it in Excel and load it back. */
+  async exportWorkbook(cuisineId?: string): Promise<Buffer> {
+    const refs = await this.cuisineRefs();
+    const ids = await this.db
+      .select({ id: menuItems.id })
+      .from(menuItems)
+      .where(and(eq(menuItems.approved, true), cuisineId ? eq(menuItems.cuisineId, cuisineId) : undefined))
+      .orderBy(asc(menuItems.cuisineId), desc(menuItems.importance), asc(menuItems.normalizedName));
+    const records = await getTemplates(
+      this.db,
+      ids.map((r) => r.id),
+    );
+    const names = new Map(refs.map((r) => [r.id, r.name]));
+    const entries = records
+      .map((r) => ({ cuisineName: names.get(r.cuisineId) ?? '', aliases: r.aliases, importance: r.importance, payload: r.payload }))
+      .sort((a, b) => a.cuisineName.localeCompare(b.cuisineName, 'tr') || b.importance - a.importance);
+    return templateWorkbook(entries, refs);
+  }
+
+  /**
+   * Loads a filled sheet into the pool. Rows that fail validation are reported and skipped; the rest are created
+   * or updated (matched on cuisine + name) as `source='imported'`, which re-seeding never overwrites. With
+   * `dryRun` nothing is written: the same report is the preview the panel shows before the real import.
+   */
+  async importWorkbook(userId: string, file: Buffer, dryRun: boolean): Promise<ImportReport> {
+    let sheetRows: Awaited<ReturnType<typeof readTemplateSheet>>;
+    try {
+      sheetRows = await readTemplateSheet(file);
+    } catch (err) {
+      const message = err instanceof Error && err.message.includes('Ürün Adı') ? err.message : 'Dosya okunamadı: .xlsx biçiminde bir Excel dosyası yükle.';
+      throw new AppError('VALIDATION_ERROR', message);
+    }
+    if (sheetRows.length === 0) throw new AppError('VALIDATION_ERROR', 'Dosyada ürün satırı yok.');
+    if (sheetRows.length > 2000) throw new AppError('VALIDATION_ERROR', 'Bir dosyada en fazla 2000 ürün olabilir; dosyayı böl.');
+
+    const refs = await this.cuisineRefs();
+    const existingRows = await this.db
+      .select({ id: menuItems.id, cuisineId: menuItems.cuisineId, normalizedName: menuItems.normalizedName })
+      .from(menuItems)
+      .where(eq(menuItems.approved, true));
+    const existingId = new Map(existingRows.map((r) => [`${r.cuisineId}|${r.normalizedName}`, r.id]));
+    const wantedKeys = new Set(
+      sheetRows.flatMap((r) => {
+        const cuisine = normalizeTr(r.cells.cuisine ?? '');
+        return refs
+          .filter((c) => normalizeTr(c.name) === cuisine || normalizeTr(c.slug) === cuisine)
+          .map((c) => `${c.id}|${normalizeTr(r.cells.name ?? '')}`);
+      }),
+    );
+    const records = await getTemplates(
+      this.db,
+      [...wantedKeys].map((k) => existingId.get(k)).filter((id): id is string => id !== undefined),
+    );
+    const recordByKey = new Map(records.map((r) => [`${r.cuisineId}|${r.normalizedName}`, r]));
+    const { valid, errors } = parseTemplateRows(sheetRows, refs, (cuisineId, name) => recordByKey.get(`${cuisineId}|${name}`)?.payload);
+
+    const cuisineName = new Map(refs.map((r) => [r.id, r.name]));
+    const items: ImportReport['items'] = [];
+    const written: string[] = [];
+    const rowErrors: RowError[] = [...errors];
+    const work = async (tx: Executor) => {
+      for (const row of valid) {
+        const record = recordByKey.get(`${row.cuisineId}|${normalizeTr(row.payload.name)}`);
+        const same =
+          record !== undefined &&
+          isDeepStrictEqual(record.payload, row.payload) &&
+          (row.importance === undefined || row.importance === record.importance) &&
+          (row.aliases.length === 0 || isDeepStrictEqual([...record.aliases].map(normalizeTr).sort(), row.aliases.map(normalizeTr).sort()));
+        const action = record === undefined ? 'create' : same ? 'same' : 'update';
+        const item = { row: row.row, name: row.payload.name, cuisine: cuisineName.get(row.cuisineId) ?? '', action } as const;
+        if (dryRun || action === 'same') {
+          items.push(item);
+          continue;
+        }
+        try {
+          // A savepoint per row: one alias clash must not undo the rest of the file.
+          const id = await tx.transaction(async (sp) => {
+            if (record) {
+              await replaceTemplateContent(sp, record.id, row.payload, {
+                source: 'imported',
+                ...(row.importance !== undefined ? { importance: row.importance } : {}),
+              });
+              if (row.aliases.length > 0) await this.setAliases(sp, record.id, row.aliases, row.payload.name);
+              return record.id;
+            }
+            await sp
+              .delete(menuItems)
+              .where(
+                and(
+                  eq(menuItems.cuisineId, row.cuisineId),
+                  eq(menuItems.normalizedName, normalizeTr(row.payload.name)),
+                  eq(menuItems.approved, false),
+                  ne(menuItems.source, 'seed'),
+                ),
+              );
+            return insertTemplate(sp, {
+              cuisineId: row.cuisineId,
+              payload: row.payload,
+              source: 'imported',
+              approved: true,
+              importance: row.importance ?? 50,
+              aliases: row.aliases,
+              createdBy: userId,
+            });
+          });
+          written.push(id);
+          items.push(item);
+        } catch (err) {
+          rowErrors.push({
+            row: row.row,
+            name: row.payload.name,
+            message: isUniqueViolation(err) ? 'Takma adlardan biri başka bir ürünle çakışıyor' : 'Kaydedilemedi',
+          });
+        }
+      }
+    };
+    if (dryRun) await work(this.db);
+    else await this.db.transaction(work);
+    if (written.length > 0) await this.queue.enqueueEmbedding(written);
+
+    const count = (action: ImportReport['items'][number]['action']) => items.filter((i) => i.action === action).length;
+    return {
+      dryRun,
+      rows: sheetRows.length,
+      created: count('create'),
+      updated: count('update'),
+      unchanged: count('same'),
+      items,
+      errors: rowErrors.sort((a, b) => a.row - b.row),
+    };
   }
 
   async remove(id: string): Promise<{ archived: boolean }> {

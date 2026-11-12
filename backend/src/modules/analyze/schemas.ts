@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ANALYSIS_MODES, DEFAULT_MODE } from '../../agents/plan.js';
+import { qualitySchema } from '../../agents/quality.js';
 import { AGENT_NAMES } from '../../agents/types.js';
 import { templatePayloadSchema } from '../../domain/template.js';
 
@@ -108,6 +109,8 @@ export const countsDtoSchema = z.object({
   cuisineName: z.string(),
   cuisineId: z.uuid(),
   categories: z.array(categoryCountSchema),
+  /** The opening checklist (D-206); absent on runs stored before it existed. */
+  quality: qualitySchema.optional(),
 });
 export type CountsDto = z.infer<typeof countsDtoSchema>;
 

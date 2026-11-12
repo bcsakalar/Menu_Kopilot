@@ -34,6 +34,8 @@ import { AnalyzeStore } from './modules/analyze/store.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { AuthService } from './modules/auth/service.js';
 import { chatRoutes } from './modules/chat/routes.js';
+import { feedbackAdminRoutes, feedbackRoutes } from './modules/feedback/routes.js';
+import { FeedbackService } from './modules/feedback/service.js';
 import { ChatService } from './modules/chat/service.js';
 import { cuisineRoutes } from './modules/cuisines/routes.js';
 import { CuisineService } from './modules/cuisines/service.js';
@@ -230,11 +232,13 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     onError: (err) => app.log.error({ err }, 'chat message failed'),
   });
 
+  const feedbackService = new FeedbackService(db);
   await app.register(
     async (api) => {
       await api.register(authRoutes, { service: authService, secureCookies });
       // Open to anyone: a browser's cookie is all the identity there is (D-200).
       await api.register(chatRoutes, { service: chatService, uploads });
+      await api.register(feedbackRoutes, { service: feedbackService });
       await api.register(async (session) => {
         session.addHook('onRequest', session.authenticate);
         await session.register(analyzeRoutes, { service: analyzeService, uploads });
@@ -248,6 +252,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await admin.register(usageRoutes, {
           service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),
         });
+        await admin.register(feedbackAdminRoutes, { service: feedbackService });
         await admin.register(adminRoutes, {
           service: new AdminService(db, chatService, ai.quota, { timezone: config.quota.timezone }),
         });

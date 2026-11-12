@@ -1,8 +1,11 @@
+import type { FastifyReply } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { AppError } from '../../lib/errors.js';
 import { getAuthUser } from '../../plugins/auth.js';
 import {
   createTemplateSchema,
+  importReportSchema,
   templateDtoSchema,
   templateListQuerySchema,
   templateListSchema,
@@ -26,6 +29,48 @@ export const templateRoutes: FastifyPluginAsyncZod<{ service: TemplateService }>
       },
     },
     async (request) => service.list(request.query),
+  );
+
+  const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  const sendWorkbook = (reply: FastifyReply, file: Buffer, name: string) =>
+    reply.header('content-type', XLSX).header('content-disposition', `attachment; filename="${name}"`).send(file);
+
+  app.get(
+    '/templates/excel/sample',
+    { schema: { tags: ['templates'], summary: 'Sample .xlsx to fill in: example rows, how to fill it, cuisine list', security } },
+    async (_request, reply) => sendWorkbook(reply, await service.sampleWorkbook(), 'menu-kopilot-sablon-ornegi.xlsx'),
+  );
+
+  app.get(
+    '/templates/excel/export',
+    {
+      schema: {
+        tags: ['templates'],
+        summary: 'The approved pool (one cuisine or all) as .xlsx, in the import layout',
+        security,
+        querystring: z.object({ cuisineId: z.uuid().optional() }),
+      },
+    },
+    async (request, reply) => sendWorkbook(reply, await service.exportWorkbook(request.query.cuisineId), 'menu-kopilot-sablonlar.xlsx'),
+  );
+
+  app.post(
+    '/templates/excel/import',
+    {
+      schema: {
+        tags: ['templates'],
+        summary: 'Create / update templates from a filled .xlsx (multipart "file"); dryRun=true only previews',
+        security,
+        querystring: z.object({ dryRun: z.enum(['true', 'false']).default('true') }),
+        response: { 200: importReportSchema },
+      },
+    },
+    async (request) => {
+      const part = await request.file();
+      if (!part) throw new AppError('VALIDATION_ERROR', 'Dosya seçilmedi');
+      const file = await part.toBuffer();
+      return service.importWorkbook(getAuthUser(request).id, file, request.query.dryRun === 'true');
+    },
   );
 
   app.get(

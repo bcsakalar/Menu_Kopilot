@@ -143,6 +143,9 @@ describe('a conversation', () => {
     const sent = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
     const [answer] = eventOf<{ message: ConversationDetail['messages'][number] }>(sent, 'message');
     expect(answer?.message.text).toContain('ürün okudum');
+    // The opening checklist (D-206): one drink on a three-product menu is short of the ten-drink rule.
+    expect(answer?.message.text).toContain('Açılış kurallarında eksik: içecek 1/10');
+    expect(answer?.message.result?.counts?.quality?.drinks).toEqual({ current: 1, target: 10, ok: false });
     expect(answer?.message.quickReplies.length).toBeGreaterThan(0);
     expect(answer?.message.result?.cards.some((c) => c.section === 'new_product')).toBe(true);
     expect(answer?.message.result?.cards.some((c) => c.section === 'option')).toBe(true);
@@ -277,6 +280,14 @@ describe('the admin panel', () => {
     const overview = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/overview', headers: bearer(accessToken) });
     expect(overview.statusCode, overview.body).toBe(200);
     expect(overview.json<{ conversations: number; runs: number }>().conversations).toBeGreaterThan(0);
+    const week = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/overview?range=week', headers: bearer(accessToken) });
+    const dashboard = week.json<{ daily: { runs: number }[]; quality: { runs: number; drinks: number }; pool: { templates: number; thin: unknown[] }; feedback: { new: number } }>();
+    expect(dashboard.daily).toHaveLength(14);
+    expect(dashboard.daily.at(-1)?.runs).toBeGreaterThan(0);
+    expect(dashboard.quality.runs).toBeGreaterThan(0);
+    expect(dashboard.quality.drinks).toBeGreaterThan(0);
+    expect(dashboard.pool.templates).toBeGreaterThan(400);
+    expect(dashboard.feedback.new).toBe(0);
 
     const list = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/conversations', headers: bearer(accessToken) });
     const rows = list.json<{ data: { id: string; visitor: string }[] }>().data;

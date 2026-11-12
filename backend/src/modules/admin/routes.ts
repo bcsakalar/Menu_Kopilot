@@ -5,8 +5,10 @@ import type { AdminService } from './service.js';
 
 const security = [{ bearerAuth: [] }];
 
+const rangeSchema = z.enum(['today', 'week', 'month']);
+
 const overviewSchema = z.object({
-  range: z.enum(['today', 'month']),
+  range: rangeSchema,
   visitors: z.number().int(),
   conversations: z.number().int(),
   runs: z.number().int(),
@@ -14,6 +16,23 @@ const overviewSchema = z.object({
   llm: z.object({ calls: z.number().int(), failed: z.number().int(), tokens: z.number().int() }),
   topCuisines: z.array(z.object({ name: z.string(), runs: z.number().int() })),
   site: z.object({ callsToday: z.number().int(), dailyCalls: z.number().int() }),
+  daily: z.array(z.object({ date: z.string(), runs: z.number().int(), conversations: z.number().int() })),
+  /** Analyses in the range that missed each opening rule (D-206). */
+  quality: z.object({
+    runs: z.number().int(),
+    products: z.number().int(),
+    drinks: z.number().int(),
+    descriptions: z.number().int(),
+    images: z.number().int(),
+    writing: z.number().int(),
+  }),
+  pool: z.object({
+    templates: z.number().int(),
+    imported: z.number().int(),
+    cuisines: z.number().int(),
+    thin: z.array(z.object({ name: z.string(), templates: z.number().int(), target: z.number().int() })),
+  }),
+  feedback: z.object({ new: z.number().int(), open: z.number().int() }),
 });
 
 const conversationRowSchema = z.object({
@@ -33,7 +52,7 @@ export const adminRoutes: FastifyPluginAsyncZod<{ service: AdminService }> = asy
         tags: ['admin'],
         summary: 'How the site is used: visitors, calls, analyses, answers, AI spend',
         security,
-        querystring: z.object({ range: z.enum(['today', 'month']).default('today') }),
+        querystring: z.object({ range: rangeSchema.default('today') }),
         response: { 200: overviewSchema },
       },
     },

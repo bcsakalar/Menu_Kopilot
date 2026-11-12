@@ -18,6 +18,7 @@ const item = (rawName: string, over: Partial<ExtractedItem> = {}): ExtractedItem
   descriptionText: null,
   description: 'unknown',
   options: 'unknown',
+  image: 'unknown',
   removables: 'unknown',
   optionNames: [],
   confidence: 0.9,

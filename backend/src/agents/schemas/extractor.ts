@@ -19,6 +19,9 @@ export const extractedItemSchema = z.object({
   description: triStateSchema.default('unknown').describe('Açıklama dolu: present, alan boş: absent, alan görünmüyor: unknown'),
   options: triStateSchema.default('unknown').describe('Opsiyon/seçenek bilgisi için aynı kural'),
   removables: triStateSchema.default('unknown').describe('Çıkarılabilir malzeme bilgisi için aynı kural'),
+  image: triStateSchema
+    .default('unknown')
+    .describe('Ürün fotoğrafı görünüyor: present, fotoğraf yeri boş/varsayılan ikon: absent, fotoğraf alanı görünmüyor: unknown'),
   optionNames: z.array(z.string().max(60)).max(12).default([]).describe('Görünen opsiyon grubu adları; göremiyorsan boş dizi'),
   confidence: z.number().min(0).max(1),
 });
