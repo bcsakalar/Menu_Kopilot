@@ -1198,6 +1198,460 @@ const DISHES: readonly SeedTemplate[] = [
     tags: ['hamur işi', 'vejetaryen'],
     allergens: ['Gluten'],
   }),
+
+  // ---- D-207: the kitchens whose pool was still below the opening target set in the admin panel -----------------
+
+  // Pizza
+  dish('pizza', 62, 'Pastırmalı Pizza', 'Pastırma, mozzarella, domates sosu ve közlenmiş biber.', {
+    groups: [pizzaBoy(), hamurSecimi(), pizzaEkstra()],
+    removable: ['Közlenmiş Biber', 'Domates'],
+    extras: ['Ekstra Pastırma', 'Ekstra Kaşar'],
+    tags: ['pizza'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 60, 'Köfteli Pizza', 'Izgara köfte parçaları, mozzarella, domates ve biber.', {
+    groups: [pizzaBoy(), hamurSecimi(), pizzaEkstra()],
+    removable: ['Biber', 'Soğan', 'Domates'],
+    extras: ['Ekstra Köfte', 'Ekstra Kaşar'],
+    tags: ['pizza'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 60, 'Ranch Tavuklu Pizza', 'Ranch soslu tavuk, mozzarella, mısır ve kırmızı soğan.', {
+    groups: [pizzaBoy(), hamurSecimi(), pizzaEkstra()],
+    removable: ['Mısır', 'Kırmızı Soğan'],
+    extras: ['Ekstra Tavuk', 'Ekstra Ranch Sos'],
+    tags: ['pizza'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('pizza', 58, 'Diavola Pizza', 'Acı salam, mozzarella, jalapeno ve acı domates sosu.', {
+    groups: [pizzaBoy(), hamurSecimi(), aciSeviyesi(2), pizzaEkstra()],
+    removable: ['Jalapeno Biber', 'Acı Salam'],
+    extras: ['Ekstra Salam', 'Ekstra Kaşar'],
+    tags: ['pizza', 'acılı'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 56, 'Trüflü Mantarlı Pizza', 'Mantar, mozzarella, trüf yağı ve krema sosu.', {
+    groups: [pizzaBoy(), hamurSecimi(), pizzaEkstra()],
+    removable: ['Trüf Yağı', 'Roka'],
+    extras: ['Ekstra Mantar', 'Parmesan'],
+    tags: ['pizza', 'vejetaryen'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 56, 'Pesto Tavuklu Pizza', 'Fesleğenli pesto sos, tavuk, mozzarella ve çeri domates.', {
+    groups: [pizzaBoy(), hamurSecimi(), pizzaEkstra()],
+    removable: ['Çeri Domates', 'Roka'],
+    extras: ['Ekstra Tavuk', 'Parmesan'],
+    tags: ['pizza'],
+    allergens: ['Gluten', 'Süt ürünü', 'Sert kabuklu yemiş'],
+  }),
+  dish('pizza', 60, 'Soğan Halkası', 'Çıtır kaplamalı soğan halkaları, yanında seçtiğin sos.', {
+    groups: [adet(['6 Adet', '9 Adet', '12 Adet'], 0), sosSecimi(['Ketçap', 'Mayonez', 'Ranch Sos', 'Barbekü Sos'])],
+    tags: ['yan ürün'],
+    allergens: ['Gluten'],
+  }),
+  dish('pizza', 58, 'Tavuk Nugget', 'Çıtır kaplamalı tavuk parçaları, yanında seçtiğin sos.', {
+    groups: [adet(['6 Adet', '9 Adet', '12 Adet'], 0), tavukSos()],
+    tags: ['ara sıcak'],
+    allergens: ['Gluten'],
+  }),
+  dish('pizza', 56, 'Ekmek Çubukları', 'Fırından çıtır ekmek çubukları, sarımsaklı tereyağı ile.', {
+    groups: [adet(['4 Adet', '6 Adet', '8 Adet'], 1), sosSecimi(['Marinara Sos', 'Ranch Sos', 'Sarımsaklı Mayonez'])],
+    extras: ['Kaşar', 'Parmesan'],
+    tags: ['ara sıcak'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 56, 'Penne Arrabbiata', 'Penne makarna, acılı domates sosu, sarımsak ve fesleğen.', {
+    groups: [aciSeviyesi(1), multi('Ekstra Malzeme', ['Parmesan', 'Izgara Tavuk', 'Mantar'], { mode: 'surcharge' })],
+    removable: ['Sarımsak', 'Fesleğen'],
+    tags: ['makarna', 'vejetaryen'],
+    allergens: ['Gluten'],
+  }),
+  dish('pizza', 56, 'Fettuccine Alfredo', 'Fettuccine makarna, kremalı parmesan sos ve mantar.', {
+    groups: [multi('Ekstra Malzeme', ['Izgara Tavuk', 'Mantar', 'Parmesan'], { mode: 'surcharge' })],
+    removable: ['Mantar'],
+    tags: ['makarna'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 54, 'Akdeniz Salata', 'Marul, domates, salatalık, zeytin, beyaz peynir ve zeytinyağı.', {
+    groups: [salataSos(), salataEkstra()],
+    removable: ['Zeytin', 'Beyaz Peynir', 'Soğan'],
+    tags: ['salata', 'vejetaryen'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('pizza', 54, 'Çikolatalı Brownie', 'Yoğun kakaolu, içi yumuşak fırın brownie dilimi.', {
+    groups: [tatliYani()],
+    tags: ['tatlı'],
+    allergens: ['Gluten', 'Yumurta', 'Süt ürünü'],
+  }),
+  dish('pizza', 52, 'San Sebastian Cheesecake', 'Üstü karamelize, içi kremamsı fırın cheesecake dilimi.', {
+    groups: [sosSecimi(['Çikolata Sos', 'Frambuaz Sos', 'Karamel Sos'])],
+    tags: ['tatlı'],
+    allergens: ['Süt ürünü', 'Yumurta'],
+  }),
+  dish('pizza', 62, 'Tek Kişilik Pizza Menü', 'Orta boy pizza, patates kızartması ve kutu içecek.', {
+    groups: [
+      single('Pizza Seçimi', ['Margherita Pizza', 'Karışık Pizza', 'Sucuklu Pizza', 'Tavuklu Pizza'], { required: true, defaultIndex: 1 }),
+      single('İçecek', ['Kola', 'Kola Zero', 'Ayran', 'Su'], { required: true, defaultIndex: 0 }),
+    ],
+    tags: ['menü'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pizza', 60, 'Aile Boyu Pizza Menü', 'İki büyük pizza, sarımsaklı ekmek ve litrelik içecek.', {
+    groups: [
+      multi('Pizza Seçimi', ['Margherita Pizza', 'Karışık Pizza', 'Sucuklu Pizza', 'Tavuklu Pizza', 'Vejetaryen Pizza'], { maxSelect: 2 }),
+      single('İçecek', ['Litrelik Kola', 'Litrelik Kola Zero', 'Litrelik Ayran'], { required: true, defaultIndex: 0 }),
+    ],
+    tags: ['menü'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+
+  // Uzak Doğu
+  dish('uzak-dogu', 62, 'Karides Nigiri', 'Haşlanmış karides, sushi pirinci üzerinde, wasabi ile.', {
+    groups: [adet(['2 Adet', '4 Adet', '6 Adet'], 0), asyaSos()],
+    tags: ['sushi'],
+    allergens: ['Kabuklu deniz ürünü', 'Soya'],
+  }),
+  dish('uzak-dogu', 62, 'Ton Balıklı Nigiri', 'İnce dilim ton balığı, elle şekillendirilmiş sushi pirinci.', {
+    groups: [adet(['2 Adet', '4 Adet', '6 Adet'], 0), asyaSos()],
+    tags: ['sushi'],
+    allergens: ['Balık', 'Soya'],
+  }),
+  dish('uzak-dogu', 58, 'Avokado Maki', 'Nori yaprağına sarılı avokado ve sushi pirinci.', {
+    groups: [sushiAdet(), asyaSos()],
+    removable: ['Susam'],
+    tags: ['sushi', 'vejetaryen'],
+    allergens: ['Soya', 'Susam'],
+  }),
+  dish('uzak-dogu', 60, 'Sashimi Tabağı', 'İnce dilimlenmiş taze somon ve ton balığı.', {
+    groups: [adet(['6 Dilim', '9 Dilim', '12 Dilim'], 0), asyaSos()],
+    tags: ['sushi'],
+    allergens: ['Balık', 'Soya'],
+  }),
+  dish('uzak-dogu', 62, 'Tavuklu Udon', 'Kalın udon eriştesi, tavuk, sebze ve soya sosu.', {
+    groups: [aciSeviyesi(0), multi('Ekstra Malzeme', ['Ekstra Tavuk', 'Karides', 'Yumurta', 'Mantar'], { mode: 'surcharge', maxSelect: 2 })],
+    removable: ['Taze Soğan', 'Susam'],
+    tags: ['noodle'],
+    allergens: ['Gluten', 'Soya'],
+  }),
+  dish('uzak-dogu', 62, 'Karidesli Noodle', 'Wokta karides, sebze ve soya soslu yumurtalı erişte.', {
+    groups: [aciSeviyesi(0), multi('Ekstra Malzeme', ['Ekstra Karides', 'Tavuk', 'Yumurta', 'Mantar'], { mode: 'surcharge', maxSelect: 2 })],
+    removable: ['Taze Soğan', 'Susam'],
+    tags: ['noodle'],
+    allergens: ['Gluten', 'Soya', 'Kabuklu deniz ürünü', 'Yumurta'],
+  }),
+  dish('uzak-dogu', 58, 'Karidesli Pilav', 'Wokta yumurtalı pirinç, karides, bezelye ve taze soğan.', {
+    groups: [aciSeviyesi(0), asyaSos()],
+    removable: ['Bezelye', 'Taze Soğan'],
+    tags: ['pilav'],
+    allergens: ['Kabuklu deniz ürünü', 'Yumurta', 'Soya'],
+  }),
+  dish('uzak-dogu', 60, 'Moğol Usulü Dana', 'Dana dilimleri, taze soğan ve tatlı soya sosu.', {
+    groups: [pilavSecimi(['Beyaz Pilav', 'Wok Pilav', 'Noodle']), aciSeviyesi(0)],
+    removable: ['Taze Soğan', 'Susam'],
+    tags: ['wok'],
+    allergens: ['Soya', 'Susam'],
+  }),
+  dish('uzak-dogu', 58, 'Kung Pao Karides', 'Karides, yer fıstığı, kuru biber ve acı sos.', {
+    groups: [pilavSecimi(['Beyaz Pilav', 'Wok Pilav', 'Noodle']), aciSeviyesi(2)],
+    removable: ['Yer Fıstığı', 'Kuru Biber'],
+    tags: ['wok', 'acılı'],
+    allergens: ['Kabuklu deniz ürünü', 'Yer fıstığı', 'Soya'],
+  }),
+  dish('uzak-dogu', 56, 'Tom Yum Çorbası', 'Karidesli, limon otlu ve acılı Tayland çorbası.', {
+    groups: [aciSeviyesi(1), porsiyon(['Küçük Kase', 'Büyük Kase', 'Paylaşmalık Kase'], 0)],
+    tags: ['çorba', 'acılı'],
+    allergens: ['Kabuklu deniz ürünü'],
+  }),
+  dish('uzak-dogu', 60, 'Tavuk Katsu', 'Panko kaplamalı çıtır tavuk göğsü, katsu sos ile.', {
+    groups: [pilavSecimi(['Beyaz Pilav', 'Wok Pilav', 'Lahana Salatası']), sosSecimi(['Katsu Sos', 'Teriyaki Sos', 'Acı Mayonez'])],
+    tags: ['ana yemek'],
+    allergens: ['Gluten', 'Yumurta', 'Soya'],
+  }),
+  dish('uzak-dogu', 56, 'Tavuk Yakitori', 'Teriyaki soslu tavuk şiş, ızgarada pişirilir.', {
+    groups: [adet(['2 Şiş', '4 Şiş', '6 Şiş'], 0), sosSecimi(['Teriyaki Sos', 'Tatlı Ekşi Sos', 'Acı Mayonez'])],
+    removable: ['Susam', 'Taze Soğan'],
+    tags: ['ara sıcak'],
+    allergens: ['Soya', 'Susam'],
+  }),
+  dish('uzak-dogu', 52, 'Wakame Salatası', 'Susamlı deniz yosunu salatası, pirinç sirkesi ile.', {
+    groups: [porsiyon(['Küçük Porsiyon', 'Orta Porsiyon', 'Büyük Porsiyon'], 0)],
+    tags: ['salata', 'vegan'],
+    allergens: ['Susam', 'Soya'],
+  }),
+  dish('uzak-dogu', 56, 'Tavuklu Bao', 'Buharda pişmiş yumuşak bun, çıtır tavuk ve sos.', {
+    groups: [adet(['1 Adet', '2 Adet', '3 Adet'], 1), sosSecimi(['Hoisin Sos', 'Acı Mayonez', 'Teriyaki Sos'])],
+    removable: ['Salatalık', 'Kişniş'],
+    tags: ['ara sıcak'],
+    allergens: ['Gluten', 'Soya'],
+  }),
+  dish('uzak-dogu', 50, 'Kızarmış Muz', 'Çıtır kaplamalı kızarmış muz, bal ve susamla.', {
+    groups: [yanindaGelen(['Vanilyalı Dondurma', 'Bal', 'Çikolata Sos'], 2)],
+    tags: ['tatlı'],
+    allergens: ['Gluten', 'Susam'],
+  }),
+  dish('uzak-dogu', 60, 'Noodle Menü', 'Tavuklu noodle, bahar rulosu ve kutu içecek.', {
+    groups: [
+      single('Noodle Seçimi', ['Tavuklu Noodle', 'Sebzeli Noodle', 'Dana Etli Noodle', 'Karidesli Noodle'], { required: true, defaultIndex: 0 }),
+      single('İçecek', ['Kola', 'Kola Zero', 'Ice Tea Şeftali', 'Su'], { required: true, defaultIndex: 0 }),
+    ],
+    tags: ['menü'],
+    allergens: ['Gluten', 'Soya'],
+  }),
+
+  // Pastane & Fırın
+  dish('pastane-firin', 60, 'Su Böreği', 'İnce haşlanmış yufka katları arasında beyaz peynir.', {
+    groups: [gramaj(['200 g', '300 g', '500 g', '1 kg'], 0)],
+    tags: ['börek'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('pastane-firin', 56, 'Baget Ekmek', 'Çıtır kabuklu, içi yumuşak uzun Fransız ekmeği.', {
+    groups: [adet(['1 Adet', '2 Adet', '3 Adet'], 0)],
+    tags: ['ekmek'],
+    allergens: ['Gluten'],
+  }),
+  dish('pastane-firin', 52, 'Çavdar Ekmeği', 'Çavdar unuyla yapılan koyu renkli ekşi mayalı ekmek.', {
+    groups: [single('Kesim', ['Bütün', 'Dilimlenmiş', 'Yarım'], { required: true, defaultIndex: 0 })],
+    tags: ['ekmek'],
+    allergens: ['Gluten'],
+  }),
+  dish('pastane-firin', 58, 'Karaorman Pasta', 'Kakaolu pandispanya, vişne ve çikolata talaşlı krema.', {
+    groups: [porsiyon(['1 Dilim', '4 Kişilik', '8 Kişilik', '12 Kişilik'], 0)],
+    tags: ['pasta'],
+    allergens: ['Gluten', 'Yumurta', 'Süt ürünü'],
+  }),
+  dish('pastane-firin', 56, 'Magnolia', 'Bisküvi, muz ve hafif sütlü krema, kupta.', {
+    groups: [single('Meyve', ['Muzlu', 'Çilekli', 'Frambuazlı', 'Karışık Meyveli'], { required: true, defaultIndex: 0 })],
+    tags: ['sütlü tatlı'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pastane-firin', 54, 'Supangle', 'Kakaolu muhallebi, kek tabanı ve çikolata sosu.', {
+    groups: [yanindaGelen(['Antep Fıstığı', 'Hindistan Cevizi', 'Dondurma'], 2)],
+    tags: ['sütlü tatlı'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('pastane-firin', 56, 'Trileçe', 'Üç çeşit sütle ıslatılmış kek, karamel sosla.', {
+    groups: [single('Sos', ['Karamel Sos', 'Çikolata Sos', 'Frambuaz Sos'], { required: true, defaultIndex: 0 })],
+    tags: ['sütlü tatlı'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('pastane-firin', 50, 'Elmalı Kurabiye', 'Tarçınlı elma harcıyla doldurulmuş yumuşak kurabiye.', {
+    groups: [gramaj(['250 g', '500 g', '1 kg'], 0)],
+    tags: ['kurabiye'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('pastane-firin', 52, 'Çikolatalı Muffin', 'Damla çikolatalı yumuşak kek, tek kişilik kalıpta.', {
+    groups: [adet(['1 Adet', '3 Adet', '6 Adet'], 0)],
+    tags: ['kek'],
+    allergens: ['Gluten', 'Yumurta', 'Süt ürünü'],
+  }),
+  dish('pastane-firin', 50, 'Havuçlu Kek', 'Havuç, tarçın ve ceviz ile pişen yumuşak kek.', {
+    groups: [porsiyon(['1 Dilim', 'Yarım Kek', 'Bütün Kek'], 0)],
+    tags: ['kek'],
+    allergens: ['Gluten', 'Yumurta', 'Sert kabuklu yemiş'],
+  }),
+  dish('pastane-firin', 54, 'Limonata', 'Taze sıkılmış limon, nane ve buzla hazırlanır.', {
+    groups: [boy(['Küçük', 'Orta', 'Büyük'], 1), buz()],
+    tags: ['soğuk içecek'],
+  }),
+  dish('pastane-firin', 54, 'Latte', 'Espresso ve bol buharda ısıtılmış süt, ince köpük.', {
+    groups: [kahveBoy(), sutSecimi(), surupSecimi()],
+    tags: ['sıcak kahve'],
+    allergens: ['Süt ürünü'],
+  }),
+
+  // Kahve & İçecek
+  dish('kafe-icecek', 58, 'Affogato', 'Bir top vanilyalı dondurma üzerine sıcak espresso.', {
+    groups: [single('Espresso', ['Tek Shot', 'Çift Shot', 'Kafeinsiz'], { required: true, defaultIndex: 0 })],
+    extras: ['Karamel Sos', 'Fındık Kırığı'],
+    tags: ['kahve', 'tatlı'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('kafe-icecek', 58, 'Macchiato', 'Bir shot espresso üzerine az miktarda süt köpüğü.', {
+    groups: [single('Espresso', ['Tek Shot', 'Çift Shot', 'Kafeinsiz'], { required: true, defaultIndex: 0 }), sutSecimi()],
+    tags: ['sıcak kahve'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('kafe-icecek', 54, 'Espresso Tonic', 'Tonik, buz ve üzerine dökülen soğuk espresso.', {
+    groups: [kahveBoy(), single('Aroma', ['Sade', 'Portakallı', 'Limonlu', 'Biberiyeli'], { required: true, defaultIndex: 0 })],
+    tags: ['soğuk kahve'],
+  }),
+  dish('kafe-icecek', 58, 'Çikolatalı Milkshake', 'Çikolatalı dondurma, soğuk süt ve çikolata sosu.', {
+    groups: [kahveBoy(), multi('Ekstra', ['Krema', 'Çikolata Parçası', 'Fındık Kırığı'], { mode: 'surcharge', maxSelect: 2 })],
+    tags: ['soğuk içecek'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('kafe-icecek', 54, 'Muzlu Milkshake', 'Taze muz, vanilyalı dondurma ve soğuk süt.', {
+    groups: [kahveBoy(), multi('Ekstra', ['Krema', 'Karamel Sos', 'Bal'], { mode: 'surcharge', maxSelect: 2 })],
+    tags: ['soğuk içecek'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('kafe-icecek', 54, 'Kış Çayı', 'Tarçın, karanfil, elma ve portakal kabuğuyla demlenir.', {
+    groups: [boy(['Küçük', 'Orta', 'Büyük'], 1), single('Tatlandırıcı', ['Şekersiz', 'Bal', 'Esmer Şeker'], { required: true, defaultIndex: 0 })],
+    tags: ['sıcak içecek'],
+  }),
+  dish('kafe-icecek', 54, 'Cool Lime', 'Lime, nane, yeşil elma ve buzlu soğuk içecek.', {
+    groups: [boy(['Küçük', 'Orta', 'Büyük'], 1), buz(), single('Aroma', ['Klasik', 'Çilekli', 'Mango', 'Ananas'], { required: true, defaultIndex: 0 })],
+    tags: ['soğuk içecek'],
+  }),
+  dish('kafe-icecek', 58, 'Waffle', 'Çıtır waffle, çikolata sosu, muz ve çilek.', {
+    groups: [
+      multi('Meyve', ['Muz', 'Çilek', 'Kivi', 'Orman Meyvesi'], { maxSelect: 3 }),
+      multi('Ekstra', ['Dondurma', 'Fındık Kırığı', 'Beyaz Çikolata Sos'], { mode: 'surcharge', maxSelect: 2 }),
+    ],
+    tags: ['tatlı'],
+    allergens: ['Gluten', 'Yumurta', 'Süt ürünü'],
+  }),
+  dish('kafe-icecek', 56, 'Kruvasan Sandviç', 'Tereyağlı kruvasan arası hindi füme, kaşar ve domates.', {
+    groups: [single('İç Malzeme', ['Hindi Füme Kaşarlı', 'Peynirli Domatesli', 'Ton Balıklı', 'Avokadolu'], { required: true, defaultIndex: 0 })],
+    removable: ['Domates', 'Marul'],
+    tags: ['sandviç'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('kafe-icecek', 52, 'Çikolatalı Muffin', 'Damla çikolatalı yumuşak kek, tek kişilik kalıpta.', {
+    groups: [adet(['1 Adet', '3 Adet', '6 Adet'], 0)],
+    tags: ['kek'],
+    allergens: ['Gluten', 'Yumurta', 'Süt ürünü'],
+  }),
+
+  // Dünya Mutfağı & Cafe
+  dish('dunya-mutfagi', 58, 'Fish and Chips', 'Çıtır kaplamalı balık fileto ve patates kızartması.', {
+    groups: [sosSecimi(['Tartar Sos', 'Ketçap', 'Limonlu Mayonez']), porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0)],
+    tags: ['ana yemek'],
+    allergens: ['Balık', 'Gluten', 'Yumurta'],
+  }),
+  dish('dunya-mutfagi', 60, 'Spagetti Bolonez', 'Spagetti makarna, kıymalı domates sosu ve parmesan.', {
+    groups: [multi('Ekstra Malzeme', ['Ekstra Parmesan', 'Mantar', 'Acı Biber'], { mode: 'surcharge' })],
+    removable: ['Parmesan'],
+    tags: ['makarna'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('dunya-mutfagi', 58, 'Ton Balıklı Poke', 'Pirinç üzerinde ton balığı, avokado, edamame ve susam.', {
+    groups: [
+      sosSecimi(['Soya Sosu', 'Acı Mayonez', 'Susam Sos']),
+      multi('Ekstra Malzeme', ['Ekstra Ton Balığı', 'Mango', 'Wakame', 'Avokado'], { mode: 'surcharge', maxSelect: 2 }),
+    ],
+    removable: ['Avokado', 'Edamame', 'Susam'],
+    tags: ['bowl'],
+    allergens: ['Balık', 'Soya', 'Susam'],
+  }),
+  dish('dunya-mutfagi', 56, 'Avokadolu Ekmek','Ekşi mayalı ekmek, ezilmiş avokado ve haşlanmış yumurta.', {
+    groups: [multi('Ekstra Malzeme', ['Füme Somon', 'Beyaz Peynir', 'Çeri Domates', 'Poşe Yumurta'], { mode: 'surcharge', maxSelect: 2 })],
+    removable: ['Yumurta', 'Pul Biber'],
+    tags: ['kahvaltılık', 'vejetaryen'],
+    allergens: ['Gluten', 'Yumurta'],
+  }),
+  dish('dunya-mutfagi', 56, 'Lazanya', 'Kat kat makarna, kıymalı sos, beşamel ve kaşar.', {
+    groups: [porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0)],
+    tags: ['makarna'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('dunya-mutfagi', 58, 'Cheeseburger', 'Dana köfte, cheddar peyniri, turşu ve burger sosu.', {
+    groups: [burgerPisme(), burgerMenu(), burgerSos()],
+    removable: ['Turşu', 'Soğan', 'Domates'],
+    extras: ['Ekstra Cheddar', 'Ekstra Köfte'],
+    tags: ['burger'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('dunya-mutfagi', 54, 'Mantarlı Risotto', 'Arborio pirinci, mantar, parmesan ve tereyağı ile.', {
+    groups: [multi('Ekstra Malzeme', ['Izgara Tavuk', 'Trüf Yağı', 'Ekstra Parmesan'], { mode: 'surcharge' })],
+    tags: ['risotto', 'vejetaryen'],
+    allergens: ['Süt ürünü'],
+  }),
+
+  // Steak
+  dish('steak', 56, 'Dana Carpaccio', 'İnce dilim çiğ dana bonfile, roka ve parmesan.', {
+    groups: [sosSecimi(['Zeytinyağı Limon', 'Balzamik Sos', 'Hardallı Sos'])],
+    removable: ['Roka', 'Kapari'],
+    tags: ['başlangıç'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('steak', 60, 'Hünkar Beğendi', 'Patlıcan beğendi üzerinde tereyağında pişmiş dana kuşbaşı.', {
+    groups: [porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0)],
+    tags: ['ana yemek'],
+    allergens: ['Süt ürünü', 'Gluten'],
+  }),
+  dish('steak', 60, 'Lokum Steak', 'Yumuşak dana bonfileden kalın kesilmiş lokum dilimler.', {
+    groups: [gramaj(['200 g', '300 g', '400 g'], 0), pismeDerecesi(), garnitur()],
+    tags: ['steak'],
+  }),
+  dish('steak', 54, 'Sezar Salata', 'Marul, ızgara tavuk, kruton, parmesan ve sezar sos.', {
+    groups: [salataEkstra()],
+    removable: ['Kruton', 'Parmesan'],
+    tags: ['salata'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('steak', 54, 'Biberiyeli Patates', 'Fırında biberiyeli, sarımsaklı ve tereyağlı küçük patatesler.', {
+    groups: [multi('Ekstra Malzeme', ['Cheddar', 'Parmesan', 'Füme Et', 'Taze Soğan'], { mode: 'surcharge', maxSelect: 2 })],
+    tags: ['yan ürün', 'vejetaryen'],
+    allergens: ['Süt ürünü'],
+  }),
+  dish('steak', 50, 'Kremalı Ispanak', 'Tereyağında sotelenmiş ıspanak, krema ve parmesan ile.', {
+    groups: [porsiyon(['Küçük Porsiyon', 'Orta Porsiyon', 'Büyük Porsiyon'], 0)],
+    tags: ['yan ürün', 'vejetaryen'],
+    allergens: ['Süt ürünü'],
+  }),
+
+  // Balık & Deniz Ürünleri
+  dish('balik-deniz', 58, 'Levrek Şiş', 'Levrek parçaları, biber ve domatesle şişte ızgara.', {
+    groups: [porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0), balikYani()],
+    tags: ['ızgara'],
+    allergens: ['Balık'],
+  }),
+  dish('balik-deniz', 58, 'Palamut Izgara', 'Mevsiminde palamut, közlenmiş soğan ve roka ile.', {
+    groups: [porsiyon(['1 Porsiyon', '1,5 Porsiyon', '2 Porsiyon'], 0), balikYani()],
+    tags: ['ızgara', 'mevsimlik'],
+    allergens: ['Balık'],
+  }),
+  dish('balik-deniz', 56, 'Ahtapot Izgara', 'Yumuşatılmış ahtapot, zeytinyağı ve limonla ızgarada pişirilir.', {
+    groups: [porsiyon(['Küçük Porsiyon', 'Orta Porsiyon', 'Büyük Porsiyon'], 1), yanindaGelen(['Roka', 'Patates Püresi', 'Közlenmiş Biber'], 2)],
+    tags: ['ızgara'],
+    allergens: ['Yumuşakça'],
+  }),
+  dish('balik-deniz', 52, 'Fırın Helva', 'Fırında ısıtılmış tahin helvası, dondurma ile servis.', {
+    groups: [yanindaGelen(['Vanilyalı Dondurma', 'Ceviz', 'Antep Fıstığı'], 2)],
+    tags: ['tatlı'],
+    allergens: ['Susam', 'Süt ürünü'],
+  }),
+
+  // Meze
+  dish('meze', 56, 'Tarama', 'Balık yumurtası, ekmek içi, zeytinyağı ve limonla.', {
+    groups: [mezeBoy()],
+    tags: ['soğuk meze'],
+    allergens: ['Balık', 'Gluten'],
+  }),
+  dish('meze', 54, 'Lakerda', 'Tuzlanmış palamut dilimleri, kırmızı soğan ve zeytinyağı.', {
+    groups: [mezeBoy()],
+    removable: ['Kırmızı Soğan'],
+    tags: ['soğuk meze'],
+    allergens: ['Balık'],
+  }),
+  dish('meze', 54, 'Barbunya Pilaki', 'Zeytinyağında havuç ve patatesle pişmiş barbunya fasulyesi.', {
+    groups: [mezeBoy()],
+    tags: ['zeytinyağlı', 'vegan'],
+  }),
+  dish('meze', 52, 'Semizotu Salatası', 'Yoğurtlu semizotu, sarımsak ve ceviz ile hazırlanır.', {
+    groups: [mezeBoy()],
+    removable: ['Sarımsak', 'Ceviz'],
+    tags: ['soğuk meze', 'vejetaryen'],
+    allergens: ['Süt ürünü', 'Sert kabuklu yemiş'],
+  }),
+
+  // Börek
+  dish('borek', 56, 'Arnavut Böreği', 'Kat kat açılmış yufka arasında beyaz peynir, fırında.', {
+    groups: [gramaj(['250 g', '500 g', '1 kg'], 0)],
+    tags: ['börek'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
+  dish('borek', 54, 'Puf Böreği', 'Kızartılmış çıtır hamur içinde beyaz peynir ve maydanoz.', {
+    groups: [adet(['3 Adet', '6 Adet', '10 Adet'], 0), single('İç Harç', ['Peynirli', 'Kıymalı', 'Patatesli'], { required: true, defaultIndex: 0 })],
+    tags: ['börek'],
+    allergens: ['Gluten', 'Süt ürünü'],
+  }),
+  dish('borek', 52, 'Kabaklı Börek', 'Rendelenmiş kabak, dereotu ve beyaz peynirli tepsi böreği.', {
+    groups: [gramaj(['250 g', '500 g', '1 kg'], 0)],
+    tags: ['börek', 'vejetaryen'],
+    allergens: ['Gluten', 'Süt ürünü', 'Yumurta'],
+  }),
 ];
 
 // ---- packaged drinks: every store opens with at least ten (D-206) ---------------------------------------------

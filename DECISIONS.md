@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-207'den devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-208'den devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1031,3 +1031,11 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   ada dokunulmaz); Makarna & İtalyan, Mantı & Makarna'nın altına alındı. (7) *Havuz* 424 → 899 şablon; menüde ayrı ürün
   olan varyantlar (zeytinli/kaşarlı poğaça, kıymalı/patatesli gözleme, elma dilim patates) takma ad değil, kendi
   şablonu. "Ice tea" içecek anahtar kelimesi oldu.
+- **D-207** — **Her mutfakta havuz açılış hedefine yetiyor** (kullanıcı isteği, 2026-11-13: "eksiksiz tamamla"). Canlıda
+  yönetimden girilen hedeflerle karşılaştırınca dokuz mutfağın havuzu hedefin altında kalıyordu (Pizza, Uzak Doğu,
+  Pastane & Fırın, Kahve & İçecek, Dünya Mutfağı & Cafe, Steak, Balık & Deniz Ürünleri, Meze, Börek). Hedef temsilcinin
+  restorana söylediği toplam ürün sayısıdır; restoranın kendi ürünleri havuzdaki şablonlarla örtüştükçe havuz ancak
+  kendi büyüklüğü kadar doldurabilir. Bu yüzden ölçüt *havuz ≥ hedef*: model yoğunken de hedefe havuzdan ulaşılabilir.
+  78 el yazımı şablon eklendi (899 → 977), her biri hedefin en az iki üstünde. Yeni adlar başka şablonların takma
+  adlarıyla çakışmıyor; başka mutfakta zaten olan ürün (Lazanya, Hünkar Beğendi, Avokadolu Ekmek) aynı yazılışla
+  eklendi. Hedef sayıları yine kodda değil, canlı veritabanında.

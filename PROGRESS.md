@@ -9,13 +9,13 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
 - **Analiz:** altı ajanlık hat, ilk cevap normalde 6–11 saniye; hazır düğmeler ("Çorba öner") modelsiz, 1–3 saniye.
   Başlıkta **açılış kuralları** (ürün sayısı, 10 içecek, %70 açıklama, %20 fotoğraf, yazım düzeni) ve ek mutfak türü
   önerisi (D-206).
-- **Şablon havuzu:** 899 hazır şablon, her mutfakta paketli içecek seti; yönetimden **Excel ile toplu ekleme ve
+- **Şablon havuzu:** 977 hazır şablon; her mutfakta havuz açılış hedefine yetiyor (D-207), paketli içecek seti; yönetimden **Excel ile toplu ekleme ve
   güncelleme** (örnek dosya, önizleme, dışa aktarma).
 - **Yönetim paneli:** pano (14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1228, web 2; hepsi geçiyor.
+- **Testler:** backend 1306, web 2; hepsi geçiyor. GitHub Actions da yeşil.
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
 ## Bilinen sorunlar
@@ -27,12 +27,11 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
   artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
 - **Cloudflare Web Analytics betiği CSP'ye takılıyor.** Siteyi etkilemez, yalnızca tarayıcı konsolunda hata görünür.
   Cloudflare panelinden kapatılabilir.
-- **GitHub Actions sonucu son iki sürüm için doğrulanmadı.** Yerelde bütün kontroller geçiyor; Actions sekmesine bakmak lazım.
 
 ## Sıradaki işler için fikirler
 
-- **Havuz kalitesi:** Türk mutfakları dışındaki mutfaklarda (Uzak Doğu, Dünya Mutfağı, Burger) hazır şablon az. Yapay zekâ
-  yoğunken öneriler havuza düştüğü için buraya şablon eklemek kaliteyi doğrudan artırır (`backend/src/db/seed/templates-*.ts`).
+- **Havuz kalitesi:** her mutfakta havuz artık hedefe yetiyor (D-207). Bundan sonrası için en hızlı yol, yöneticilerin
+  bölgelerinden gelen gerçek ürünleri yönetim panelinden Excel ile eklemesi; kod tarafı `backend/src/db/seed/templates-*.ts`.
 - **İlk cevabın hızı:** kartlar ancak doğrulamadan sonra geliyor. Havuzdan gelen kartları erkenden göstermek ilk cevabı
   hızlandırır (`agents/pipeline.ts`, `item` olayları).
 - **Öğrenme için hafif bir sinyal:** temsilcinin kopyaladığı kartlar "işe yaradı" sinyali olarak kaydedilebilir.
@@ -43,6 +42,6 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-202 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-207 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).
