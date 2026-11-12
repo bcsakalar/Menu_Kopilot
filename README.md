@@ -204,6 +204,9 @@ Sürümü artırmazsan değişiklik canlıya **yansımaz**, çünkü veritabanı
 ### Mutfak, kategori ya da hazır şablon eklemek
 
 - Elle ve anında: yönetim paneli → **Mutfak türleri** (hedef ürün sayısı, kategori minimumları) ve **Şablon havuzu**.
+- Toplu, Excel ile: **Şablon havuzu → Örnek Excel**'i indir, doldur (Google Sheets'te de açılır), **Excel'den yükle**.
+  Önce önizleme gelir; aynı mutfakta aynı isimli ürün güncellenir, yoksa eklenir. **Havuzu Excel'e aktar** aynı düzende
+  dışa aktarır: düzenleyip geri yüklemek toplu güncellemedir (`backend/src/modules/templates/excel.ts`).
 - Kodla, herkes için: `backend/src/db/seed/` dosyaları. Tohumlama her açılışta çalışır ama panelden düzenlenmiş ya da
   silinmiş kayıtların üzerine yazmaz.
 
@@ -228,7 +231,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-206`'dan devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-207`'den devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -270,11 +273,12 @@ biçimindedir. Etkileşimli belge `/docs` adresindedir (canlıda kapalı).
 | Alan | Uçlar |
 |---|---|
 | Sohbet (açık) | `POST /chat/messages` (multipart: `conversationId?`, `text?`, `images[]` ≤ 5; cevap SSE ile akar), `GET /chat/conversations`, `GET/DELETE /chat/conversations/:id` |
-| Yönetim | `GET /admin/overview?range=today\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id` |
+| Yönetim | `GET /admin/overview?range=today\|week\|month`, `GET /admin/conversations`, `GET /admin/conversations/:id`, `GET /admin/feedback`, `PATCH /admin/feedback/:id` |
+| Geri bildirim (açık) | `POST /feedback` (`kind`, `message`, `name?`, `conversationId?`; dakikada 5) |
 | Giriş | `POST /auth/login` (admin çerezini koyar), `POST /auth/logout`, `GET /auth/me` |
 | Analiz | `GET /analyze/:runId`, `/events`, `/trace`, `POST /analyze/:runId/cancel` (oturum sahibi); `POST /analyze` ve `POST /suggestion-items/:id/accept\|skip\|later` yalnızca admin |
 | Kategoriler | `GET /categories`, `PATCH /categories/:key`, `GET/PUT /cuisines/:id/categories` |
-| Şablon havuzu | `GET /templates`, `GET/PATCH/DELETE /templates/:id`, `POST /templates` |
+| Şablon havuzu | `GET /templates`, `GET/PATCH/DELETE /templates/:id`, `POST /templates`, `GET /templates/excel/sample`, `GET /templates/excel/export`, `POST /templates/excel/import?dryRun=true\|false` |
 | Ayarlar | `GET/POST/PATCH/DELETE /cuisines`, `GET /settings/providers`, `PUT /settings/providers/:taskKey`, `GET /settings/quota`, `GET /usage/summary`, `GET /learning`, `POST /learning/forget` |
 | Sağlık | `GET /health`, `GET /health/ready` (veritabanı + Redis) |
 
@@ -347,7 +351,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-205). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-206). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

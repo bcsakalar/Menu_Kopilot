@@ -1,17 +1,21 @@
 # Durum
 
-Son güncelleme: 2026-11-08 · Canlı sürüm: `921201a`
+Son güncelleme: 2026-11-13
 
 ## Bugün ne çalışıyor
 
 - **Site:** sohbet ekranı (Ctrl+V, sürükle-bırak, dosya seçme, yazarak ürün listesi), takip mesajları, kopyalama, sayfa
-  yenilenince kaldığı yerden devam, analiz sürerken görüşme değiştirme.
+  yenilenince kaldığı yerden devam, analiz sürerken görüşme değiştirme, **geri bildirim gönderme**.
 - **Analiz:** altı ajanlık hat, ilk cevap normalde 6–11 saniye; hazır düğmeler ("Çorba öner") modelsiz, 1–3 saniye.
-- **Yönetim paneli:** genel bakış, görüşmeler (zaman çizelgesi), şablon havuzu ve arşivi, mutfak türleri, öğrenilenler,
-  modeller.
+  Başlıkta **açılış kuralları** (ürün sayısı, 10 içecek, %70 açıklama, %20 fotoğraf, yazım düzeni) ve ek mutfak türü
+  önerisi (D-206).
+- **Şablon havuzu:** 899 hazır şablon, her mutfakta paketli içecek seti; yönetimden **Excel ile toplu ekleme ve
+  güncelleme** (örnek dosya, önizleme, dışa aktarma).
+- **Yönetim paneli:** pano (14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
+  bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 737, web 2; hepsi geçiyor.
+- **Testler:** backend 1228, web 2; hepsi geçiyor.
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
 ## Bilinen sorunlar

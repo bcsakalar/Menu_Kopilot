@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-206'dan devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-207'den devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1012,3 +1012,22 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   sertifika yenileme yolu açık kalır). Ayrıca sunucudaki bütün projelerin veritabanları her gece yedeklenir, 10 dakikada bir
   çalışan bir sağlık kontrolü sorunları telefona bildirir. Bunlar sunucuya ait betiklerdir, bu repoda yer almaz; Menü
   Kopilot'un kendi yedeği (`deploy/backup.sh`) aynen sürer.
+- **D-206** — **Açılış kuralları, geri bildirim, Excel ile şablon havuzu, yönetim panosu, zenginleşen havuz** (kullanıcı
+  isteği, 2026-11-13: ekibe sunum öncesi "hedeflere göre güncelle, şablonları zenginleştir, Excel'den ekleyelim,
+  geri bildirim ve akıllı bir pano"). (1) *Kontrol listesi:* her analiz `counts.quality` taşır: ürün sayısı mutfağın
+  hedefine karşı (içecekler dahil), en az 10 içecek, ürünlerin %70'inde açıklama, %20'sinde fotoğraf, yazım düzeni
+  (tamamı büyük ya da küçük harf ad) ve menünün kendi ürünlerinden çıkan ek mutfak türleri. Açıklama ve fotoğraf
+  yalnızca panel ekran görüntüsünde görünür; görünmeyen kural tahmin edilmez, "bilinmiyor" döner. Eşikler
+  `agents/quality.ts`; mutfak bazlı minimum sayılar şirket içi bilgi olduğu için koda yazılmaz, canlıda yönetimden
+  girilir. Bölge km², logo/banner, AI görsel ve arama kuralları menüyle ilgili olmadığı için kapsam dışı. (2) *İçecek:*
+  kategori beklentisi 10 (kahve dükkânı 25), migration 0009; GREATEST ile hiçbir sayıyı düşürmez, kural platformun
+  olduğu için elle düzenlenmiş mutfaklara da uygulanır. Her mutfağa paketli içecek seti eklendi (düz panel satırı).
+  (3) *Geri bildirim:* `feedback` tablosu (0008); ziyaretçi çereziyle gönderir (dakikada 5), görüşme yalnızca kendi
+  görüşmesiyse eklenir; yönetim okur, not düşer, kapatır. (4) *Excel:* örnek dosya, havuzu dışa aktarma ve içe aktarma
+  aynı düzende; içe aktarma önce önizleme gösterir, eşleşme mutfak + ad, içe aktarılan şablon `imported` olur ve
+  tohumlama üzerine yazmaz. Kütüphane olarak `read-excel-file` / `write-excel-file` (küçük, bakımlı; `exceljs`'in eski
+  bağımlılıkları yerine). (5) *Pano:* 7 günlük aralık, 14 günlük seri, analizlerin kuralları kaçırma oranı, hedefine
+  uzak mutfaklar, yeni geri bildirim. (6) *Mutfak adları* platformun kategori adlarına çekildi (0008, elle değiştirilmiş
+  ada dokunulmaz); Makarna & İtalyan, Mantı & Makarna'nın altına alındı. (7) *Havuz* 424 → 899 şablon; menüde ayrı ürün
+  olan varyantlar (zeytinli/kaşarlı poğaça, kıymalı/patatesli gözleme, elma dilim patates) takma ad değil, kendi
+  şablonu. "Ice tea" içecek anahtar kelimesi oldu.

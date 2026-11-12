@@ -169,15 +169,19 @@ describe('migrations', () => {
     expect(await publicTables(handle)).toHaveLength(22);
   });
 
-  it('0009 raises the drink expectation to ten (a coffee house to 25) and leaves hand-edited cuisines alone', async () => {
+  it('0009 raises the drink expectation to at least ten (a coffee house 25) and never lowers a higher one', async () => {
     expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0009_drink_minimum']);
     await executeRows(handle.db, sql`insert into menu_categories (key, label, sort_order) values ('icecek', 'İçecek', 70) on conflict do nothing returning key`);
     await executeRows(
       handle.db,
       sql`insert into cuisines (slug, name, categories_edited_by_user) values
-        ('kebap-izgara', 'Kebap', false), ('kafe-icecek', 'Kahve & İçecek', false), ('tatli', 'Tatlı', true) returning id`,
+        ('kebap-izgara', 'Kebap', false), ('kafe-icecek', 'Kahve & İçecek', false), ('pizza', 'Pizza', true), ('tatli', 'Tatlı', true) returning id`,
     );
-    await executeRows(handle.db, sql`insert into cuisine_categories (cuisine_id, category_key, min_items) select id, 'icecek', 2 from cuisines returning id`);
+    await executeRows(
+      handle.db,
+      sql`insert into cuisine_categories (cuisine_id, category_key, min_items)
+          select id, 'icecek', case when slug = 'tatli' then 12 else 2 end from cuisines returning id`,
+    );
     await handle.migrate();
     const rows = await executeRows(
       handle.db,
@@ -186,7 +190,8 @@ describe('migrations', () => {
     expect(rows.map((r) => [r['slug'], r['min_items']])).toEqual([
       ['kafe-icecek', 25],
       ['kebap-izgara', 10],
-      ['tatli', 2],
+      ['pizza', 10],
+      ['tatli', 12],
     ]);
     await executeRows(handle.db, sql`delete from cuisines returning id`);
     await executeRows(handle.db, sql`delete from menu_categories returning key`);

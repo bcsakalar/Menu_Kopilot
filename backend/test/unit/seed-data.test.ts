@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { SEED_CATEGORIES } from '../../src/db/seed/categories.js';
+import { CategoryIndex } from '../../src/domain/category.js';
 import { isBasePriceGroupName, templatePayloadSchema } from '../../src/domain/template.js';
 import { containsPriceAmount } from '../../src/lib/price-guard.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
@@ -45,6 +47,14 @@ describe('seed data', () => {
       expect(words(d), `${t.cuisine} / ${t.payload.name}: ${d}`).toBeGreaterThanOrEqual(6);
       expect(words(d), `${t.cuisine} / ${t.payload.name}: ${d}`).toBeLessThanOrEqual(8);
       expect(d).not.toMatch(/eşsiz|muhteşem|enfes|nefis|harika|mükemmel/i);
+    }
+  });
+
+  it('files every packaged drink under İçecek, so the ten-drink rule counts it (D-206)', () => {
+    const index = new CategoryIndex(SEED_CATEGORIES.map((c, i) => ({ key: c.key, label: c.label, sortOrder: i, keywords: [...c.keywords] })));
+    for (const t of SEED_TEMPLATES) {
+      if (t.payload.description !== '') continue;
+      expect(index.classify(t.payload.name), `${t.cuisine} / ${t.payload.name}`).toBe('icecek');
     }
   });
 

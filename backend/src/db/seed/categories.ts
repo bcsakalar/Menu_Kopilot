@@ -92,6 +92,8 @@ export const SEED_CATEGORIES: readonly SeedCategory[] = [
       // panel (D-175), so the spellings the model actually writes matter: "Salep" without the h, şerbetler,
       // nektarlar, kefir.
       'salep', 'oralet', 'serbet', 'nektar', 'kefir', 'shake', 'kombucha', 'nane-limon', 'ihlamur',
+      // Packaged ice tea goes on menus under its own name (D-206).
+      'ice tea',
     ],
   },
   {
