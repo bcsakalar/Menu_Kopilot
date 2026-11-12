@@ -1,5 +1,6 @@
 import { DUNYA_DENIZ_EK_TEMPLATES } from './templates-dunya-deniz-ek.js';
 import { EK_GENIS_TEMPLATES } from './templates-ek-genis.js';
+import { ZENGIN_TEMPLATES, packagedDrinks } from './templates-zengin.js';
 import { EV_EK_TEMPLATES } from './templates-ev-ek.js';
 import { FASTFOOD_EK_TEMPLATES } from './templates-fastfood-ek.js';
 import { HAMUR_EV_TEMPLATES } from './templates-hamur-ev.js';
@@ -18,7 +19,7 @@ import type { SeedTemplate } from './template-types.js';
  * The same product may appear in several cuisines (e.g. Ayran for kebap, çiğ köfte and ev yemekleri); matching
  * prefers the branch's own cuisine.
  */
-const ALL_TEMPLATES: readonly SeedTemplate[] = [
+const WAVES: readonly SeedTemplate[] = [
   ...KEBAP_DONER_TEMPLATES,
   ...HAMUR_EV_TEMPLATES,
   ...TATLI_DIGER_TEMPLATES,
@@ -32,7 +33,10 @@ const ALL_TEMPLATES: readonly SeedTemplate[] = [
   // none at all), çorba, yan ürün, ara sıcak, tatlı — plus the smallest kitchens and drinks as plain panel rows.
   ...KOMBO_ICECEK_TEMPLATES,
   ...EK_GENIS_TEMPLATES,
+  // Fourth wave (D-206): toward the opening targets, and ten drinks for every kitchen.
+  ...ZENGIN_TEMPLATES,
 ];
+const ALL_TEMPLATES: readonly SeedTemplate[] = [...WAVES, ...packagedDrinks(WAVES)];
 
 /**
  * The templates with their panel descriptions: 6–8 words, or empty for a packaged drink (D-178). The dish data

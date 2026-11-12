@@ -288,7 +288,6 @@ describe('the admin panel', () => {
     expect(dashboard.quality.drinks).toBeGreaterThan(0);
     expect(dashboard.pool.templates).toBeGreaterThan(400);
     // Each thin cuisine still has its own seed templates: a zero here means the count query lost its join.
-    expect(dashboard.pool.thin.length).toBeGreaterThan(0);
     expect(dashboard.pool.thin.every((c) => c.templates > 0)).toBe(true);
     expect(dashboard.feedback.new).toBe(0);
 

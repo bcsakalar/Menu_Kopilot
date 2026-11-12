@@ -183,7 +183,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'burger',
     importance: 86,
-    aliases: ['Patates', 'Kızarmış Patates', 'Parmak Patates', 'Elma Dilim Patates', 'Baharatlı Patates'],
+    aliases: ['Patates', 'Kızarmış Patates', 'Parmak Patates', 'Baharatlı Patates'],
     name: 'Patates Kızartması',
     description: 'Çıtır çıtır kızartılmış patates; parmak ya da elma dilim kesim, tuz ve isteğe göre baharatla.',
     servingNote: 'Sıcak servis; yumuşamasın diye havalandırmalı kapta, soslar ayrı gönderilir.',
@@ -232,7 +232,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'burger',
     importance: 72,
-    aliases: ['Kutu Kola', 'Soğuk İçecek', 'Kola', 'Gazlı İçecek'],
+    aliases: ['Kutu Kola', 'Soğuk İçecek', 'Gazlı İçecek'],
     name: 'Kutu İçecek',
     description: 'Soğuk kutu içecek; kola, şekersiz kola, gazoz, soğuk çay ya da maden suyu seçenekleriyle.',
     servingNote: 'Soğuk servis; kutusunda ya da şişesinde gönderilir.',

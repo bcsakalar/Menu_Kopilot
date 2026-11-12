@@ -73,8 +73,8 @@ describe('category taxonomy seed', () => {
       .from(cuisineCategories)
       .where(eq(cuisineCategories.cuisineId, pideci!));
     expect(expectations.map((e) => e.categoryKey).sort()).toEqual(['ana-yemek', 'corba', 'icecek', 'salata-meze', 'tatli']);
-    // A drinks target of 2 is what makes a pide-only menu report an open drinks category.
-    expect(expectations.find((e) => e.categoryKey === 'icecek')?.minItems).toBe(2);
+    // The ten-drink opening rule (D-206) is what makes a pide-only menu report an open drinks category.
+    expect(expectations.find((e) => e.categoryKey === 'icecek')?.minItems).toBe(10);
   });
 });
 
@@ -113,8 +113,8 @@ describe('POST /analyze — typed menu', () => {
     });
     const counts = result.counts!;
     const gaps = new Map(counts.categories.map((c) => [c.key, c]));
-    // A pide-only menu is two drinks short and, at 5 of an expected 6, one main course short.
-    expect(gaps.get('icecek')?.missing).toBe(2);
+    // A pide-only menu is ten drinks short (D-206) and, at 5 of an expected 6, one main course short.
+    expect(gaps.get('icecek')?.missing).toBe(10);
     expect(gaps.get('ana-yemek')?.missing).toBe(1);
 
     const perCategory = new Map<string, number>();

@@ -223,7 +223,7 @@ describe('cuisines API', () => {
         'ana-yemek:6',
         'salata-meze:1',
         'tatli:1',
-        'icecek:2',
+        'icecek:10',
       ]);
 
       const res = await ctx.app.inject({

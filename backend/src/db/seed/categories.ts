@@ -1,4 +1,5 @@
 import type { CuisineSlug } from './cuisines.js';
+import { MIN_DRINKS } from '../../agents/quality.js';
 
 /**
  * Menu category taxonomy and the per-cuisine expectations behind the Gap Analyst.
@@ -122,38 +123,41 @@ function spread(cuisine: CuisineSlug, entries: readonly (readonly [CategoryKey, 
   return entries.map(([category, minItems]) => ({ cuisine, category, minItems }));
 }
 
+/** Every store opens with at least ten drinks (D-206); a coffee house is mostly drinks. */
+const CAFE_DRINKS = 25;
+
 const FOOD_BASE: readonly (readonly [CategoryKey, number])[] = [
   ['ana-yemek', 5],
-  ['icecek', 2],
+  ['icecek', MIN_DRINKS],
   ['tatli', 1],
 ];
 
 export const SEED_CUISINE_CATEGORIES: readonly SeedCuisineCategory[] = [
-  ...spread('kebap-izgara', [['ana-yemek', 6], ['corba', 1], ['ara-sicak', 1], ['salata-meze', 2], ['icecek', 2], ['tatli', 1]]),
-  ...spread('doner', [['ana-yemek', 6], ['ara-sicak', 1], ['salata-meze', 1], ['yan-urun', 1], ['icecek', 2], ['menu-kampanya', 1]]),
-  ...spread('pide-lahmacun', [['ana-yemek', 6], ['corba', 1], ['salata-meze', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('kofte', [['ana-yemek', 5], ['corba', 1], ['salata-meze', 2], ['yan-urun', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('cigkofte', [['ana-yemek', 4], ['salata-meze', 1], ['icecek', 2], ['tatli', 1], ['menu-kampanya', 1]]),
-  ...spread('ev-yemekleri', [['ana-yemek', 6], ['corba', 2], ['salata-meze', 2], ['yan-urun', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('corba', [['corba', 6], ['ana-yemek', 2], ['yan-urun', 1], ['icecek', 2]]),
-  ...spread('manti-hamur-isleri', [['ana-yemek', 5], ['corba', 1], ['salata-meze', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('tatli', [['tatli', 7], ['icecek', 3]]),
-  ...spread('dondurma', [['tatli', 6], ['icecek', 3]]),
-  ...spread('sokak-lezzetleri', [['ana-yemek', 5], ['ara-sicak', 2], ['icecek', 2], ['tatli', 1]]),
-  ...spread('tantuni', [['ana-yemek', 4], ['salata-meze', 1], ['icecek', 2], ['tatli', 1], ['menu-kampanya', 1]]),
-  ...spread('burger', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', 2], ['menu-kampanya', 1]]),
-  ...spread('tavuk', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', 2], ['menu-kampanya', 1]]),
-  ...spread('pizza', [['ana-yemek', 6], ['ara-sicak', 1], ['salata-meze', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('makarna', [['ana-yemek', 6], ['salata-meze', 1], ['icecek', 2], ['tatli', 1]]),
-  ...spread('steak', [['ana-yemek', 5], ['ara-sicak', 1], ['salata-meze', 1], ['yan-urun', 2], ['icecek', 2]]),
-  ...spread('kahvalti', [['ana-yemek', 5], ['ara-sicak', 2], ['atistirmalik', 2], ['icecek', 3]]),
-  ...spread('tost-sandvic', [['atistirmalik', 6], ['ara-sicak', 1], ['icecek', 3]]),
-  ...spread('pastane-firin', [['atistirmalik', 5], ['tatli', 4], ['icecek', 2]]),
-  ...spread('borek', [['atistirmalik', 5], ['corba', 1], ['tatli', 1], ['icecek', 3]]),
-  ...spread('kafe-icecek', [['icecek', 8], ['atistirmalik', 3], ['tatli', 2]]),
-  ...spread('balik-deniz', [['ana-yemek', 5], ['corba', 1], ['ara-sicak', 1], ['salata-meze', 3], ['icecek', 2]]),
-  ...spread('meze', [['salata-meze', 7], ['ara-sicak', 2], ['icecek', 2]]),
-  ...spread('salata-saglikli', [['salata-meze', 6], ['ana-yemek', 2], ['icecek', 2], ['atistirmalik', 1]]),
-  ...spread('uzak-dogu', [['ana-yemek', 6], ['ara-sicak', 2], ['salata-meze', 1], ['icecek', 2]]),
+  ...spread('kebap-izgara', [['ana-yemek', 6], ['corba', 1], ['ara-sicak', 1], ['salata-meze', 2], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('doner', [['ana-yemek', 6], ['ara-sicak', 1], ['salata-meze', 1], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['menu-kampanya', 1]]),
+  ...spread('pide-lahmacun', [['ana-yemek', 6], ['corba', 1], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('kofte', [['ana-yemek', 5], ['corba', 1], ['salata-meze', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('cigkofte', [['ana-yemek', 4], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1], ['menu-kampanya', 1]]),
+  ...spread('ev-yemekleri', [['ana-yemek', 6], ['corba', 2], ['salata-meze', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('corba', [['corba', 6], ['ana-yemek', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS]]),
+  ...spread('manti-hamur-isleri', [['ana-yemek', 5], ['corba', 1], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('tatli', [['tatli', 7], ['icecek', MIN_DRINKS]]),
+  ...spread('dondurma', [['tatli', 6], ['icecek', MIN_DRINKS]]),
+  ...spread('sokak-lezzetleri', [['ana-yemek', 5], ['ara-sicak', 2], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('tantuni', [['ana-yemek', 4], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1], ['menu-kampanya', 1]]),
+  ...spread('burger', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['menu-kampanya', 1]]),
+  ...spread('tavuk', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['menu-kampanya', 1]]),
+  ...spread('pizza', [['ana-yemek', 6], ['ara-sicak', 1], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('makarna', [['ana-yemek', 6], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
+  ...spread('steak', [['ana-yemek', 5], ['ara-sicak', 1], ['salata-meze', 1], ['yan-urun', 2], ['icecek', MIN_DRINKS]]),
+  ...spread('kahvalti', [['ana-yemek', 5], ['ara-sicak', 2], ['atistirmalik', 2], ['icecek', MIN_DRINKS]]),
+  ...spread('tost-sandvic', [['atistirmalik', 6], ['ara-sicak', 1], ['icecek', MIN_DRINKS]]),
+  ...spread('pastane-firin', [['atistirmalik', 5], ['tatli', 4], ['icecek', MIN_DRINKS]]),
+  ...spread('borek', [['atistirmalik', 5], ['corba', 1], ['tatli', 1], ['icecek', MIN_DRINKS]]),
+  ...spread('kafe-icecek', [['icecek', CAFE_DRINKS], ['atistirmalik', 3], ['tatli', 2]]),
+  ...spread('balik-deniz', [['ana-yemek', 5], ['corba', 1], ['ara-sicak', 1], ['salata-meze', 3], ['icecek', MIN_DRINKS]]),
+  ...spread('meze', [['salata-meze', 7], ['ara-sicak', 2], ['icecek', MIN_DRINKS]]),
+  ...spread('salata-saglikli', [['salata-meze', 6], ['ana-yemek', 2], ['icecek', MIN_DRINKS], ['atistirmalik', 1]]),
+  ...spread('uzak-dogu', [['ana-yemek', 6], ['ara-sicak', 2], ['salata-meze', 1], ['icecek', MIN_DRINKS]]),
   ...spread('dunya-mutfagi', [...FOOD_BASE, ['ara-sicak', 2], ['salata-meze', 1]]),
 ];

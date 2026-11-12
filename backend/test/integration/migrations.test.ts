@@ -70,8 +70,9 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003 to 0008 sit on top of 0002, so all seven come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 7)).map((r) => r.tag)).toEqual([
+    // 0003 to 0009 sit on top of 0002, so all eight come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 8)).map((r) => r.tag)).toEqual([
+      '0009_drink_minimum',
       '0008_feedback_cuisine_names',
       '0007_web_chat',
       '0006_seller_answers',
@@ -95,7 +96,8 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 7)).map((r) => r.tag)).toEqual([
+    expect((await rollbackMigrations(handle.db, 8)).map((r) => r.tag)).toEqual([
+      '0009_drink_minimum',
       '0008_feedback_cuisine_names',
       '0007_web_chat',
       '0006_seller_answers',
@@ -114,6 +116,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
+    // 0009 only changes numbers.
+    const drinks = await rollbackMigrations(handle.db, 1);
+    expect(drinks.map((r) => r.tag)).toEqual(['0009_drink_minimum']);
+    expect(await publicTables(handle)).toHaveLength(22);
+
     // 0008 takes the feedback table with it.
     const feedback = await rollbackMigrations(handle.db, 1);
     expect(feedback.map((r) => r.tag)).toEqual(['0008_feedback_cuisine_names']);
@@ -160,6 +167,29 @@ describe('migrations', () => {
 
     await handle.migrate();
     expect(await publicTables(handle)).toHaveLength(22);
+  });
+
+  it('0009 raises the drink expectation to ten (a coffee house to 25) and leaves hand-edited cuisines alone', async () => {
+    expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0009_drink_minimum']);
+    await executeRows(handle.db, sql`insert into menu_categories (key, label, sort_order) values ('icecek', 'İçecek', 70) on conflict do nothing returning key`);
+    await executeRows(
+      handle.db,
+      sql`insert into cuisines (slug, name, categories_edited_by_user) values
+        ('kebap-izgara', 'Kebap', false), ('kafe-icecek', 'Kahve & İçecek', false), ('tatli', 'Tatlı', true) returning id`,
+    );
+    await executeRows(handle.db, sql`insert into cuisine_categories (cuisine_id, category_key, min_items) select id, 'icecek', 2 from cuisines returning id`);
+    await handle.migrate();
+    const rows = await executeRows(
+      handle.db,
+      sql`select c.slug, cc.min_items from cuisine_categories cc join cuisines c on c.id = cc.cuisine_id order by c.slug`,
+    );
+    expect(rows.map((r) => [r['slug'], r['min_items']])).toEqual([
+      ['kafe-icecek', 25],
+      ['kebap-izgara', 10],
+      ['tatli', 2],
+    ]);
+    await executeRows(handle.db, sql`delete from cuisines returning id`);
+    await executeRows(handle.db, sql`delete from menu_categories returning key`);
   });
 
   it('splits statements on drizzle breakpoints and drops comment-only chunks', () => {

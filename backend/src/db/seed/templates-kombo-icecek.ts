@@ -14,7 +14,7 @@ import { type SeedTemplate, template } from './template-types.js';
  */
 
 /** A drink: the row as the panel takes it. */
-function drink(cuisine: SeedTemplate['cuisine'], name: string, importance: number, aliases: readonly string[] = [], portionInfo = ''): SeedTemplate {
+export function drink(cuisine: SeedTemplate['cuisine'], name: string, importance: number, aliases: readonly string[] = [], portionInfo = ''): SeedTemplate {
   return template({
     cuisine,
     importance,
@@ -281,9 +281,9 @@ export const KOMBO_ICECEK_TEMPLATES: readonly SeedTemplate[] = [
   // ---- Drinks, as plain panel rows --------------------------------------------------------------------------
   drink('pide-lahmacun', 'Ayran', 80, ['Ayran Bardak'], '300 ml'),
   drink('pide-lahmacun', 'Şalgam Suyu', 62, ['Şalgam'], '300 ml'),
-  drink('pide-lahmacun', 'Kutu İçecek', 70, ['Kola', 'Gazoz', 'Meşrubat'], '330 ml'),
+  drink('pide-lahmacun', 'Kutu İçecek', 70, ['Meşrubat'], '330 ml'),
   drink('kofte', 'Ayran', 80, [], '300 ml'),
-  drink('kofte', 'Kutu İçecek', 70, ['Kola', 'Gazoz'], '330 ml'),
+  drink('kofte', 'Kutu İçecek', 70, ['Meşrubat'], '330 ml'),
   drink('kofte', 'Su', 60, ['Şişe Su'], '500 ml'),
   drink('tantuni', 'Ayran', 80, [], '300 ml'),
   drink('tantuni', 'Şalgam Suyu', 66, ['Şalgam'], '300 ml'),
@@ -293,25 +293,25 @@ export const KOMBO_ICECEK_TEMPLATES: readonly SeedTemplate[] = [
   drink('corba', 'Su', 58, ['Şişe Su'], '500 ml'),
   drink('borek', 'Çay', 76, ['Demleme Çay'], ''),
   drink('borek', 'Ayran', 70, [], '300 ml'),
-  drink('makarna', 'Kutu İçecek', 68, ['Kola', 'Gazoz'], '330 ml'),
+  drink('makarna', 'Kutu İçecek', 68, ['Meşrubat'], '330 ml'),
   drink('makarna', 'Maden Suyu', 58, ['Soda'], '200 ml'),
   drink('steak', 'Maden Suyu', 60, ['Soda'], '200 ml'),
   drink('steak', 'Şalgam Suyu', 52, ['Şalgam'], '300 ml'),
   drink('tost-sandvic', 'Çay', 74, ['Demleme Çay'], ''),
-  drink('tost-sandvic', 'Kutu İçecek', 70, ['Kola', 'Gazoz'], '330 ml'),
+  drink('tost-sandvic', 'Kutu İçecek', 70, ['Meşrubat'], '330 ml'),
   drink('pastane-firin', 'Çay', 78, ['Demleme Çay'], ''),
   drink('pastane-firin', 'Ayran', 66, [], '300 ml'),
   drink('salata-saglikli', 'Taze Sıkma Portakal Suyu', 62, ['Portakal Suyu'], '250 ml'),
   drink('salata-saglikli', 'Su', 58, ['Şişe Su'], '500 ml'),
   drink('balik-deniz', 'Ayran', 66, [], '300 ml'),
   drink('balik-deniz', 'Şalgam Suyu', 58, ['Şalgam'], '300 ml'),
-  drink('uzak-dogu', 'Kutu İçecek', 62, ['Kola', 'Gazoz'], '330 ml'),
+  drink('uzak-dogu', 'Kutu İçecek', 62, ['Meşrubat'], '330 ml'),
   drink('uzak-dogu', 'Yasemin Çayı', 58, ['Jasmine Tea'], ''),
-  drink('dunya-mutfagi', 'Kutu İçecek', 64, ['Kola', 'Gazoz'], '330 ml'),
+  drink('dunya-mutfagi', 'Kutu İçecek', 64, ['Meşrubat'], '330 ml'),
   drink('dunya-mutfagi', 'Limonata', 56, ['Ev Yapımı Limonata'], '300 ml'),
-  drink('tavuk', 'Kutu İçecek', 72, ['Kola', 'Gazoz'], '330 ml'),
+  drink('tavuk', 'Kutu İçecek', 72, ['Meşrubat'], '330 ml'),
   drink('tavuk', 'Ayran', 66, [], '300 ml'),
-  drink('ev-yemekleri', 'Kutu İçecek', 62, ['Kola', 'Gazoz'], '330 ml'),
+  drink('ev-yemekleri', 'Kutu İçecek', 62, ['Meşrubat'], '330 ml'),
   drink('ev-yemekleri', 'Şalgam Suyu', 54, ['Şalgam'], '300 ml'),
   drink('kahvalti', 'Taze Sıkma Portakal Suyu', 70, ['Portakal Suyu'], '250 ml'),
   drink('kahvalti', 'Türk Kahvesi', 64, ['Kahve'], ''),

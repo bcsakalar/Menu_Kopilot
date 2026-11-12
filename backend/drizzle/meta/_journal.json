@@ -64,6 +64,13 @@
       "when": 1793900000000,
       "tag": "0008_feedback_cuisine_names",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794000000000,
+      "tag": "0009_drink_minimum",
+      "breakpoints": true
     }
   ]
 }

@@ -416,7 +416,7 @@ export const KAHVALTI_KAFE_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'pastane-firin',
     importance: 82,
-    aliases: ['Peynirli Poğaça', 'Zeytinli Poğaça', 'Patatesli Poğaça', 'Kaşarlı Poğaça'],
+    aliases: ['Peynirli Poğaça', 'Patatesli Poğaça'],
     name: 'Poğaça',
     description: 'Tereyağlı yumuşak hamurdan fırında pişen poğaça; peynirli, zeytinli, patatesli ya da sade çeşitlerle.',
     servingNote: 'Taze ve ılık servis; kağıt torbada gönderilir.',
@@ -501,7 +501,7 @@ export const KAHVALTI_KAFE_EK_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'pastane-firin',
     importance: 52,
-    aliases: ['Tuzlu Kurabiye', 'Tatlı Kurabiye', 'Un Kurabiyesi', 'Acıbadem Kurabiyesi', 'Karışık Kurabiye'],
+    aliases: ['Tatlı Kurabiye', 'Un Kurabiyesi', 'Acıbadem Kurabiyesi', 'Karışık Kurabiye'],
     name: 'Kurabiye',
     description: 'Günlük pişen tuzlu ve tatlı kurabiyeler; un kurabiyesi, acıbadem, cevizli ve susamlı çeşitlerle.',
     servingNote: 'Karton kutuda, kırılmayacak şekilde gönderilir.',

@@ -344,7 +344,7 @@ export const HAMUR_EV_TEMPLATES: readonly SeedTemplate[] = [
   template({
     cuisine: 'manti-hamur-isleri',
     importance: 70,
-    aliases: ['Gözleme Porsiyon', 'Peynirli Gözleme', 'Patatesli Gözleme', 'Kıymalı Gözleme', 'Ispanaklı Gözleme'],
+    aliases: ['Gözleme Porsiyon', 'Peynirli Gözleme', 'Ispanaklı Gözleme'],
     name: 'Gözleme',
     description:
       'İnce açılan yufkanın içine seçilen harç konur, sac üzerinde tereyağıyla pişirilir; üçgen dilimlenerek servis edilir.',
