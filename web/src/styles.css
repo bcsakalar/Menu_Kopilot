@@ -533,6 +533,8 @@ textarea::placeholder {
 
 .message.assistant {
   display: grid;
+  /* A grid item may not grow past the column: the tab row scrolls instead of widening the answer on a phone. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   scroll-margin-top: 16px;
 }
@@ -616,6 +618,8 @@ div.skeleton:empty {
   top: 0;
   z-index: 1;
   display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
   align-items: center;
   gap: 4px;
   padding: 4px 10px 0;
@@ -1820,6 +1824,11 @@ button.stat.link-stat:hover {
 
   .admin-page {
     padding: 18px 14px 32px;
+  }
+
+  /* Fourteen day names do not fit a phone: every other one carries the axis. */
+  .bars li:nth-child(even) .bar-day {
+    visibility: hidden;
   }
 
   .turn {
