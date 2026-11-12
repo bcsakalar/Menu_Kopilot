@@ -1299,6 +1299,400 @@ div.skeleton:empty {
 
 /* ---- narrow screens ---- */
 
+/* ---- opening checklist (D-206) ---- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.checklist {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.checklist ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.rule b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.rule.ok svg {
+  color: var(--success);
+}
+
+.rule.miss {
+  border-color: transparent;
+  background: var(--danger-soft);
+}
+
+.rule.miss svg,
+.rule.miss b {
+  color: var(--danger);
+}
+
+.rule.unknown svg {
+  color: var(--text-faint);
+}
+
+.extra-cuisines {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* ---- feedback ---- */
+
+.feedback-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.feedback-button:hover {
+  background: var(--selected);
+  color: var(--text);
+}
+
+.dialog {
+  width: min(460px, calc(100vw - 32px));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.dialog::backdrop {
+  background: rgb(10 12 16 / 0.45);
+}
+
+.dialog form {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px 20px;
+}
+
+.dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dialog h2 {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.dialog label {
+  display: grid;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.dialog label small {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.dialog textarea {
+  resize: vertical;
+  min-height: 110px;
+  font: inherit;
+}
+
+.dialog .check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog .sent {
+  padding: 18px 0 8px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+/* ---- admin dashboard (D-206) ---- */
+
+.panel.wide {
+  grid-column: 1 / -1;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.button.small {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  gap: 5px;
+}
+
+.insight {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.insight b {
+  color: var(--text);
+}
+
+.rank i.miss {
+  background: var(--danger);
+  opacity: 0.75;
+}
+
+button.stat.link-stat {
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background-color 150ms ease;
+}
+
+button.stat.link-stat:hover {
+  background: var(--selected);
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 2px;
+  align-items: end;
+  height: 150px;
+}
+
+.bars li {
+  display: grid;
+  grid-template-rows: 16px 1fr 18px;
+  height: 100%;
+  text-align: center;
+  font-size: 11.5px;
+  border-radius: 6px;
+}
+
+.bars li:hover {
+  background: var(--selected);
+}
+
+.bar-value {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.bar-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.bar-track i {
+  display: block;
+  width: min(22px, 70%);
+  min-height: 0;
+  background: var(--accent);
+  border-radius: 4px 4px 0 0;
+}
+
+.bar-day {
+  padding-top: 3px;
+  color: var(--text-faint);
+}
+
+.badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* ---- admin feedback ---- */
+
+.feedback-list {
+  display: grid;
+  gap: 10px;
+}
+
+.feedback-item {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.feedback-item.new {
+  border-left: 3px solid var(--accent);
+}
+
+.feedback-item.done {
+  opacity: 0.72;
+}
+
+.feedback-item header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.feedback-item .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kind {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--selected);
+}
+
+.kind.hata {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.kind.oneri {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.feedback-message {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedback-actions input {
+  flex: 1 1 240px;
+  height: 30px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+/* ---- admin excel ---- */
+
+.excel {
+  display: grid;
+  gap: 10px;
+}
+
+.excel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.excel-actions a.button {
+  text-decoration: none;
+}
+
+.import-report {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.import-report h2 {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.import-report header p {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.import-report .danger {
+  color: var(--danger);
+}
+
+.import-items {
+  display: grid;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 8px;
+  font-size: 13.5px;
+}
+
+.tag {
+  display: inline-block;
+  min-width: 96px;
+  margin-right: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tag.create {
+  color: var(--success);
+}
+
+.tag.update {
+  color: var(--accent-text);
+}
+
 @media (max-width: 900px) {
   .panels,
   .split {

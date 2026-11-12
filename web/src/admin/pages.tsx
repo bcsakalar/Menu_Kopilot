@@ -4,10 +4,11 @@ import { api, ApiError, patch, post, put } from '../api';
 import { RunBlock } from '../chat/RunBlock';
 import { RichText } from '../chat/ui';
 import { dateTimeLabel, groupRule, timeLabel } from '../format';
+import { ExcelTools } from './ExcelTools';
 import type { Conversation, OptionGroup, RunResult } from '../types';
 
 /** One fetch with its loading and error states; `reload` after a write. */
-function useLoad<T>(path: string): { data: T | null; error: string | null; reload: () => void } {
+export function useLoad<T>(path: string): { data: T | null; error: string | null; reload: () => void } {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const reload = useCallback(() => {
@@ -20,7 +21,7 @@ function useLoad<T>(path: string): { data: T | null; error: string | null; reloa
   return { data, error, reload };
 }
 
-function Page({ title, intro, actions, children, error }: { title: string; intro?: string; actions?: ReactNode; children: ReactNode; error?: string | null }) {
+export function Page({ title, intro, actions, children, error }: { title: string; intro?: string; actions?: ReactNode; children: ReactNode; error?: string | null }) {
   return (
     <section className="admin-page">
       <header className="page-head">
@@ -38,126 +39,7 @@ function Page({ title, intro, actions, children, error }: { title: string; intro
   );
 }
 
-const Loading = () => <div className="skeleton" aria-label="Yükleniyor" />;
-
-// ---- Genel bakış ---------------------------------------------------------------------------------------------------
-
-interface UsageData {
-  byModel: { model: string; label: string; calls: number; failed: number; avgLatencyMs: number }[];
-  errors: { code: string; count: number }[];
-}
-
-interface OverviewData {
-  visitors: number;
-  conversations: number;
-  runs: number;
-  cards: number;
-  llm: { calls: number; failed: number; tokens: number };
-  topCuisines: { name: string; runs: number }[];
-  site: { callsToday: number; dailyCalls: number };
-}
-
-const ERROR_LABEL: Record<string, string> = { unavailable: 'yoğunluk', rate_limited: 'hız limiti', timeout: 'zaman aşımı', aborted: 'iptal' };
-
-function Stat({ label, value, note }: { label: string; value: number; note?: string | undefined }) {
-  return (
-    <div className="stat">
-      <span>{label}</span>
-      <strong>{value.toLocaleString('tr-TR')}</strong>
-      {note && <small>{note}</small>}
-    </div>
-  );
-}
-
-export function Overview() {
-  const [range, setRange] = useState<'today' | 'month'>('today');
-  const { data, error } = useLoad<OverviewData>(`/admin/overview?range=${range}`);
-  const { data: usage } = useLoad<UsageData>(`/usage/summary?range=${range}`);
-  const busiest = data?.topCuisines[0]?.runs ?? 1;
-  const dailyShare = data ? Math.min(100, (data.site.callsToday / Math.max(1, data.site.dailyCalls)) * 100) : 0;
-  return (
-    <Page
-      title="Genel bakış"
-      error={error}
-      actions={
-        <div className="segmented" role="group" aria-label="Dönem">
-          <button type="button" aria-pressed={range === 'today'} onClick={() => setRange('today')}>
-            Bugün
-          </button>
-          <button type="button" aria-pressed={range === 'month'} onClick={() => setRange('month')}>
-            Bu ay
-          </button>
-        </div>
-      }
-    >
-      {!data && !error && <Loading />}
-      {data && (
-        <>
-          <div className="stats">
-            <Stat label="Temsilci" value={data.visitors} />
-            <Stat label="Görüşme" value={data.conversations} />
-            <Stat label="Analiz" value={data.runs} />
-            <Stat label="Önerilen kart" value={data.cards} />
-            <Stat label="AI çağrısı" value={data.llm.calls} note={data.llm.failed > 0 ? `${data.llm.failed} hatalı` : undefined} />
-          </div>
-          <div className="panels">
-            <section className="panel">
-              <h2>En çok çalışılan mutfaklar</h2>
-              {data.topCuisines.length === 0 ? (
-                <p className="muted">Bu dönemde analiz yok.</p>
-              ) : (
-                <ol className="rank">
-                  {data.topCuisines.map((cuisine) => (
-                    <li key={cuisine.name}>
-                      <span>{cuisine.name}</span>
-                      <b>{cuisine.runs}</b>
-                      <i style={{ width: `${(cuisine.runs / busiest) * 100}%` }} />
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
-            <section className="panel">
-              <h2>Yapay zekâ</h2>
-              <div className="quota">
-                <p>
-                  Bugün <b>{data.site.callsToday.toLocaleString('tr-TR')}</b> / {data.site.dailyCalls.toLocaleString('tr-TR')} çağrı
-                </p>
-                <span className="meter-track" aria-hidden>
-                  <b style={{ width: `${dailyShare}%` }} />
-                </span>
-                <small>Kota dolunca öneriler yalnızca şablon havuzundan gelir.</small>
-              </div>
-              {usage && usage.byModel.length > 0 && (
-                <table className="mini-table">
-                  <thead>
-                    <tr>
-                      <th>Model</th>
-                      <th className="number">Çağrı</th>
-                      <th className="number">Hata</th>
-                      <th className="number">Süre</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usage.byModel.map((row) => (
-                      <tr key={row.model}>
-                        <td>{row.label}</td>
-                        <td className="number">{row.calls}</td>
-                        <td className="number">{row.failed}</td>
-                        <td className="number">{(row.avgLatencyMs / 1000).toFixed(1)} sn</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              {usage && usage.errors.length > 0 && <p className="muted small">Hatalar: {usage.errors.map((e) => `${ERROR_LABEL[e.code] ?? e.code} ${e.count}`).join(', ')}</p>}
-            </section>
-          </div>
-        </>
-      )}
-    </Page>
-  );
-}
+export const Loading = () => <div className="skeleton" aria-label="Yükleniyor" />;
 
 // ---- Görüşmeler ----------------------------------------------------------------------------------------------------
 
@@ -182,19 +64,29 @@ function runSummary(result: RunResult): string {
     .join(' · ');
 }
 
-function ConversationView({ row, onBack }: { row: ConversationRow; onBack: () => void }) {
+export function ConversationView({
+  row,
+  onBack,
+  backLabel = 'Görüşmeler',
+}: {
+  row: Pick<ConversationRow, 'id' | 'title'> & Partial<ConversationRow>;
+  onBack: () => void;
+  backLabel?: string;
+}) {
   const { data, error } = useLoad<Conversation>(`/admin/conversations/${row.id}`);
   return (
     <section className="admin-page">
       <button type="button" className="back" onClick={onBack}>
         <ArrowLeft size={16} />
-        Görüşmeler
+        {backLabel}
       </button>
       <header className="page-head">
         <div>
           <h1>{data?.title ?? row.title}</h1>
           <p className="admin-intro">
-            {dateTimeLabel(row.createdAt)} · {row.messages} mesaj · Tarayıcı {row.visitor}
+            {[row.createdAt ? dateTimeLabel(row.createdAt) : null, `${row.messages ?? data?.messages.length ?? 0} mesaj`, row.visitor ? `Tarayıcı ${row.visitor}` : null]
+              .filter(Boolean)
+              .join(' · ')}
           </p>
         </div>
       </header>
@@ -314,9 +206,10 @@ export function Templates() {
   return (
     <Page
       title="Şablon havuzu"
-      intro="Havuzdaki ürünler önerilerde yapay zekâya sorulmadan gelir. Sildiğin ürün arşive düşer, oradan geri alabilirsin."
+      intro="Havuzdaki ürünler önerilerde yapay zekâya sorulmadan gelir. Toplu ekleme ve güncelleme için Excel kullan: örneği indir, doldur, yükle. Sildiğin ürün arşive düşer, oradan geri alabilirsin."
       error={error ?? actionError}
     >
+      <ExcelTools onImported={reload} />
       <div className="toolbar">
         <div className="segmented" role="group" aria-label="Şablon durumu">
           <button type="button" aria-pressed={view === 'true'} onClick={() => setView('true')}>

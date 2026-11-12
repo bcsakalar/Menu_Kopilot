@@ -20,7 +20,9 @@ export class UsageService {
 
   async summary(userId: string, range: UsageSummary['range']): Promise<UsageSummary> {
     const now = this.now();
-    const from = range === 'today' ? startOfDay(now, this.config.timezone) : startOfMonth(now, this.config.timezone);
+    const today = startOfDay(now, this.config.timezone);
+    const from =
+      range === 'today' ? today : range === 'week' ? new Date(today.getTime() - 6 * 86_400_000) : startOfMonth(now, this.config.timezone);
     const inRange = gte(usageLog.createdAt, from);
     const counters = {
       calls: sql<number>`count(*)::int`,

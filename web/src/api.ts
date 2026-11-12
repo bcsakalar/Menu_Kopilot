@@ -25,6 +25,15 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
 }
 
+/** A multipart upload: the browser sets the boundary, so no content-type of our own. */
+export async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`/api/v1${path}`, { method: 'POST', body: form }).catch(() => {
+    throw new ApiError(0, CONNECTION_ERROR);
+  });
+  if (!res.ok) throw await failure(res);
+  return (await res.json()) as T;
+}
+
 export const post = <T>(path: string, body: unknown = {}): Promise<T> => api<T>(path, { method: 'POST', body: JSON.stringify(body) });
 export const patch = <T>(path: string, body: unknown): Promise<T> => api<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
 export const put = <T>(path: string, body: unknown): Promise<T> => api<T>(path, { method: 'PUT', body: JSON.stringify(body) });

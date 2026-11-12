@@ -15,6 +15,7 @@ import {
 } from '../../db/schema/index.js';
 import { notFound } from '../../lib/errors.js';
 import type { ChatService } from '../chat/service.js';
+import { approvedCounts } from '../templates/service.js';
 
 const TOP_CUISINES = 8;
 const DAILY_DAYS = 14;
@@ -123,13 +124,9 @@ export class AdminService {
 
   /** The template pool, and the cuisines whose own templates fall furthest short of their opening target. */
   private async pool() {
-    const rows = await this.db
-      .select({
-        name: cuisines.name,
-        minItemCount: cuisines.minItemCount,
-        templates: sql<number>`(select count(*)::int from ${menuItems} where ${menuItems.cuisineId} = ${cuisines.id} and ${menuItems.approved})`,
-      })
-      .from(cuisines);
+    const cuisineRows = await this.db.select({ id: cuisines.id, name: cuisines.name, minItemCount: cuisines.minItemCount }).from(cuisines);
+    const counts = await approvedCounts(this.db);
+    const rows = cuisineRows.map((r) => ({ ...r, templates: counts.get(r.id) ?? 0 }));
     const [totals] = await this.db
       .select({
         templates: sql<number>`(count(*) filter (where ${menuItems.approved}))::int`,

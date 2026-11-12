@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const usageRangeSchema = z.enum(['today', 'month']);
+export const usageRangeSchema = z.enum(['today', 'week', 'month']);
 
 const counters = {
   calls: z.number().int(),

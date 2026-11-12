@@ -1,9 +1,11 @@
-import { Menu, Plus, Trash2, X } from 'lucide-react';
+import { Menu, MessageSquarePlus, Plus, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, ApiError, sendMessage } from '../api';
 import { timeLabel } from '../format';
 import type { ChatEvent, Conversation, ConversationRow, Message, RunResult } from '../types';
+import { OpeningChecklist } from './Checklist';
 import { Composer, type Attachment } from './Composer';
+import { FeedbackDialog } from './Feedback';
 import { RunBlock } from './RunBlock';
 import { CountMeter, RichText } from './ui';
 
@@ -75,7 +77,11 @@ function CallHeader({ title, run }: { title: string; run: RunResult | null }) {
     <header className="call-header">
       <div className="call-title">
         <h1>{counts?.cuisineName ?? title}</h1>
-        {gaps.length > 0 && <p className="gaps">Eksik: {gaps.map((gap) => `${gap.label} ${gap.present}/${gap.minItems}`).join(' · ')}</p>}
+        {counts?.quality ? (
+          <OpeningChecklist quality={counts.quality} />
+        ) : (
+          gaps.length > 0 && <p className="gaps">Eksik: {gaps.map((gap) => `${gap.label} ${gap.present}/${gap.minItems}`).join(' · ')}</p>
+        )}
       </div>
       {counts && <CountMeter current={counts.current} target={counts.target} />}
     </header>
@@ -90,6 +96,7 @@ export function ChatApp() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const lastAnswer = useRef<HTMLDivElement>(null);
   // Answers to a stream arrive after a React render; this is the conversation the stream belongs to.
@@ -293,7 +300,12 @@ export function ChatApp() {
             ))}
           </ul>
         )}
+        <button type="button" className="feedback-button" onClick={() => setFeedbackOpen(true)}>
+          <MessageSquarePlus size={16} aria-hidden />
+          Geri bildirim gönder
+        </button>
       </nav>
+      <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} conversationId={conversation?.id ?? null} />
       <button type="button" className="sidebar-scrim" aria-label="Görüşmeleri kapat" onClick={() => setSidebarOpen(false)} />
 
       <main className="chat">

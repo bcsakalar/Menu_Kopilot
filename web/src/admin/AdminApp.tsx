@@ -1,15 +1,18 @@
-import { BarChart3, BookOpenCheck, Brain, ChefHat, Cpu, LogOut, MessagesSquare } from 'lucide-react';
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { BarChart3, BookOpenCheck, Brain, ChefHat, Cpu, LogOut, MessageSquareHeart, MessagesSquare } from 'lucide-react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { api, ApiError, post } from '../api';
-import { Conversations, Cuisines, Learning, Models, Overview, Templates } from './pages';
+import { Dashboard } from './Dashboard';
+import { Feedback } from './Feedback';
+import { Conversations, Cuisines, Learning, Models, Templates } from './pages';
 
-const PAGES: { key: string; label: string; icon: ReactNode; page: ReactNode }[] = [
-  { key: 'overview', label: 'Genel bakış', icon: <BarChart3 size={17} />, page: <Overview /> },
-  { key: 'conversations', label: 'Görüşmeler', icon: <MessagesSquare size={17} />, page: <Conversations /> },
-  { key: 'templates', label: 'Şablon havuzu', icon: <BookOpenCheck size={17} />, page: <Templates /> },
-  { key: 'cuisines', label: 'Mutfak türleri', icon: <ChefHat size={17} />, page: <Cuisines /> },
-  { key: 'learning', label: 'Öğrenilenler', icon: <Brain size={17} />, page: <Learning /> },
-  { key: 'models', label: 'Modeller', icon: <Cpu size={17} />, page: <Models /> },
+const PAGES: { key: string; label: string; icon: ReactNode }[] = [
+  { key: 'overview', label: 'Pano', icon: <BarChart3 size={17} /> },
+  { key: 'conversations', label: 'Görüşmeler', icon: <MessagesSquare size={17} /> },
+  { key: 'feedback', label: 'Geri bildirimler', icon: <MessageSquareHeart size={17} /> },
+  { key: 'templates', label: 'Şablon havuzu', icon: <BookOpenCheck size={17} /> },
+  { key: 'cuisines', label: 'Mutfak türleri', icon: <ChefHat size={17} /> },
+  { key: 'learning', label: 'Öğrenilenler', icon: <Brain size={17} /> },
+  { key: 'models', label: 'Modeller', icon: <Cpu size={17} /> },
 ];
 
 function Login({ onDone }: { onDone: () => void }) {
@@ -60,6 +63,17 @@ function Login({ onDone }: { onDone: () => void }) {
 export function AdminApp() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [page, setPage] = useState('overview');
+  const [newFeedback, setNewFeedback] = useState(0);
+
+  // The nav badge: how many reps' messages nobody has read yet.
+  const refreshFeedback = useCallback(() => {
+    void api<{ counts: { new: number } }>('/admin/feedback?limit=1')
+      .then((r) => setNewFeedback(r.counts.new))
+      .catch(() => undefined);
+  }, []);
+  useEffect(() => {
+    if (signedIn) refreshFeedback();
+  }, [signedIn, refreshFeedback]);
 
   const check = () => {
     void api('/auth/me')
@@ -87,6 +101,11 @@ export function AdminApp() {
               <button type="button" className={page === item.key ? 'active' : ''} aria-current={page === item.key ? 'page' : undefined} onClick={() => setPage(item.key)}>
                 {item.icon}
                 {item.label}
+                {item.key === 'feedback' && newFeedback > 0 && (
+                  <span className="badge" aria-label={`${newFeedback} yeni`}>
+                    {newFeedback}
+                  </span>
+                )}
               </button>
             </li>
           ))}
@@ -98,7 +117,15 @@ export function AdminApp() {
           </button>
         </div>
       </nav>
-      <main className="admin-main">{PAGES.find((item) => item.key === page)?.page}</main>
+      <main className="admin-main">
+        {page === 'overview' && <Dashboard onNavigate={setPage} />}
+        {page === 'conversations' && <Conversations />}
+        {page === 'feedback' && <Feedback onCountsChange={refreshFeedback} />}
+        {page === 'templates' && <Templates />}
+        {page === 'cuisines' && <Cuisines />}
+        {page === 'learning' && <Learning />}
+        {page === 'models' && <Models />}
+      </main>
     </div>
   );
 }

@@ -281,12 +281,15 @@ describe('the admin panel', () => {
     expect(overview.statusCode, overview.body).toBe(200);
     expect(overview.json<{ conversations: number; runs: number }>().conversations).toBeGreaterThan(0);
     const week = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/overview?range=week', headers: bearer(accessToken) });
-    const dashboard = week.json<{ daily: { runs: number }[]; quality: { runs: number; drinks: number }; pool: { templates: number; thin: unknown[] }; feedback: { new: number } }>();
+    const dashboard = week.json<{ daily: { runs: number }[]; quality: { runs: number; drinks: number }; pool: { templates: number; thin: { templates: number }[] }; feedback: { new: number } }>();
     expect(dashboard.daily).toHaveLength(14);
     expect(dashboard.daily.at(-1)?.runs).toBeGreaterThan(0);
     expect(dashboard.quality.runs).toBeGreaterThan(0);
     expect(dashboard.quality.drinks).toBeGreaterThan(0);
     expect(dashboard.pool.templates).toBeGreaterThan(400);
+    // Each thin cuisine still has its own seed templates: a zero here means the count query lost its join.
+    expect(dashboard.pool.thin.length).toBeGreaterThan(0);
+    expect(dashboard.pool.thin.every((c) => c.templates > 0)).toBe(true);
     expect(dashboard.feedback.new).toBe(0);
 
     const list = await ctx.app.inject({ method: 'GET', url: '/api/v1/admin/conversations', headers: bearer(accessToken) });

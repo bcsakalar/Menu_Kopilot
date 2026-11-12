@@ -23,6 +23,16 @@ import type {
 } from './schemas.js';
 import { type TemplateRecord, addAliases, getTemplate, getTemplates, insertTemplate, replaceTemplateContent } from './template-store.js';
 
+/** Approved templates per cuisine (one grouped query; a correlated subquery here loses the outer table name). */
+export async function approvedCounts(db: Executor): Promise<Map<string, number>> {
+  const rows = await db
+    .select({ cuisineId: menuItems.cuisineId, n: sql<number>`count(*)::int` })
+    .from(menuItems)
+    .where(eq(menuItems.approved, true))
+    .groupBy(menuItems.cuisineId);
+  return new Map(rows.map((r) => [r.cuisineId, r.n]));
+}
+
 function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
@@ -200,16 +210,11 @@ export class TemplateService {
   /** Every cuisine with its approved template count and opening target: the sample's "Mutfaklar" sheet. */
   async cuisineRefs(): Promise<CuisineRef[]> {
     const rows = await this.db
-      .select({
-        id: cuisines.id,
-        name: cuisines.name,
-        slug: cuisines.slug,
-        minItemCount: cuisines.minItemCount,
-        templates: sql<number>`(select count(*)::int from ${menuItems} where ${menuItems.cuisineId} = ${cuisines.id} and ${menuItems.approved})`,
-      })
+      .select({ id: cuisines.id, name: cuisines.name, slug: cuisines.slug, minItemCount: cuisines.minItemCount })
       .from(cuisines)
       .orderBy(asc(cuisines.name));
-    return rows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, templates: r.templates, target: Math.max(MIN_BRANCH_ITEMS, r.minItemCount) }));
+    const counts = await approvedCounts(this.db);
+    return rows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, templates: counts.get(r.id) ?? 0, target: Math.max(MIN_BRANCH_ITEMS, r.minItemCount) }));
   }
 
   async sampleWorkbook(): Promise<Buffer> {

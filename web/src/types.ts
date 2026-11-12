@@ -41,12 +41,31 @@ export interface CategoryCount {
   missing: number;
 }
 
+export interface ShareRule {
+  present: number;
+  known: number;
+  total: number;
+  share: number;
+  ok: boolean | null;
+}
+
+/** The opening checklist (D-206); `ok: null` means the input could not show it. */
+export interface Quality {
+  products: { current: number; target: number; ok: boolean };
+  drinks: { current: number; target: number; ok: boolean };
+  descriptions: ShareRule;
+  images: ShareRule;
+  writing: { names: string[]; checked: number; ok: boolean | null };
+  extraCuisines: { name: string; count: number }[];
+}
+
 export interface Counts {
   current: number;
   target: number;
   missing: number;
   cuisineName: string;
   categories: CategoryCount[];
+  quality?: Quality;
 }
 
 export interface RunResult {
