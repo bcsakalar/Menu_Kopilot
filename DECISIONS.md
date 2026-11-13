@@ -1052,4 +1052,6 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   ("Kola", "Çay") "kısaltma gibi" diye düzeltmeye düşüyordu; uyarı yalnızca havuzla eşleşmeyen adlarda. (6) Fotoğrafı
   yazarak eklenen tek ürün yüzünden bilinmeyen kural "Bu görüntüde görünmüyor" diyordu; artık "x/y ürün; z ürünün
   durumu görünmüyor" der. (7) Wakame Salatası'na genel salatanın Sezar sosu ve krutonu doluyordu; şablona kendi sosu ve
-  malzemeleri yazıldı.
+  malzemeleri yazıldı. (8) Düzeltmeler canlıya çıktıktan sonraki ikinci turda model "ayranı satmıyorlarmış" mesajına
+  Ayran'ı çıkarıp yerine olmayan bir "Yeni İçecek" ekledi; menüye artık yalnızca adı temsilcinin mesajında geçen ürün
+  eklenir (`onlyNamed`).

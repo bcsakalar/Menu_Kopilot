@@ -91,6 +91,17 @@ function focusOf(decision: ChatDecision): Partial<RunFocus> {
   return { targets: decision.addProducts, products: decision.addProducts.length > 0 ? PRODUCTS_WITH_NEW_ITEMS : 0, exclude: decision.removeProducts };
 }
 
+/**
+ * A product joins the menu only if the rep named it: asked to drop the ayran, the model once added a made-up "Yeni
+ * İçecek" in its place. A word of the name must start a word of the message ("lahmacunu da ekle" names Lahmacun).
+ */
+function onlyNamed(decision: ChatDecision, text: string): ChatDecision {
+  if (decision.action !== 'update_menu') return decision;
+  const said = normalizeTr(text).split(' ');
+  const named = (product: string) => normalizeTr(product).split(' ').some((word) => word.length >= 3 && said.some((s) => s.startsWith(word)));
+  return { ...decision, addProducts: decision.addProducts.filter(named) };
+}
+
 /** One of the buttons of `nextSteps`, typed or clicked. */
 function shortcut(text: string, last: AnalyzeResult | null): ChatDecision | undefined {
   if (!last) return undefined;
@@ -206,7 +217,7 @@ export class ChatService {
   private async follow(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const conversationId = outgoing.conversation.id;
     const quick = shortcut(outgoing.text, last);
-    const decision = quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId));
+    const decision = onlyNamed(quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId)), outgoing.text);
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
     if (decision.action === 'update_menu' && !last && decision.addProducts.length > 0) {

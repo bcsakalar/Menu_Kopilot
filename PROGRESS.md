@@ -15,8 +15,8 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1306, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
-  çıkan yedi sorun düzeltildi (D-208).
+- **Testler:** backend 1307, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+  çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
 ## Bilinen sorunlar
@@ -26,6 +26,10 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
   20–30 saniyeyi bulabilir. Kalıcı çözüm ücretli Gemini katmanı.
 - **Öğrenme döngüsü yeni veri almıyor.** Evet / Düşünecek / Hayır kaldırıldığı için (D-202) sistem restoranların tercihini
   artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
+- **Embedding kotası günde 1000 istek (Gemini ücretsiz katman).** Toplu şablon eklemesinden sonra kota dolarsa yeni
+  şablonların vektörü ertesi gün tamamlanır: `embed-missing` taraması 30 dakikada bir 100 şablonu işler. Bu sürede
+  öneriler havuzdan gelmeye devam eder, yalnızca anlamca benzer ad eşleştirmesi zayıflar. 2026-11-13'te 553 şablon
+  bekliyordu.
 - **Modelin yazdığı kartlar havuzunkiler kadar temiz değil.** Canlı testte "Mantar Peynirli Pide Pizza" gibi garip bir ad ve
   "Ekstra Yoğurt" / "Ekstra Yoğurtlu" gibi neredeyse aynı iki ekstra görüldü. Havuzdan gelen kartlarda bu olmuyor;
   `agents/validator.ts` ve `agents/grounding.ts` bu tür tekrarları daha sıkı eleyebilir.

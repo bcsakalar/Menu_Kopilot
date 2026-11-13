@@ -249,6 +249,15 @@ describe('a conversation', () => {
     expect(next?.message.result.cards.length).toBeGreaterThan(0);
     expect(next?.message.result.cards.map((c) => c.name)).not.toContain('Ayran');
   });
+
+  it('adds to the menu only what the rep named', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    // Seen live: asked to drop the ayran, the model put a made-up product in its place.
+    decision = { ...noDecision, action: 'update_menu', reply: 'Bakıyorum.', addProducts: ['Yeni İçecek'], removeProducts: ['Ayran'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'ayranı artık satmıyorlarmış' }, first.cookie);
+    const [answer] = eventOf<{ message: { result: { menu: { name: string }[] } } }>(sent, 'message');
+    expect(answer?.message.result.menu.map((m) => m.name).sort()).toEqual(['Adana Kebap', 'Urfa Kebap']);
+  });
 });
 
 describe('what a visitor may write', () => {
