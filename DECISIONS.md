@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-213'ten devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-214'ten devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1091,3 +1091,36 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   içerik de ancak ada tıklayınca açılıyordu. Artık toplam sayı, sayfa sayfa gezinme, mutfak filtresi var; her şablonun
   açıklaması, porsiyonu, opsiyonları, çıkarılabilir ve ekstra malzemeleri, takma adları listede açık durur.
   `tests/ai_eval/` düzeneğindeki "makarna" menüsü güncellenmedi: o menü artık Mantı & Makarna'ya düşer.
+- **D-213** — **Her analiz mutfağın hedefini geçecek kadar ürün önerir; öneriler yazılan ürünün etrafında kurulur**
+  (kullanıcı isteği, 2026-11-13: "ürün sayısına yetişmek için 10 tane yeni ürün veriyor sadece… sadece hamsi yazıyorsa
+  hem hamsi çeşitleri hem balık çeşitleri önerecek, mutfak türünün sayısına yetişecek hatta geçecek; tekil yazsa da
+  grup olarak yazsa da görsel atsa da hep aynı"). Canlıda o gün 95 analizin hepsi hızlı moddaydı ve menü ne kadar eksik
+  olursa olsun 10 ürün önerdi: hedefinin kırk ürün altındaki bir pizza menüsü de 10 ürün aldı. "hamsi ile ilgili
+  yemekler öner" yazıldığında hamsiyle ilgisi olmayan 10 ürün geldi, ardından "hamsi" yazılınca 3 ürün geldi.
+  (1) **Sayı:** ilk analiz (ekran görüntüsü, ürün listesi, tek ürün, yalnızca mutfak adı, menüden önce adı geçen ürün)
+  hedefe kalan ürünü ve hedefin onda birini (en az 3) önerir, hiçbir zaman 10'dan az değil (`plan.ts`: `fillGoal`,
+  `fillCount`). Örnek: 11 ürünlük menü, hedef 50 → 39 + 5 = 44 öneri. Bunların üçte biri (en çok 10, tek model
+  çağrısı) menüdeki ürünlerin çeşitleridir, gerisi mutfağın kategori şekline göre dağılır. Kategori tavanları toplamı tutmazsa kalan pay şekle göre yine dağıtılır. Havuz önce doldurur,
+  model ancak havuzun dolduramadığını ister. Havuzdan doldurma model süresi dolduğunda da çalışır; son kontrolün eleyeceği
+  kartlar için birkaç yedek eklenir, toplamı geçen yedek elenir. "Daha fazla ürün öner" ve ikinci ekran görüntüsü
+  hedefe kalanı tamamlar (`topUp`), yoksa 10'luk bir tur getirir. Üst sınır 120: admin bir mutfağın hedefini 500'e
+  kadar yazabildiği için. (2) **Çapa:** tek başına yazılan ve bütün kelimeleri havuzdaki ürünlerde geçen ad ("hamsi")
+  modelsiz ürün sayılır. Mutfak adının kendisi ("Pizza", "Kebap") ve istek kelimeleri ("tatlı") sohbet ajanına
+  gider. Menüsüz bir istekte geçen ürün kelimeleri ("hamsi ile ilgili…") menüye girmeden önerilerin çapası olur.
+  Mutfak profiline katılırlar, modelin alternatiflerine dayanak olurlar. (3) **Sıra:** menüde en çok üç ürün varken
+  boş kategori haber değildir. Kartlar önce ürünün çeşitleri (ürünün kendi kelimesini taşıyan: Hamsili Pilav), sonra
+  aynı türden ürünler (balık ve deniz ürünü, bütün ızgaralar), sonra diğer alternatifler, sonra mutfağın geri kalanı
+  diye dizilir. (4) **Mantık sınırları korunur, düzeltildi:** "Balık Ekmek" adındaki balık mutfağa balık türünü de
+  açar (ama midye gibi uzmanlıkları değil). Yalnızca mutfaktan tahmin edilen tür aynı ürün sayılmaz (balıkçıda Kısır
+  balık değildir). Bir menü ürününün çeşidi başka mutfakta kayıtlı olsa da gelir (kafedeki Club Sandviç'e Tost &
+  Sandviç'in sandviçleri). Yalnızca tür aynı diye başka mutfağın çorbası gelmez. Menüsüz mutfak başlangıcı o mutfağın
+  kendi uzmanlıklarını önerir (önceden "Çiğ Köfte için öneri sun" hiç çiğ köfte önermiyordu). (5) **Aynı ürün:**
+  "Adana"/"Adana Kebap", "Margarita"/"Margarita Pizza", "Margherita"/"Margarita", "Balık Ekmek"/"Ekmek Arası Balık",
+  "Yarım Balık Ekmek" aynı ürün sayılır; uzun listelerde canlı havuzla denenirken görüldü. Doğrulama: canlının şablon
+  havuzunun (kullanıcı verisi olmadan) yerel kopyasında gerçek modellerle, mutfakların gerçek hedefleriyle: "hamsi",
+  "hamsi ile ilgili yemekler öner", beş ürünlük pizza menüsü, kebapçı listesi ve pideci ekran görüntüsü hedefi geçti;
+  hamsi çeşitleri önde, sonra balıklar; kebapçıya döner veya tantuni yok; 6–11 saniye. Model yavaşken "hamsi" önce
+  hedefin altında kalıyordu; havuz doldurması artık model süresine bağlı değil. Bu kayıtta mutfakların gerçek hedef
+  sayıları bilerek yok: onlar yalnızca canlı veritabanında durur. Testler model hiç ürün
+  vermezken 26 mutfağın hepsinde hedefin geçildiğini, çeşitlerin önde geldiğini ve mutfak sınırlarının tuttuğunu
+  sınar (`test/e2e/target-fill.e2e.test.ts`).

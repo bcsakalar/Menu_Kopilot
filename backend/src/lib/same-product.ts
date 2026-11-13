@@ -9,6 +9,19 @@
 const GENERIC_WORDS = new Set([
   'corba',
   'tatli',
+  // D-213: the category word of a dish named by its style — "Adana" is the Adana Kebap, "Margarita" the Margarita
+  // Pizza — and the bread word of a sandwich ("Balık Ekmek" is the "Ekmek Arası Balık").
+  'kebap',
+  'pizza',
+  'arasi',
+  // A size is a portion option of the product ("Yarım Balık Ekmek"), not another product.
+  'yarim',
+  'tam',
+  'ceyrek',
+  'buyuk',
+  'kucuk',
+  'orta',
+  'boy',
   'taze',
   'sikma',
   'ev',
@@ -55,6 +68,8 @@ const SYNONYMS: Readonly<Record<string, string>> = {
   suyu: 'su',
   // "Taze Sıkılmış Portakal Suyu" is the pool's "Taze Sıkma Portakal Suyu" (D-198: suggested next to it on production).
   sikilmis: 'sikma',
+  // D-213: suggested next to "Margarita Pizza" in a pizza menu's long list.
+  margherita: 'margarita',
 };
 
 /** "sucuklu" → "sucuk", "kasarli" → "kasar", "firinda" → "firin": the word the family lists. */

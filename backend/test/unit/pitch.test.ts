@@ -79,3 +79,29 @@ describe('product on the menu: the strongest thing its card adds', () => {
     expect(bare.priority).toBe(plain.priority + 10);
   });
 });
+
+// D-213: on a menu of a product or three, every category is empty — that is no news.
+describe('new product on a tiny menu: the variants, then its kind, then the other alternatives, then the rest', () => {
+  const tiny = { ...base, menuSize: 1, gaps: gaps.map((g) => ({ ...g, present: 0, missing: Math.max(1, g.missing) })) };
+
+  it('orders by band, and the importance bonus never crosses a band', () => {
+    const variant = newProductPitch({ ...tiny, importance: 0, variant: true });
+    const sameKind = newProductPitch({ ...tiny, importance: 100, sameKind: true });
+    const alternative = newProductPitch({ ...tiny, importance: 100, basedOn: 'Hamsi Tava' });
+    const other = newProductPitch({ ...tiny, importance: 100 });
+    expect(variant.priority).toBe(115);
+    expect(sameKind.priority).toBe(110);
+    expect(alternative.priority).toBe(95);
+    expect(other.priority).toBe(80);
+    expect(variant.priority).toBeGreaterThan(sameKind.priority);
+    expect(sameKind.priority).toBeGreaterThan(alternative.priority);
+    expect(alternative.priority).toBeGreaterThan(other.priority);
+    // The fact still stands in the sentence; it only stops deciding the order.
+    expect(other.text).toContain('Menünüzde hiç tatlı yok');
+  });
+
+  it('a menu of four products is ordered by its gaps again', () => {
+    expect(newProductPitch({ ...base, menuSize: 4 }).priority).toBe(108);
+    expect(newProductPitch({ ...base, menuSize: 4, variant: true }).priority).toBe(108);
+  });
+});

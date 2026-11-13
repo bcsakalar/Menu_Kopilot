@@ -1,6 +1,6 @@
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { recommendDecision, runChatAgent, type ChatContext } from '../../agents/chat.js';
-import type { RunFocus } from '../../agents/plan.js';
+import { topUp, type RunFocus } from '../../agents/plan.js';
 import type { ChatDecision } from '../../agents/schemas/chat.js';
 import type { PromptRepository } from '../../ai/prompt-repository.js';
 import type { AiRouter } from '../../ai/router.js';
@@ -35,6 +35,34 @@ const SENTENCE_WORDS = new Set(
   'merhaba selam selamlar günaydın iyi kolay gelsin teşekkürler sağol tamam lütfen bir bu şu ben biz siz için ne nasıl neden mı mi mu mü var yok değil ama gibi şimdi'.split(' '),
 );
 const isSentence = (name: string) => name.toLocaleLowerCase('tr').split(/\s+/u).some((word) => SENTENCE_WORDS.has(word));
+
+/**
+ * Words of a request, never of a product (normalized): "hamsi ile ilgili yemekler öner" names one product, hamsi. Also the
+ * category words: "tatlı" alone is a request for desserts, not a product called Tatlı.
+ */
+const REQUEST_WORDS = new Set(
+  (
+    'ile ilgili icin gibi olan olarak oner onerir oneri onerisi sun ver getir yaz ekle istiyorum istiyor lazim yemek cesit ' +
+    'urun mutfak mutfagi restoran salon menu tur turu turleri liste opsiyon malzeme fazla daha baska yeni tatli corba ' +
+    'icecek salata meze ana sicak ara yan kampanya kahvalti hepsi tum butun neler hangi'
+  ).split(' '),
+);
+/** A product name typed alone has at most this many words; a longer line is a sentence for the chat agent. */
+const PRODUCT_NAME_WORDS = 4;
+/** Product words looked up in one cuisine start: a request names one or two products, never a dozen. */
+const MAX_SEEDS = 4;
+
+/** The words of a text that could name a product: normalized, three letters or more, no request words. */
+const productWords = (text: string): string[] =>
+  [...new Set(normalizeTr(text).split(' ').filter((word) => /^[a-z0-9]{3,}$/u.test(word) && !REQUEST_WORDS.has(word)))];
+
+/** Products a follow-up still owes the menu (D-213): what passes the target, less what this call already offered. */
+function owed(last: AnalyzeResult, offered: readonly string[]): number {
+  if (!last.counts) return 0;
+  const onMenu = new Set(last.menu.map((m) => normalizeTr(m.name)));
+  const open = new Set(offered.map(normalizeTr).filter((name) => !onMenu.has(name))).size;
+  return topUp(last.counts.current, last.counts.target, open);
+}
 
 /** "adana, urfa, ayran": a list of products, which needs no model to understand. Anything else goes to the chat agent. */
 export function looksLikeProductList(text: string): boolean {
@@ -193,7 +221,7 @@ export class ChatService {
       const snapshot = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
       // The conversation's run: a menu, or a cuisine named before any menu (a run that read nothing never becomes it).
       const last = snapshot?.counts ? snapshot : null;
-      const typedMenu = !last?.menu.length && (looksLikeProductList(text) || (await this.isTemplateName(text)));
+      const typedMenu = !last?.menu.length && (looksLikeProductList(text) || (await this.isProductName(text)));
       if (images.length > 0 || typedMenu) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
     } catch (err) {
@@ -223,7 +251,9 @@ export class ChatService {
       await this.reply(outgoing, summarize(result), null, emit);
       return;
     }
-    const focus = await this.focus(conversation.id, last, { products: PRODUCTS_WITH_IMAGES, newItemsOnly: true });
+    // What the screenshot adds may still leave the menu short of its target: the call keeps its promise (D-213).
+    const products = Math.max(PRODUCTS_WITH_IMAGES, owed(last, await this.offeredNames(conversation.id)));
+    const focus = await this.focus(conversation.id, last, { products, newItemsOnly: true });
     const fields = continueFields(last, [], text);
     const result = await this.runAgents(userId, outgoing, fields, { focus }, emit);
     const current = result.counts?.current ?? 0;
@@ -242,18 +272,24 @@ export class ChatService {
       await this.reply(outgoing, answer, null, emit);
       return;
     }
-    // Products named before any menu start it: "lahmacun da var", "Adana için opsiyon yaz".
+    // Products named before any menu start it: "lahmacun da var", "Adana için opsiyon yaz" — a first analysis that fills
+    // to the target (D-213), in the cuisine the rep named before, if any.
     const typed = decision.action === 'complete' && !last?.menu.length ? named(decision.targets, outgoing.text) : decision.addProducts;
-    if (!last && typed.length > 0) {
-      const result = await this.runAgents(userId, outgoing, firstFields({ menuText: typed.join('\n') }), {}, emit);
+    if (!last?.menu.length && typed.length > 0) {
+      const cuisine = last?.counts ? { cuisineId: last.counts.cuisineId } : {};
+      const result = await this.runAgents(userId, outgoing, firstFields({ menuText: typed.join('\n'), ...cuisine }), {}, emit);
       await this.reply(outgoing, summarize(result), result, emit);
       return;
     }
-    // A cuisine named with no menu ("Uzak Doğu için öneri sun") or a switch of cuisine: a fresh start from it.
+    // A cuisine named with no menu ("Uzak Doğu için öneri sun") or a switch of cuisine: a fresh start from it. The
+    // products the request names lead what it suggests: "hamsi ile ilgili yemekler öner" (D-213).
     const cuisineId = (!last || decision.action === 'change_cuisine') && decision.cuisineSlug ? await this.cuisineId(decision.cuisineSlug) : undefined;
     if (cuisineId) {
-      const fields = last ? { ...continueFields(last, [], ''), cuisineId } : firstFields({ cuisineId });
-      const result = await this.runAgents(userId, outgoing, fields, {}, emit);
+      const fresh = !last?.menu.length;
+      const seeds = fresh ? await this.seedsOf(outgoing.text, cuisineId) : [];
+      const notes = seeds.length > 0 ? { notes: outgoing.text } : {};
+      const fields = last ? { ...continueFields(last, [], ''), cuisineId, ...notes } : firstFields({ cuisineId, ...notes });
+      const result = await this.runAgents(userId, outgoing, fields, { seeds }, emit);
       await this.reply(outgoing, result.menu.length > 0 ? summarize(result) : fromCuisine(result), result, emit);
       return;
     }
@@ -262,7 +298,12 @@ export class ChatService {
       await this.reply(outgoing, { text: ASK_MENU, quickReplies: [] }, null, emit);
       return;
     }
-    const focus = await this.focus(conversationId, last, focusOf(decision));
+    const want = focusOf(decision);
+    // "Daha fazla ürün öner" after a short answer brings the menu past its target first (D-213); "Tatlı öner" stays one category.
+    if (decision.action === 'recommend' && decision.categoryKey === null) {
+      want.products = Math.max(want.products ?? 0, owed(last, await this.offeredNames(conversationId)));
+    }
+    const focus = await this.focus(conversationId, last, want);
     const fields = continueFields(last, typed, decision.note);
     const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts }, emit);
     const lead = decision.action === 'update_menu' ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.` : '';
@@ -367,17 +408,57 @@ export class ChatService {
     return rows.map((row) => row.name);
   }
 
-  /** "Lahmacun" alone: a name the pool knows is the restaurant's product (its cuisine follows), not a cuisine to start from. */
-  private async isTemplateName(text: string): Promise<boolean> {
+  /**
+   * "Lahmacun" or "hamsi" alone: a name the pool knows — the whole name, or every word of it in the pool's products — is
+   * the restaurant's product (its cuisine follows), not a cuisine to start from. A cuisine's own name ("Pizza", "Kebap")
+   * stays a cuisine: the chat agent starts from it.
+   */
+  private async isProductName(text: string): Promise<boolean> {
     const names = parseMenuText(text);
     const name = names[0];
     if (names.length !== 1 || !name || text.includes('?') || isSentence(name)) return false;
+    const normalized = normalizeTr(name);
+    if (normalized.split(' ').length > PRODUCT_NAME_WORDS || (await this.isCuisineName(normalized))) return false;
     const [row] = await this.deps.db
       .select({ id: menuItems.id })
       .from(menuItems)
-      .where(and(eq(menuItems.approved, true), eq(menuItems.normalizedName, normalizeTr(name))))
+      .where(and(eq(menuItems.approved, true), eq(menuItems.normalizedName, normalized)))
       .limit(1);
-    return row !== undefined;
+    if (row) return true;
+    const words = productWords(name);
+    // Every word of the name must be a product word: "Kebap salonuyuz" is a sentence about a kebap shop.
+    if (words.length === 0 || words.length !== normalized.split(' ').length) return false;
+    return (await this.poolWords(words)).length === words.length;
+  }
+
+  private async isCuisineName(normalized: string): Promise<boolean> {
+    const rows = await this.deps.db.select({ slug: cuisines.slug, name: cuisines.name }).from(cuisines);
+    return rows.some((c) => normalizeTr(c.name) === normalized || c.slug.replace(/-/gu, ' ') === normalized);
+  }
+
+  /** The words a product of the pool starts a word with: "hamsi" (Hamsi Tava, Hamsili Pilav), not "salonuyuz". */
+  private async poolWords(words: readonly string[]): Promise<string[]> {
+    const found: string[] = [];
+    for (const word of words) {
+      const [row] = await this.deps.db
+        .select({ id: menuItems.id })
+        .from(menuItems)
+        .where(and(eq(menuItems.approved, true), sql`(' ' || ${menuItems.normalizedName}) like ${`% ${word}%`}`))
+        .limit(1);
+      if (row) found.push(word);
+    }
+    return found;
+  }
+
+  /**
+   * D-213. The products a cuisine start's request names, to lead its suggestions: "hamsi ile ilgili yemekler öner" →
+   * hamsi. The cuisine's own name says nothing new ("Kebap salonuyuz" is the Kebap cuisine, not a kebap seed).
+   */
+  private async seedsOf(text: string, cuisineId: string): Promise<string[]> {
+    const [cuisine] = await this.deps.db.select({ name: cuisines.name, slug: cuisines.slug }).from(cuisines).where(eq(cuisines.id, cuisineId));
+    const own = new Set([...normalizeTr(cuisine?.name ?? '').split(' '), ...(cuisine?.slug ?? '').split('-')]);
+    const words = productWords(text).filter((word) => !own.has(word) && !isSentence(word));
+    return this.poolWords(words.slice(0, MAX_SEEDS));
   }
 
   private async cuisineId(slug: string | null): Promise<string | undefined> {

@@ -447,6 +447,24 @@ describe('understanding — same product or another one', () => {
     expect(sameProductName(n('Tavuklu Pizza'), n('Barbekü Tavuklu Pizza'))).toBe(false);
   });
 
+  it('a dish named by its style or its bread is the same dish (D-213: seen in a long list on the production pool)', () => {
+    expect(sameProductName(n('Adana'), n('Adana Kebap'))).toBe(true);
+    expect(sameProductName(n('Urfa'), n('Urfa Kebap'))).toBe(true);
+    expect(sameProductName(n('Margarita'), n('Margarita Pizza'))).toBe(true);
+    expect(sameProductName(n('Margarita Pizza'), n('Margherita Pizza'))).toBe(true);
+    expect(sameProductName(n('Balık Ekmek'), n('Ekmek Arası Balık'))).toBe(true);
+    // …and still not another style, another meat or another form.
+    expect(sameProductName(n('Adana Kebap'), n('Urfa Kebap'))).toBe(false);
+    expect(sameProductName(n('Adana Kebap'), n('Acılı Adana Kebap'))).toBe(false);
+    // A size is a portion option of the product, not another product.
+    expect(sameProductName(n('Balık Ekmek'), n('Yarım Balık Ekmek'))).toBe(true);
+    expect(sameProductName(n('Ayran'), n('Büyük Boy Ayran'))).toBe(true);
+    expect(sameProductName(n('Tam Ekmek Kokoreç'), n('Yarım Ekmek Kokoreç'))).toBe(false);
+    expect(sameProductName(n('Adana Kebap'), n('Adana Dürüm'))).toBe(false);
+    expect(sameProductName(n('Balık Ekmek'), n('Köfte Ekmek'))).toBe(false);
+    expect(sameProductName(n('Sucuklu Pizza'), n('Sucuklu Kaşarlı Pizza'))).toBe(false);
+  });
+
   it('refuses a close match that is another dish: another cooking, filling, meat or form', () => {
     expect(variantConflict(n('Levrek Buğulama'), n('Levrek Izgara'))).toBe(true);
     expect(variantConflict(n('Kıymalı Pide'), n('Kaşarlı Pide'))).toBe(true);

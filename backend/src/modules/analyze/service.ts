@@ -58,7 +58,7 @@ export class AnalyzeService {
     userId: string,
     fields: AnalyzeFields,
     images: ImageInput[],
-    chat: { focus?: RunFocus | undefined; remove?: readonly string[] | undefined } = {},
+    chat: { focus?: RunFocus | undefined; remove?: readonly string[] | undefined; seeds?: readonly string[] | undefined } = {},
   ): Promise<StartedRun> {
     const { db, store, registry } = this.deps;
     const typedNames = parseMenuText(fields.menuText);
@@ -125,6 +125,7 @@ export class AnalyzeService {
         notes: fields.notes,
         mode: fields.mode,
         focus: chat.focus,
+        seeds: chat.seeds,
         selectedCuisine,
         cuisineOptions,
         graph,

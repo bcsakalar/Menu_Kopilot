@@ -39,8 +39,22 @@ const NOTHING = {
   quickReplies: [],
 } as const;
 
+/** "Tatlı öner" brings a handful of one category; "Daha fazla ürün öner" a round of ten, or what the target still needs (D-213). */
+const CATEGORY_ROUND = 5;
+const MORE_ROUND = 10;
+
 /** What the next-step buttons ask for needs no model: they work, and at once, when the providers are overloaded. */
-export const recommendDecision = (categoryKey: string | null): ChatDecision => ({ ...NOTHING, targets: [], addProducts: [], removeProducts: [], quickReplies: [], action: 'recommend', reply: '', categoryKey, productCount: 5 });
+export const recommendDecision = (categoryKey: string | null): ChatDecision => ({
+  ...NOTHING,
+  targets: [],
+  addProducts: [],
+  removeProducts: [],
+  quickReplies: [],
+  action: 'recommend',
+  reply: '',
+  categoryKey,
+  productCount: categoryKey ? CATEGORY_ROUND : MORE_ROUND,
+});
 
 const noAi = (message: string): ChatDecision => ({
   ...NOTHING,

@@ -282,8 +282,9 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           dropped.push({ card: raw.name, reason: `kategori bu mutfakta yok (${raw.categoryKey})` });
           continue;
         }
-        // A quick run's fill-up may go past its category, never past the run's total (D-189).
-        if (left <= 0 && (!raw.overQuota || newProducts.length >= runTotal)) {
+        // A quick run's fill-up may go past its category, never past the run's total (D-189) — not even into a category
+        // that still has room: an earlier fill-up already spent that room (D-213, one card too many on production data).
+        if ((left <= 0 && !raw.overQuota) || (raw.overQuota && newProducts.length >= runTotal)) {
           dropped.push({ card: raw.name, reason: `${raw.categoryKey} kategorisi zaten yeterli` });
           continue;
         }

@@ -6,6 +6,7 @@ import { bearer, createTestApp, loginAs, type TestContext } from '../helpers/tes
 import { fixtureImage, fixtureResponder, loadFixtures, multipartBody, parseSse, type Fixtures } from '../helpers/fixtures.js';
 import type { AnalyzeResult, CardDto } from '../../src/modules/analyze/schemas.js';
 import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
+import { fillCount, fillGoal } from '../../src/agents/plan.js';
 
 /** Words the way the panel counts them: 6–8 per description (D-178). */
 const words = (text: string): number => text.split(/\s+/u).filter((w) => /\p{L}/u.test(w)).length;
@@ -105,7 +106,7 @@ describe('POST /analyze — typed menu', () => {
     for (const card of result.cards) expect(['new_product', 'option', 'fix']).toContain(card.section);
   });
 
-  it('quick mode: a handful of suggestions spread over the categories, never a second pide', async () => {
+  it('quick mode: past the target (D-213), spread over the categories, the pides kept to a share', async () => {
     const result = await analyze({
       cuisineId: cuisineIdBySlug.get('pide-lahmacun')!,
       mode: 'quick',
@@ -130,15 +131,17 @@ describe('POST /analyze — typed menu', () => {
     const menuNames = new Set(['Kıymalı Pide', 'Kaşarlı Pide', 'Kuşbaşılı Pide', 'Karışık Pide', 'Sucuklu Yumurtalı Pide']);
     for (const card of alternatives) expect(menuNames.has(card.basedOn!), `${card.name} ← ${card.basedOn}`).toBe(true);
     expect(alternatives.filter((card) => card.productType === 'pide').length).toBeLessThanOrEqual(2);
-    // "Öneri versen yeter": six products spread over the categories — the old recommender answered this menu with
-    // six more pides. With fewer usable categories than six, a category may give a second, an open gap first (the
-    // drinks here, D-189); a main past the first is another kind of main (Lahmacun), never one more pide.
-    for (const [key, count] of perCategory) expect(count, `${key} en fazla iki ürün almalı`).toBeLessThanOrEqual(2);
-    const morePide = bySection(result, 'new_product').filter((card) => card.basedOn === null && card.productType === 'pide');
-    expect(morePide.length, 'ikinci pide yok').toBeLessThanOrEqual(1);
-    expect(perCategory.size).toBeGreaterThanOrEqual(3);
-    // And the emptiest category is the one that actually gets filled.
-    expect(perCategory.get('icecek') ?? 0).toBeGreaterThan(0);
+    // D-213: enough to pass the target — the gap plus the overshoot — spread over the categories. The old recommender
+    // answered this menu with six more pides; now more pides are a share of a long list, never most of it, and the
+    // emptiest category (ten drinks short) gets the most.
+    const offered = bySection(result, 'new_product');
+    const list = offered.map((card) => `${card.name} [${card.categoryKey}/${card.productType}]`).join(', ');
+    expect(offered.length, list).toBe(fillGoal(counts.current, counts.target));
+    expect(counts.current + offered.length).toBeGreaterThan(counts.target);
+    expect(offered.filter((card) => card.productType === 'pide').length, list).toBeLessThanOrEqual(Math.ceil(offered.length / 3));
+    expect(perCategory.size, list).toBeGreaterThanOrEqual(4);
+    const icecek = perCategory.get('icecek') ?? 0;
+    for (const [key, count] of perCategory) expect(count, `${key} ≤ icecek: ${list}`).toBeLessThanOrEqual(icecek);
     // Every new product arrives with its four sections — except a packaged drink, which is a plain panel row. A
     // prepared drink (limonata, latte) is not plain: it has a size and a description like any dish.
     for (const card of bySection(result, 'new_product')) {
@@ -413,11 +416,15 @@ describe('degraded modes', () => {
         .cards.filter((c) => c.section === 'new_product')
         .map((c) => c.name.toLocaleLowerCase('tr-TR'));
       expect(new Set(soupNames).size, soupNames.join(', ')).toBe(soupNames.length);
-      // D-198: ten in quick mode — alternatives built on the menu plus the category products.
+      // D-198: ten in quick mode — alternatives built on the menu plus the category products; six soups already sit
+      // close to a soup shop's target, so ten is also what passes it (D-213).
+      const soupCounts = soupRes.json<AnalyzeResult>().counts!;
+      expect(fillCount(soupCounts.current, soupCounts.target)).toBe(10);
       expect(soupNames.length, soupNames.join(', ')).toBe(10);
 
       // A home-cooking menu whose salad category has nothing left in the pool: without a model the slot used to stay
-      // empty (five). Quick mode fills it from the other open categories — six, never past the run's total.
+      // empty. Quick mode fills it from the other open categories, up to the run's total and never past it — which
+      // since D-213 is what passes the cuisine's target.
       const home = multipartBody(
         {
           cuisineId: rows.find((r) => r.slug === 'ev-yemekleri')!.id,
@@ -433,9 +440,12 @@ describe('degraded modes', () => {
         payload: home.payload,
       });
       expect(homeRes.statusCode, homeRes.body).toBe(200);
-      const homeNew = homeRes.json<AnalyzeResult>().cards.filter((c) => c.section === 'new_product');
-      expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(10);
-      expect(new Set(homeNew.map((c) => c.name)).size).toBe(10);
+      const homeResult = homeRes.json<AnalyzeResult>();
+      const homeNew = homeResult.cards.filter((c) => c.section === 'new_product');
+      const homeTotal = fillCount(homeResult.counts!.current, homeResult.counts!.target);
+      expect(homeTotal).toBeGreaterThan(10);
+      expect(homeNew.map((c) => c.name), homeNew.map((c) => `${c.name} [${c.categoryKey}]`).join(', ')).toHaveLength(homeTotal);
+      expect(new Set(homeNew.map((c) => c.name)).size).toBe(homeTotal);
 
       // Two variants of one pool product stay two products: listed by their own names, never "renamed" to the pool's
       // bare "Gözleme", and not asked the filling their name already chose (D-188).

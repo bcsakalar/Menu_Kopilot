@@ -45,6 +45,9 @@ const MAX_GAP_BATCHES = 4;
 const SIDE_CATEGORIES: ReadonlySet<string> = new Set(['yan-urun', 'salata-meze']);
 /** Kitchen fit of a same-type product that also shares a word with a menu product (40 + 15, see KitchenProfile.fit). */
 const SHARES_A_WORD = 55;
+/** Spares past a fill-up run's total (D-213): a fifth of it, at least two. */
+const SPARE_SHARE = 0.2;
+const MIN_SPARES = 2;
 /** A product of the cuisine's own pool (or a related one) ranks a little higher than one from elsewhere. */
 const RELATED_BONUS = 5;
 /**
@@ -84,7 +87,9 @@ export interface ProductRecommenderInput {
   graph: CuisineGraph;
   priceSegment: string;
   existing: readonly ExistingItem[];
-  /** What the menu shows this kitchen can make (D-198). */
+  /** D-213. Products the rep named that are not on the menu; an alternative may be built on one of them too. */
+  seeds?: readonly string[] | undefined;
+  /** What the menu shows this kitchen can make (D-198), the seeds included. */
   kitchen: KitchenProfile;
   /** Every category of the cuisine (key, label): an alternative may land in one the quota does not open. */
   categories: readonly { key: string; label: string }[];
@@ -150,6 +155,12 @@ interface PoolRow {
   basedOn: string | null;
   /** The template's product type is one the menu already sells. */
   sameType: boolean;
+  /**
+   * D-213. A variant of a menu product — it carries the product's own word: another sandwich to a sandwich seller, from
+   * whatever cuisine the pool keeps it under (the café's Club Sandviç seller gets Tost & Sandviç's sandwiches). A shared
+   * type alone is not enough: Mercimek Çorbası is no soup for the sushi bar that sells Miso Çorbası.
+   */
+  kind: boolean;
   typeKey: string;
 }
 
@@ -175,6 +186,8 @@ async function loadPool(deps: Pick<AgentDeps, 'db' | 'categories'>, input: Produ
     .where(eq(menuItems.approved, true))
     .orderBy(desc(sql`${menuItems.importance} + least(${menuItems.usageCount}, 10) * 3`), desc(menuItems.usageCount));
 
+  // No menu to read (a start from the cuisine alone): the cuisine's own specialities are what it sells (D-213).
+  input.kitchen.adoptSpecialties(rows.filter((row) => row.cuisineId === input.cuisine.id).map((row) => row.name));
   const pool: PoolRow[] = [];
   for (const row of rows) {
     // Rows seeded before the taxonomy existed have no category: classify them on the fly.
@@ -198,6 +211,7 @@ async function loadPool(deps: Pick<AgentDeps, 'db' | 'categories'>, input: Produ
       score: fit.score + (inRelated ? RELATED_BONUS : 0),
       basedOn: fit.basedOn,
       sameType: input.kitchen.types.has(type.key),
+      kind: input.kitchen.informative && input.kitchen.variant(row.name),
       typeKey: type.key,
     });
   }
@@ -243,9 +257,10 @@ function fromTemplates(
   if (quotaRows.length === 0 || limit <= 0) return [];
 
   // Candidates bucketed per open category, each bucket in pool order (closest to the menu first). A category
-  // product comes from the cuisine's own family — an unrelated cuisine's soup is not this kitchen's soup.
+  // product comes from the cuisine's own family — an unrelated cuisine's soup is not this kitchen's soup — unless it
+  // is a variant of a menu product (D-213): the café's Club Sandviç seller gets the sandwiches of Tost & Sandviç.
   const buckets = new Map<string, PoolRow[]>(quotaRows.map((g) => [g.key, []]));
-  for (const row of pool) if (row.related) buckets.get(row.categoryKey)?.push(row);
+  for (const row of pool) if (row.related || row.kind) buckets.get(row.categoryKey)?.push(row);
   // A product the sellers of this kitchen kept turning down goes to the back of its category — never away: when
   // nothing else fits, it is still better than an empty slot (D-196).
   for (const [key, bucket] of buckets) {
@@ -311,9 +326,10 @@ function alternativesFromPool(
   const picked: RecommendedItem[] = [];
   for (const row of pool) {
     if (picked.length >= count) break;
-    // Only the cuisine's own family, and a shared type alone only within the cuisine itself: Mercimek Çorbası is no
-    // alternative to the sushi bar's Miso Çorbası, nor Bulgur Pilavı to the pizza shop's Sarımsaklı Ekmek.
-    if (!row.basedOn || !row.related || (!row.sameType && row.score < 30)) continue;
+    // Only the cuisine's own family (or a variant of a menu product, D-213), and a shared type alone only within the
+    // cuisine itself: Mercimek Çorbası is no alternative to the sushi bar's Miso Çorbası, nor Bulgur Pilavı to the
+    // pizza shop's Sarımsaklı Ekmek.
+    if (!row.basedOn || !(row.related || row.kind) || (!row.sameType && row.score < 30)) continue;
     if (row.sameType && row.score < SHARES_A_WORD && row.cuisineId !== cuisineId) continue;
     if ((perType.get(row.typeKey) ?? 0) >= maxPerType) continue;
     if (taken(row.normalized, row.id) || picked.some((p) => p.normalized === row.normalized || sameProductName(p.normalized, row.normalized))) continue;
@@ -338,6 +354,16 @@ export function menuProduct(existing: readonly ExistingItem[], name: string | nu
     existing.find((item) => spellings(item).some((s) => sameProductName(s, wanted))) ??
     existing.find((item) => spellings(item).some((s) => s.includes(wanted) || wanted.includes(s)))
   );
+}
+
+/** The seed a model's `basedOn` names ("hamsi" for "Hamsi"), in the rep's spelling; null if none. */
+function seedProduct(seeds: readonly string[], name: string | null | undefined): string | null {
+  const wanted = normalizeTr(name ?? '');
+  if (wanted.length < 2) return null;
+  return seeds.find((seed) => {
+    const own = normalizeTr(seed);
+    return own === wanted || sameProductName(own, wanted) || own.includes(wanted) || wanted.includes(own);
+  }) ?? null;
 }
 
 interface Batch {
@@ -410,15 +436,25 @@ export async function runProductRecommender(
         for (const item of items) take(item.normalized, item.templateId);
         return items;
       };
+      // D-213: a few spares past the total. The Validator drops what its stricter duplicate check catches (a near
+      // spelling of a menu product) and lets spares through only up to the run's total, so the count holds.
+      const withSpares = total + Math.max(MIN_SPARES, Math.ceil(total * SPARE_SHARE));
       /** Quick mode's fill-up: more pool products past their category's quota until the run has its count. */
       const fillUp = (items: RecommendedItem[]): RecommendedItem[] => {
-        if (!input.fillUp || items.length >= total || run.signal.aborted) return items;
-        const open = input.quota.map((gap) => ({ ...gap, want: total }));
-        // Not a third pide to a pide shop: a type the alternatives already filled is no filler.
+        // No model and no wait here, so not even the deadline stops it: a run whose models were too slow still gets its
+        // count from the pool (D-213).
+        if (!input.fillUp || items.length >= withSpares) return items;
+        const open = input.quota.map((gap) => ({ ...gap, want: withSpares }));
+        // Not a third pide to a pide shop: a type the alternatives already filled is no filler…
         const varied = pool.filter((row) => (perType.get(row.typeKey) ?? 0) < maxPerType);
-        const extra = fromTemplates(deps, input, varied, open, total - items.length, isTaken);
+        const extra = fromTemplates(deps, input, varied, open, withSpares - items.length, isTaken);
         for (const item of extra) take(item.normalized, item.templateId);
-        return [...items, ...extra.map((item) => ({ ...item, overQuota: true }))];
+        // …until nothing else is left: then one more fish to a fish restaurant beats a menu short of its target (D-213,
+        // seen on the production pool when the models were too slow to answer).
+        const short = withSpares - items.length - extra.length;
+        const same = short > 0 ? fromTemplates(deps, input, pool, open, short, isTaken) : [];
+        for (const item of same) take(item.normalized, item.templateId);
+        return [...items, ...[...extra, ...same].map((item) => ({ ...item, overQuota: true }))];
       };
       const finish = (items: RecommendedItem[]): RecommendedItem[] => fillUp(items);
 
@@ -457,8 +493,9 @@ export async function runProductRecommender(
       // The alternatives always get a call of their own: two short answers in parallel, on different providers,
       // arrive sooner than one long one — measured on production, ten products with their options in one answer ran
       // past the 8 s attempt on both the first and the second provider.
+      // One call answers at most RECOMMEND_BATCH alternatives; the pool's closest products bring any rest.
       const batches: Batch[] = [
-        ...(input.alternatives > 0 ? [{ gaps: [], alternatives: input.alternatives }] : []),
+        ...(input.alternatives > 0 ? [{ gaps: [], alternatives: Math.min(RECOMMEND_BATCH, input.alternatives) }] : []),
         ...plannedGaps.map((gaps) => ({ gaps, alternatives: 0 })),
       ];
 
@@ -641,9 +678,9 @@ async function pickModelItems(
       return false;
     })
     .map((item) => {
-      // An alternative names a product that is really on the menu, in the menu's own spelling.
+      // An alternative names a product that is really on the menu, in the menu's own spelling — or one the rep named.
       const base = menuProduct(input.existing, item.basedOn);
-      return { ...item, basedOn: base ? base.rawName : null };
+      return { ...item, basedOn: base ? base.rawName : seedProduct(input.seeds ?? [], item.basedOn) };
     })
     .sort(
       (a, b) =>

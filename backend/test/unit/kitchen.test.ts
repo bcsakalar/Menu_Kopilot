@@ -66,3 +66,59 @@ describe('kitchen profile — only what this kitchen can make', () => {
     expect(reconcileCategory('yan-urun', true, index.resolve('Tam Ekmek Kokoreç'), () => true)).toBe('yan-urun');
   });
 });
+
+// D-213: what the rep gives leads, and the kitchen still decides what is makeable.
+describe('kitchen profile — the kind and the variants of what the menu sells', () => {
+  it('a balık-ekmek stand grills fish too: the fish its name shows is its kind, not everything fish comes with', () => {
+    const stand = kitchen('Balık Ekmek');
+    const levrek = fits(stand, 'Levrek Izgara');
+    expect(levrek.ok).toBe(true);
+    expect(levrek.basedOn).toBe('Balık Ekmek');
+    // Between the menu's own type (40) and the rest (15).
+    expect(levrek.score).toBe(30);
+    expect(stand.close('balik')).toBe(true);
+    // Seafood is of the same kind as fish for the order of the call…
+    expect(stand.close('deniz-urunu')).toBe(true);
+    // …but a speciality still needs its own word on the menu.
+    expect(fits(stand, 'Midye Tava').ok).toBe(false);
+  });
+
+  it('a type only guessed from the cuisine is no evidence of the same product', () => {
+    const hamsi = new KitchenProfile([{ name: 'Hamsi Tava' }], index, 'balik-deniz');
+    const { type, byName } = hamsi.typeOf('Kısır');
+    expect(byName).toBe(false);
+    const kisir = hamsi.fit('Kısır', type.key, byName);
+    expect(kisir.score).toBeLessThan(40);
+    expect(kisir.basedOn).toBeNull();
+  });
+
+  it('a variant carries the menu product’s own word — not its filling, its cooking or its serving', () => {
+    const hamsi = kitchen('Hamsi Tava');
+    expect(hamsi.variant('Hamsili Pilav')).toBe(true);
+    expect(hamsi.variant('Hamsi Buğulama')).toBe(true);
+    expect(hamsi.variant('Karides Tava')).toBe(false);
+    expect(hamsi.variant('Lüfer Izgara')).toBe(false);
+    const tost = kitchen('Kaşarlı Tost');
+    expect(tost.variant('Karışık Tost')).toBe(true);
+    expect(tost.variant('Kaşarlı Pide')).toBe(false);
+    const cheesecake = kitchen('Meyveli Cheesecake');
+    expect(cheesecake.variant('San Sebastian Cheesecake')).toBe(true);
+    expect(cheesecake.variant('Meyve Suyu')).toBe(false);
+    const adana = kitchen('Adana Kebap');
+    expect(adana.variant('Adana Dürüm')).toBe(true);
+    expect(adana.variant('Urfa Kebap')).toBe(true);
+    expect(adana.variant('Beyti')).toBe(false);
+  });
+
+  it('a start from the cuisine alone adopts the cuisine’s specialities; a menu’s own evidence always wins', () => {
+    const empty = kitchen();
+    expect(fits(empty, 'Çiğ Köfte Dürüm').ok).toBe(false);
+    empty.adoptSpecialties(['Çiğ Köfte Porsiyon', 'Mega Çiğ Köfte Dürüm', 'Ayran']);
+    expect(fits(empty, 'Çiğ Köfte Dürüm').ok).toBe(true);
+    expect(fits(empty, 'Et Tantuni Dürüm').ok).toBe(false);
+
+    const kebap = kitchen('Adana Kebap');
+    kebap.adoptSpecialties(['Tavuk Döner Dürüm']);
+    expect(fits(kebap, 'Tavuk Döner Dürüm').ok).toBe(false);
+  });
+});

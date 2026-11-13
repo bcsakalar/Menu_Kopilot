@@ -6,6 +6,8 @@ Restoran yalnızca menüsüyle gelir; site menüyü okur ve görüşmeyi yöneti
 - **Ekran görüntüsünü Ctrl+V ile yapıştır** (sayfanın herhangi bir yerinde), sürükle-bırak yap ya da ürünleri yaz. Aynı
   panelin birden fazla ekran görüntüsü tekrarsız birleştirilir.
 - **İlk cevap**, menünün durumunu (`7 ürün, hedef 20`), önce neyin teklif edileceğini ve sıradaki adımları gösterir.
+  Menüyü hedefin biraz ötesine taşıyacak kadar yeni ürün önerir; tek bir ürün yazılsa bile ("hamsi") önce o ürünün
+  çeşitleri, sonra aynı türden ürünler, sonra mutfağın geri kalanı gelir.
   Altında üç sekmede kartlar vardır:
   **Yeni ürünler** (menüde olmayan ve bu mutfağın yapabileceği ürünler, restorana söylenecek cümleyle birlikte),
   **Opsiyon ve malzeme** (menüdeki her ürün için opsiyon grupları, çıkarılabilir ve ekstra malzemeler, açıklama),
@@ -231,7 +233,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-213`'ten devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-214`'ten devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -351,7 +353,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-212). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-213). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

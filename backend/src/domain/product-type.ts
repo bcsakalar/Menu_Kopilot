@@ -136,6 +136,14 @@ export class ProductTypeIndex {
     return { type: byCuisine ?? this.get(GENERIC_TYPE) ?? this.types[0]!, byName: false };
   }
 
+  /**
+   * Every type the name points at, not only the strongest: "Balık Ekmek" is a sandwich made of fish, "Köfte Ekmek" one of
+   * köfte. What the kitchen can make follows all of them (D-213).
+   */
+  matching(name: string): ProductTypeDef[] {
+    return this.types.filter((type) => matchScore(name, type) > 0);
+  }
+
   /** Plain panel row (packaged / poured drink): no description, no options, no ingredients. */
   isPlain(key: string | null | undefined): boolean {
     return this.get(key)?.plain === true;

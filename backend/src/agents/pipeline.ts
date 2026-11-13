@@ -65,6 +65,11 @@ export interface AnalyzeRunInput {
   mode: AnalysisMode;
   /** A chat follow-up: only this slice of the run (D-200). */
   focus?: RunFocus | undefined;
+  /**
+   * D-213. Products the rep named that are not on the menu: "hamsi ile ilgili yemekler öner" before any menu. They lead
+   * the suggestions — their variants first, then products of their type — without counting as the restaurant's own.
+   */
+  seeds?: readonly string[] | undefined;
   /** The cuisine the user picked; the Classifier fills the blank when it is undefined. */
   selectedCuisine: CuisineNode | undefined;
   cuisineOptions: readonly CuisineOption[];
@@ -286,9 +291,11 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   }));
   input.emit({ type: 'menu', items: menu });
 
-  // What this kitchen can make, read off its own products (D-198): every new product must fit it.
+  // What this kitchen can make, read off its own products (D-198): every new product must fit it. The products the
+  // rep named without a menu (D-213) say the same about the kitchen, so they rank and judge the pool too.
+  const seeds = (input.seeds ?? []).filter((seed) => !existing.some((item) => item.normalized === normalizeTr(seed)));
   const kitchen = new KitchenProfile(
-    existing.map((item) => ({ name: item.canonicalName ?? item.rawName })),
+    [...existing.map((item) => ({ name: item.canonicalName ?? item.rawName })), ...seeds.map((name) => ({ name }))],
     deps.productTypes,
     cuisineSlug,
   );
@@ -343,6 +350,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     categories: analysis.categories,
     current: analysis.current,
     missing: analysis.missing,
+    target: analysis.target,
     needOptions: analysis.needOptions.length,
   });
   const focus = input.focus;
@@ -363,9 +371,9 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     type: 'progress',
     agent: 'product_recommender',
     message:
-      plan.mode === 'full'
+      plan.products + plan.alternatives > 0
         ? `${plan.products + plan.alternatives} ürün ve ${plan.optionTargets} ürün için opsiyon hazırlanıyor`
-        : 'Eksik ürünler ve opsiyonlar hazırlanıyor',
+        : 'Opsiyonlar hazırlanıyor',
   });
 
   /**
@@ -389,6 +397,7 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
             graph: input.graph,
             priceSegment: classification.priceSegment,
             existing,
+            seeds,
             kitchen,
             categories: gaps.map((c) => ({ key: c.key, label: c.label })),
             quota: quotaRows(gaps, plan.quota),
@@ -401,7 +410,9 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
             alternatives: plan.alternatives,
             attemptTimeoutMs: plan.attemptTimeoutMs,
             aiUsable,
-            fillUp: plan.mode === 'quick' && !focus,
+            // A top-up to the target ("Daha fazla ürün öner", D-213) keeps its count like a first analysis; a request for
+            // one category ("Tatlı öner") never fills up with another's products.
+            fillUp: plan.mode === 'quick' && (!focus || (focus.categoryKey === null && focus.products > 0)),
           },
           boundedRun,
         ),
@@ -483,7 +494,13 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   // menu lacks first, what sellers of this kitchen keep saying yes to next — so the phone just lists them.
   const callOrder = <T extends { priority: number }>(items: T[]): T[] =>
     items.map((item, index) => ({ item, index })).sort((a, b) => b.item.priority - a.item.priority || a.index - b.index).map((x) => x.item);
-  const pitchContext = { gaps: analysis.categories, cuisineId: classification.cuisine.id, cuisineName: classification.cuisine.name };
+  const pitchContext = {
+    gaps: analysis.categories,
+    cuisineId: classification.cuisine.id,
+    cuisineName: classification.cuisine.name,
+    menuSize: analysis.current,
+    kitchen,
+  };
   for (const card of callOrder(validated.newProducts.map((item) => newProductCard(deps, item, pitchContext)))) await push(card);
   for (const card of callOrder(validated.options.map((card) => optionCard(deps, card, existing)))) await push(card);
   if (!focus) for (const card of fixCards(deps, analysis.needFixes)) await push(card);
@@ -529,9 +546,12 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
 function newProductCard(
   deps: Pick<AgentDeps, 'categories' | 'feedback' | 'productTypes'>,
   item: ValidatedNewProduct,
-  context: { gaps: readonly CategoryGap[]; cuisineId: string; cuisineName: string },
+  context: { gaps: readonly CategoryGap[]; cuisineId: string; cuisineName: string; menuSize: number; kitchen: KitchenProfile },
 ): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
   const pitch = newProductPitch({
+    menuSize: context.menuSize,
+    sameKind: context.kitchen.close(item.productType),
+    variant: context.kitchen.variant(item.name),
     categoryKey: item.categoryKey,
     categoryLabel: deps.categories.label(item.categoryKey),
     gaps: context.gaps,

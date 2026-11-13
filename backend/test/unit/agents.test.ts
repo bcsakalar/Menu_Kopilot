@@ -4,8 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { addTypedItems, dedupeExtracted, mergeFlag } from '../../src/agents/dedupe.js';
 import { looksAbbreviated } from '../../src/agents/gap-analyst.js';
 import type { ExtractedItem } from '../../src/agents/schemas/extractor.js';
-import { allocate, planRun, quotaRows } from '../../src/agents/plan.js';
-import { cleanProductName } from '../../src/agents/validator.js';
+import { allocate, fillCount, fillGoal, focusPlan, MAX_PRODUCTS, overshoot, planRun, QUICK_TOTAL, quotaRows, topUp } from '../../src/agents/plan.js';
+import { cleanProductName, runValidator } from '../../src/agents/validator.js';
+import type { RecommendedItem } from '../../src/agents/product-recommender.js';
+import type { AgentRunContext } from '../../src/agents/types.js';
+import type { AgentTracer } from '../../src/agents/tracer.js';
+import { FeedbackIndex } from '../../src/agents/knowledge.js';
+import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
+import { ProductTypeIndex } from '../../src/domain/product-type.js';
+import { normalizeTr } from '../../src/lib/normalize-tr.js';
 import { CategoryIndex, categoryGaps, FALLBACK_CATEGORY } from '../../src/domain/category.js';
 import { SEED_CATEGORIES } from '../../src/db/seed/categories.js';
 import { templatePayloadSchema, type TemplatePayload } from '../../src/domain/template.js';
@@ -169,20 +176,76 @@ describe('run plan — how many products and from which categories', () => {
     ]),
   );
 
-  it('quick mode: ten suggestions — six alternatives, four spread over different categories, no combos, every menu product completed', () => {
+  it('the count (D-213): the gap to the target plus a tenth of it (three at least), never under ten, capped', () => {
+    expect(overshoot(10)).toBe(3);
+    expect(overshoot(40)).toBe(4);
+    expect(overshoot(51)).toBe(6);
+    // 11 products on the menu, target 50: 39 short, five past it.
+    expect(fillGoal(11, 50)).toBe(44);
+    expect(fillCount(11, 50)).toBe(44);
+    // A typed "hamsi" in a 40-product cuisine.
+    expect(fillCount(1, 40)).toBe(43);
+    // A menu already past its target still gets a quick run's ten.
+    expect(fillGoal(31, 20)).toBe(3);
+    expect(fillCount(31, 20)).toBe(QUICK_TOTAL);
+    expect(QUICK_TOTAL).toBe(10);
+    // An admin typo (a minimum of 500) cannot turn one analysis into hundreds of cards.
+    expect(fillCount(0, 500)).toBe(MAX_PRODUCTS);
+    // A follow-up owes what the target still needs past the products already offered in the call.
+    expect(topUp(11, 50, 30)).toBe(14);
+    expect(topUp(11, 50, 44)).toBe(0);
+    expect(topUp(11, 50, 60)).toBe(0);
+  });
+
+  it('quick mode past the target: the gap plus the overshoot, a third of it alternatives, every short category served', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 8, missing: 20, needOptions: 10 });
-    // D-198: alternatives built on the menu's own products, on top of the category spread.
-    expect(plan.alternatives).toBe(6);
-    expect(plan.products).toBe(4);
+    // 8 products, target 28: 20 short and three past it.
+    expect(plan.products + plan.alternatives).toBe(fillCount(8, 28));
+    expect(plan.products + plan.alternatives).toBe(23);
+    // D-198: alternatives built on the menu's own products lead; the categories bring the rest.
+    expect(plan.alternatives).toBe(7);
+    expect(plan.products).toBe(16);
     // Every menu product gets its four sections; the model is asked about seven, in two parallel calls at most,
     // and the pool and the knowledge base complete the rest at no model cost.
     expect(plan.optionTargets).toBe(10);
     expect(plan.modelOptionTargets).toBe(7);
     expect(plan.optionBatches).toBe(2);
+    // Every short category gets its share, the mains the largest; a combo is the last resort: one at most.
+    for (const gap of kebap.filter((c) => c.missing > 0 && c.key !== 'menu-kampanya')) expect(plan.quota.get(gap.key), gap.key).toBeGreaterThan(0);
+    const mains = plan.quota.get('ana-yemek')!;
+    for (const [key, count] of plan.quota) if (key !== 'ana-yemek') expect(count, key).toBeLessThanOrEqual(mains);
+    expect(plan.quota.get('menu-kampanya')).toBeLessThanOrEqual(1);
+  });
+
+  it('quick mode keeps its ten-product shape when ten already pass the target: six alternatives, four spread', () => {
+    const plan = planRun({ mode: 'quick', categories: kebap, current: 8, missing: 2, needOptions: 10 });
+    expect(plan.alternatives).toBe(6);
+    expect(plan.products).toBe(4);
     // One per category — the user's "5 farklı kategoriden 5-6 ürün".
     expect([...plan.quota.values()].every((v) => v <= 1)).toBe(true);
     expect(quotaRows(kebap, plan.quota)).toHaveLength(4);
     expect(plan.quota.get('menu-kampanya')).toBe(0);
+  });
+
+  it('a long run asks for one model call of alternatives at most; the categories carry the rest', () => {
+    // Nothing on the menu and a large target: 60 + 6.
+    const plan = planRun({ mode: 'quick', categories: kebap, current: 0, missing: 60, needOptions: 0 });
+    expect(plan.alternatives).toBe(10);
+    expect(plan.products).toBe(56);
+    expect(plan.products + plan.alternatives).toBe(fillCount(0, 60));
+  });
+
+  it('a follow-up top-up spreads over the categories past one call of alternatives', () => {
+    const base = planRun({ mode: 'quick', categories: kebap, current: 8, missing: 20, needOptions: 0 });
+    const focus = { products: 30, categoryKey: null, targets: [], newItemsOnly: false, exclude: [], priceSegment: 'orta' };
+    const plan = focusPlan(base, focus, kebap, 0);
+    expect(plan.alternatives).toBe(10);
+    expect(plan.products).toBe(20);
+    expect(plan.quota.get('menu-kampanya')).toBe(0);
+    // "Tatlı öner" stays one category, with no alternatives.
+    const dessert = focusPlan(base, { ...focus, products: 5, categoryKey: 'tatli' }, kebap, 0);
+    expect(dessert.alternatives).toBe(0);
+    expect([...dessert.quota]).toEqual([['tatli', 5]]);
   });
 
   it('quick mode still spreads its four category products when the cuisine has few categories', () => {
@@ -232,12 +295,13 @@ describe('run plan — how many products and from which categories', () => {
     expect(planRun({ mode: 'quick', categories: combos, current: 4, missing: 1, needOptions: 0 }).products).toBe(0);
   });
 
-  it('quick mode on a one-product menu ("ürün ekle"): ten suggestions, half of them alternatives', () => {
+  it('quick mode on a one-product menu ("ürün ekle", a typed "hamsi"): past the target, its variants first', () => {
     const plan = planRun({ mode: 'quick', categories: kebap, current: 1, missing: 19, needOptions: 1 });
-    expect(plan.products).toBe(5);
-    expect(plan.alternatives).toBe(5);
-    expect([...plan.quota.values()].every((v) => v <= 2)).toBe(true);
-    expect(plan.quota.get('menu-kampanya')).toBe(0);
+    // 1 product, target 20: 19 short and three past it.
+    expect(plan.products + plan.alternatives).toBe(22);
+    expect(plan.alternatives).toBe(7);
+    expect(plan.products).toBe(15);
+    expect(plan.quota.get('menu-kampanya')).toBeLessThanOrEqual(1);
     expect(plan.optionTargets).toBe(1);
   });
 
@@ -246,7 +310,8 @@ describe('run plan — how many products and from which categories', () => {
     const shape = kebap.reduce((sum, c) => sum + c.missing, 0);
     expect(shape).toBeLessThan(10);
     const plan = planRun({ mode: 'full', categories: kebap, missing: 20, needOptions: 10 });
-    expect(plan.products).toBe(22);
+    // Past the target like a quick run (D-213): 20 short, three past it.
+    expect(plan.products).toBe(23);
     expect(plan.optionTargets).toBe(10);
     // Every short category is served, and the surplus follows the cuisine's shape: mains get the largest share.
     expect(plan.quota.get('corba')).toBeGreaterThan(0);
@@ -286,7 +351,8 @@ describe('run plan — how many products and from which categories', () => {
       ]),
     );
     const plan = planRun({ mode: 'full', categories: kafe, missing: 40, needOptions: 10 });
-    expect(plan.products).toBe(40);
+    expect(plan.products).toBe(fillGoal(0, 40));
+    expect(plan.products).toBe(44);
     expect(plan.quota.get('icecek')).toBeGreaterThan(16);
   });
 
@@ -404,5 +470,60 @@ describe('a follow-up that came back empty', () => {
     expect(followUp({ ...empty, warnings: [{ code: 'recommend_failed', message: '' }] })).toContain('yoğun');
     expect(followUp({ ...empty, warnings: [{ code: 'target_unreachable', message: '' }] })).toContain('uygun bir sonuç çıkmadı');
     expect(followUp(empty)).toContain('uygun bir sonuç çıkmadı');
+  });
+});
+
+describe('validator — a fill-up never runs past the run total', () => {
+  // D-213: on production data a fill-up card of a full category took the run's last free slot, and a later fill-up
+  // card of a category with room still passed — one card past the total.
+  const deps = {
+    tracer: { step: async (_agent: string, _label: string, _input: unknown, body: () => Promise<{ value: unknown }>) => (await body()).value } as unknown as AgentTracer,
+    productTypes: new ProductTypeIndex(SEED_PRODUCT_TYPES, new Map(Object.entries(CUISINE_DEFAULT_TYPE)), new Map(Object.entries(CATEGORY_DEFAULT_TYPE))),
+    feedback: new FeedbackIndex(),
+  };
+  const item = (name: string, categoryKey: string, overQuota = false): RecommendedItem => ({
+    name,
+    normalized: normalizeTr(name),
+    categoryKey,
+    shortDescription: 'Kısa açıklama',
+    portionInfo: '',
+    priceRangeHint: '',
+    reason: 'test',
+    importance: 50,
+    source: 'ai',
+    templateId: null,
+    optionGroups: [],
+    removableIngredients: [],
+    extraIngredients: [],
+    basedOn: null,
+    ...(overQuota ? { overQuota } : {}),
+  });
+
+  it('a fill-up card waits for a free slot of the run, whatever its category has left', async () => {
+    const result = await runValidator(
+      deps,
+      {
+        existing: [],
+        recommended: [
+          item('Mercimek Çorbası', 'corba'),
+          item('Fıstıklı Baklava', 'tatli'),
+          // Fill-up past the full soup category: takes the run's third and last slot.
+          item('Ezogelin Çorbası', 'corba', true),
+          // Fill-up into the drinks, which never got their card: the run is already full.
+          item('Ayran', 'icecek', true),
+        ],
+        options: [],
+        categoryQuota: new Map([
+          ['corba', 1],
+          ['tatli', 1],
+          ['icecek', 1],
+        ]),
+        current: 0,
+        target: 10,
+      },
+      {} as AgentRunContext,
+    );
+    expect(result.newProducts.map((p) => p.name)).toEqual(['Mercimek Çorbası', 'Fıstıklı Baklava', 'Ezogelin Çorbası']);
+    expect(result.dropped.map((d) => d.card)).toContain('Ayran');
   });
 });

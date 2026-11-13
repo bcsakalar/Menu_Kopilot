@@ -51,7 +51,22 @@ export interface NewProductPitchInput {
   basedOn?: string | null;
   /** The recommender's one-line reason; said after the alternative, when there is room. */
   reason?: string;
+  /** How many products the menu has; on a tiny one an empty category is no news (D-213). */
+  menuSize?: number;
+  /** The product is of a type the menu (or what the rep named) already sells, or of its kind: fish and seafood to a hamsi seller. */
+  sameKind?: boolean;
+  /** It carries the own word of the product it is built on: "Hamsili Pilav" of "Hamsi Tava". */
+  variant?: boolean;
 }
+
+/**
+ * D-213. A menu of one to three products — a typed "hamsi", "Adana, Lahmacun" — lacks every category, so "menünüzde hiç
+ * çorba yok" ranks nothing. There the call goes: the variants of what it sells, then more of its kind (other fish and
+ * seafood), then the other alternatives, then the rest of the cuisine. The bands sit further apart than the importance
+ * bonus (≤ 10), so Ayran waits its turn.
+ */
+const TINY_MENU = 3;
+const TINY_BANDS = { variant: 115, sameKind: 100, alternative: 85, other: 70 } as const;
 
 /**
  * A product to add. First what the menu lacks (a category with nothing in it opens the call), then what sellers of
@@ -77,6 +92,15 @@ export function newProductPitch(input: NewProductPitchInput): Pitch {
     const why = (input.reason ?? '').trim().replace(/[.!]+$/u, '');
     if (why) parts.push(lowerFirst(why));
     priority = Math.max(priority, 85);
+  }
+  if (input.menuSize !== undefined && input.menuSize <= TINY_MENU) {
+    priority = input.variant
+      ? TINY_BANDS.variant
+      : input.sameKind
+        ? TINY_BANDS.sameKind
+        : input.basedOn
+          ? TINY_BANDS.alternative
+          : TINY_BANDS.other;
   }
 
   const answered = input.answers ? input.answers.accepted + input.answers.removed : 0;

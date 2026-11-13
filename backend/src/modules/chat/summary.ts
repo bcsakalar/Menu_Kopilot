@@ -34,6 +34,17 @@ export function nextSteps(result: AnalyzeResult): string[] {
 }
 
 /**
+ * D-213. Where the suggestions take the menu: every first answer offers enough to pass the cuisine's target, and says so —
+ * or says how far short it stays when the pool and the models had no more that fit this kitchen.
+ */
+export function reachLine(counts: CountsDto, offered: number): string {
+  const reach = counts.current + offered;
+  const verdict =
+    reach > counts.target ? `hedef ${counts.target} geçilir` : reach === counts.target ? `hedef ${counts.target} tamamlanır` : `hedefe ${counts.target - reach} ürün kalır`;
+  return `**${offered} yeni ürün** önerdim: hepsi eklenirse menü ${reach} ürün olur, ${verdict}.`;
+}
+
+/**
  * The first thing the rep reads on the call, written without a model so it arrives with the cards: where the menu
  * stands, what to bring up first, and the next steps as buttons.
  */
@@ -51,7 +62,10 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   const products = cards.filter((c) => c.section === 'new_product');
   // The gaps stand in the header and the card counts on the tabs: this answer says only what they cannot.
   const lines = [`**${counts.cuisineName}** menüsü: ${counts.current} ürün okudum, hedef ${counts.target}.`];
-  if (products.length > 0) lines.push(`Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`);
+  if (products.length > 0) {
+    lines.push(reachLine(counts, products.length));
+    lines.push(`Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`);
+  }
   const missing = openingGaps(counts.quality);
   if (missing.length > 0) lines.push(`Açılış kurallarında eksik: ${missing.join(', ')}.`);
   const extra = counts.quality?.extraCuisines ?? [];
@@ -70,7 +84,8 @@ export function fromCuisine(result: AnalyzeResult): { text: string; quickReplies
   if (!result.counts || products.length === 0) return { text: aiBusy(result) ? AI_BUSY : ASK_MENU, quickReplies: [] };
   const lines = [
     `**${result.counts.cuisineName}** için menüsüz başladım: hedef ${result.counts.target} ürün.`,
-    `Bu mutfağın menülerinde en sık görülenler: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`,
+    reachLine(result.counts, products.length),
+    `Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`,
     'Menünün ekran görüntüsünü yapıştırırsan ya da ürünleri yazarsan eksikleri tam çıkarırım.',
   ];
   return { text: lines.join('\n'), quickReplies: nextSteps(result) };
@@ -88,11 +103,12 @@ export function followUp(result: AnalyzeResult, lead = ''): string {
       .map((c) => c.targetName ?? c.name)
       .join(', ');
   const products = named('new_product');
+  const more = result.cards.filter((c) => c.section === 'new_product').length - TOP_PRODUCTS;
   const options = named('option');
   const lines = [
     ...(lead ? [lead] : []),
     ...(options ? [`**${options}** için opsiyon ve malzemeleri hazırladım.`] : []),
-    ...(products ? [`Önerim: **${products}**.`] : []),
+    ...(products ? [`Önerim: **${products}**${more > 0 ? ` ve ${more} ürün daha` : ''}.`] : []),
   ];
   if (lines.length > 0) return lines.join('\n');
   return aiBusy(result) ? AI_BUSY : 'Bu istek için yeni ve bu mutfağa uygun bir sonuç çıkmadı. Başka bir kategori dene.';

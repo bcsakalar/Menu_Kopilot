@@ -4,8 +4,9 @@ import type { CategoryGap } from '../domain/category.js';
  * The run plan — how much work one analysis does, and how that work is split between the cuisine's categories.
  *
  * Two modes, chosen by the user on the home screen:
- *   quick — "öneri versen yeter": ten products — alternatives built on the menu's own products plus a few from
- *           DIFFERENT categories — and a few option cards.
+ *   quick — "öneri versen yeter": enough products to pass the cuisine's target (D-213; ten when the menu already
+ *           meets it) — alternatives built on the menu's own products first, then the categories — and a few option
+ *           cards.
  *   full  — "hakikaten işimizi yapalım": recommend until the menu would actually reach the cuisine's minimum,
  *           and ask for options/ingredients on every product whose options are not already known.
  *
@@ -50,8 +51,46 @@ const QUICK_SPREAD_CATEGORIES = 5;
 
 /** Full mode never returns less than this, even for a menu that already meets its minimum. */
 const FULL_FLOOR = 8;
-/** Upper bound on one run: beyond this the list stops being something a person can go through on a call. */
-export const MAX_PRODUCTS = 40;
+/**
+ * D-213. Every run aims past the cuisine's target, never just to it: the menu should still reach it when the restaurant
+ * turns a few suggestions down. A tenth of the target, at least three.
+ */
+const MIN_OVERSHOOT = 3;
+/** A quick run never offers fewer than this, even to a menu that already meets its target. */
+export const QUICK_TOTAL = QUICK_PRODUCTS + QUICK_ALTERNATIVES;
+/**
+ * Alternatives built on the menu's own products, at most, in a run that fills to the target: one model call answers
+ * them (see RECOMMEND_BATCH in the recommender) and the category products bring the rest.
+ */
+const MAX_ALTERNATIVES = 10;
+/** Share of a long run that goes to alternatives: the variants of what the rep gave come first ("hamsi çeşitleri"). */
+const ALTERNATIVE_SHARE = 0.3;
+/**
+ * Upper bound on one run. The admin may set a cuisine's minimum up to 500; real targets sit far below this, so it only
+ * stops a typo from turning one analysis into hundreds of cards.
+ */
+export const MAX_PRODUCTS = 120;
+
+/** How far past the target a run aims (D-213). */
+export const overshoot = (target: number): number => Math.max(MIN_OVERSHOOT, Math.ceil(target / 10));
+
+/** New products that bring a menu of `current` products past its `target`: the gap plus the overshoot. */
+export const fillGoal = (current: number, target: number): number => Math.max(0, target - current) + overshoot(target);
+
+/**
+ * D-213. How many new products a run that starts or grows a menu offers: enough to pass the cuisine's target, and never
+ * fewer than a quick run's ten. A typed "hamsi", a screenshot of eleven pizzas or a cuisine named alone all get the
+ * same rule.
+ */
+export const fillCount = (current: number, target: number): number => Math.min(MAX_PRODUCTS, Math.max(QUICK_TOTAL, fillGoal(current, target)));
+
+/**
+ * A follow-up's share of the same promise: what the menu still needs past the products already offered in this call
+ * ("Daha fazla ürün öner" after a short first answer, a second screenshot).
+ */
+export const topUp = (current: number, target: number, openOffers: number): number =>
+  Math.min(MAX_PRODUCTS, Math.max(0, fillGoal(current, target) - openOffers));
+
 /** Full mode completes every menu product up to here; the ones past the model batches come from the knowledge base. */
 export const MAX_OPTION_TARGETS = 40;
 
@@ -88,8 +127,9 @@ const FULL_ATTEMPT_MS = 11_000;
  */
 export function modeBudget(mode: AnalysisMode): { extraLlmCalls: number; extraInputTokens: number } {
   // Quick mode's second option batch is the "biraz daha fazlası"; the alternatives (D-198) add one recommend call in
-  // call of their own in both modes, with a longer prompt — the kitchen brief.
-  return mode === 'full' ? { extraLlmCalls: 7, extraInputTokens: 26_000 } : { extraLlmCalls: 3, extraInputTokens: 10_000 };
+  // call of their own in both modes, with a longer prompt — the kitchen brief. D-213: a quick run fills to the target
+  // too, so it may need the category batches the pool cannot answer (up to four, in parallel).
+  return mode === 'full' ? { extraLlmCalls: 7, extraInputTokens: 26_000 } : { extraLlmCalls: 6, extraInputTokens: 20_000 };
 }
 
 export interface RunPlan {
@@ -123,6 +163,8 @@ export interface PlanInput {
   current?: number;
   /** How many products short of the opening target the menu is. */
   missing: number;
+  /** The cuisine's opening target; current + missing when not given. */
+  target?: number;
   /** How many products on the menu are waiting for options. */
   needOptions: number;
 }
@@ -188,8 +230,63 @@ export function allocate(categories: readonly CategoryGap[], total: number, capO
   return quota;
 }
 
+/**
+ * A category's ceiling in a run of `wanted` products. Twice what the cuisine expects is enough for a normal menu, but
+ * some cuisines ask for far more products than their category table describes — a café with a minimum of 50 has three
+ * categories summing to 13, and capping each at double left the run 24 products short of a target it was told to
+ * reach. So the ceiling also follows the category's share of what this run needs. A combo is the last resort: one.
+ */
+function shareCap(categories: readonly CategoryGap[], wanted: number): (c: CategoryGap) => number {
+  const shapeTotal = categories.reduce((sum, c) => sum + Math.max(1, c.minItems), 0);
+  return (c) => {
+    if (LAST_RESORT.has(c.key)) return 1;
+    const share = Math.ceil((wanted * Math.max(1, c.minItems)) / Math.max(1, shapeTotal));
+    return Math.max(2, c.minItems * 2, share);
+  };
+}
+
+/**
+ * `wanted` slots over the categories under their ceilings — and, when the ceilings together hold less (the combo's
+ * share of a long run is one), the rest by the cuisine's shape past them: the run keeps its count (D-213).
+ */
+function spread(categories: readonly CategoryGap[], wanted: number): Map<string, number> {
+  const quota = allocate(categories, wanted, shareCap(categories, wanted));
+  const rest = wanted - sum(quota);
+  if (rest <= 0) return quota;
+  const more = allocate(
+    categories.map((c) => ({ ...c, missing: 0 })),
+    rest,
+    (c) => (LAST_RESORT.has(c.key) ? 0 : Number.POSITIVE_INFINITY),
+  );
+  for (const [key, count] of more) quota.set(key, (quota.get(key) ?? 0) + count);
+  return quota;
+}
+
 export function planRun(input: PlanInput): RunPlan {
   const shape = input.categories.reduce((sum, c) => sum + c.missing, 0);
+  const current = input.current ?? 0;
+  const target = input.target ?? current + input.missing;
+
+  const total = fillCount(current, target);
+  if (input.mode === 'quick' && total > QUICK_TOTAL) {
+    // D-213: a menu short of its target gets enough to pass it. The variants of what the rep gave lead (a third of the
+    // run, up to one model call's worth); the rest follows the cuisine's shape, every short category first.
+    const alternatives = Math.min(MAX_ALTERNATIVES, Math.max(QUICK_ALTERNATIVES, Math.round(total * ALTERNATIVE_SHARE)));
+    const wanted = total - alternatives;
+    const quota = spread(input.categories, wanted);
+    return {
+      mode: 'quick',
+      products: sum(quota),
+      alternatives,
+      optionTargets: Math.min(MAX_OPTION_TARGETS, input.needOptions),
+      modelOptionTargets: Math.min(QUICK_OPTION_TARGETS, input.needOptions),
+      optionBatches: QUICK_OPTION_BATCHES,
+      quota,
+      deadlineMs: QUICK_DEADLINE_MS,
+      attemptTimeoutMs: QUICK_ATTEMPT_MS,
+      extraLlmCalls: modeBudget('quick').extraLlmCalls,
+    };
+  }
 
   if (input.mode === 'quick') {
     // One product per category when the cuisine has enough of them: six suggestions from six different
@@ -222,21 +319,9 @@ export function planRun(input: PlanInput): RunPlan {
     };
   }
 
-  // Full: enough to actually reach the opening target (plus two spares), never below the floor.
-  const wanted = Math.min(MAX_PRODUCTS, Math.max(FULL_FLOOR, input.missing + 2, shape));
-  /**
-   * A category's ceiling. Twice what the cuisine expects is enough for a normal menu, but some cuisines ask for
-   * far more products than their category table describes — a café with a minimum of 50 has three categories
-   * summing to 13, and capping each at double left the run 24 products short of a target it was told to reach.
-   * So the ceiling also follows the category's share of what this run needs.
-   */
-  const shapeTotal = input.categories.reduce((sum, c) => sum + Math.max(1, c.minItems), 0);
-  const capOf = (c: CategoryGap): number => {
-    if (LAST_RESORT.has(c.key)) return 1;
-    const share = Math.ceil((wanted * Math.max(1, c.minItems)) / Math.max(1, shapeTotal));
-    return Math.max(2, c.minItems * 2, share);
-  };
-  const quota = allocate(input.categories, wanted, capOf);
+  // Full: past the opening target like a quick run (D-213), never below the floor; its alternatives come on top.
+  const wanted = Math.min(MAX_PRODUCTS, Math.max(FULL_FLOOR, fillGoal(current, target), shape));
+  const quota = spread(input.categories, wanted);
   return {
     mode: 'full',
     products: sum(quota),
@@ -270,9 +355,12 @@ export interface RunFocus {
   priceSegment: string;
 }
 
-/** A quick run narrowed to the focus. Half of an open request goes to alternatives, as in a first analysis. */
+/**
+ * A quick run narrowed to the focus. Half of an open request goes to alternatives, as in a first analysis — up to one
+ * model call's worth, so a top-up to the target (D-213) spreads the rest over the cuisine's categories.
+ */
 export function focusPlan(plan: RunPlan, focus: RunFocus, categories: readonly CategoryGap[], targets: number): RunPlan {
-  const alternatives = focus.categoryKey ? 0 : Math.ceil(focus.products / 2);
+  const alternatives = focus.categoryKey ? 0 : Math.min(MAX_ALTERNATIVES, Math.ceil(focus.products / 2));
   const inCategories = focus.products - alternatives;
   const quota = focus.categoryKey
     ? new Map([[focus.categoryKey, focus.products]])
