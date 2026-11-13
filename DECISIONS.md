@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-209'dan devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-210'dan devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1056,3 +1056,12 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   malzemeleri yazıldı. (8) Düzeltmeler canlıya çıktıktan sonraki ikinci turda model "ayranı satmıyorlarmış" mesajına
   Ayran'ı çıkarıp yerine olmayan bir "Yeni İçecek" ekledi; menüye artık yalnızca adı temsilcinin mesajında geçen ürün
   eklenir (`onlyNamed`).
+- **D-209** — **Menü gelmeden de sohbet takılmaz** (kullanıcı isteği, 2026-11-13: "bu tarz yazılar da gelebilir, tekil
+  ürün, mutfak türü… sistem hiçbir şekilde takılmamalı"). Telefondan denenirken menü yokken "Suşici için opsiyon öner",
+  "Uzak doğu mutfağı için öneri sun" gibi mesajlar yalnızca "Bakıyorum." alıp kalıyordu: model öneri aksiyonu seçiyor,
+  kod menü olmadığı için hiçbir şey yapmıyordu. Artık: (1) menüden önce adı geçen ürün ("Adana için opsiyon yaz")
+  menüyü başlatır; (2) yalnızca mutfak türü söylendiyse model `cuisineSlug` verir ve analiz menüsüz, o mutfaktan başlar:
+  hedef sayı ve o mutfağın temel ürünleri gelir, sonraki "daha fazla", yazılı liste ya da ekran görüntüsü aynı mutfakla
+  devam eder (`analyze.start` mutfak verildiyse boş girişi kabul eder); (3) ikisi de yoksa cevap hiçbir zaman çıplak
+  "Bakıyorum." olmaz, neyin yazılacağını söyler. Mutfak türünü koddaki kelime eşleştirmesiyle bulmak denenmedi:
+  "tatlı öner", "çorba öner" gibi kategori istekleri mutfak adlarıyla çakışıyor; karar modelde, liste bağlamda.

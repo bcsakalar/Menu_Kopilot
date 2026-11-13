@@ -69,7 +69,8 @@ export class AnalyzeService {
     if (fields.fromRunId && !reuseItems) {
       throw new AppError('CONFLICT', 'Önceki analizin ürün listesi yok; fotoğrafları veya ürün adlarını yeniden gönder');
     }
-    if (images.length === 0 && typedNames.length === 0 && !reuseItems) {
+    // A cuisine alone is a start too: the rep named it before the menu, and its essentials come first.
+    if (images.length === 0 && typedNames.length === 0 && !reuseItems && !fields.cuisineId) {
       throw new AppError('VALIDATION_ERROR', 'En az bir fotoğraf ekle veya ürün adlarını yaz');
     }
 

@@ -14,7 +14,7 @@ import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { aiBusy, followUp, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
+import { aiBusy, ASK_MENU, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -77,7 +77,8 @@ const firstFields = (fields: Partial<AnalyzeFields>): AnalyzeFields => ({ mode: 
 
 function continueFields(last: AnalyzeResult, typed: readonly string[], notes: string): AnalyzeFields {
   return firstFields({
-    fromRunId: last.runId,
+    // A start from the cuisine alone has no product list to carry on: the cuisine is the thread.
+    ...(last.menu.length > 0 ? { fromRunId: last.runId } : {}),
     ...(last.counts ? { cuisineId: last.counts.cuisineId } : {}),
     ...(typed.length > 0 ? { menuText: typed.join('\n') } : {}),
     ...(notes ? { notes } : {}),
@@ -95,11 +96,13 @@ function focusOf(decision: ChatDecision): Partial<RunFocus> {
  * A product joins the menu only if the rep named it: asked to drop the ayran, the model once added a made-up "Yeni
  * İçecek" in its place. A word of the name must start a word of the message ("lahmacunu da ekle" names Lahmacun).
  */
-function onlyNamed(decision: ChatDecision, text: string): ChatDecision {
-  if (decision.action !== 'update_menu') return decision;
+function named(products: readonly string[], text: string): string[] {
   const said = normalizeTr(text).split(' ');
-  const named = (product: string) => normalizeTr(product).split(' ').some((word) => word.length >= 3 && said.some((s) => s.startsWith(word)));
-  return { ...decision, addProducts: decision.addProducts.filter(named) };
+  return products.filter((p) => normalizeTr(p).split(' ').some((word) => word.length >= 3 && said.some((s) => s.startsWith(word))));
+}
+
+function onlyNamed(decision: ChatDecision, text: string): ChatDecision {
+  return decision.action === 'update_menu' ? { ...decision, addProducts: named(decision.addProducts, text) } : decision;
 }
 
 /** One of the buttons of `nextSteps`, typed or clicked. */
@@ -186,9 +189,9 @@ export class ChatService {
     emit({ type: 'user_message', message: toMessage(outgoing.message, null) });
     try {
       const snapshot = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
-      // A run that read nothing is no menu: the next screenshot is the first analysis, not an addition to an empty list.
-      const last = snapshot && snapshot.menu.length > 0 ? snapshot : null;
-      if (images.length > 0 || (!last && looksLikeProductList(text))) await this.analyzeMenu(userId, outgoing, last, emit);
+      // The conversation's run: a menu, or a cuisine named before any menu (a run that read nothing never becomes it).
+      const last = snapshot?.counts ? snapshot : null;
+      if (images.length > 0 || (!last?.menu.length && looksLikeProductList(text))) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
     } catch (err) {
       this.deps.onError(err);
@@ -199,10 +202,18 @@ export class ChatService {
   /** A screenshot or a typed list: the first analysis of the menu, or what a later screenshot adds to it. */
   private async analyzeMenu(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const { text, images, conversation } = outgoing;
-    if (!last) {
+    if (!last?.menu.length) {
       const fields = images.length > 0 ? { ...(text ? { notes: text } : {}) } : { menuText: text };
-      const result = await this.runAgents(userId, outgoing, firstFields(fields), {}, emit);
-      await this.reply(outgoing, summarize(result), result, emit);
+      // A cuisine the rep named before the menu keeps leading.
+      const cuisine = last?.counts ? { cuisineId: last.counts.cuisineId } : {};
+      const result = await this.runAgents(userId, outgoing, firstFields({ ...fields, ...cuisine }), {}, emit);
+      if (result.menu.length > 0) {
+        await this.reply(outgoing, summarize(result), result, emit);
+        return;
+      }
+      // An invoice or a blurry shot recommended into the air: no cards, and the conversation keeps its earlier run.
+      await this.deps.db.update(conversations).set({ lastRunId: conversation.lastRunId }).where(eq(conversations.id, conversation.id));
+      await this.reply(outgoing, summarize(result), null, emit);
       return;
     }
     const focus = await this.focus(conversation.id, last, { products: PRODUCTS_WITH_IMAGES, newItemsOnly: true });
@@ -220,24 +231,32 @@ export class ChatService {
     const decision = onlyNamed(quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId)), outgoing.text);
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
-    if (decision.action === 'update_menu' && !last && decision.addProducts.length > 0) {
-      const result = await this.runAgents(userId, outgoing, firstFields({ menuText: decision.addProducts.join('\n') }), {}, emit);
-      await this.reply(outgoing, summarize(result), result, emit);
-      return;
-    }
-    const cuisineId = decision.action === 'change_cuisine' ? await this.cuisineId(decision.cuisineSlug) : undefined;
-    if (!last || decision.action === 'answer' || (decision.action === 'change_cuisine' && !cuisineId)) {
+    if (decision.action === 'answer') {
       await this.reply(outgoing, answer, null, emit);
       return;
     }
-
-    if (cuisineId) {
-      const result = await this.runAgents(userId, outgoing, { ...continueFields(last, [], ''), cuisineId }, {}, emit);
+    // Products named before any menu start it: "lahmacun da var", "Adana için opsiyon yaz".
+    const typed = decision.action === 'complete' && !last?.menu.length ? named(decision.targets, outgoing.text) : decision.addProducts;
+    if (!last && typed.length > 0) {
+      const result = await this.runAgents(userId, outgoing, firstFields({ menuText: typed.join('\n') }), {}, emit);
       await this.reply(outgoing, summarize(result), result, emit);
       return;
     }
+    // A cuisine named with no menu ("Uzak Doğu için öneri sun") or a switch of cuisine: a fresh start from it.
+    const cuisineId = (!last || decision.action === 'change_cuisine') && decision.cuisineSlug ? await this.cuisineId(decision.cuisineSlug) : undefined;
+    if (cuisineId) {
+      const fields = last ? { ...continueFields(last, [], ''), cuisineId } : firstFields({ cuisineId });
+      const result = await this.runAgents(userId, outgoing, fields, {}, emit);
+      await this.reply(outgoing, result.menu.length > 0 ? summarize(result) : fromCuisine(result), result, emit);
+      return;
+    }
+    // Nothing to act on: say what would move the call on, never a bare "Bakıyorum.".
+    if (!last || decision.action === 'change_cuisine') {
+      await this.reply(outgoing, { text: ASK_MENU, quickReplies: [] }, null, emit);
+      return;
+    }
     const focus = await this.focus(conversationId, last, focusOf(decision));
-    const fields = continueFields(last, decision.addProducts, decision.note);
+    const fields = continueFields(last, typed, decision.note);
     const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts }, emit);
     const lead = decision.action === 'update_menu' ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.` : '';
     const quickReplies = aiBusy(result) ? [outgoing.text] : quick ? nextSteps(result) : answer.quickReplies;
@@ -283,10 +302,8 @@ export class ChatService {
     return this.deps.analyze.snapshot(userId, started.runId);
   }
 
-  private async reply(outgoing: OutgoingMessage, answer: { text: string; quickReplies: string[] }, run: AnalyzeResult | null, emit: Emit): Promise<void> {
+  private async reply(outgoing: OutgoingMessage, answer: { text: string; quickReplies: string[] }, result: AnalyzeResult | null, emit: Emit): Promise<void> {
     const { conversation } = outgoing;
-    // A run that read nothing (an invoice, a blurry shot) recommended into the air: its cards, cuisine and count stay off.
-    const result = run && run.menu.length > 0 ? run : null;
     const [message] = await this.deps.db
       .insert(chatMessages)
       .values({ conversationId: conversation.id, role: 'assistant', text: answer.text, runId: result?.runId ?? null, quickReplies: answer.quickReplies })

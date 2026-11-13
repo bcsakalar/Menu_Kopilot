@@ -15,7 +15,7 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `fc884e7`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1307, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1309, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
@@ -50,6 +50,6 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `fc884e7`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-208 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-209 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

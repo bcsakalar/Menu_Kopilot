@@ -57,6 +57,22 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   return { text: lines.join('\n'), quickReplies: nextSteps(result) };
 }
 
+/** The answer when a request needs a menu or a cuisine and the message gave neither: never a bare "Bakıyorum.". */
+export const ASK_MENU =
+  'Menünün ekran görüntüsünü yapıştır, ürünleri yaz (ör. "California Roll, Somon Maki") ya da mutfak türünü söyle (ör. "Uzak Doğu"); hemen başlarım.';
+
+/** A start from the cuisine alone ("Uzak Doğu için öneri sun"), before any menu: its target and what such menus carry. */
+export function fromCuisine(result: AnalyzeResult): { text: string; quickReplies: string[] } {
+  const products = result.cards.filter((c) => c.section === 'new_product');
+  if (!result.counts || products.length === 0) return { text: aiBusy(result) ? AI_BUSY : ASK_MENU, quickReplies: [] };
+  const lines = [
+    `**${result.counts.cuisineName}** için menüsüz başladım: hedef ${result.counts.target} ürün.`,
+    `Bu mutfağın menülerinde en sık görülenler: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`,
+    'Menünün ekran görüntüsünü yapıştırırsan ya da ürünleri yazarsan eksikleri tam çıkarırım.',
+  ];
+  return { text: lines.join('\n'), quickReplies: nextSteps(result) };
+}
+
 /**
  * What a follow-up run brought, from the run itself: a lead-in the model writes before the agents have run named
  * products that the guards then dropped, so the sentence and the cards disagreed.

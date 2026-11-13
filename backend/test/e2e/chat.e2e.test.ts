@@ -187,8 +187,39 @@ describe('a conversation', () => {
   it('asks for a menu instead of recommending into the air', async () => {
     decision = { ...noDecision, action: 'recommend', reply: 'Hemen öneriyorum.', productCount: 5 };
     const sent = await send({ text: 'tatlı öner' });
-    const [answer] = eventOf<{ message: { runId: string | null } }>(sent, 'message');
+    const [answer] = eventOf<{ message: { runId: string | null; text: string } }>(sent, 'message');
     expect(answer?.message.runId).toBeNull();
+    // Never a bare "Bakıyorum.": it says what would move the call on.
+    expect(answer?.message.text).toContain('mutfak türünü söyle');
+  });
+
+  it('starts from a cuisine named before any menu, and keeps it for what follows', async () => {
+    // Seen live: "Uzak doğu mutfağı için öneri sun" with no menu stopped at "Bakıyorum.".
+    decision = { ...noDecision, action: 'recommend', reply: 'Bakıyorum.', productCount: 5, cuisineSlug: 'uzak-dogu' };
+    const first = await send({ text: 'Uzak doğu mutfağı için öneri sun' });
+    const [start] = eventOf<{ message: { text: string; result: { cards: CardDto[]; counts: { cuisineName: string } } | null } }>(first, 'message');
+    expect(start?.message.text).toContain('menüsüz başladım');
+    expect(start?.message.result?.counts.cuisineName).toBe('Uzak Doğu');
+    const offered = start?.message.result?.cards.filter((c) => c.section === 'new_product').map((c) => c.name) ?? [];
+    expect(offered.length).toBeGreaterThan(0);
+
+    const more = await send({ conversationId: conversationIdOf(first), text: 'Daha fazla ürün öner' }, first.cookie);
+    const [next] = eventOf<{ message: { result: { cards: CardDto[] } } }>(more, 'message');
+    const again = next?.message.result.cards.filter((c) => c.section === 'new_product').map((c) => c.name) ?? [];
+    expect(again.length).toBeGreaterThan(0);
+    expect(again.filter((name) => offered.includes(name))).toEqual([]);
+
+    const typed = await send({ conversationId: conversationIdOf(first), text: 'California Roll, Somon Maki' }, first.cookie);
+    const [menu] = eventOf<{ message: { result: { menu: { name: string }[]; counts: { cuisineName: string } } } }>(typed, 'message');
+    expect(menu?.message.result.menu.length).toBe(2);
+    expect(menu?.message.result.counts.cuisineName).toBe('Uzak Doğu');
+  });
+
+  it('starts the menu from a product named before it', async () => {
+    decision = { ...noDecision, action: 'complete', reply: 'Bakıyorum.', targets: ['Adana Kebap'] };
+    const sent = await send({ text: 'adana kebap için opsiyon yaz' });
+    const [answer] = eventOf<{ message: { result: { menu: { name: string }[] } | null } }>(sent, 'message');
+    expect(answer?.message.result?.menu.map((m) => m.name)).toEqual(['Adana Kebap']);
   });
 
   it('a follow-up runs only the slice that was asked for, and never offers a product twice', async () => {
