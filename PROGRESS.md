@@ -1,6 +1,6 @@
 # Durum
 
-Son güncelleme: 2026-11-13 · Canlı sürüm: `31aabb2`
+Son güncelleme: 2026-11-13 · Canlı sürüm: `9aaddf3`
 
 ## Bugün ne çalışıyor
 
