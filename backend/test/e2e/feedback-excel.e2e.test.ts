@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { conversations, menuItems, users } from '../../src/db/schema/index.js';
+import writeXlsxFile from 'write-excel-file/node';
+import { conversations, cuisines, menuItems, users } from '../../src/db/schema/index.js';
+import { readTemplateSheet } from '../../src/modules/templates/excel.js';
 import type { ImportReport } from '../../src/modules/templates/schemas.js';
 import { multipartBody } from '../helpers/fixtures.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
@@ -96,6 +98,28 @@ describe('feedback and the Excel template pool', () => {
     expect(report.errors).toEqual([]);
     expect(report.items.filter((i) => i.action !== 'same').map((i) => `${i.cuisine}/${i.name}`)).toEqual([]);
     expect(report.unchanged).toBeGreaterThan(400);
+  });
+
+  it('an edited export saves only the edited rows; a row of the retired pasta kitchen lands in Mantı & Makarna', async () => {
+    const exported = await ctx.app.inject({ method: 'GET', url: '/api/v1/templates/excel/export', headers: bearer(token) });
+    const rows = (await readTemplateSheet(exported.rawPayload)).map((r) => r.cells);
+    expect(rows.filter((c) => c.name === 'Spagetti Bolonez').map((c) => c.cuisine)).toContain('Mantı & Makarna');
+    // What a rep does in Excel: rewrite one description, add a product, keep a row from an export taken before D-212.
+    rows[0] = { ...rows[0], description: 'Elde açılan hamur, taş fırında pişer.' };
+    rows.push({ cuisine: 'Makarna & İtalyan', name: 'Tortellini', description: 'Peynir dolgulu halka makarna, kremalı sosla.' });
+    const keys = ['cuisine', 'name', 'description', 'groups', 'removable', 'extras', 'aliases', 'portion', 'tags', 'allergens', 'importance'] as const;
+    const titles = ['Mutfak', 'Ürün Adı', 'Açıklama', 'Opsiyon Grupları', 'Çıkarılabilir Malzemeler', 'Ekstra Malzemeler', 'Takma Adlar', 'Porsiyon Bilgisi', 'Etiketler', 'Alerjenler', 'Önem (0-100)'];
+    const file = await writeXlsxFile([titles.map((value) => ({ value })), ...rows.map((c) => keys.map((k) => ({ value: c[k] ?? '' })))]).toBuffer();
+
+    const report = (await upload(file, false)).json<ImportReport>();
+    expect(report.errors).toEqual([]);
+    expect(report.items.filter((i) => i.action !== 'same').map((i) => `${i.action}:${i.cuisine}/${i.name}`)).toEqual([
+      `update:${rows[0].cuisine}/${rows[0].name}`,
+      'create:Mantı & Makarna/Tortellini',
+    ]);
+    const [manti] = await ctx.db.db.select({ id: cuisines.id }).from(cuisines).where(eq(cuisines.slug, 'manti-hamur-isleri'));
+    const [tortellini] = await ctx.db.db.select({ cuisineId: menuItems.cuisineId }).from(menuItems).where(eq(menuItems.canonicalName, 'Tortellini'));
+    expect(tortellini?.cuisineId).toBe(manti?.id);
   });
 
   it('a file that is not a spreadsheet gets a plain answer', async () => {

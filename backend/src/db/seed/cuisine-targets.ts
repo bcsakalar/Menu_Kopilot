@@ -38,7 +38,6 @@ export const CUISINE_TARGETS: Readonly<Record<CuisineSlug, CuisineTarget>> = {
   burger: { typical: 24, target: 14, note: '6–10 burger, menü versiyonları, 4–6 yan ürün, içecek, tatlı.' },
   tavuk: { typical: 26, target: 16, note: 'Parça, kanat, bonfile, nugget, burger/wrap, kova menüler, yan ürün, sos, içecek.' },
   pizza: { typical: 28, target: 18, note: '10–14 pizza, yan ürün, kampanya menüleri, içecek, tatlı.' },
-  makarna: { typical: 20, target: 14, note: '8–12 makarna/risotto, salata, başlangıç, tatlı, içecek.' },
   steak: { typical: 22, target: 14, note: '6–10 et kesimi, garnitür, başlangıç, salata, tatlı, içecek.' },
   kahvalti: { typical: 36, target: 20, note: 'Serpme/tabaklar, yumurtalılar, fırından, tatlı kahvaltı, içecekler (rehberler: 35–45).' },
   'tost-sandvic': { typical: 20, target: 12, note: 'Tost ve sandviç çeşitleri, yan ürün, çay/ayran.' },

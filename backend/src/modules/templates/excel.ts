@@ -235,6 +235,25 @@ function issueText(error: z.ZodError): string {
     .join('; ');
 }
 
+/** Cuisines folded into another (D-212): an export taken before still names them, so their rows land in the new one. */
+const RETIRED_CUISINES: ReadonlyMap<string, string> = new Map([
+  [normalizeTr('Makarna & İtalyan'), 'manti-hamur-isleri'],
+  ['makarna', 'manti-hamur-isleri'],
+]);
+
+/** Finds the cuisine a sheet names, by name or slug, a retired name included. */
+export function cuisineFinder(cuisines: readonly CuisineRef[]): (text: string) => CuisineRef | undefined {
+  const byName = new Map<string, CuisineRef>();
+  for (const c of cuisines) {
+    byName.set(normalizeTr(c.name), c);
+    byName.set(normalizeTr(c.slug), c);
+  }
+  return (text) => {
+    const key = normalizeTr(text);
+    return byName.get(key) ?? byName.get(normalizeTr(RETIRED_CUISINES.get(key) ?? ''));
+  };
+}
+
 /**
  * Turns sheet rows into validated template payloads. `current` gives the stored payload of a product that already
  * exists, so the fields the sheet does not carry (servis notu, upsell) survive an update.
@@ -244,11 +263,7 @@ export function parseTemplateRows(
   cuisines: readonly CuisineRef[],
   current: (cuisineId: string, normalizedName: string) => TemplatePayload | undefined,
 ): { valid: ParsedRow[]; errors: RowError[] } {
-  const byName = new Map<string, CuisineRef>();
-  for (const c of cuisines) {
-    byName.set(normalizeTr(c.name), c);
-    byName.set(normalizeTr(c.slug), c);
-  }
+  const findCuisine = cuisineFinder(cuisines);
   const valid: ParsedRow[] = [];
   const errors: RowError[] = [];
   const seen = new Set<string>();
@@ -259,7 +274,7 @@ export function parseTemplateRows(
       fail('Ürün adı boş');
       continue;
     }
-    const cuisine = byName.get(normalizeTr(cells.cuisine ?? ''));
+    const cuisine = findCuisine(cells.cuisine ?? '');
     if (!cuisine) {
       fail(cells.cuisine ? `"${cells.cuisine}" mutfağı bulunamadı ("Mutfaklar" sayfasındaki adlardan birini yaz)` : 'Mutfak boş');
       continue;

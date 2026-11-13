@@ -1,0 +1,3 @@
+-- Nothing to undo here. The merge is not split back: the moved templates, runs and learning stay under
+-- "Mantı & Makarna", and the dropped duplicate drinks are copies of ones that stayed. The code before D-212 seeds
+-- "Makarna & İtalyan" again on its first start, with its own seed templates.

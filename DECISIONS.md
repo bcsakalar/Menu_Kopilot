@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-212'den devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-213'ten devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1078,3 +1078,16 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   model tarafından "Pide & Lahmacun" mutfağı sayıldı ve menü boş kaldı. Menü yokken tek bir ad havuzdaki onaylı bir
   şablonun adıyla birebir eşleşiyorsa artık model sorulmadan ürün listesi gibi okunur: ürün menüye girer, mutfak türü
   ondan çıkar. Eşleşmeyen tek kelime ("Pizza", "suşici") yine sohbet ajanına gider.
+- **D-212** — **Makarna & İtalyan, Mantı & Makarna'ya katıldı; yönetimde bütün şablonlar içerikleriyle görünür**
+  (kullanıcı isteği, 2026-11-13: "bizde makarna italyan diye mutfak türü yok, silelim, mantı makarna olacak"; "şablon
+  havuzu sayfasında az şablon görünüyor, içeriğini de göremiyorum"). (1) Ekibin mutfak listesinde ayrı bir İtalyan
+  mutfağı yok. `0010_merge_pasta_cuisine` migration'ı Makarna & İtalyan'ın şablonlarını, analizlerini (sohbetin devam
+  ettiği `counts` dahil), öğrenilenlerini ve ürün türü eşleşmelerini Mantı & Makarna'ya taşır; iki mutfakta da olan
+  paketli içecekler tekilleşir, sonra mutfak silinir. Tohum veride makarna şablonları Mantı & Makarna'ya geçti
+  (26 mutfak, 966 şablon). Geri alma adımı birleştirmeyi bölmez. (2) Excel'de "Makarna & İtalyan" (ya da "makarna")
+  yazan satırlar Mantı & Makarna'ya yüklenir; birleştirmeden önce indirilmiş dosya hata vermez. Tam havuzu dışa aktarıp
+  birkaç satırını düzeltip yüklemek yalnızca o satırları yazar; test veritabanında bütün satırları değişmiş 966 satırlık
+  dosya 5 saniyede kaydedildi. (3) Şablon havuzu sayfası en çok kullanılan 100 şablonu gösterip kalanını gizliyordu,
+  içerik de ancak ada tıklayınca açılıyordu. Artık toplam sayı, sayfa sayfa gezinme, mutfak filtresi var; her şablonun
+  açıklaması, porsiyonu, opsiyonları, çıkarılabilir ve ekstra malzemeleri, takma adları listede açık durur.
+  `tests/ai_eval/` düzeneğindeki "makarna" menüsü güncellenmedi: o menü artık Mantı & Makarna'ya düşer.

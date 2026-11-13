@@ -106,7 +106,7 @@ powershell -File scripts/deploy.ps1
 
 Betik `HEAD`'in `origin/main` olduğunu, sırlar dosyasını ve git kopyasını denetler, sunucuda `git pull --ff-only` yapar,
 `linux/amd64` için `menu-kopilot-api:<git sha>` imajını kurar, sıkıştırılmış imajı (~100 MB) kopyalar, yığını başlatır ve
-`/health/ready` cevabını bekler. Migration'lar ve tohumlama (27 mutfak, şablonlar, admin kullanıcısı) uygulama açılırken
+`/health/ready` cevabını bekler. Migration'lar ve tohumlama (26 mutfak, şablonlar, admin kullanıcısı) uygulama açılırken
 çalışır; panelden düzenlenen ya da silinen şablonların üzerine yazılmaz, geri getirilmez.
 
 ## 6. Doğrulama

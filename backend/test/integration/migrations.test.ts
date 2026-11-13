@@ -70,8 +70,9 @@ describe('migrations', () => {
   it('0002 moves a vision chain seeded before it to Flash-Lite first and drops qwen3.6', async () => {
     const chain = (task: string) =>
       executeRows(handle.db, sql`select model, params from provider_configs where task_key = ${task} order by priority`);
-    // 0003 to 0009 sit on top of 0002, so all eight come off before the vision routes can be re-tested.
-    expect((await rollbackMigrations(handle.db, 8)).map((r) => r.tag)).toEqual([
+    // 0003 to 0010 sit on top of 0002, so all nine come off before the vision routes can be re-tested.
+    expect((await rollbackMigrations(handle.db, 9)).map((r) => r.tag)).toEqual([
+      '0010_merge_pasta_cuisine',
       '0009_drink_minimum',
       '0008_feedback_cuisine_names',
       '0007_web_chat',
@@ -96,7 +97,8 @@ describe('migrations', () => {
     // No routes yet (fresh install): left to the seed.
     expect(await chain('vision.panel_extract')).toEqual([]);
 
-    expect((await rollbackMigrations(handle.db, 8)).map((r) => r.tag)).toEqual([
+    expect((await rollbackMigrations(handle.db, 9)).map((r) => r.tag)).toEqual([
+      '0010_merge_pasta_cuisine',
       '0009_drink_minimum',
       '0008_feedback_cuisine_names',
       '0007_web_chat',
@@ -116,7 +118,11 @@ describe('migrations', () => {
   });
 
   it('rolls back step by step and re-applies (up → down → up)', async () => {
-    // 0009 only changes numbers.
+    // 0010 and 0009 only change rows.
+    const pasta = await rollbackMigrations(handle.db, 1);
+    expect(pasta.map((r) => r.tag)).toEqual(['0010_merge_pasta_cuisine']);
+    expect(await publicTables(handle)).toHaveLength(22);
+
     const drinks = await rollbackMigrations(handle.db, 1);
     expect(drinks.map((r) => r.tag)).toEqual(['0009_drink_minimum']);
     expect(await publicTables(handle)).toHaveLength(22);
@@ -170,7 +176,7 @@ describe('migrations', () => {
   });
 
   it('0009 raises the drink expectation to at least ten (a coffee house 25) and never lowers a higher one', async () => {
-    expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0009_drink_minimum']);
+    expect((await rollbackMigrations(handle.db, 2)).map((r) => r.tag)).toEqual(['0010_merge_pasta_cuisine', '0009_drink_minimum']);
     await executeRows(handle.db, sql`insert into menu_categories (key, label, sort_order) values ('icecek', 'İçecek', 70) on conflict do nothing returning key`);
     await executeRows(
       handle.db,
@@ -195,6 +201,58 @@ describe('migrations', () => {
     ]);
     await executeRows(handle.db, sql`delete from cuisines returning id`);
     await executeRows(handle.db, sql`delete from menu_categories returning key`);
+  });
+
+  it('0010 folds "Makarna & İtalyan" into "Mantı & Makarna": templates, runs, learning and product types move', async () => {
+    expect((await rollbackMigrations(handle.db, 1)).map((r) => r.tag)).toEqual(['0010_merge_pasta_cuisine']);
+    const [pasta, manti] = (
+      await executeRows(
+        handle.db,
+        sql`insert into cuisines (slug, name) values ('makarna', 'Makarna & İtalyan'), ('manti-hamur-isleri', 'Mantı & Makarna') returning id`,
+      )
+    ).map((r) => String(r['id']));
+    await executeRows(handle.db, sql`insert into menu_categories (key, label, sort_order) values ('ana-yemek', 'Ana Yemek', 10) returning key`);
+    await executeRows(handle.db, sql`insert into cuisine_categories (cuisine_id, category_key, min_items) values (${pasta}, 'ana-yemek', 6) returning id`);
+    // Lazanya moves; both kitchens carry Kola (one copy stays); the pasta kitchen's archived Su does not clash with
+    // the other's approved Su.
+    await executeRows(
+      handle.db,
+      sql`insert into menu_items (canonical_name, normalized_name, cuisine_id, source, approved) values
+        ('Lazanya', 'lazanya', ${pasta}, 'seed', true), ('Kola', 'kola', ${pasta}, 'seed', true), ('Su', 'su', ${pasta}, 'seed', false),
+        ('Kola', 'kola', ${manti}, 'seed', true), ('Su', 'su', ${manti}, 'seed', true) returning id`,
+    );
+    const [user] = await executeRows(handle.db, sql`insert into users (email, name, password_hash) values ('m@test.local', 'M', 'x') returning id`);
+    const counts = JSON.stringify({ cuisineId: pasta, cuisineName: 'Makarna & İtalyan', current: 3 });
+    await executeRows(handle.db, sql`insert into suggestion_runs (user_id, cuisine_id, counts) values (${user?.['id']}, ${pasta}, ${counts}::jsonb) returning id`);
+    await executeRows(
+      handle.db,
+      sql`insert into suggestion_feedback (user_id, cuisine_id, kind, value, action) values (${user?.['id']}, ${pasta}, 'product', 'Lazanya', 'removed') returning id`,
+    );
+    await executeRows(handle.db, sql`insert into product_types (key, label, cuisines) values ('makarna', 'Makarna', '["makarna", "pizza"]') returning key`);
+
+    await handle.migrate();
+    const items = await executeRows(
+      handle.db,
+      sql`select m.canonical_name, m.approved, c.slug from menu_items m join cuisines c on c.id = m.cuisine_id order by m.canonical_name, m.approved`,
+    );
+    expect(items.map((r) => [r['canonical_name'], r['approved'], r['slug']])).toEqual([
+      ['Kola', true, 'manti-hamur-isleri'],
+      ['Lazanya', true, 'manti-hamur-isleri'],
+      ['Su', false, 'manti-hamur-isleri'],
+      ['Su', true, 'manti-hamur-isleri'],
+    ]);
+    expect((await executeRows(handle.db, sql`select slug from cuisines`)).map((r) => r['slug'])).toEqual(['manti-hamur-isleri']);
+    expect(await executeRows(handle.db, sql`select id from cuisine_categories`)).toEqual([]);
+    const [run] = await executeRows(handle.db, sql`select cuisine_id, counts from suggestion_runs`);
+    expect(run?.['cuisine_id']).toBe(manti);
+    expect(run?.['counts']).toEqual({ cuisineId: manti, cuisineName: 'Mantı & Makarna', current: 3 });
+    expect((await executeRows(handle.db, sql`select cuisine_id from suggestion_feedback`))[0]?.['cuisine_id']).toBe(manti);
+    const [type] = await executeRows(handle.db, sql`select cuisines from product_types where key = 'makarna'`);
+    expect([...(type?.['cuisines'] as string[])].sort()).toEqual(['manti-hamur-isleri', 'pizza']);
+
+    for (const table of ['suggestion_feedback', 'suggestion_runs', 'users', 'menu_items', 'product_types', 'cuisines', 'menu_categories']) {
+      await executeRows(handle.db, sql`delete from ${sql.identifier(table)} returning 1`);
+    }
   });
 
   it('splits statements on drizzle breakpoints and drops comment-only chunks', () => {

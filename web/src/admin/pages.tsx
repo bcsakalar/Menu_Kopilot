@@ -168,16 +168,26 @@ interface Template {
   approved: boolean;
   needsReview: boolean;
   usageCount: number;
-  payload: { description: string; optionGroups: OptionGroup[]; removableIngredients: string[]; extraIngredients: { name: string }[] };
+  aliases: string[];
+  payload: {
+    description: string;
+    portionInfo: string;
+    optionGroups: OptionGroup[];
+    removableIngredients: string[];
+    extraIngredients: { name: string }[];
+  };
 }
 
 const SOURCE_LABEL: Record<Template['source'], string> = { ai: 'AI', user: 'Ekip', imported: 'İçe aktarma', seed: 'Hazır' };
+const PAGE_SIZE = 100;
 
 function TemplateDetail({ template }: { template: Template }) {
-  const { description, optionGroups, removableIngredients, extraIngredients } = template.payload;
+  const { description, portionInfo, optionGroups, removableIngredients, extraIngredients } = template.payload;
+  const empty = !description && optionGroups.length === 0 && removableIngredients.length === 0 && extraIngredients.length === 0;
   return (
     <div className="template-detail">
       {description && <p>{description}</p>}
+      {portionInfo && <p>Porsiyon: {portionInfo}</p>}
       {optionGroups.map((group) => (
         <p key={group.name}>
           <strong>{group.name}</strong> ({groupRule(group)}): {group.options.map((o) => o.name).join(', ')}
@@ -185,18 +195,55 @@ function TemplateDetail({ template }: { template: Template }) {
       ))}
       {removableIngredients.length > 0 && <p>Çıkarılabilir: {removableIngredients.join(', ')}</p>}
       {extraIngredients.length > 0 && <p>Ekstra: {extraIngredients.map((e) => e.name).join(', ')}</p>}
+      {template.aliases.length > 0 && <p>Takma adlar: {template.aliases.join(', ')}</p>}
+      {empty && <p>Açıklama ve opsiyon yok (paketli ürün).</p>}
     </div>
   );
 }
 
 export function Templates() {
   const [view, setView] = useState<'true' | 'false'>('true');
+  const [cuisineId, setCuisineId] = useState('');
   const [query, setQuery] = useState('');
   const [submitted, setSubmitted] = useState('');
-  const [open, setOpen] = useState<string | null>(null);
-  const params = new URLSearchParams({ approved: view, limit: '100', ...(submitted ? { q: submitted } : {}) });
+  const [page, setPage] = useState(0);
+  const params = new URLSearchParams({
+    approved: view,
+    limit: String(PAGE_SIZE),
+    offset: String(page * PAGE_SIZE),
+    ...(cuisineId ? { cuisineId } : {}),
+    ...(submitted ? { q: submitted } : {}),
+  });
   const { data, error, reload } = useLoad<{ data: Template[]; meta: { total: number } }>(`/templates?${params.toString()}`);
+  const cuisineList = useLoad<{ data: Cuisine[] }>('/cuisines').data?.data ?? [];
   const [actionError, setActionError] = useState<string | null>(null);
+  const total = data?.meta.total ?? 0;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  // A new filter starts from the first page.
+  const filter = <T,>(set: (value: T) => void) => (value: T) => {
+    set(value);
+    setPage(0);
+  };
+
+  const turn = (to: number) => {
+    setPage(to);
+    // The panel scrolls inside its main column; a new page starts at the top of the list.
+    document.querySelector('.admin-main')?.scrollTo({ top: 0 });
+  };
+
+  const pager = total > PAGE_SIZE && (
+    <div className="pager">
+      <button type="button" className="button ghost" disabled={page === 0} onClick={() => turn(page - 1)}>
+        Önceki
+      </button>
+      <span className="muted">
+        Sayfa {page + 1} / {pages}
+      </span>
+      <button type="button" className="button ghost" disabled={page + 1 >= pages} onClick={() => turn(page + 1)}>
+        Sonraki
+      </button>
+    </div>
+  );
 
   const run = (action: Promise<unknown>) => {
     setActionError(null);
@@ -212,67 +259,80 @@ export function Templates() {
       <ExcelTools onImported={reload} />
       <div className="toolbar">
         <div className="segmented" role="group" aria-label="Şablon durumu">
-          <button type="button" aria-pressed={view === 'true'} onClick={() => setView('true')}>
+          <button type="button" aria-pressed={view === 'true'} onClick={() => filter(setView)('true')}>
             Havuzdakiler
           </button>
-          <button type="button" aria-pressed={view === 'false'} onClick={() => setView('false')}>
+          <button type="button" aria-pressed={view === 'false'} onClick={() => filter(setView)('false')}>
             Arşiv
           </button>
         </div>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            setSubmitted(query.trim());
-          }}
-        >
-          <input type="search" placeholder="Ürün ara ve Enter'a bas" aria-label="Ürün ara" value={query} onChange={(e) => setQuery(e.target.value)} />
-        </form>
+        <div className="toolbar-filters">
+          <select aria-label="Mutfak" value={cuisineId} onChange={(e) => filter(setCuisineId)(e.target.value)}>
+            <option value="">Tüm mutfaklar</option>
+            {cuisineList.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.templateCount})
+              </option>
+            ))}
+          </select>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              filter(setSubmitted)(query.trim());
+            }}
+          >
+            <input type="search" placeholder="Ürün ara ve Enter'a bas" aria-label="Ürün ara" value={query} onChange={(e) => setQuery(e.target.value)} />
+          </form>
+        </div>
       </div>
       {!data && !error && <Loading />}
-      {data && data.data.length === 0 && <p>{view === 'false' ? 'Arşivde ürün yok.' : 'Bu aramayla ürün bulunamadı.'}</p>}
+      {data && data.data.length === 0 && <p>{view === 'false' ? 'Arşivde ürün yok.' : 'Bu filtreyle ürün bulunamadı.'}</p>}
       {data && data.data.length > 0 && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Ürün</th>
-              <th>Mutfak</th>
-              <th>Kaynak</th>
-              <th className="number">Kullanım</th>
-              <th aria-label="İşlemler" />
-            </tr>
-          </thead>
-          <tbody>
-            {data.data.map((template) => (
-              <tr key={template.id}>
-                <td>
-                  <button type="button" className="link" aria-expanded={open === template.id} onClick={() => setOpen(open === template.id ? null : template.id)}>
-                    {template.name}
-                  </button>
-                  {open === template.id && <TemplateDetail template={template} />}
-                </td>
-                <td className="muted">{template.cuisineName}</td>
-                <td className="muted">{SOURCE_LABEL[template.source]}</td>
-                <td className="number">{template.usageCount}</td>
-                <td className="row-actions">
-                  {!template.approved && (
-                    <button type="button" className="button ghost" onClick={() => run(patch(`/templates/${template.id}`, { approved: true }))}>
-                      <Check size={15} />
-                      Havuza al
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="icon-button small"
-                    aria-label={`${template.name} şablonunu sil`}
-                    onClick={() => run(api(`/templates/${template.id}`, { method: 'DELETE' }))}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </td>
+        <>
+          <p className="muted">
+            {total} şablon
+            {total > PAGE_SIZE && ` · ${page * PAGE_SIZE + 1}–${Math.min(total, (page + 1) * PAGE_SIZE)} arası gösteriliyor`}
+          </p>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Ürün ve içeriği</th>
+                <th aria-label="İşlemler" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.data.map((template) => (
+                <tr key={template.id}>
+                  <td>
+                    <strong>{template.name}</strong>
+                    <span className="muted small template-meta">
+                      {template.cuisineName} · {SOURCE_LABEL[template.source]}
+                      {template.usageCount > 0 && ` · ${template.usageCount} kez kullanıldı`}
+                    </span>
+                    <TemplateDetail template={template} />
+                  </td>
+                  <td className="row-actions">
+                    {!template.approved && (
+                      <button type="button" className="button ghost" onClick={() => run(patch(`/templates/${template.id}`, { approved: true }))}>
+                        <Check size={15} />
+                        Havuza al
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="icon-button small"
+                      aria-label={`${template.name} şablonunu sil`}
+                      onClick={() => run(api(`/templates/${template.id}`, { method: 'DELETE' }))}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {pager}
+        </>
       )}
     </Page>
   );

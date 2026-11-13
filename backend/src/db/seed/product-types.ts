@@ -389,7 +389,7 @@ export const SEED_PRODUCT_TYPES: readonly ProductTypeDef[] = [
     extras: ['Ekstra Parmesan', 'Tavuk', 'Ekstra Mantar', 'Sarımsaklı Ekmek'],
     forbiddenGroups: [...NOT_FOR_FOOD, 'Pişirme Derecesi', 'Lavaş', 'Pilav', 'Ekmek Seçimi', 'Hamur'],
     fallbackDescription: 'Taze sosla hazırlanan makarna, parmesanla servis edilir.',
-    cuisines: ['makarna'],
+    cuisines: ['manti-hamur-isleri'],
   },
   {
     key: 'manti',
@@ -909,7 +909,6 @@ export const CUISINE_DEFAULT_TYPE: Readonly<Record<string, string>> = {
   burger: 'burger',
   tavuk: 'tavuk-citir',
   pizza: 'pizza',
-  makarna: 'makarna',
   steak: 'steak',
   kahvalti: 'yumurta',
   'tost-sandvic': 'tost-sandvic',

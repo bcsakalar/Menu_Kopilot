@@ -150,7 +150,6 @@ export const SEED_CUISINE_CATEGORIES: readonly SeedCuisineCategory[] = [
   ...spread('burger', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['menu-kampanya', 1]]),
   ...spread('tavuk', [['ana-yemek', 5], ['ara-sicak', 2], ['yan-urun', 1], ['icecek', MIN_DRINKS], ['menu-kampanya', 1]]),
   ...spread('pizza', [['ana-yemek', 6], ['ara-sicak', 1], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
-  ...spread('makarna', [['ana-yemek', 6], ['salata-meze', 1], ['icecek', MIN_DRINKS], ['tatli', 1]]),
   ...spread('steak', [['ana-yemek', 5], ['ara-sicak', 1], ['salata-meze', 1], ['yan-urun', 2], ['icecek', MIN_DRINKS]]),
   ...spread('kahvalti', [['ana-yemek', 5], ['ara-sicak', 2], ['atistirmalik', 2], ['icecek', MIN_DRINKS]]),
   ...spread('tost-sandvic', [['atistirmalik', 6], ['ara-sicak', 1], ['icecek', MIN_DRINKS]]),

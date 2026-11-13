@@ -12,7 +12,7 @@ import {
 } from './groups.js';
 import { type SeedTemplate, template } from './template-types.js';
 
-/** Burger (second wave), Tavuk, Pizza (second wave), Makarna & İtalyan and Steak & Et. */
+/** Burger (second wave), Tavuk, Pizza (second wave), pasta (under Mantı & Makarna since D-212) and Steak & Et. */
 
 // ---- Burger ---------------------------------------------------------------------------------------------------------
 const burgerMenu = menuSecimi([
@@ -655,9 +655,9 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Orta ve büyük boy pizza siparişlerine önerilebilir.',
   }),
 
-  // ---- Makarna & İtalyan --------------------------------------------------------------------------------------------
+  // ---- Makarna (Mantı & Makarna) ------------------------------------------------------------------------------------
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 80,
     aliases: ['Bolonez', 'Bolonez Soslu Makarna', 'Spaghetti Bolognese', 'Kıymalı Makarna'],
     name: 'Spagetti Bolonez',
@@ -672,7 +672,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Sarımsaklı ekmek ve tiramisu önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 74,
     aliases: ['Alfredo', 'Alfredo Soslu Makarna', 'Tavuklu Alfredo', 'Fettucine Alfredo'],
     name: 'Fettuccine Alfredo',
@@ -687,7 +687,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Sarımsaklı ekmek önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 62,
     aliases: ['Arrabbiata', 'Acılı Penne', 'Penne Arabiata', 'Acılı Domates Soslu Makarna'],
     name: 'Penne Arrabbiata',
@@ -702,7 +702,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Sarımsaklı ekmek önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 70,
     aliases: ['Tavuklu Makarna', 'Kremalı Tavuklu Penne', 'Tavuklu Mantarlı Makarna'],
     name: 'Kremalı Tavuklu Makarna',
@@ -717,7 +717,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Mevsim salata önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 44,
     aliases: ['Pesto Makarna', 'Pesto Penne', 'Fesleğenli Makarna'],
     name: 'Pesto Soslu Makarna',
@@ -732,7 +732,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Roka salatası önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 60,
     aliases: ['Lazanya Porsiyon', 'Kıymalı Lazanya', 'Lasagna', 'Fırın Lazanya'],
     name: 'Lazanya',
@@ -747,7 +747,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Sarımsaklı ekmek önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 36,
     aliases: ['Mac & Cheese', 'Makarna Peynirli', 'Fırın Peynirli Makarna', 'Mac n Cheese'],
     name: 'Mac and Cheese',
@@ -762,7 +762,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Salata önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 52,
     aliases: ['Napoliten', 'Domates Soslu Makarna', 'Napoliten Makarna', 'Pomodoro'],
     name: 'Napoliten Soslu Makarna',
@@ -777,7 +777,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Sarımsaklı ekmek önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 46,
     aliases: ['Mantarlı Makarna', 'Kremalı Mantarlı Penne', 'Mantar Soslu Makarna'],
     name: 'Kremalı Mantarlı Makarna',
@@ -792,7 +792,7 @@ export const FASTFOOD_EK_TEMPLATES: readonly SeedTemplate[] = [
     upsell: 'Tavuk ekleme önerilebilir.',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 32,
     aliases: ['Risotto', 'Mantar Risotto', 'Kremalı Risotto'],
     name: 'Mantarlı Risotto',

@@ -9,6 +9,7 @@ import { MIN_BRANCH_ITEMS } from '../../agents/gap-analyst.js';
 import {
   type CuisineRef,
   type RowError,
+  cuisineFinder,
   parseTemplateRows,
   readTemplateSheet,
   sampleEntries,
@@ -263,12 +264,11 @@ export class TemplateService {
       .from(menuItems)
       .where(eq(menuItems.approved, true));
     const existingId = new Map(existingRows.map((r) => [`${r.cuisineId}|${r.normalizedName}`, r.id]));
+    const findCuisine = cuisineFinder(refs);
     const wantedKeys = new Set(
       sheetRows.flatMap((r) => {
-        const cuisine = normalizeTr(r.cells.cuisine ?? '');
-        return refs
-          .filter((c) => normalizeTr(c.name) === cuisine || normalizeTr(c.slug) === cuisine)
-          .map((c) => `${c.id}|${normalizeTr(r.cells.name ?? '')}`);
+        const cuisine = findCuisine(r.cells.cuisine ?? '');
+        return cuisine ? [`${cuisine.id}|${normalizeTr(r.cells.name ?? '')}`] : [];
       }),
     );
     const records = await getTemplates(

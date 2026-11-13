@@ -9,13 +9,15 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `f06fca4`
 - **Analiz:** altı ajanlık hat, ilk cevap normalde 6–11 saniye; hazır düğmeler ("Çorba öner") modelsiz, 1–3 saniye.
   Başlıkta **açılış kuralları** (ürün sayısı, 10 içecek, %70 açıklama, %20 fotoğraf, yazım düzeni) ve ek mutfak türü
   önerisi (D-206).
-- **Şablon havuzu:** 977 hazır şablon; her mutfakta havuz açılış hedefine yetiyor (D-207), paketli içecek seti; yönetimden **Excel ile toplu ekleme ve
-  güncelleme** (örnek dosya, önizleme, dışa aktarma).
+- **Şablon havuzu:** 966 hazır şablon, 26 mutfak (Makarna & İtalyan, Mantı & Makarna'ya katıldı: D-212); her mutfakta
+  havuz açılış hedefine yetiyor (D-207), paketli içecek seti; yönetimden **Excel ile toplu ekleme ve güncelleme**
+  (örnek dosya, önizleme, dışa aktarma). Yönetimdeki liste bütün şablonları içerikleriyle, sayfa sayfa ve mutfağa göre
+  gösterir.
 - **Yönetim paneli:** pano (14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1311, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1303, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
@@ -50,6 +52,6 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `f06fca4`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-211 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-212 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

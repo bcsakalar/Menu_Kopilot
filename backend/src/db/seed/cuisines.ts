@@ -26,7 +26,6 @@ export const CUISINE_SLUGS = [
   'burger',
   'tavuk',
   'pizza',
-  'makarna',
   'steak',
   'kahvalti',
   'tost-sandvic',
@@ -116,7 +115,7 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
     parentSlug: 'ev-yemekleri',
     minItemCount: MIN,
     notes:
-      'Bölümler: Mantılar, Gözlemeler, Börekler, Erişte, İçecekler. Olmazsa olmaz: Kayseri Mantısı, Çıtır Mantı, Gözleme, Su Böreği, Ayran. Sor: porsiyon, yoğurt (sarımsaklı / sarımsaksız), sos (tereyağlı pul biber, domatesli), gözleme iç harcı.',
+      'Bölümler: Mantılar, Makarnalar, Gözlemeler, Börekler, Erişte, İçecekler. Olmazsa olmaz: Kayseri Mantısı, Çıtır Mantı, Gözleme, Su Böreği, Spagetti Bolonez, Ayran. Sor: porsiyon, yoğurt (sarımsaklı / sarımsaksız), sos (tereyağlı pul biber, domatesli), makarna türü, gözleme iç harcı.',
   },
   {
     slug: 'tatli',
@@ -168,14 +167,6 @@ export const SEED_CUISINES: readonly SeedCuisine[] = [
     minItemCount: MIN,
     notes:
       'Bölümler: Kampanyalı Menüler, Klasik Pizzalar, Özel Pizzalar, Yan Ürünler, Soslar, İçecekler, Tatlılar. Olmazsa olmaz: Margherita, Karışık, Sucuklu, Pepperoni, Tavuklu, Sarımsaklı Ekmek. Sor: boy, hamur (ince / klasik / kalın), kenar, ekstra malzeme, çıkarılacaklar.',
-  },
-  {
-    slug: 'makarna',
-    name: 'Makarna & İtalyan',
-    parentSlug: 'manti-hamur-isleri',
-    minItemCount: MIN,
-    notes:
-      'Bölümler: Makarnalar, Fırın Makarnalar, Risotto, Salatalar, İçecekler, Tatlılar. Olmazsa olmaz: Bolonez, Alfredo, Arrabbiata, Kremalı Tavuklu, Lazanya. Sor: makarna türü (spagetti / penne / fettuccine), acılık, parmesan, glutensiz seçenek.',
   },
   {
     slug: 'steak',

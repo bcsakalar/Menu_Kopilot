@@ -241,7 +241,7 @@ export const EK_GENIS_TEMPLATES: readonly SeedTemplate[] = [
     upsell: '',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 62,
     aliases: ['Garlic Bread', 'Sarımsaklı Bread'],
     name: 'Sarımsaklı Ekmek',
@@ -348,7 +348,7 @@ export const EK_GENIS_TEMPLATES: readonly SeedTemplate[] = [
     upsell: '',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 54,
     aliases: ['Bruscetta', 'Domatesli Ekmek'],
     name: 'Bruschetta',
@@ -764,7 +764,7 @@ export const EK_GENIS_TEMPLATES: readonly SeedTemplate[] = [
 
   // ---- Makarna ----------------------------------------------------------------------------------------------
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 74,
     aliases: ['Carbonara', 'Spagetti Karbonara'],
     name: 'Spagetti Karbonara',
@@ -779,7 +779,7 @@ export const EK_GENIS_TEMPLATES: readonly SeedTemplate[] = [
     upsell: '',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 62,
     aliases: ['Gnocchi', 'Patatesli Gnocchi'],
     name: 'Gnocchi',
@@ -794,7 +794,7 @@ export const EK_GENIS_TEMPLATES: readonly SeedTemplate[] = [
     upsell: '',
   }),
   template({
-    cuisine: 'makarna',
+    cuisine: 'manti-hamur-isleri',
     importance: 58,
     aliases: ['Ravioli', 'Mantarlı Ravioli'],
     name: 'Ravioli',

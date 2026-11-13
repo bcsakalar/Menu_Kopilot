@@ -15,6 +15,7 @@ import { templatePayloadSchema } from '../../src/domain/template.js';
 const CUISINES: CuisineRef[] = [
   { id: '00000000-0000-4000-8000-000000000001', name: 'Kebap', slug: 'kebap-izgara', templates: 26, target: 32 },
   { id: '00000000-0000-4000-8000-000000000002', name: 'Kahve & İçecek', slug: 'kafe-icecek', templates: 21, target: 55 },
+  { id: '00000000-0000-4000-8000-000000000003', name: 'Mantı & Makarna', slug: 'manti-hamur-isleri', templates: 40, target: 18 },
 ];
 
 describe('template spreadsheet format', () => {
@@ -68,6 +69,19 @@ describe('template spreadsheet format', () => {
     expect(errors.map((e) => e.row)).toEqual([3, 4, 5, 6, 7]);
     expect(errors[0]?.message).toMatch(/mutfağı bulunamadı/);
     expect(errors[2]?.message).toMatch(/Açıklama: Fiyat/);
+  });
+
+  it('puts a row of the retired "Makarna & İtalyan" under "Mantı & Makarna" (an export taken before D-212)', () => {
+    const { valid, errors } = parseTemplateRows(
+      [
+        { row: 2, cells: { cuisine: 'Makarna & İtalyan', name: 'Lazanya' } },
+        { row: 3, cells: { cuisine: 'makarna', name: 'Gnocchi' } },
+      ],
+      CUISINES,
+      () => undefined,
+    );
+    expect(errors).toEqual([]);
+    expect(valid.map((v) => v.cuisineId)).toEqual([CUISINES[2]!.id, CUISINES[2]!.id]);
   });
 
   it('keeps the serving note and upsell of a product that already exists', () => {

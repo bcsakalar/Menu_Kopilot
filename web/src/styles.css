@@ -1301,6 +1301,29 @@ div.skeleton:empty {
   color: var(--text-muted);
 }
 
+.template-meta {
+  display: block;
+  margin-top: 2px;
+}
+
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolbar-filters select {
+  width: auto;
+  max-width: 100%;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
 /* ---- narrow screens ---- */
 
 /* ---- opening checklist (D-206) ---- */
