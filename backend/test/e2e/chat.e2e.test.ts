@@ -24,8 +24,11 @@ let ctx: TestContext;
 let fx: Fixtures;
 let decision: Record<string, unknown>;
 let chatPrompts: string[];
+/** Every model refuses to read images, as when Gemini is overloaded and Groq is at its per-minute cap. */
+let extractDown = false;
 
 const responder = (fallback: FakeResponder): FakeResponder => (request, call) => {
+  if (request.task === 'agent.extract' && extractDown) return { ok: false, kind: 'unavailable', message: 'high demand' };
   if (request.task !== 'agent.chat') return fallback(request, call);
   chatPrompts.push(request.user);
   return okJson(decision);
@@ -352,4 +355,31 @@ describe('the admin panel', () => {
     expect(one.statusCode, one.body).toBe(200);
     expect(one.json<ConversationDetail>().messages.length).toBeGreaterThan(1);
   });
+});
+
+describe('when every model is busy', () => {
+  it('says so, rather than that the screenshot holds no menu', async () => {
+    // An app of its own: the failures open the providers' circuit breaker, which would leak into every later test.
+    const shared = ctx;
+    const fallback = fixtureResponder(fx);
+    ctx = await createTestApp({
+      providers: {
+        gemini: new FakeProvider('gemini', responder(fallback), (texts, opts) => texts.map((t) => hashEmbedding(t, opts.dim))),
+        groq: new FakeProvider('groq', responder(fallback)),
+      },
+    });
+    extractDown = true;
+    try {
+      // Other bytes than NO_MENU: a read image is cached by its hash and would never reach a model.
+      const sent = await send({}, undefined, Buffer.concat([NO_MENU, Buffer.from('busy')]));
+      const [answer] = eventOf<{ message: { text: string; result: unknown } }>(sent, 'message');
+      expect(answer?.message.text).toContain('yoğun');
+      expect(answer?.message.text).not.toContain('okuyamadım');
+      expect(answer?.message.result).toBeNull();
+    } finally {
+      extractDown = false;
+      await ctx.close();
+      ctx = shared;
+    }
+  }, 30_000);
 });

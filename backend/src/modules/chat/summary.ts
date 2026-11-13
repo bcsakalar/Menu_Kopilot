@@ -23,7 +23,9 @@ export function openingGaps(quality: CountsDto['quality']): string[] {
   return gaps;
 }
 
-export const aiBusy = (result: AnalyzeResult): boolean => result.cards.length === 0 && result.warnings.some((w) => AI_TROUBLE.has(w.code));
+/** A model call failed for want of capacity (overloaded, rate-limited), not because of the menu. */
+export const aiTrouble = (result: AnalyzeResult): boolean => result.warnings.some((w) => AI_TROUBLE.has(w.code));
+export const aiBusy = (result: AnalyzeResult): boolean => result.cards.length === 0 && aiTrouble(result);
 
 /** The next steps as buttons: the categories the menu is short of, then more of anything. */
 export function nextSteps(result: AnalyzeResult): string[] {
@@ -39,7 +41,8 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   const { counts, cards } = result;
   if (!counts || result.menu.length === 0) {
     return {
-      text: aiBusy(result)
+      // Nothing read because every model was busy says so: "no menu here" sent reps hunting for a better screenshot.
+      text: aiTrouble(result)
         ? `${AI_BUSY} Görüntüyü yeniden yapıştır ya da ürün adlarını virgülle yaz.`
         : 'Bu görüntüde menü okuyamadım. Ürünlerin göründüğü bir ekran görüntüsü yapıştır ya da ürün adlarını virgülle yaz.',
       quickReplies: [],

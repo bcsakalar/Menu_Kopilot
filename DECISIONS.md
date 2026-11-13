@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-210'dan devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-211'den devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1065,3 +1065,10 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   devam eder (`analyze.start` mutfak verildiyse boş girişi kabul eder); (3) ikisi de yoksa cevap hiçbir zaman çıplak
   "Bakıyorum." olmaz, neyin yazılacağını söyler. Mutfak türünü koddaki kelime eşleştirmesiyle bulmak denenmedi:
   "tatlı öner", "çorba öner" gibi kategori istekleri mutfak adlarıyla çakışıyor; karar modelde, liste bağlamda.
+- **D-210** — **Yapay zekâ meşgulken görüntü bir kez daha okunur, mesaj gerçeği söyler** (kullanıcı isteği,
+  2026-11-13: "bu hata var sebebi ne"). Canlıda iki dakikada üç ekran görüntüsünden üçüncüsü "Bu görüntüde menü
+  okuyamadım" aldı. Menüde sorun yoktu: Gemini o an iki kez 503 "high demand" verdi, yedek Groq önce bozuk çıktı verip
+  sonra dakikalık girdi token sınırına (7000) takıldı; okuma adımı başarısız olunca kullanıcıya "menü yok" denmişti.
+  Artık okuma kapasite yüzünden başarısızsa (`extract_failed` gibi uyarılar) sohbet 5 saniye bekleyip görüntüyü bir
+  kez daha okutur (Groq'un "4,9 saniye sonra dene" penceresi); yine olmazsa cevap "Yapay zekâ servisleri şu an çok
+  yoğun" olur, "menü okuyamadım" değil. Kalıcı çözüm ücretli Gemini katmanı (PROGRESS'teki bilinen sorun).

@@ -14,7 +14,7 @@ import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { aiBusy, ASK_MENU, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
+import { aiBusy, aiTrouble, ASK_MENU, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -27,6 +27,8 @@ const LIST_MAX_NAME_CHARS = 60;
 /** A later screenshot brings a few new products with it, on top of the cards for what it added. */
 const PRODUCTS_WITH_IMAGES = 4;
 const PRODUCTS_WITH_NEW_ITEMS = 3;
+/** Gemini's "high demand" and Groq's per-minute token cap both clear within seconds: one more read after this. */
+const BUSY_RETRY_MS = 5000;
 
 /** Words of a sentence, never of a product name: "merhaba, yeni bir restoranla görüşüyorum" is no two-item menu. */
 const SENTENCE_WORDS = new Set(
@@ -206,7 +208,11 @@ export class ChatService {
       const fields = images.length > 0 ? { ...(text ? { notes: text } : {}) } : { menuText: text };
       // A cuisine the rep named before the menu keeps leading.
       const cuisine = last?.counts ? { cuisineId: last.counts.cuisineId } : {};
-      const result = await this.runAgents(userId, outgoing, firstFields({ ...fields, ...cuisine }), {}, emit);
+      let result = await this.runAgents(userId, outgoing, firstFields({ ...fields, ...cuisine }), {}, emit);
+      if (result.menu.length === 0 && images.length > 0 && aiTrouble(result)) {
+        await new Promise((resolve) => setTimeout(resolve, BUSY_RETRY_MS));
+        result = await this.runAgents(userId, outgoing, firstFields({ ...fields, ...cuisine }), {}, emit);
+      }
       if (result.menu.length > 0) {
         await this.reply(outgoing, summarize(result), result, emit);
         return;
