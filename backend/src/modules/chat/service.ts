@@ -7,7 +7,7 @@ import type { AiRouter } from '../../ai/router.js';
 import type { ImageInput } from '../../ai/types.js';
 import type { Database } from '../../db/client.js';
 import type { MergedItem } from '../../agents/dedupe.js';
-import { chatMessages, conversations, cuisines, menuCategories, suggestionItems, suggestionRuns } from '../../db/schema/index.js';
+import { chatMessages, conversations, cuisines, menuCategories, menuItems, suggestionItems, suggestionRuns } from '../../db/schema/index.js';
 import { AppError, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
@@ -193,7 +193,8 @@ export class ChatService {
       const snapshot = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
       // The conversation's run: a menu, or a cuisine named before any menu (a run that read nothing never becomes it).
       const last = snapshot?.counts ? snapshot : null;
-      if (images.length > 0 || (!last?.menu.length && looksLikeProductList(text))) await this.analyzeMenu(userId, outgoing, last, emit);
+      const typedMenu = !last?.menu.length && (looksLikeProductList(text) || (await this.isTemplateName(text)));
+      if (images.length > 0 || typedMenu) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
     } catch (err) {
       this.deps.onError(err);
@@ -364,6 +365,19 @@ export class ChatService {
       .innerJoin(chatMessages, eq(chatMessages.runId, suggestionItems.runId))
       .where(and(eq(chatMessages.conversationId, conversationId), eq(suggestionItems.section, 'new_product')));
     return rows.map((row) => row.name);
+  }
+
+  /** "Lahmacun" alone: a name the pool knows is the restaurant's product (its cuisine follows), not a cuisine to start from. */
+  private async isTemplateName(text: string): Promise<boolean> {
+    const names = parseMenuText(text);
+    const name = names[0];
+    if (names.length !== 1 || !name || text.includes('?') || isSentence(name)) return false;
+    const [row] = await this.deps.db
+      .select({ id: menuItems.id })
+      .from(menuItems)
+      .where(and(eq(menuItems.approved, true), eq(menuItems.normalizedName, normalizeTr(name))))
+      .limit(1);
+    return row !== undefined;
   }
 
   private async cuisineId(slug: string | null): Promise<string | undefined> {

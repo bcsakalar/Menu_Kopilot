@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-211'den devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-212'den devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1072,3 +1072,9 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   Artık okuma kapasite yüzünden başarısızsa (`extract_failed` gibi uyarılar) sohbet 5 saniye bekleyip görüntüyü bir
   kez daha okutur (Groq'un "4,9 saniye sonra dene" penceresi); yine olmazsa cevap "Yapay zekâ servisleri şu an çok
   yoğun" olur, "menü okuyamadım" değil. Kalıcı çözüm ücretli Gemini katmanı (PROGRESS'teki bilinen sorun).
+- **D-211** — **Tek başına yazılan bilinen ürün adı üründür** (kullanıcı isteği, 2026-11-13: "ürün adı yazsalar, mutfak
+  türünü yazsalar çalışıyor mu, hazır şablonlardan mesela"). Canlı denemede "Pizza" doğru şekilde Pizza mutfağından
+  menüsüz başladı, "Karides Nigiri, Wakame Salatası, Tavuklu Bao" Uzak Doğu 3/54 oldu; ama tek başına "Lahmacun"
+  model tarafından "Pide & Lahmacun" mutfağı sayıldı ve menü boş kaldı. Menü yokken tek bir ad havuzdaki onaylı bir
+  şablonun adıyla birebir eşleşiyorsa artık model sorulmadan ürün listesi gibi okunur: ürün menüye girer, mutfak türü
+  ondan çıkar. Eşleşmeyen tek kelime ("Pizza", "suşici") yine sohbet ajanına gider.

@@ -218,6 +218,15 @@ describe('a conversation', () => {
     expect(menu?.message.result.counts.cuisineName).toBe('Uzak Doğu');
   });
 
+  it('takes one name the pool knows as the first product, without asking a model', async () => {
+    // Seen live: "Lahmacun" alone was read as the cuisine "Pide & Lahmacun" and the menu stayed empty.
+    chatPrompts.length = 0;
+    const sent = await send({ text: 'Lahmacun' });
+    const [answer] = eventOf<{ message: { result: { menu: { name: string }[] } | null } }>(sent, 'message');
+    expect(answer?.message.result?.menu.map((m) => m.name)).toEqual(['Lahmacun']);
+    expect(chatPrompts).toHaveLength(0);
+  });
+
   it('starts the menu from a product named before it', async () => {
     decision = { ...noDecision, action: 'complete', reply: 'Bakıyorum.', targets: ['Adana Kebap'] };
     const sent = await send({ text: 'adana kebap için opsiyon yaz' });
