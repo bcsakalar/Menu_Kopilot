@@ -1048,7 +1048,8 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   önerilerde geri geliyordu; görüşmede okunup menüden çıkan her ürün o görüşmenin önerilerinden de çıkar. (3) Sohbet
   ajanı açılış kurallarını görmüyordu ve 11/52 ürünlük menüye "hemen başlayabiliriz" dedi; bağlama kuralların eksikleri
   girdi, "hazır mı" sorusunda eksik varsa hazır değil der. (4) Hiç ürün okunmayan analiz (fatura) başlıkta ve görüşme
-  adında "Dondurma · 0 ürün" gösteriyordu; menüsüz analiz başlığa ve ada yansımaz. (5) Havuzda birebir eşleşen kısa ad
+  adında "Dondurma · 0 ürün" gösteriyor, altına da o mutfağın on ürününü diziyordu; menüsüz analiz mesaja hiç
+  bağlanmaz, yalnızca "menü okuyamadım" cevabı kalır. (5) Havuzda birebir eşleşen kısa ad
   ("Kola", "Çay") "kısaltma gibi" diye düzeltmeye düşüyordu; uyarı yalnızca havuzla eşleşmeyen adlarda. (6) Fotoğrafı
   yazarak eklenen tek ürün yüzünden bilinmeyen kural "Bu görüntüde görünmüyor" diyordu; artık "x/y ürün; z ürünün
   durumu görünmüyor" der. (7) Wakame Salatası'na genel salatanın Sezar sosu ve krutonu doluyordu; şablona kendi sosu ve

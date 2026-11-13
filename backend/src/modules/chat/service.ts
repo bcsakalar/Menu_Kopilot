@@ -112,7 +112,7 @@ function shortcut(text: string, last: AnalyzeResult | null): ChatDecision | unde
 }
 
 function titleOf(conversation: ConversationRow, text: string, result: AnalyzeResult | null): string {
-  if (result?.counts && result.menu.length > 0) return `${result.counts.cuisineName} · ${result.counts.current} ürün`;
+  if (result?.counts) return `${result.counts.cuisineName} · ${result.counts.current} ürün`;
   if (conversation.title !== NEW_TITLE) return conversation.title;
   return text.slice(0, TITLE_CHARS) || NEW_TITLE;
 }
@@ -283,8 +283,10 @@ export class ChatService {
     return this.deps.analyze.snapshot(userId, started.runId);
   }
 
-  private async reply(outgoing: OutgoingMessage, answer: { text: string; quickReplies: string[] }, result: AnalyzeResult | null, emit: Emit): Promise<void> {
+  private async reply(outgoing: OutgoingMessage, answer: { text: string; quickReplies: string[] }, run: AnalyzeResult | null, emit: Emit): Promise<void> {
     const { conversation } = outgoing;
+    // A run that read nothing (an invoice, a blurry shot) recommended into the air: its cards, cuisine and count stay off.
+    const result = run && run.menu.length > 0 ? run : null;
     const [message] = await this.deps.db
       .insert(chatMessages)
       .values({ conversationId: conversation.id, role: 'assistant', text: answer.text, runId: result?.runId ?? null, quickReplies: answer.quickReplies })

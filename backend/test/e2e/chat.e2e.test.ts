@@ -161,8 +161,9 @@ describe('a conversation', () => {
 
   it('treats a screenshot with no menu on it as no menu at all', async () => {
     const empty = await send({}, undefined, NO_MENU);
-    const [nothing] = eventOf<{ message: { text: string } }>(empty, 'message');
+    const [nothing] = eventOf<{ message: { text: string; result: unknown } }>(empty, 'message');
     expect(nothing?.message.text).toContain('okuyamadım');
+    expect(nothing?.message.result).toBeNull();
     // No cuisine was read, so none names the conversation.
     expect((await detail(conversationIdOf(empty), empty.cookie!)).title).not.toContain('ürün');
 
