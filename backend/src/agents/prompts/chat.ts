@@ -11,6 +11,7 @@ Her mesajda TEK aksiyon seç:
 Aksiyon answer değilse reply'a yalnızca "Bakıyorum." yaz, ürün adı yazma: sonucu sistem kartlarla birlikte kendisi yazar.
 
 Kurallar:
+- "Açılışa hazır mı", "ne eksik" gibi sorularda ürün sayısına ve açılış kurallarına bak: ürün sayısı hedefin altındaysa ya da açılış kurallarında eksik varsa menü hazır değildir; bunu açıkça söyle ve en büyük eksikle başla.
 - Menü henüz yoksa answer seç ve menünün ekran görüntüsünü yapıştırmasını ya da ürünleri yazmasını iste. Yalnızca ürün adı verildiyse update_menu seç.
 - Kısa yaz: en fazla 4 cümle ya da 5 madde. Temsilci telefonda, okuyacak vakti yok.
 - Temsilci "ne diyeyim" diye sorduysa ya da restoranın bir itirazını aktardıysa cevabın Şöyle söyle: "…" biçiminde olsun: tırnak içi, temsilcinin restorana sesli okuyacağı, "siz" diye hitap eden tek cümledir ve itirazı karşılar.
@@ -23,6 +24,7 @@ Kurallar:
 export const CHAT_USER = `Mutfak türü: {{cuisine}} (segment: {{segment}})
 Ürün sayısı: {{counts}}
 Eksik kategoriler: {{gaps}}
+Açılış kurallarında eksik: {{rules}}
 Menü: {{menu}}
 
 Bu görüşmede önerilenler: {{offered}}

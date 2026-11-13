@@ -15,7 +15,8 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1306, web 2; hepsi geçiyor. GitHub Actions da yeşil.
+- **Testler:** backend 1306, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+  çıkan yedi sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
 
 ## Bilinen sorunlar
@@ -25,6 +26,9 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
   20–30 saniyeyi bulabilir. Kalıcı çözüm ücretli Gemini katmanı.
 - **Öğrenme döngüsü yeni veri almıyor.** Evet / Düşünecek / Hayır kaldırıldığı için (D-202) sistem restoranların tercihini
   artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
+- **Modelin yazdığı kartlar havuzunkiler kadar temiz değil.** Canlı testte "Mantar Peynirli Pide Pizza" gibi garip bir ad ve
+  "Ekstra Yoğurt" / "Ekstra Yoğurtlu" gibi neredeyse aynı iki ekstra görüldü. Havuzdan gelen kartlarda bu olmuyor;
+  `agents/validator.ts` ve `agents/grounding.ts` bu tür tekrarları daha sıkı eleyebilir.
 - **Cloudflare Web Analytics betiği CSP'ye takılıyor.** Siteyi etkilemez, yalnızca tarayıcı konsolunda hata görünür.
   Cloudflare panelinden kapatılabilir.
 
@@ -42,6 +46,6 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `d07f17f`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-207 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-208 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

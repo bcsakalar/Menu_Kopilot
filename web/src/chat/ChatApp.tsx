@@ -26,8 +26,9 @@ interface Live {
 
 const IDLE_LIVE: Live = { status: 'Düşünüyorum', cuisine: null, menuCount: null, warnings: [] };
 
+/** The menu the header stands for; a run that read nothing (an invoice, a blurry shot) has no cuisine to show. */
 function latestRun(messages: readonly Message[]): RunResult | null {
-  for (const message of [...messages].reverse()) if (message.result?.counts) return message.result;
+  for (const message of [...messages].reverse()) if (message.result?.counts && message.result.menu.length > 0) return message.result;
   return null;
 }
 

@@ -440,7 +440,7 @@ describe('degraded modes', () => {
       // Two variants of one pool product stay two products: listed by their own names, never "renamed" to the pool's
       // bare "Gözleme", and not asked the filling their name already chose (D-188).
       const variants = multipartBody(
-        { cuisineId: rows.find((r) => r.slug === 'manti-hamur-isleri')!.id, mode: 'quick', menuText: 'Peynirli Gözleme, Patatesli Gözleme' },
+        { cuisineId: rows.find((r) => r.slug === 'manti-hamur-isleri')!.id, mode: 'quick', menuText: 'Peynirli Gözleme, Patatesli Gözleme, Çay' },
         [],
       );
       const variantRes = await local.app.inject({
@@ -451,8 +451,10 @@ describe('degraded modes', () => {
       });
       expect(variantRes.statusCode, variantRes.body).toBe(200);
       const variantResult = variantRes.json<AnalyzeResult>();
-      expect(variantResult.menu.map((m) => m.name).sort()).toEqual(['Patatesli Gözleme', 'Peynirli Gözleme']);
+      expect(variantResult.menu.map((m) => m.name).sort()).toEqual(['Patatesli Gözleme', 'Peynirli Gözleme', 'Çay']);
       expect(variantResult.cards.filter((c) => c.section === 'fix' && c.fixKind === 'bad_name' && c.suggestedValue === 'Gözleme')).toHaveLength(0);
+      // A short name the pool knows is the full name, not a shorthand to ask about.
+      expect(variantResult.cards.filter((c) => c.section === 'fix' && c.currentValue === 'Çay')).toHaveLength(0);
       for (const card of variantResult.cards.filter((c) => c.section === 'option')) {
         expect(card.optionGroups.map((g) => g.name), card.targetName ?? card.name).not.toContain('İç Harç');
       }

@@ -14,6 +14,8 @@ export interface ChatContext {
   segment: string;
   counts: string;
   gaps: string;
+  /** The opening rules the menu misses for sure (D-206), or '-'. */
+  rules: string;
   menu: string;
   offered: string;
   categories: string;

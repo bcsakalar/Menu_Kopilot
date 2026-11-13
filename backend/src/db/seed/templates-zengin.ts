@@ -1374,7 +1374,10 @@ const DISHES: readonly SeedTemplate[] = [
     allergens: ['Soya', 'Susam'],
   }),
   dish('uzak-dogu', 52, 'Wakame Salatası', 'Susamlı deniz yosunu salatası, pirinç sirkesi ile.', {
-    groups: [porsiyon(['Küçük Porsiyon', 'Orta Porsiyon', 'Büyük Porsiyon'], 0)],
+    // Its own sauce and ingredients: left empty, the generic salad type filled in Caesar dressing and croutons.
+    groups: [porsiyon(['Küçük Porsiyon', 'Orta Porsiyon', 'Büyük Porsiyon'], 0), sosSecimi(['Susam Sos', 'Ponzu Sos', 'Acı Sos'])],
+    removable: ['Susam', 'Salatalık'],
+    extras: ['Edamame', 'Avokado', 'Ekstra Susam'],
     tags: ['salata', 'vegan'],
     allergens: ['Susam', 'Soya'],
   }),

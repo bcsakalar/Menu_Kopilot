@@ -6,14 +6,15 @@ import type { PromptRepository } from '../../ai/prompt-repository.js';
 import type { AiRouter } from '../../ai/router.js';
 import type { ImageInput } from '../../ai/types.js';
 import type { Database } from '../../db/client.js';
-import { chatMessages, conversations, cuisines, menuCategories, suggestionItems } from '../../db/schema/index.js';
+import type { MergedItem } from '../../agents/dedupe.js';
+import { chatMessages, conversations, cuisines, menuCategories, suggestionItems, suggestionRuns } from '../../db/schema/index.js';
 import { AppError, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { aiBusy, followUp, MORE_PRODUCTS, nextSteps, summarize } from './summary.js';
+import { aiBusy, followUp, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -27,10 +28,20 @@ const LIST_MAX_NAME_CHARS = 60;
 const PRODUCTS_WITH_IMAGES = 4;
 const PRODUCTS_WITH_NEW_ITEMS = 3;
 
-/** "adana, urfa, ayran": a list of products, which needs no model to understand. */
+/** Words of a sentence, never of a product name: "merhaba, yeni bir restoranla görüşüyorum" is no two-item menu. */
+const SENTENCE_WORDS = new Set(
+  'merhaba selam selamlar günaydın iyi kolay gelsin teşekkürler sağol tamam lütfen bir bu şu ben biz siz için ne nasıl neden mı mi mu mü var yok değil ama gibi şimdi'.split(' '),
+);
+const isSentence = (name: string) => name.toLocaleLowerCase('tr').split(/\s+/u).some((word) => SENTENCE_WORDS.has(word));
+
+/** "adana, urfa, ayran": a list of products, which needs no model to understand. Anything else goes to the chat agent. */
 export function looksLikeProductList(text: string): boolean {
   const names = parseMenuText(text);
-  return names.length >= LIST_MIN_NAMES && !text.includes('?') && names.every((n) => n.length <= LIST_MAX_NAME_CHARS);
+  return (
+    names.length >= LIST_MIN_NAMES &&
+    !text.includes('?') &&
+    names.every((n) => n.length <= LIST_MAX_NAME_CHARS && !isSentence(n))
+  );
 }
 
 type ConversationRow = typeof conversations.$inferSelect;
@@ -90,7 +101,7 @@ function shortcut(text: string, last: AnalyzeResult | null): ChatDecision | unde
 }
 
 function titleOf(conversation: ConversationRow, text: string, result: AnalyzeResult | null): string {
-  if (result?.counts) return `${result.counts.cuisineName} · ${result.counts.current} ürün`;
+  if (result?.counts && result.menu.length > 0) return `${result.counts.cuisineName} · ${result.counts.current} ürün`;
   if (conversation.title !== NEW_TITLE) return conversation.title;
   return text.slice(0, TITLE_CHARS) || NEW_TITLE;
 }
@@ -230,8 +241,20 @@ export class ChatService {
       newItemsOnly: false,
       priceSegment: last.classification?.priceSegment ?? 'orta',
       ...want,
-      exclude: [...(await this.offeredNames(conversationId)), ...(want.exclude ?? [])],
+      exclude: [...(await this.offeredNames(conversationId)), ...(await this.removedNames(conversationId, last)), ...(want.exclude ?? [])],
     };
+  }
+
+  /** What an earlier run of the call read but the menu no longer holds: the rep took it off ("ayran yokmuş"). */
+  private async removedNames(conversationId: string, last: AnalyzeResult): Promise<string[]> {
+    const rows = await this.deps.db
+      .select({ snapshot: suggestionRuns.menuSnapshot })
+      .from(suggestionRuns)
+      .innerJoin(chatMessages, eq(chatMessages.runId, suggestionRuns.id))
+      .where(eq(chatMessages.conversationId, conversationId));
+    const onMenu = new Set(last.menu.map((m) => normalizeTr(m.name)));
+    const read = rows.flatMap((row) => (row.snapshot as { extracted?: MergedItem[] } | null)?.extracted ?? []);
+    return [...new Set(read.filter((item) => !onMenu.has(item.normalized)).map((item) => item.name))];
   }
 
   private async runAgents(
@@ -283,6 +306,7 @@ export class ChatService {
       segment: last?.classification?.priceSegment ?? 'bilinmiyor',
       counts: last?.counts ? `${last.counts.current} / hedef ${last.counts.target}` : 'menü henüz yok',
       gaps: gaps.map((g) => `${g.label} ${g.present}/${g.minItems}`).join(', ') || '-',
+      rules: openingGaps(last?.counts?.quality).join(', ') || '-',
       menu: last?.menu.slice(0, MENU_NAMES).map((m) => m.name).join(', ') || 'menü henüz yok',
       offered: offered.slice(0, OFFERED_NAMES).join(', ') || '-',
       categories: categoryRows.map((c) => `${c.key} | ${c.label}`).join(', '),

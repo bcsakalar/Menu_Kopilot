@@ -20,9 +20,12 @@ function share(label: string, rule: ShareRule, what: string): Rule {
     value: rule.known === 0 ? '?' : percent(rule.present / Math.max(1, rule.total)),
     state: stateOf(rule.ok),
     hint:
-      rule.ok === null
-        ? `${what} en az ${percent(rule.share)} olmalı. Bu görüntüde görünmüyor; panelin ekran görüntüsünü yapıştırırsan kontrol ederim.`
-        : `${what} en az ${percent(rule.share)} olmalı: ${rule.present}/${rule.total} ürün.`,
+      rule.ok !== null
+        ? `${what} en az ${percent(rule.share)} olmalı: ${rule.present}/${rule.total} ürün.`
+        : rule.known === 0
+          ? `${what} en az ${percent(rule.share)} olmalı. Bu görüntüde görünmüyor; panelin ekran görüntüsünü yapıştırırsan kontrol ederim.`
+          : // Most of the menu was visible; only the typed or unreadable products are open, and they decide the rule.
+            `${what} en az ${percent(rule.share)} olmalı: ${rule.present}/${rule.total} ürün; ${rule.total - rule.known} ürünün durumu görünmüyor, panelden kontrol et.`,
   };
 }
 

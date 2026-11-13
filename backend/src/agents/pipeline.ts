@@ -678,7 +678,8 @@ function fixCards(deps: Pick<AgentDeps, 'categories'>, items: readonly ExistingI
         currentValue: item.rawName,
         suggestedValue: item.canonicalName,
       });
-    } else if (looksAbbreviated(item.rawName)) {
+    } else if (item.canonicalName === null && looksAbbreviated(item.rawName)) {
+      // A short name the pool knows ("Kola", "Çay") is the product's full name, not a shorthand.
       push({
         ...base,
         shortDescription: item.rawName,

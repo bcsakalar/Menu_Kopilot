@@ -85,6 +85,9 @@ describe('a typed product list', () => {
     expect(looksLikeProductList('Lahmacun\nAyran')).toBe(true);
     expect(looksLikeProductList('tatlı öner')).toBe(false);
     expect(looksLikeProductList('adana mı urfa mı, hangisi daha iyi?')).toBe(false);
+    expect(looksLikeProductList('Su, Çay, Ayran')).toBe(true);
+    expect(looksLikeProductList('merhaba, yeni bir restoranla görüşmeye başlıyorum')).toBe(false);
+    expect(looksLikeProductList('iyi günler, kolay gelsin')).toBe(false);
   });
 });
 
@@ -160,6 +163,8 @@ describe('a conversation', () => {
     const empty = await send({}, undefined, NO_MENU);
     const [nothing] = eventOf<{ message: { text: string } }>(empty, 'message');
     expect(nothing?.message.text).toContain('okuyamadım');
+    // No cuisine was read, so none names the conversation.
+    expect((await detail(conversationIdOf(empty), empty.cookie!)).title).not.toContain('ürün');
 
     const sent = await send({ conversationId: conversationIdOf(empty), text: 'Adana Kebap, Urfa Kebap, Ayran' }, empty.cookie);
     const [answer] = eventOf<{ message: { text: string } }>(sent, 'message');
@@ -175,6 +180,7 @@ describe('a conversation', () => {
     expect(answer?.message.text).toContain('dürüm');
     expect(answer?.message.runId).toBeNull();
     expect(chatPrompts[0]).toContain('Adana Kebap');
+    expect(chatPrompts[0]).toContain('Açılış kurallarında eksik: içecek 1/10');
   });
 
   it('asks for a menu instead of recommending into the air', async () => {
@@ -236,6 +242,12 @@ describe('a conversation', () => {
     // What the restaurant just said it does not sell is not offered back in the same breath.
     expect(answer?.message.result.cards.map((c) => c.name)).not.toContain('Ayran');
     expect(answer?.message.result.counts.current).toBe(3);
+
+    // Nor later in the call: the next round of products leaves it out too.
+    const more = await send({ conversationId: conversationIdOf(first), text: 'Daha fazla ürün öner' }, first.cookie);
+    const [next] = eventOf<{ message: { result: { cards: CardDto[] } } }>(more, 'message');
+    expect(next?.message.result.cards.length).toBeGreaterThan(0);
+    expect(next?.message.result.cards.map((c) => c.name)).not.toContain('Ayran');
   });
 });
 

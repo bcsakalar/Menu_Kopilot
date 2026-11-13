@@ -1,7 +1,7 @@
 # DECISIONS
 
 > **Türkçe not:** Bu dosya projedeki bütün kararların günlüğüdür. Eski kayıtlar İngilizce yazıldı; yeni kararlar Türkçe
-> eklenebilir, numaralandırma D-208'den devam eder. Telefon uygulaması dönemine ait belgeler
+> eklenebilir, numaralandırma D-209'dan devam eder. Telefon uygulaması dönemine ait belgeler
 > (`docs/FAZ0_TESHIS.md`, `docs/FAZ3_RAPOR.md`, eski `PROGRESS.md`) `docs/arsiv/` klasörüne taşındı; ilk görev tanımı
 > repodan çıkarıldı (D-203).
 
@@ -1039,3 +1039,17 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   78 el yazımı şablon eklendi (899 → 977), her biri hedefin en az iki üstünde. Yeni adlar başka şablonların takma
   adlarıyla çakışmıyor; başka mutfakta zaten olan ürün (Lazanya, Hünkar Beğendi, Avokadolu Ekmek) aynı yazılışla
   eklendi. Hedef sayıları yine kodda değil, canlı veritabanında.
+- **D-208** — **Canlı temsilci testinden çıkan düzeltmeler** (kullanıcı isteği, 2026-11-13: "canlıya al ve dene, bizim
+  temsilciler gibi her senaryoyu dene"). `1fde908` canlıdayken pizza, Uzak Doğu (iki görüntü), yazılı döner listesi,
+  mutfak değişikliği, opsiyon isteği, kategori düğmesi, "daha fazla ürün", açılışa hazır mı sorusu, fatura görüntüsü,
+  selamlaşma, geri bildirim ve telefon ekranı denendi. Çıkanlar: (1) "merhaba, yeni bir restoranla görüşüyorum"
+  virgül yüzünden iki ürünlük menü sayılıp analiz başlatıyordu; cümle kelimesi (merhaba, bir, için, mı…) içeren parça
+  artık ürün adı sayılmaz, mesaj sohbet ajanına gider. (2) Temsilcinin "ayran yokmuş" diye çıkardığı ürün sonraki
+  önerilerde geri geliyordu; görüşmede okunup menüden çıkan her ürün o görüşmenin önerilerinden de çıkar. (3) Sohbet
+  ajanı açılış kurallarını görmüyordu ve 11/52 ürünlük menüye "hemen başlayabiliriz" dedi; bağlama kuralların eksikleri
+  girdi, "hazır mı" sorusunda eksik varsa hazır değil der. (4) Hiç ürün okunmayan analiz (fatura) başlıkta ve görüşme
+  adında "Dondurma · 0 ürün" gösteriyordu; menüsüz analiz başlığa ve ada yansımaz. (5) Havuzda birebir eşleşen kısa ad
+  ("Kola", "Çay") "kısaltma gibi" diye düzeltmeye düşüyordu; uyarı yalnızca havuzla eşleşmeyen adlarda. (6) Fotoğrafı
+  yazarak eklenen tek ürün yüzünden bilinmeyen kural "Bu görüntüde görünmüyor" diyordu; artık "x/y ürün; z ürünün
+  durumu görünmüyor" der. (7) Wakame Salatası'na genel salatanın Sezar sosu ve krutonu doluyordu; şablona kendi sosu ve
+  malzemeleri yazıldı.
