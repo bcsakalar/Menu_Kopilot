@@ -57,7 +57,7 @@ export function ToolsApp() {
             </li>
           ))}
         </ul>
-        <p className="sidebar-note">Metin ve dosyalar bilgisayarından çıkmaz.</p>
+        <p className="sidebar-note">Dosyalar ve görseller bilgisayarından çıkmaz. Havuzdan açıklama için yalnızca ürün adları sorulur.</p>
       </nav>
       <main className="admin-main">
         {tool === 'metin' && <TextTool />}

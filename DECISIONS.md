@@ -1338,3 +1338,28 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
 
   Önceki aracın "Kolaj" ve Excel'deki hazır çıktı şablonları (ör. "Stok Güncelleme") yapılmadı: şablonların biçimi
   bilinmiyor.
+- **D-220** — **Araçlar önceki araçtan bir adım öte: kuralın nedeni, düzeltilemeyenin uyarısı, havuzdan açıklama, dosya
+  kontrolü, logo kenarı** (kullanıcı isteği, 2026-11-14: "sistemde bizim farkımız da olsun… daha iyi olalım"). Önceki araç
+  metni yalnızca düzeltiyordu; bizimkinin farkı ekibin kendi verisini ve kurallarını kullanması:
+  - **Ne değişti:** her düzeltme kuralıyla listelenir ("sogan → Soğan · Türkçe karakter", "coca cola → Coca-Cola ·
+    Birleşik yazım", "330ML → (330 ml) · Sayı ve birim"). Yazılan ve düzeltilen kelimeler harfleri aynı tutan parçalara
+    bölünür; yalnızca büyük harfe çevrilen ya da yer değiştiren kelime listelenmez. Temsilci kuralı görerek öğrenir.
+  - **Düzeltilemeyenin uyarısı:** fiyat ("45 TL", "₺45"), emoji, telefon/e-posta/site/@hesap ve art arda aynı kelime
+    satırın altında uyarılır, silinmez: neyin kastedildiğini temsilci bilir. Miktar ve ölçü ("2 Adet", "330 ml") uyarı
+    değildir.
+  - **Havuzdan açıklama:** `POST /api/v1/tools/describe` (açık, yalnızca okuma, adres başına 60/dk, istek başına en
+    fazla 500 ad) ürün adlarına onaylı şablonların açıklamalarını döndürür. Eşleşme analizdekiyle aynı sırada ve modelsiz:
+    aynı normalize ad, bilinen takma ad, sonra trigram benzerliği; havuz 10 dakika bellekte tutulur. Metin aracı en
+    yakın üç öneriyi gösterir (eşik 0,5, benzerlik yüzdesiyle); Excel'deki toplu doldurma yalnızca analizin "aynı ürün"
+    eşiğini (0,72) geçeni yazar ve yazılmış açıklamaya dokunmaz. Taslak ve arşiv önerilmez. Bu yüzden ürün adları artık
+    sunucuya gider; arayüzdeki "metin bilgisayarından çıkmaz" yazısı buna göre düzeltildi, dosya ve görseller yine
+    gitmez.
+  - **Dosya kontrolü (Excel):** açılış kuralları (D-206) satıcının dosyasından okunur: açıklama oranı (%70), fotoğraf
+    sütunu varsa oranı (%20), kategori sütunu varsa içecek sayısı (10). Yanında kurala uymayan adlar, aynı ürünün tekrarı
+    ve fiyat/emoji/iletişim. Bir maddeye tıklayınca tablo o satırlara iner; düzeltme ve doldurma sonrası sayılar canlı
+    güncellenir. Ürün sayısının mutfak hedefi dosyada mutfak türü olmadığından sorulmaz.
+  - **Logo kenarı ve büyütme uyarısı:** köşeleri aynı renkte ya da saydam olan görselin boş kenarı bulunur, "Boş
+    kenarları kırp" ile atılır; "Sığdır"da logonun çevresinde %6 pay kalır. Köşeleri farklı görsel (fotoğraf) bütün
+    kalır. Kaynak 1,25 kattan fazla büyütülecekse "bulanık görünebilir, daha büyük görsel iste" uyarısı çıkar.
+  - **Hata düzeltmesi:** D-219'daki "Özel ölçü" seçiliyken görsel her çizimde yeni bir ölçü nesnesi aldığı için durmadan
+    yeniden kodlanıyordu; ölçü artık yalnızca değerleri değişince yenilenir (tarayıcıda 3 saniyede 0 yeniden kodlama).

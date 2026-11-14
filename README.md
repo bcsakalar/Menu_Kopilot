@@ -152,14 +152,18 @@ olmaz. Onaylanmamış öneri temsilciye hiç sunulmaz. Havuzun tek başına ne v
 dönerci olmayana döner önerilmesini bu engeller.
 
 **Araçlar (D-218):** sol üstteki "Asistan | Araçlar" geçişi `/araclar` sayfasını açar. Asistan olduğu gibi kalır. Araçlar
-tarayıcıda çalışır, metin ve dosyalar sunucuya gitmez; yapay zekâ kullanılmaz.
+tarayıcıda çalışır, dosyalar ve görseller sunucuya gitmez; yapay zekâ kullanılmaz. Sunucuya yalnızca sözlük ve ürün
+adlarıyla havuzdan açıklama sorulur (D-220).
 
 - **Metin düzeltme:** ürün/mağaza adı ve açıklama, panelin yazım kurallarına göre yazdıkça düzeltilir. Yapıştırılan
   metnin düzeltilmiş hâli panoya kopyalanır; "Otomatik pano" açıksa başka yerde kopyalanan metin sekmeye dönünce
   düzeltilip panoya geri yazılır. Türkçe karakter tamamlama, yazım hatası ve bitişik kelime düzeltmesi
-  şablon havuzundan çıkan sözlükle yapılır (`GET /api/v1/tools/lexicon`, açık, yalnızca okuma).
+  şablon havuzundan çıkan sözlükle yapılır (`GET /api/v1/tools/lexicon`, açık, yalnızca okuma). Her düzeltmenin
+  kuralı "Ne değişti" altında yazar; fiyat, emoji, telefon/site ve çift kelime satırın altında uyarılır. Ürün adları
+  için havuzun onaylı açıklamaları önerilir (`POST /api/v1/tools/describe`, açık, yalnızca okuma, modelsiz eşleşme).
 - **Excel:** .xlsx ya da .csv açılır; arama, sıralama, sayfa sekmeleri. Ad ve açıklama sütunları kurallarla düzeltilip
-  .xlsx olarak indirilir.
+  .xlsx olarak indirilir. "Dosya kontrolü" açılış kurallarını (açıklama %70, fotoğraf %20, 10 içecek) ve yazım, tekrar,
+  fiyat/emoji sorunlarını gösterir; bir maddeye tıklayınca o satırlar listelenir. Boş açıklamalar havuzdan doldurulur.
 - **Logo ve banner:** ürün görseli (1000 × 1000), mağaza logosu (500 × 500) ve banner (1035 × 390), en fazla 150 KB;
   kırp ya da sığdır, JPEG ya da PNG.
 
@@ -255,7 +259,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-220`'den devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-221`'den devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -379,7 +383,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-219). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-220). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

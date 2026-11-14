@@ -1,3 +1,4 @@
+import { checkLine } from '../text/checks';
 import { formatLine, type TextKind } from '../text/format';
 import type { Lexicon } from '../text/lexicon';
 import { fold } from '../text/turkish';
@@ -146,4 +147,110 @@ export function parseCsv(text: string): string[][] {
 export function pickColumns(header: readonly string[], rows: readonly string[][], hidden: ReadonlySet<number>): Table {
   const keep = header.map((_, index) => index).filter((index) => !hidden.has(index));
   return { header: keep.map((index) => header[index]!), rows: rows.map((row) => keep.map((index) => row[index] ?? '')) };
+}
+
+/**
+ * The file check (D-220): the opening rules (D-206) read off a seller's spreadsheet before it goes to the panel, plus what
+ * the panel would turn away. The same numbers as the analysis: 70% of products with a description, 20% with a photo, a
+ * drinks section of at least 10.
+ */
+export const DESCRIPTION_SHARE = 0.7;
+export const IMAGE_SHARE = 0.2;
+export const MIN_DRINKS = 10;
+
+export interface SheetCheck {
+  key: 'products' | 'descriptions' | 'photos' | 'drinks' | 'writing' | 'duplicates' | 'warnings';
+  label: string;
+  value: string;
+  /** Met, missed, or only a count. */
+  ok: boolean | null;
+  /** The rows to look at: the ones missing it, or the ones at fault. */
+  rows: number[];
+}
+
+const PHOTO_HEADERS = ['gorsel', 'resim', 'foto', 'fotograf', 'image', 'img', 'photo', 'picture', 'url', 'link'];
+const CATEGORY_HEADERS = ['kategori', 'category', 'bolum', 'grup', 'group', 'section'];
+const DRINK_WORDS = /icecek|drink|beverage/u;
+
+const headerWords = (header: string): string[] => fold(header).split(/[^a-z0-9]+/u).filter(Boolean);
+const findColumn = (header: readonly string[], words: readonly string[]): number => header.findIndex((title) => headerWords(title).some((word) => words.includes(word)));
+const percent = (share: number): string => `%${Math.floor(share * 100)}`;
+/** "Adana Kebap", "ADANA  KEBAP." and "adana kebap" are the same product written twice. */
+const sameName = (name: string): string => fold(name).replace(/[^a-z0-9]+/gu, ' ').trim();
+
+export function checkSheet(table: Table, kinds: readonly (TextKind | 'none')[], options: { smart: boolean; lexicon?: Lexicon }): SheetCheck[] {
+  const nameColumn = kinds.indexOf('name');
+  if (nameColumn < 0) return [];
+  const descriptionColumn = kinds.indexOf('description');
+  const products = table.rows.map((row, index) => (row[nameColumn] ? index : -1)).filter((index) => index >= 0);
+  const checks: SheetCheck[] = [{ key: 'products', label: 'Ürün', value: products.length.toLocaleString('tr-TR'), ok: null, rows: [] }];
+  if (products.length === 0) return checks;
+
+  const share = (column: number, key: 'descriptions' | 'photos', label: string, target: number) => {
+    const missing = products.filter((index) => !table.rows[index]![column]);
+    const present = (products.length - missing.length) / products.length;
+    checks.push({ key, label, value: `${percent(present)} · hedef ${percent(target)}`, ok: present >= target, rows: missing });
+  };
+  if (descriptionColumn >= 0) share(descriptionColumn, 'descriptions', 'Açıklama', DESCRIPTION_SHARE);
+  const photoColumn = findColumn(table.header, PHOTO_HEADERS);
+  if (photoColumn >= 0) share(photoColumn, 'photos', 'Fotoğraf', IMAGE_SHARE);
+  const categoryColumn = findColumn(table.header, CATEGORY_HEADERS);
+  if (categoryColumn >= 0) {
+    const drinks = products.filter((index) => DRINK_WORDS.test(fold(table.rows[index]![categoryColumn] ?? '')));
+    checks.push({ key: 'drinks', label: 'İçecek', value: `${drinks.length} · en az ${MIN_DRINKS}`, ok: drinks.length >= MIN_DRINKS, rows: drinks });
+  }
+
+  const format = { kind: 'name' as const, smart: options.smart, ...(options.lexicon ? { lexicon: options.lexicon } : {}) };
+  const unwritten = products.filter((index) => formatLine(table.rows[index]![nameColumn]!, format) !== table.rows[index]![nameColumn]);
+  checks.push({ key: 'writing', label: 'Yazım', value: unwritten.length === 0 ? 'kurallara uygun' : `${unwritten.length} ad kurala uymuyor`, ok: unwritten.length === 0, rows: unwritten });
+
+  const groups = new Map<string, number[]>();
+  for (const index of products) {
+    const key = sameName(table.rows[index]![nameColumn]!);
+    groups.set(key, [...(groups.get(key) ?? []), index]);
+  }
+  const twice = [...groups.values()].filter((group) => group.length > 1);
+  checks.push({
+    key: 'duplicates',
+    label: 'Tekrar',
+    value: twice.length === 0 ? 'yok' : `${twice.length} ad birden çok kez`,
+    ok: twice.length === 0,
+    rows: twice.flat().sort((a, b) => a - b),
+  });
+
+  const textColumns = kinds.map((kind, index) => (kind === 'none' ? -1 : index)).filter((index) => index >= 0);
+  const flagged = products.filter((index) => textColumns.some((column) => checkLine(table.rows[index]![column] ?? '').length > 0));
+  checks.push({
+    key: 'warnings',
+    label: 'Fiyat, emoji, iletişim',
+    value: flagged.length === 0 ? 'yok' : `${flagged.length} satırda`,
+    ok: flagged.length === 0,
+    rows: flagged,
+  });
+  return checks;
+}
+
+/**
+ * Empty descriptions filled from the pool (D-220): `ideas` maps a product name to the approved description chosen for
+ * it. A description already written is never replaced.
+ */
+export function fillDescriptions(
+  rows: readonly string[][],
+  nameColumn: number,
+  descriptionColumn: number,
+  ideas: ReadonlyMap<string, string>,
+): { rows: string[][]; filled: number[] } {
+  const filled: number[] = [];
+  const out = rows.map((row, index) => {
+    const idea = ideas.get((row[nameColumn] ?? '').trim());
+    if (row[descriptionColumn] || !idea) return row;
+    filled.push(index);
+    return row.map((cell, column) => (column === descriptionColumn ? idea : cell));
+  });
+  return { rows: out, filled };
+}
+
+/** The distinct product names whose description is empty: what to ask the pool for. */
+export function namesWithoutDescription(rows: readonly string[][], nameColumn: number, descriptionColumn: number): string[] {
+  return [...new Set(rows.filter((row) => !row[descriptionColumn] && (row[nameColumn] ?? '').trim()).map((row) => row[nameColumn]!.trim()))];
 }

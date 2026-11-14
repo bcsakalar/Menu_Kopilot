@@ -1,6 +1,19 @@
-import { ArrowDown, ArrowUp, Download, FileSpreadsheet, Search, Sparkles, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, Database, Download, FileSpreadsheet, Search, Sparkles, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { applyRules, guessKind, parseCsv, pickColumns, toTable, viewRows, type Table } from './excel/sheet';
+import {
+  applyRules,
+  checkSheet,
+  fillDescriptions,
+  guessKind,
+  namesWithoutDescription,
+  parseCsv,
+  pickColumns,
+  toTable,
+  viewRows,
+  type SheetCheck,
+  type Table,
+} from './excel/sheet';
+import { describeNames, SURE_SCORE } from './pool';
 import type { TextKind } from './text/format';
 import { downloadRows } from './download';
 import { useLexicon } from './useLexicon';
@@ -38,7 +51,10 @@ export function ExcelTool() {
   const [sort, setSort] = useState<{ column: number; direction: 'asc' | 'desc' } | null>(null);
   const [kinds, setKinds] = useState<ColumnKind[]>([]);
   const [hidden, setHidden] = useState<Set<number>>(new Set());
-  const [fixed, setFixed] = useState<{ rows: string[][]; cells: Set<string>; changed: number } | null>(null);
+  /** The sheet after the rules and the pool: which cells the rules changed, which the pool filled. */
+  const [fixed, setFixed] = useState<{ rows: string[][]; cells: Set<string>; filled: Set<string> } | null>(null);
+  const [focus, setFocus] = useState<SheetCheck | null>(null);
+  const [pool, setPool] = useState<{ busy: boolean; message: string | null }>({ busy: false, message: null });
   const [showFixed, setShowFixed] = useState(true);
   const [limit, setLimit] = useState(PAGE);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +69,8 @@ export function ExcelTool() {
     setKinds(next ? next.header.map((title) => guessKind(title) ?? 'none') : []);
     setHidden(new Set());
     setFixed(null);
+    setFocus(null);
+    setPool({ busy: false, message: null });
     setSort(null);
     setQuery('');
     setLimit(PAGE);
@@ -75,8 +93,22 @@ export function ExcelTool() {
   };
 
   const rows = table ? (fixed && showFixed ? fixed.rows : table.rows) : [];
-  const view = useMemo(() => viewRows(rows, query, sort), [rows, query, sort]);
+  const focusRows = useMemo(() => (focus ? new Set(focus.rows) : null), [focus]);
+  const view = useMemo(() => viewRows(rows, query, sort).filter((index) => !focusRows || focusRows.has(index)), [rows, query, sort, focusRows]);
   const chosen = kinds.some((kind) => kind !== 'none');
+  const checks = useMemo(() => (table ? checkSheet({ header: table.header, rows }, kinds, { smart: true, lexicon }) : []), [table, rows, kinds, lexicon]);
+  const nameColumn = kinds.indexOf('name');
+  const descriptionColumn = kinds.indexOf('description');
+
+  /** The rules' and the pool's work so far, measured against the file as it came. */
+  const settle = (next: string[][], filled: Set<string>) => {
+    if (!table) return;
+    const cells = new Set<string>();
+    next.forEach((row, r) => row.forEach((cell, c) => cell !== table.rows[r]![c] && !filled.has(`${r}:${c}`) && cells.add(`${r}:${c}`)));
+    setFixed({ rows: next, cells, filled });
+    setShowFixed(true);
+    setFocus(null);
+  };
 
   const fix = () => {
     if (!table) return;
@@ -84,11 +116,42 @@ export function ExcelTool() {
     kinds.forEach((kind, index) => {
       if (kind !== 'none') columns.set(index, kind);
     });
-    const result = applyRules(table.rows, columns, { smart: true, lexicon });
-    const cells = new Set<string>();
-    result.rows.forEach((row, r) => row.forEach((cell, c) => cell !== table.rows[r]![c] && cells.add(`${r}:${c}`)));
-    setFixed({ rows: result.rows, cells, changed: result.changed });
-    setShowFixed(true);
+    // On top of what the pool filled: fixing again never loses it.
+    settle(applyRules(fixed?.rows ?? table.rows, columns, { smart: true, lexicon }).rows, fixed?.filled ?? new Set());
+  };
+
+  const fillFromPool = async () => {
+    if (!table || nameColumn < 0 || descriptionColumn < 0) return;
+    const current = fixed?.rows ?? table.rows;
+    const names = namesWithoutDescription(current, nameColumn, descriptionColumn);
+    if (names.length === 0) {
+      setPool({ busy: false, message: 'Boş açıklama yok.' });
+      return;
+    }
+    setPool({ busy: true, message: null });
+    try {
+      const found = await describeNames(names);
+      const ideas = new Map<string, string>();
+      names.forEach((name, index) => {
+        const best = found[index]?.[0];
+        // Only the same product: a merely similar one is left for the rep (the text tool shows those).
+        if (best && best.score >= SURE_SCORE) ideas.set(name, best.description);
+      });
+      const result = fillDescriptions(current, nameColumn, descriptionColumn, ideas);
+      const filled = new Set(fixed?.filled ?? []);
+      for (const index of result.filled) filled.add(`${index}:${descriptionColumn}`);
+      settle(result.rows, filled);
+      const left = names.length - ideas.size;
+      setPool({
+        busy: false,
+        message:
+          result.filled.length === 0
+            ? 'Havuzda bu ürünlerin onaylı açıklaması yok.'
+            : `${result.filled.length.toLocaleString('tr-TR')} açıklama havuzdan dolduruldu${left > 0 ? `; ${left.toLocaleString('tr-TR')} ürün havuzda yok` : ''}. Göndermeden önce göz at.`,
+      });
+    } catch (err) {
+      setPool({ busy: false, message: err instanceof Error ? err.message : 'Havuza ulaşılamadı.' });
+    }
   };
 
   const save = () => {
@@ -162,6 +225,7 @@ export function ExcelTool() {
             onClick={() => {
               setBook(null);
               setFixed(null);
+              setFocus(null);
             }}
           >
             <X size={18} />
@@ -177,6 +241,34 @@ export function ExcelTool() {
             </button>
           ))}
         </div>
+      )}
+
+      {checks.length > 0 && (
+        <section className="panel sheet-checks" aria-label="Dosya kontrolü">
+          <div className="fix-head">
+            <h2>Dosya kontrolü</h2>
+            <span className="muted small">Açılış kuralları ve panelin kabul etmeyecekleri. Bir maddeye tıkla, o satırlar listelensin.</span>
+          </div>
+          <div className="check-list">
+            {checks.map((check) => (
+              <button
+                key={check.key}
+                type="button"
+                className={`check ${check.ok === true ? 'ok' : check.ok === false ? 'missed' : 'info'}`}
+                aria-pressed={focus?.key === check.key}
+                disabled={check.rows.length === 0}
+                onClick={() => {
+                  setFocus(focus?.key === check.key ? null : check);
+                  setLimit(PAGE);
+                }}
+              >
+                {check.ok === true ? <Check size={14} aria-hidden /> : check.ok === false ? <X size={14} aria-hidden /> : null}
+                <span className="check-label">{check.label}</span>
+                <span className="check-value">{check.value}</span>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="panel fix-panel">
@@ -208,9 +300,18 @@ export function ExcelTool() {
             <Sparkles size={15} aria-hidden />
             Düzelt
           </button>
+          {nameColumn >= 0 && descriptionColumn >= 0 && (
+            <button type="button" className="button ghost" disabled={pool.busy} onClick={() => void fillFromPool()} title="Açıklaması boş ürünlerin adları havuza sorulur, ekibin onayladığı açıklama yazılır; yazılmış açıklamaya dokunulmaz">
+              <Database size={15} aria-hidden />
+              {pool.busy ? 'Havuzda aranıyor…' : 'Boş açıklamaları havuzdan doldur'}
+            </button>
+          )}
           {fixed && (
             <>
-              <span className="muted small">{fixed.changed.toLocaleString('tr-TR')} hücre düzeltildi</span>
+              <span className="muted small">
+                {fixed.cells.size.toLocaleString('tr-TR')} hücre düzeltildi
+                {fixed.filled.size > 0 && <> · <span className="filled-legend">{fixed.filled.size.toLocaleString('tr-TR')} açıklama havuzdan</span></>}
+              </span>
               <div className="segmented" role="group" aria-label="Görünüm">
                 <button type="button" aria-pressed={!showFixed} onClick={() => setShowFixed(false)}>
                   Önce
@@ -222,6 +323,11 @@ export function ExcelTool() {
             </>
           )}
         </div>
+        {pool.message && (
+          <p className="muted small" role="status">
+            {pool.message}
+          </p>
+        )}
       </section>
 
       <div className="column-picker" role="group" aria-label="Gösterilen sütunlar">
@@ -258,6 +364,12 @@ export function ExcelTool() {
             }}
           />
         </label>
+        {focus && (
+          <button type="button" className="chip on focus-chip" onClick={() => setFocus(null)}>
+            {focus.label}: {focus.rows.length.toLocaleString('tr-TR')} satır
+            <X size={13} aria-label="Tüm satırları göster" />
+          </button>
+        )}
         <span className="muted small">
           {view.length === table.rows.length ? `${table.rows.length.toLocaleString('tr-TR')} satır` : `${view.length.toLocaleString('tr-TR')} / ${table.rows.length.toLocaleString('tr-TR')} satır`}
         </span>
@@ -283,7 +395,12 @@ export function ExcelTool() {
               <tr key={index}>
                 <td className="row-number">{index + 2}</td>
                 {rows[index]!.map((cell, c) => hidden.has(c) ? null : (
-                  <td key={c} className={fixed && showFixed && fixed.cells.has(`${index}:${c}`) ? 'fixed-cell' : undefined}>
+                  <td
+                    key={c}
+                    className={
+                      fixed && showFixed ? (fixed.filled.has(`${index}:${c}`) ? 'filled-cell' : fixed.cells.has(`${index}:${c}`) ? 'fixed-cell' : undefined) : undefined
+                    }
+                  >
                     {cell}
                   </td>
                 ))}
@@ -291,7 +408,7 @@ export function ExcelTool() {
             ))}
           </tbody>
         </table>
-        {view.length === 0 && <p className="muted empty-table">Aramayla eşleşen satır yok.</p>}
+        {view.length === 0 && <p className="muted empty-table">{focus ? 'Bu maddede gösterilecek satır kalmadı.' : 'Aramayla eşleşen satır yok.'}</p>}
       </div>
       {view.length > limit && (
         <button type="button" className="button ghost more" onClick={() => setLimit((current) => current + PAGE)}>

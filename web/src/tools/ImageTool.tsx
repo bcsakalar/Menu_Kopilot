@@ -1,6 +1,17 @@
-import { Download, ImageUp, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { containRect, coverRect, customPreset, IMAGE_PRESETS, outputName, type ImagePreset } from './image/fit';
+import { AlertTriangle, Download, ImageUp, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  containRect,
+  contentRect,
+  coverRect,
+  customPreset,
+  enlargement,
+  IMAGE_PRESETS,
+  outputName,
+  SOFT_ENLARGEMENT,
+  type ImagePreset,
+  type Rect,
+} from './image/fit';
 
 /**
  * Logo ve banner (D-218): a seller's logo, banner or product photo brought to the panel's format — the right size, cropped
@@ -24,6 +35,28 @@ interface Output {
 
 const toBlob = (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> =>
   new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('encode failed'))), type, quality));
+
+/** The margins are looked for on a small copy: quick on a 4000-pixel photo, and a pixel either way does not matter. */
+const SCAN_SIZE = 600;
+/** A trimmed logo still gets a little air around it in "sığdır". */
+const TRIM_AIR = 0.06;
+
+function findContent(bitmap: ImageBitmap): Rect {
+  const { width, height } = bitmap;
+  const scale = Math.min(1, SCAN_SIZE / Math.max(width, height));
+  const w = Math.max(1, Math.round(width * scale));
+  const h = Math.max(1, Math.round(height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const context = canvas.getContext('2d', { willReadFrequently: true })!;
+  context.drawImage(bitmap, 0, 0, w, h);
+  const box = contentRect(context.getImageData(0, 0, w, h).data, w, h);
+  // Back to the source's pixels, one pixel wider on each side for the rounding.
+  const x = Math.max(0, Math.floor(box.x / scale) - 1);
+  const y = Math.max(0, Math.floor(box.y / scale) - 1);
+  return { x, y, width: Math.min(width - x, Math.ceil(box.width / scale) + 2), height: Math.min(height - y, Math.ceil(box.height / scale) + 2) };
+}
 
 /** The highest JPEG quality under the limit, found in a few halvings; PNG has no quality to lower. */
 async function encode(canvas: HTMLCanvasElement, format: Format, maxBytes: number): Promise<{ blob: Blob; quality: number | null }> {
@@ -56,16 +89,25 @@ export function ImageTool() {
   const [background, setBackground] = useState('#ffffff');
   const [source, setSource] = useState<Source | null>(null);
   const [focus, setFocus] = useState({ x: 0.5, y: 0.5 });
+  const [trim, setTrim] = useState(false);
+  /** The source inside its plain margins, when it has any. */
+  const [content, setContent] = useState<Rect | null>(null);
   const [output, setOutput] = useState<Output | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; y: number; focus: { x: number; y: number } } | null>(null);
-  const preset = chosen === 'ozel' ? customPreset(custom.width, custom.height, custom.maxKb) : IMAGE_PRESETS.find((p) => p.key === chosen)!;
-  /** With the ratio locked, one side follows the other and the source's shape. */
+  // One object per size: a new one on every render would redraw and re-encode the image without end.
+  const preset = useMemo(
+    () => (chosen === 'ozel' ? customPreset(custom.width, custom.height, custom.maxKb) : IMAGE_PRESETS.find((p) => p.key === chosen)!),
+    [chosen, custom.width, custom.height, custom.maxKb],
+  );
+  const region: Rect | null = source ? (trim && content ? content : { x: 0, y: 0, width: source.bitmap.width, height: source.bitmap.height }) : null;
+  const enlarged = region ? enlargement(region.width, region.height, preset.width, preset.height, fit) : 1;
+  /** With the ratio locked, one side follows the other and the shape of the part used. */
   const resize = (side: 'width' | 'height', value: number) => {
     setCustom((current) => {
-      if (!current.lock || !source) return { ...current, [side]: value };
-      const ratio = source.bitmap.width / source.bitmap.height;
+      if (!current.lock || !region) return { ...current, [side]: value };
+      const ratio = region.width / region.height;
       return side === 'width' ? { ...current, width: value, height: Math.round(value / ratio) } : { ...current, height: value, width: Math.round(value * ratio) };
     });
   };
@@ -85,6 +127,9 @@ export function ImageTool() {
         return { name: file.name, bitmap };
       });
       setFocus({ x: 0.5, y: 0.5 });
+      const box = findContent(bitmap);
+      // Worth offering only when the margins are real: at least 4% of a side.
+      setContent(box.width < bitmap.width * 0.96 || box.height < bitmap.height * 0.96 ? box : null);
     } catch {
       setError('Görsel açılamadı. Başka bir dosya dene.');
     }
@@ -108,7 +153,7 @@ export function ImageTool() {
     canvas.height = preset.height;
     const context = canvas.getContext('2d')!;
     context.imageSmoothingQuality = 'high';
-    const { width, height } = source.bitmap;
+    const { x: sx, y: sy, width, height } = trim && content ? content : { x: 0, y: 0, width: source.bitmap.width, height: source.bitmap.height };
     // JPEG has no transparency: the background shows wherever the image does not. A PNG keeps it transparent.
     if (format === 'jpeg') {
       context.fillStyle = background;
@@ -116,10 +161,11 @@ export function ImageTool() {
     }
     if (fit === 'cover') {
       const crop = coverRect(width, height, preset.width, preset.height, focus.x, focus.y);
-      context.drawImage(source.bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, preset.width, preset.height);
+      context.drawImage(source.bitmap, sx + crop.x, sy + crop.y, crop.width, crop.height, 0, 0, preset.width, preset.height);
     } else {
-      const place = containRect(width, height, preset.width, preset.height);
-      context.drawImage(source.bitmap, place.x, place.y, place.width, place.height);
+      const air = trim && content ? Math.round(Math.min(preset.width, preset.height) * TRIM_AIR) : 0;
+      const place = containRect(width, height, preset.width - 2 * air, preset.height - 2 * air);
+      context.drawImage(source.bitmap, sx, sy, width, height, place.x + air, place.y + air, place.width, place.height);
     }
     const timer = window.setTimeout(() => {
       void encode(canvas, format, preset.maxKb * 1024).then(({ blob, quality }) => {
@@ -134,11 +180,12 @@ export function ImageTool() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [source, preset, fit, format, background, focus]);
+  }, [source, preset, fit, format, background, focus, trim, content]);
 
   const reset = () => {
     source?.bitmap.close();
     setSource(null);
+    setContent(null);
     setOutput((current) => {
       if (current) URL.revokeObjectURL(current.url);
       return null;
@@ -213,6 +260,7 @@ export function ImageTool() {
               <div className="image-meta">
                 <span className="muted small">
                   {source.name} · kaynak {source.bitmap.width} × {source.bitmap.height}
+                  {trim && content && ` · boş kenarsız ${content.width} × ${content.height}`}
                   {fit === 'cover' && ' · kırpılan alanı sürükleyerek kaydır'}
                 </span>
                 <button type="button" className="icon-button small" aria-label="Görseli kaldır" title="Başka görsel seç" onClick={reset}>
@@ -285,6 +333,14 @@ export function ImageTool() {
               ) : (
                 <p className="muted small">PNG’de görselin dışı saydam kalır.</p>
               ))}
+            {content && (
+              <label className="switch trim-switch" title="Görselin çevresindeki düz renkli ya da saydam boşluk atılır">
+                <input type="checkbox" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
+                <span aria-hidden />
+                Boş kenarları kırp
+              </label>
+            )}
+            {content && !trim && <p className="muted small">Görselin çevresinde boş kenar var; kırpınca logo çerçeveyi daha iyi doldurur.</p>}
           </fieldset>
           <fieldset>
             <legend>Biçim</legend>
@@ -306,6 +362,12 @@ export function ImageTool() {
                 · {(output.bytes / 1024).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} KB · {format.toUpperCase()}
                 {output.quality !== null && output.quality < 0.92 && <span className="muted small"> · kalite %{Math.round(output.quality * 100)}</span>}
               </p>
+              {enlarged > SOFT_ENLARGEMENT && (
+                <p className="warning small soft-warning">
+                  <AlertTriangle size={14} aria-hidden />
+                  Görsel {enlarged.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} kat büyütülüyor, bulanık görünebilir. Satıcıdan daha büyük bir görsel iste.
+                </p>
+              )}
               {output.overLimit && (
                 <p className="warning small">{format === 'png' ? `PNG ${preset.maxKb} KB sınırını aşıyor; JPEG seç.` : `En düşük kalitede bile ${preset.maxKb} KB sınırını aşıyor.`}</p>
               )}

@@ -59,6 +59,49 @@ export function containRect(sourceWidth: number, sourceHeight: number, frameWidt
   return { x: Math.round((frameWidth - width) / 2), y: Math.round((frameHeight - height) / 2), width, height };
 }
 
+/** How much the used part of the source is enlarged to fill or fit the frame; above 1 it loses sharpness. */
+export function enlargement(sourceWidth: number, sourceHeight: number, frameWidth: number, frameHeight: number, fit: 'cover' | 'contain'): number {
+  const across = frameWidth / sourceWidth;
+  const down = frameHeight / sourceHeight;
+  return fit === 'cover' ? Math.max(across, down) : Math.min(across, down);
+}
+
+/** Past this a photo visibly softens: worth asking the seller for a larger one (D-220). */
+export const SOFT_ENLARGEMENT = 1.25;
+
+/**
+ * The part of an image inside its plain margins (D-220): the corners' colour — or transparency — is the background, and
+ * the box around everything else is the content. A logo sent with a wide white border fills the frame without it; an
+ * image whose corners differ (a photo) comes back whole.
+ */
+export function contentRect(pixels: Uint8ClampedArray, width: number, height: number, tolerance = 28): Rect {
+  const whole = { x: 0, y: 0, width, height };
+  if (width === 0 || height === 0) return whole;
+  const at = (x: number, y: number) => (y * width + x) * 4;
+  const clear = (i: number) => pixels[i + 3]! < 16;
+  const base = at(0, 0);
+  const near = (i: number) =>
+    Math.abs(pixels[i]! - pixels[base]!) <= tolerance && Math.abs(pixels[i + 1]! - pixels[base + 1]!) <= tolerance && Math.abs(pixels[i + 2]! - pixels[base + 2]!) <= tolerance;
+  const corners = [at(0, 0), at(width - 1, 0), at(0, height - 1), at(width - 1, height - 1)];
+  const transparent = corners.every(clear);
+  if (!transparent && !corners.every((corner) => !clear(corner) && near(corner))) return whole;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const i = at(x, y);
+      if (clear(i) || (!transparent && near(i))) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  return maxX < 0 ? whole : { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
+}
+
 /** "Logo Final (1).PNG" as a logo JPEG → "logo-final-1-logo-500x500.jpg". */
 export function outputName(original: string, preset: ImagePreset, format: 'jpeg' | 'png'): string {
   const base =

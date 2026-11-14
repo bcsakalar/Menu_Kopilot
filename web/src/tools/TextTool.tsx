@@ -1,9 +1,15 @@
-import { Check, ChevronDown, Copy, Download, Eraser } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { wordDiff } from './text/diff';
+import { AlertTriangle, Check, ChevronDown, Copy, Download, Eraser } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { checkLine, WARNING_LABEL } from './text/checks';
+import { explainChanges, REASON_LABEL, wordDiff, type Change } from './text/diff';
 import { formatLine, formatText, type TextKind } from './text/format';
 import { useLexicon } from './useLexicon';
 import { downloadRows } from './download';
+import { describeNames, type DescriptionIdea } from './pool';
+
+/** Names looked up in the pool at once while typing; a longer list belongs in the Excel tool. */
+const POOL_NAMES = 20;
+const SHOWN_CHANGES = 40;
 
 /**
  * Metin düzeltme (D-218): a product name, a store name or a description, fixed by the panel's writing rules as it is
@@ -89,6 +95,53 @@ export function TextTool() {
   const options = useMemo(() => ({ kind: settings.kind, smart: settings.smart, lexicon }), [settings.kind, settings.smart, lexicon]);
   const result = useMemo(() => formatText(text, options), [text, options]);
   const hasText = text.trim().length > 0;
+  const warnings = useMemo(() => result.lines.map((line) => checkLine(line.before)), [result]);
+  const warned = warnings.filter((found) => found.length > 0).length;
+
+  // Every fix with its rule, the same fix counted once however many lines it is on (D-220).
+  const changes = useMemo(() => {
+    const seen = new Map<string, Change & { count: number }>();
+    for (const line of result.lines) {
+      for (const change of explainChanges(line.before, line.after)) {
+        const key = `${change.from}→${change.to}`;
+        const known = seen.get(key);
+        if (known) known.count += 1;
+        else seen.set(key, { ...change, count: 1 });
+      }
+    }
+    return [...seen.values()];
+  }, [result]);
+
+  // Descriptions the team already approved for these names (D-220): looked up a moment after the typing stops.
+  const names = useMemo(
+    () => (settings.kind === 'name' ? [...new Set(result.lines.map((line) => line.after.trim()).filter(Boolean))].slice(0, POOL_NAMES) : []),
+    [result, settings.kind],
+  );
+  const namesKey = names.join('\n');
+  const [ideas, setIdeas] = useState<{ name: string; ideas: DescriptionIdea[] }[]>([]);
+  useEffect(() => {
+    if (names.length === 0) {
+      setIdeas([]);
+      return;
+    }
+    let live = true;
+    const timer = window.setTimeout(() => {
+      describeNames(names)
+        .then((found) => {
+          if (live) setIdeas(names.map((name, index) => ({ name, ideas: found[index] ?? [] })));
+        })
+        // The pool is a help, not a step: without it the tool works as before.
+        .catch(() => {
+          if (live) setIdeas([]);
+        });
+    }, 600);
+    return () => {
+      live = false;
+      window.clearTimeout(timer);
+    };
+    // namesKey stands for names: a new array with the same names must not look the pool up again.
+  }, [namesKey]);
+  const withIdeas = ideas.filter((item) => item.ideas.length > 0);
 
   const flash = (message: string) => {
     setNotice(message);
@@ -149,7 +202,7 @@ export function TextTool() {
       <header className="page-head">
         <div>
           <h1>Metin düzeltme</h1>
-          <p className="admin-intro">Yazdıkça panelin yazım kurallarına göre düzeltilir. Yapay zekâ kullanılmaz, metin bilgisayarından çıkmaz.</p>
+          <p className="admin-intro">Yazdıkça panelin yazım kurallarına göre düzeltilir. Yapay zekâ kullanılmaz; ürün adları yalnızca havuzdaki onaylı açıklamaları bulmak için sunucuya sorulur, saklanmaz.</p>
         </div>
       </header>
 
@@ -209,7 +262,12 @@ export function TextTool() {
         <div className="text-pane">
           <div className="pane-head">
             <span className="pane-title">Düzeltilmiş</span>
-            {hasText && <span className="muted small">{result.changed > 0 ? `${result.changed} satır düzeltildi` : 'Değişiklik yok'}</span>}
+            {hasText && (
+              <span className="muted small">
+                {result.changed > 0 ? `${result.changed} satır düzeltildi` : 'Değişiklik yok'}
+                {warned > 0 && <span className="warn-count"> · {warned} satıra bak</span>}
+              </span>
+            )}
             <button type="button" className="button primary small" disabled={!hasText} onClick={() => void copy()}>
               <Copy size={15} aria-hidden />
               Kopyala
@@ -219,16 +277,24 @@ export function TextTool() {
             {!hasText && <p className="muted">Düzeltilmiş hâli burada görünür. Değişen kelimeler işaretlenir.</p>}
             {hasText &&
               result.lines.map((line, index) => (
-                <p key={index} className="out-line">
-                  {line.after === ''
-                    ? ' '
-                    : wordDiff(line.before, line.after).map((part, i) => (
-                        <span key={i} className={part.change === 'fix' ? 'fixed-word' : undefined}>
-                          {i > 0 ? ' ' : ''}
-                          {part.text}
-                        </span>
-                      ))}
-                </p>
+                <Fragment key={index}>
+                  <p className="out-line">
+                    {line.after === ''
+                      ? ' '
+                      : wordDiff(line.before, line.after).map((part, i) => (
+                          <span key={i} className={part.change === 'fix' ? 'fixed-word' : undefined}>
+                            {i > 0 ? ' ' : ''}
+                            {part.text}
+                          </span>
+                        ))}
+                  </p>
+                  {warnings[index]!.length > 0 && (
+                    <p className="line-warning">
+                      <AlertTriangle size={13} aria-hidden />
+                      {warnings[index]!.map((warning) => WARNING_LABEL[warning]).join(' · ')}
+                    </p>
+                  )}
+                </Fragment>
               ))}
           </div>
         </div>
@@ -260,6 +326,56 @@ export function TextTool() {
         )}
       </div>
 
+      {(changes.length > 0 || withIdeas.length > 0) && (
+        <div className="tool-insights">
+          {changes.length > 0 && (
+            <section className="panel insight">
+              <div className="fix-head">
+                <h2>Ne değişti</h2>
+                <span className="muted small">Her düzeltmenin kuralı</span>
+              </div>
+              <ul className="change-list">
+                {changes.slice(0, SHOWN_CHANGES).map((change) => (
+                  <li key={`${change.from}→${change.to}`}>
+                    <span className="change-from">{change.from}</span>
+                    <span aria-hidden>→</span>
+                    <span className="sr-only">yerine</span>
+                    <strong>{change.to}</strong>
+                    <span className="reason">{REASON_LABEL[change.reason]}</span>
+                    {change.count > 1 && <span className="muted small">×{change.count}</span>}
+                  </li>
+                ))}
+              </ul>
+              {changes.length > SHOWN_CHANGES && <p className="muted small">ve {changes.length - SHOWN_CHANGES} düzeltme daha</p>}
+            </section>
+          )}
+          {withIdeas.length > 0 && (
+            <section className="panel insight">
+              <div className="fix-head">
+                <h2>Havuzdan açıklama</h2>
+                <span className="muted small">Ekibin onayladığı şablonlardan; kopyalayıp panele yapıştır</span>
+              </div>
+              <ul className="idea-list">
+                {withIdeas.map((item) => (
+                  <li key={item.name}>
+                    <strong className="idea-for">{item.name}</strong>
+                    <Idea idea={item.ideas[0]!} onCopy={(value) => void copy(value, 'Açıklama panoya kopyalandı')} />
+                    {item.ideas.length > 1 && (
+                      <details>
+                        <summary>{item.ideas.length - 1} öneri daha</summary>
+                        {item.ideas.slice(1).map((idea) => (
+                          <Idea key={idea.description} idea={idea} onCopy={(value) => void copy(value, 'Açıklama panoya kopyalandı')} />
+                        ))}
+                      </details>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
+
       <section className="panel rules">
         <button type="button" className="rules-toggle" aria-expanded={rulesOpen} onClick={() => setRulesOpen((open) => !open)}>
           <span>Kurallar</span>
@@ -290,5 +406,23 @@ export function TextTool() {
         )}
       </section>
     </section>
+  );
+}
+
+function Idea({ idea, onCopy }: { idea: DescriptionIdea; onCopy: (value: string) => void }) {
+  return (
+    <div className="idea">
+      <p>{idea.description}</p>
+      <div className="idea-meta">
+        <span className="muted small">
+          {idea.name}
+          {idea.score < 1 ? ` · %${Math.round(idea.score * 100)} benzer` : ' · aynı ürün'}
+        </span>
+        <button type="button" className="button ghost small" onClick={() => onCopy(idea.description)}>
+          <Copy size={14} aria-hidden />
+          Kopyala
+        </button>
+      </div>
+    </div>
   );
 }

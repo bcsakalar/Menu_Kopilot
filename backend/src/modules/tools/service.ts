@@ -1,6 +1,9 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
-import { ingredients, menuItems, optionGroups, options } from '../../db/schema/index.js';
+import { ingredients, itemAliases, menuItems, optionGroups, options } from '../../db/schema/index.js';
+import { cleanItemName } from '../../lib/clean-name.js';
+import { normalizeTr } from '../../lib/normalize-tr.js';
+import { trigrams } from '../../lib/trigram.js';
 
 /**
  * The text tool's dictionary (D-218): every word of the approved pool — product names, descriptions, option and group
@@ -12,9 +15,38 @@ import { ingredients, menuItems, optionGroups, options } from '../../db/schema/i
 export const LEXICON_TTL_MS = 10 * 60_000;
 /** More than any pool has distinct words; a ceiling, not a target. */
 const MAX_WORDS = 30_000;
+/**
+ * The weakest name likeness still worth showing as a description idea (D-220). Lower than retrieval's hit threshold on
+ * purpose: the rep reads every idea before using it; the score goes with it so a bulk fill can ask for more.
+ */
+export const DESCRIBE_FLOOR = 0.5;
+const DESCRIBE_MATCHES = 3;
+
+export interface DescriptionIdea {
+  /** The approved template's name. */
+  name: string;
+  description: string;
+  /** 1 for the same name or a known alias, otherwise the trigram likeness of the two names. */
+  score: number;
+}
+
+interface PoolEntry {
+  name: string;
+  description: string;
+  importance: number;
+  keys: { key: string; grams: Set<string> }[];
+}
+
+function likeness(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0;
+  let shared = 0;
+  for (const gram of a) if (b.has(gram)) shared += 1;
+  return shared / (a.size + b.size - shared);
+}
 
 export class ToolsService {
   private cache: { at: number; words: Promise<[string, number][]> } | undefined;
+  private pool: { at: number; entries: Promise<PoolEntry[]> } | undefined;
 
   constructor(
     private readonly db: Database,
@@ -36,6 +68,73 @@ export class ToolsService {
   /** Read the pool again on the next request. */
   forget(): void {
     this.cache = undefined;
+    this.pool = undefined;
+  }
+
+  /**
+   * Description ideas for product names from the approved pool (D-220), matched the way the analysis matches a menu —
+   * the same normalized name, a known alias, then trigram likeness — without a model. Up to three per name, best first.
+   */
+  async describe(names: readonly string[]): Promise<DescriptionIdea[][]> {
+    const entries = await this.poolEntries();
+    return names.map((name) => {
+      const key = normalizeTr(cleanItemName(name));
+      if (key === '') return [];
+      const grams = trigrams(key);
+      const scored: { entry: PoolEntry; score: number }[] = [];
+      for (const entry of entries) {
+        let score = 0;
+        for (const candidate of entry.keys) {
+          score = Math.max(score, candidate.key === key ? 1 : likeness(grams, candidate.grams));
+          if (score === 1) break;
+        }
+        if (score >= DESCRIBE_FLOOR) scored.push({ entry, score });
+      }
+      scored.sort((a, b) => b.score - a.score || b.entry.importance - a.entry.importance);
+      const seen = new Set<string>();
+      const ideas: DescriptionIdea[] = [];
+      for (const { entry, score } of scored) {
+        // Two templates with the same text are one idea.
+        if (seen.has(entry.description)) continue;
+        seen.add(entry.description);
+        ideas.push({ name: entry.name, description: entry.description, score: Math.round(score * 1000) / 1000 });
+        if (ideas.length === DESCRIBE_MATCHES) break;
+      }
+      return ideas;
+    });
+  }
+
+  private poolEntries(): Promise<PoolEntry[]> {
+    const now = this.now();
+    if (!this.pool || now - this.pool.at >= LEXICON_TTL_MS) {
+      const entries = this.readPool();
+      this.pool = { at: now, entries };
+      entries.catch(() => {
+        if (this.pool?.entries === entries) this.pool = undefined;
+      });
+    }
+    return this.pool.entries;
+  }
+
+  private async readPool(): Promise<PoolEntry[]> {
+    const usable = and(eq(menuItems.approved, true), ne(menuItems.description, ''));
+    const items = await this.db
+      .select({ id: menuItems.id, name: menuItems.canonicalName, key: menuItems.normalizedName, description: menuItems.description, importance: menuItems.importance })
+      .from(menuItems)
+      .where(usable);
+    const aliases = await this.db
+      .select({ id: itemAliases.menuItemId, key: itemAliases.normalizedAlias })
+      .from(itemAliases)
+      .innerJoin(menuItems, eq(menuItems.id, itemAliases.menuItemId))
+      .where(usable);
+    const byItem = new Map<string, string[]>();
+    for (const alias of aliases) byItem.set(alias.id, [...(byItem.get(alias.id) ?? []), alias.key]);
+    return items.map((item) => ({
+      name: item.name,
+      description: item.description,
+      importance: item.importance,
+      keys: [item.key, ...(byItem.get(item.id) ?? [])].map((key) => ({ key, grams: trigrams(key) })),
+    }));
   }
 
   private async build(): Promise<[string, number][]> {
