@@ -85,7 +85,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    mem_limit: 384m
+    # 512 MB since D-214: ten analyses at once with their images, measured with scripts/load-probe.ts.
+    mem_limit: 512m
     logging: *logging
 
   caddy:

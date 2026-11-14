@@ -34,6 +34,7 @@
     "db:export-seed": "tsx --env-file-if-exists=../.env src/db/seed/export-seed.ts",
     "measure": "tsx --env-file-if-exists=../.env scripts/measure-quality.ts",
     "probe:recommender": "tsx --env-file-if-exists=../.env scripts/probe-recommender.ts",
+    "probe:load": "tsx --env-file-if-exists=../.env scripts/load-probe.ts",
     "compare": "tsx scripts/compare-quality.ts"
   },
   "dependencies": {

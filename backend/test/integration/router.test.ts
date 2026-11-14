@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { RequestBudget } from '../../src/ai/budget.js';
 import { CircuitBreaker } from '../../src/ai/circuit-breaker.js';
 import { PromptRepository } from '../../src/ai/prompt-repository.js';
-import { CooldownTracker } from '../../src/ai/rate-limit.js';
+import { CallPacer, CooldownTracker } from '../../src/ai/rate-limit.js';
 import { RouteRepository } from '../../src/ai/route-repository.js';
 import { AiRouter } from '../../src/ai/router.js';
 import type { ImageInput } from '../../src/ai/types.js';
@@ -29,12 +29,13 @@ describe('AiRouter', () => {
   let breaker: CircuitBreaker;
   let cooldowns: CooldownTracker;
 
-  function makeRouter(options: { localOnly?: boolean; dailyCalls?: number } = {}): AiRouter {
+  function makeRouter(options: { localOnly?: boolean; dailyCalls?: number; pacer?: CallPacer } = {}): AiRouter {
     return new AiRouter({
       providers: { gemini, groq },
       routes: new RouteRepository(handle.db, 0),
       breaker,
       cooldowns,
+      ...(options.pacer ? { pacer: options.pacer } : {}),
       usage: new UsageLogger(handle.db),
       quota: new QuotaService(handle.db, { dailyCalls: options.dailyCalls ?? 1000, dailyTokens: 10_000_000, timezone: 'Europe/Istanbul' }),
       prompts: new PromptRepository(handle.db, 0),
@@ -152,6 +153,30 @@ describe('AiRouter', () => {
     expect(next.ok && next.meta.provider).toBe('gemini');
     expect(groq.calls.length).toBe(callsBefore);
     expect(next.attempts[0]).toMatchObject({ outcome: 'skipped', reason: 'cooling_down' });
+  });
+
+  it('skips a model at the per-minute ceiling its 429 showed, and uses it again a minute later (D-214)', async () => {
+    const pacer = new CallPacer(() => now);
+    const router = makeRouter({ pacer });
+    const ask = () => router.generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
+    let n = 0;
+    // Groq takes three calls in the minute; the fourth is a 429 with a short wait, and its retry goes through.
+    groq.setResponder(() => (++n === 4 ? { ok: false, kind: 'rate_limited', retryAfterMs: 1000 } : good));
+    for (let i = 0; i < 4; i += 1) {
+      const result = await ask();
+      expect(result.ok && result.meta.provider).toBe('groq');
+    }
+    expect(pacer.snapshot()[`groq:${MODELS.groqGptOss120b}`]).toEqual({ inLastMinute: 5, ceiling: 3 });
+
+    const groqCalls = groq.calls.length;
+    const paced = await ask();
+    expect(paced.ok && paced.meta.provider).toBe('gemini');
+    expect(paced.attempts[0]).toMatchObject({ provider: 'groq', outcome: 'skipped', reason: 'paced' });
+    expect(groq.calls.length).toBe(groqCalls);
+
+    now += 61_000;
+    const again = await ask();
+    expect(again.ok && again.meta.provider).toBe('groq');
   });
 
   it('opens the circuit after 3 consecutive failures and half-opens after 60 s', async () => {

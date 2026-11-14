@@ -21,6 +21,11 @@ declare module 'fastify' {
     ensureVisitor: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** The admin cookie (or a bearer token) of an admin. */
     authenticateAdmin: (request: FastifyRequest) => Promise<void>;
+    /**
+     * Whose visitor cookie (or bearer token) the request carries, checked by signature alone: no database. Rate limits
+     * key on it, so a whole office behind one address is not one person (D-214).
+     */
+    sessionSubject: (request: FastifyRequest) => string | undefined;
   }
   interface FastifyRequest {
     authUser?: AuthUser;
@@ -49,16 +54,22 @@ export const authPlugin = fp<{ service: AuthService; secureCookies: boolean }>(
   async (app: FastifyInstance, { service, secureCookies }) => {
     app.decorateRequest('authUser', undefined);
 
-    const load = async (request: FastifyRequest, cookie: string): Promise<boolean> => {
+    const claimsOf = (request: FastifyRequest, cookie: string): AccessTokenClaims | undefined => {
       const bearer = /^Bearer (.+)$/iu.exec(request.headers.authorization ?? '')?.[1];
       const token = bearer ?? readCookie(request.headers.cookie, cookie);
-      if (!token) return false;
-      let claims: AccessTokenClaims;
+      if (!token) return undefined;
       try {
-        claims = app.jwt.verify<AccessTokenClaims>(token);
+        return app.jwt.verify<AccessTokenClaims>(token);
       } catch {
-        return false;
+        return undefined;
       }
+    };
+
+    app.decorate('sessionSubject', (request: FastifyRequest) => claimsOf(request, VISITOR_COOKIE)?.sub);
+
+    const load = async (request: FastifyRequest, cookie: string): Promise<boolean> => {
+      const claims = claimsOf(request, cookie);
+      if (!claims) return false;
       const user = await service.validateAccess(claims);
       if (!user) return false;
       request.authUser = user;

@@ -225,6 +225,11 @@ export class ChatService {
       if (images.length > 0 || typedMenu) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
     } catch (err) {
+      // Every analysis slot taken and the queue full (D-214): a moment later it will go through.
+      if (err instanceof AppError && err.code === 'SERVICE_UNAVAILABLE') {
+        await this.reply(outgoing, { text: 'Şu an çok yoğunuz. Bir dakika sonra tekrar gönderir misin?', quickReplies: [] }, null, emit);
+        return;
+      }
       this.deps.onError(err);
       await this.reply(outgoing, { text: 'Bu mesajda bir şeyler ters gitti. Tekrar dener misin?', quickReplies: [] }, null, emit);
     }

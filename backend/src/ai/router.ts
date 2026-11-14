@@ -4,7 +4,7 @@ import { RequestBudget, estimateRequestTokens, estimateTextTokens } from './budg
 import type { CircuitBreaker } from './circuit-breaker.js';
 import { ProviderError, type ProviderErrorKind } from './errors.js';
 import { describeSchema, toJsonSchema } from './json-schema.js';
-import { type CooldownTracker, backoffDelayMs, sleep as defaultSleep } from './rate-limit.js';
+import { type CallPacer, type CooldownTracker, backoffDelayMs, sleep as defaultSleep } from './rate-limit.js';
 import type { ResolvedRoute } from './route-repository.js';
 import type { AudioInput, CallMeta, GenerateStructuredOptions, LLMProvider, Result, Transcription } from './types.js';
 import type { QuotaStatus, UsageSink } from './usage.js';
@@ -77,6 +77,8 @@ export interface AiRouterDeps {
   routes: RouteSource;
   breaker: CircuitBreaker;
   cooldowns: CooldownTracker;
+  /** Learned per-minute ceilings (D-214); without one, nothing is paced. */
+  pacer?: CallPacer;
   usage: UsageSink;
   quota?: { status(userId: string | undefined): Promise<QuotaStatus> };
   prompts?: PromptRenderer;
@@ -150,6 +152,7 @@ export class AiRouter {
     }
     if (this.deps.breaker.state(route.provider) === 'open') return 'circuit_open';
     if (this.deps.cooldowns.isCooling(`${route.provider}:${route.model}`)) return 'cooling_down';
+    if (this.deps.pacer?.isFull(`${route.provider}:${route.model}`)) return 'paced';
     return undefined;
   }
 
@@ -188,6 +191,7 @@ export class AiRouter {
       if (ctx.budget && !ctx.budget.canAfford(estimate)) return fail('budget_exceeded', 'İstek bütçesi doldu');
       if (!this.deps.breaker.canRequest(route.provider)) return fail('unavailable', 'circuit open');
 
+      this.deps.pacer?.record(`${route.provider}:${route.model}`);
       const result = await provider.generateStructured({
         ...request,
         model: route.model,
@@ -232,6 +236,7 @@ export class AiRouter {
       switch (error.kind) {
         case 'rate_limited': {
           this.deps.breaker.release(route.provider);
+          this.deps.pacer?.limited(`${route.provider}:${route.model}`);
           const wait = error.retryAfterMs;
           if (attempt === 0 && wait !== undefined && wait <= this.maxInlineRetryMs) {
             try {
@@ -346,6 +351,7 @@ export class AiRouter {
       const dim = route.params.dim ?? 768;
       const started = Date.now();
       const tokensIn = texts.reduce((sum, t) => sum + estimateTextTokens(t), 0);
+      this.deps.pacer?.record(`${route.provider}:${route.model}`);
       try {
         const vectors = await provider.embed(texts, {
           model: route.model,
@@ -388,6 +394,7 @@ export class AiRouter {
         attempts.push({ provider: route.provider, model: route.model, outcome: error.kind });
         if (error.kind === 'rate_limited') {
           this.deps.breaker.release(route.provider);
+          this.deps.pacer?.limited(`${route.provider}:${route.model}`);
           this.deps.cooldowns.cooldown(`${route.provider}:${route.model}`, error.retryAfterMs ?? 30_000);
         } else if (error.kind === 'auth' || error.kind === 'not_configured') {
           this.deps.breaker.trip(route.provider, this.authTripMs);
@@ -425,6 +432,7 @@ export class AiRouter {
         continue;
       }
       if (!this.deps.breaker.canRequest(route.provider)) continue;
+      this.deps.pacer?.record(`${route.provider}:${route.model}`);
       const result = await provider.transcribe(audio, {
         model: route.model,
         timeoutMs: TASK_TIMEOUT_MS['audio.transcribe'],
@@ -459,6 +467,7 @@ export class AiRouter {
       lastError = error;
       if (error.kind === 'rate_limited') {
         this.deps.breaker.release(route.provider);
+        this.deps.pacer?.limited(`${route.provider}:${route.model}`);
         this.deps.cooldowns.cooldown(`${route.provider}:${route.model}`, error.retryAfterMs ?? 30_000);
       } else if (error.kind === 'auth' || error.kind === 'not_configured') {
         this.deps.breaker.trip(route.provider, this.authTripMs);

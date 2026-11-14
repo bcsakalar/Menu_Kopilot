@@ -108,11 +108,24 @@ function normalizeOnce(input: string): string {
     .join(' ');
 }
 
+/**
+ * Every analysis matches the whole template pool against the menu, so the same names are normalized again and again;
+ * the result is pure, so short inputs (names, ingredients) are remembered. Measured: most of an analysis's CPU time.
+ */
+const memo = new Map<string, string>();
+const MEMO_MAX_LENGTH = 120;
+const MEMO_LIMIT = 50_000;
+
 export function normalizeTr(input: string): string {
+  const hit = memo.get(input);
+  if (hit !== undefined) return hit;
   // A second pass makes chained simplifications (e.g. "cig kofteler" → "cig kofte" → "cigkofte") stable.
-  const first = normalizeOnce(input);
-  const second = normalizeOnce(first);
-  return second;
+  const result = normalizeOnce(normalizeOnce(input));
+  if (input.length <= MEMO_MAX_LENGTH) {
+    if (memo.size >= MEMO_LIMIT) memo.clear();
+    memo.set(input, result);
+  }
+  return result;
 }
 
 /** Slug for URLs / cuisine keys: folded + lowercased, no suffix simplification, spaces → dashes. */

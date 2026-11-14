@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loading, Page, useLoad } from './pages';
 
 type Range = 'today' | 'week' | 'month';
@@ -22,6 +22,22 @@ interface OverviewData {
   pool: { templates: number; imported: number; cuisines: number; thin: { name: string; templates: number; target: number }[] };
   feedback: { new: number; open: number };
 }
+
+interface LoadData {
+  analyses: { running: number; waiting: number; size: number; queueMax: number; waitP95Ms: number | null };
+  lastQuarter: { runs: number; p50Ms: number | null; p95Ms: number | null; calls: number; failed: number; byProvider: { provider: string; calls: number; failed: number }[] };
+  pacing: { model: string; inLastMinute: number; ceiling: number }[];
+  process: { rssMb: number; heapMb: number; eventLoopP99Ms: number; uptimeS: number };
+  alerts: { key: 'slow' | 'failing' | 'busy'; since: string }[];
+}
+
+const ALERT_LABEL: Record<LoadData['alerts'][number]['key'], string> = {
+  slow: 'Analizler yavaş',
+  failing: 'Yapay zekâ çağrıları sık başarısız',
+  busy: 'Analiz kuyruğu dolu',
+};
+/** How often the load panel refreshes itself while the dashboard is open. */
+const LOAD_REFRESH_MS = 15_000;
 
 const RANGES: { key: Range; label: string }[] = [
   { key: 'today', label: 'Bugün' },
@@ -159,6 +175,53 @@ function Pool({ pool, onTemplates }: { pool: OverviewData['pool']; onTemplates: 
   );
 }
 
+const sec = (ms: number | null) => (ms === null ? '–' : `${(ms / 1000).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} sn`);
+
+/** The site right now (D-214): analyses running and waiting, how long the last quarter hour took, provider failures. */
+function Load() {
+  const { data, reload } = useLoad<LoadData>('/admin/load');
+  useEffect(() => {
+    const timer = setInterval(reload, LOAD_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [reload]);
+  if (!data) return null;
+  const { analyses, lastQuarter } = data;
+  const failShare = lastQuarter.calls > 0 ? Math.round((lastQuarter.failed / lastQuarter.calls) * 100) : 0;
+  return (
+    <section className="panel wide">
+      <header className="panel-head">
+        <h2>Anlık yük</h2>
+        <span className="muted small">15 saniyede bir yenilenir</span>
+      </header>
+      {data.alerts.map((alert) => (
+        <p key={alert.key} className="error" role="status">
+          {ALERT_LABEL[alert.key]} · {timeSince(alert.since)}
+        </p>
+      ))}
+      <div className="stats">
+        <Stat label="Çalışan analiz" value={analyses.running} note={`en fazla ${analyses.size}`} />
+        <Stat label="Sırada" value={analyses.waiting} note={analyses.waitP95Ms === null ? undefined : `bekleme ${sec(analyses.waitP95Ms)}`} />
+        <Stat label="Son 15 dk analiz" value={lastQuarter.runs} note={lastQuarter.runs > 0 ? `çoğu ${sec(lastQuarter.p50Ms)}, en yavaşlar ${sec(lastQuarter.p95Ms)}` : undefined} />
+        <Stat label="Son 15 dk YZ çağrısı" value={lastQuarter.calls} note={lastQuarter.calls > 0 ? `%${failShare} hata` : undefined} />
+      </div>
+      {lastQuarter.byProvider.length > 0 && (
+        <p className="muted small">
+          {lastQuarter.byProvider.map((row) => `${row.provider}: ${row.calls} çağrı, ${row.failed} hata`).join(' · ')}
+          {data.pacing.length > 0 && ` · dakikalık sınıra yakın: ${data.pacing.map((p) => `${p.model} ${p.inLastMinute}/${p.ceiling}`).join(', ')}`}
+        </p>
+      )}
+      <small className="muted">
+        Sunucu belleği {data.process.rssMb} MB · gecikme {data.process.eventLoopP99Ms} ms
+      </small>
+    </section>
+  );
+}
+
+function timeSince(iso: string): string {
+  const minutes = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+  return `${minutes} dakikadır`;
+}
+
 export function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [range, setRange] = useState<Range>('week');
   const { data, error } = useLoad<OverviewData>(`/admin/overview?range=${range}`);
@@ -195,6 +258,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }
             />
           </div>
           <div className="panels">
+            <Load />
             <Activity days={data.daily} />
             <Rules quality={data.quality} />
             <Pool pool={data.pool} onTemplates={() => onNavigate('templates')} />

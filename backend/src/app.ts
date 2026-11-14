@@ -17,6 +17,7 @@ import {
 } from 'fastify-type-provider-zod';
 import { type AiServices, createAiServices } from './ai/index.js';
 import type { Cache } from './cache/cache.js';
+import { RedisCache } from './cache/redis-cache.js';
 import type { AppConfig } from './config/env.js';
 import type { DbHandle } from './db/client.js';
 import { EmbeddingService } from './jobs/embedding.service.js';
@@ -25,6 +26,8 @@ import { durationToSeconds } from './lib/duration.js';
 import { AppError, type ErrorEnvelope } from './lib/errors.js';
 import { loggerOptions } from './lib/logger.js';
 import { RunRegistry } from './lib/run-registry.js';
+import { Slots } from './lib/slots.js';
+import { LoadMonitor } from './modules/admin/load.js';
 import { adminRoutes } from './modules/admin/routes.js';
 import { AdminService } from './modules/admin/service.js';
 import { analyzeRoutes } from './modules/analyze/routes.js';
@@ -153,7 +156,13 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   await app.register(fastifySwaggerUi, { routePrefix: '/docs' });
   app.get('/openapi.json', { schema: { hide: true } }, () => app.swagger());
 
-  await app.register(fastifyRateLimit, { global: false });
+  // Counters in Redis when there is one, so every API process counts the same visitor once (D-214). A Redis hiccup
+  // lets the request through: the daily quotas still hold, and a broken counter must not take the site down.
+  await app.register(fastifyRateLimit, {
+    global: false,
+    skipOnError: true,
+    ...(deps.cache instanceof RedisCache ? { redis: deps.cache.client, nameSpace: 'mk-rate-' } : {}),
+  });
   await app.register(fastifyMultipart, {
     limits: {
       files: config.uploads.maxFiles,
@@ -202,11 +211,13 @@ export async function buildApp(deps: AppDeps): Promise<App> {
   });
   const extractor = new VisionExtractor(ai.router, ai.prompts, deps.cache, config.cacheTtlSeconds);
   const analyzeStore = new AnalyzeStore(db);
+  const slots = new Slots(config.analysis.concurrency, config.analysis.queueMax);
   const uploads = config.uploads;
   const analyzeService = new AnalyzeService({
     db,
     store: analyzeStore,
     registry: new RunRegistry<AnalyzeEvent>(),
+    slots,
     queue,
     // `tracer`, `categories`, `productTypes` and `feedback` are per-run: the service loads them for each analysis.
     pipelineDeps: {
@@ -222,6 +233,9 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     log: app.log,
   });
   app.decorate('services', { ai, queue, embedding, analyze: analyzeService });
+  const load = new LoadMonitor({ db, slots, pacer: ai.pacer, ntfyUrl: config.alertNtfyUrl, log: app.log });
+  load.start();
+  app.addHook('onClose', async () => load.stop());
 
   const chatService = new ChatService({
     db,
@@ -255,6 +269,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await admin.register(feedbackAdminRoutes, { service: feedbackService });
         await admin.register(adminRoutes, {
           service: new AdminService(db, chatService, ai.quota, { timezone: config.quota.timezone }),
+          load,
         });
       });
     },

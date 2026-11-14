@@ -65,6 +65,16 @@ describe('normalizeTr', () => {
     }
   });
 
+  it('answers the same the second time, from memory, and for text too long to remember (D-214)', () => {
+    const long = `${'Kuşbaşılı Pideler '.repeat(12)}Çiğ Köfteler`;
+    const samples = ['Kuşbaşılı Pideler', 'Çiğ Köfteler', 'Adana Kebabı', long];
+    const first = samples.map((s) => normalizeTr(s));
+    expect(samples.map((s) => normalizeTr(s))).toEqual(first);
+    expect(first[0]).toBe('kusbasili pide');
+    expect(first[1]).toBe('cigkofte');
+    expect(first[3]).toBe(`${'kusbasili pide '.repeat(12)}cigkofte`);
+  });
+
   it('treats Turkish and ASCII spellings the same', () => {
     expect(normalizeTr('Kuşbaşılı Pide')).toBe(normalizeTr('Kusbasili Pide'));
     expect(normalizeTr('Ali Nazik')).toBe(normalizeTr('ALİ NAZİK'));

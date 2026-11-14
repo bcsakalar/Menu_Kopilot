@@ -76,8 +76,8 @@ export interface AnalyzeRunInput {
   graph: CuisineGraph;
   signal: AbortSignal;
   emit: (event: AnalyzeEvent) => void;
-  /** Persists one card and returns its DTO (with the generated id). */
-  saveCard: (card: Omit<CardDto, 'id' | 'runId'>) => Promise<CardDto>;
+  /** Persists the run's cards in one write and returns their DTOs (with the generated ids), in the same order. */
+  saveCards: (cards: Omit<CardDto, 'id' | 'runId'>[]) => Promise<CardDto[]>;
 }
 
 export interface AnalyzeRunResult {
@@ -482,12 +482,9 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   }
 
   // ---- cards --------------------------------------------------------------------------------------------------
-  const cards: CardDto[] = [];
-  let sortOrder = 0;
-  const push = async (card: Omit<CardDto, 'id' | 'runId' | 'sortOrder'>): Promise<void> => {
-    const saved = await input.saveCard({ ...card, sortOrder: sortOrder++ });
-    cards.push(saved);
-    input.emit({ type: 'item', card: saved });
+  const pending: Omit<CardDto, 'id' | 'runId'>[] = [];
+  const push = (card: Omit<CardDto, 'id' | 'runId' | 'sortOrder'>): void => {
+    pending.push({ ...card, sortOrder: pending.length });
   };
 
   // The order of the call (D-196): each section is stored in the order the expert should bring it up — what the
@@ -501,9 +498,12 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     menuSize: analysis.current,
     kitchen,
   };
-  for (const card of callOrder(validated.newProducts.map((item) => newProductCard(deps, item, pitchContext)))) await push(card);
-  for (const card of callOrder(validated.options.map((card) => optionCard(deps, card, existing)))) await push(card);
-  if (!focus) for (const card of fixCards(deps, analysis.needFixes)) await push(card);
+  for (const card of callOrder(validated.newProducts.map((item) => newProductCard(deps, item, pitchContext)))) push(card);
+  for (const card of callOrder(validated.options.map((card) => optionCard(deps, card, existing)))) push(card);
+  if (!focus) for (const card of fixCards(deps, analysis.needFixes)) push(card);
+  // One insert for the whole run, not one round trip per card (D-214).
+  const cards = await input.saveCards(pending);
+  for (const card of cards) input.emit({ type: 'item', card });
 
   // ---- finalize -----------------------------------------------------------------------------------------------
   const llmCalls = deps.tracer.totals.llmCalls;

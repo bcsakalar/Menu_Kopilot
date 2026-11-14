@@ -9,6 +9,7 @@ import { AgentTracer } from '../../agents/tracer.js';
 import type { ImageInput } from '../../ai/types.js';
 import type { Database, Executor } from '../../db/client.js';
 import { menuItems, suggestionItems } from '../../db/schema/index.js';
+import type { ProductTypeIndex } from '../../domain/product-type.js';
 import { templatePayloadSchema, type TemplatePayload } from '../../domain/template.js';
 import type { JobQueue } from '../../jobs/queue.js';
 import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
@@ -17,6 +18,7 @@ import { sameProductName } from '../../lib/same-product.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
 import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
+import type { Slots } from '../../lib/slots.js';
 import { diffFeedback, forgetCardFeedback, recordFeedback } from './feedback.js';
 import type { AnalyzeEvent, AnalyzeFields, AnalyzeResult, CardDto, ClassificationDto, HistoryQuery, HistoryResult } from './schemas.js';
 import type { AnalyzeStore } from './store.js';
@@ -31,6 +33,8 @@ export interface AnalyzeServiceDeps {
   db: Database;
   store: AnalyzeStore;
   registry: RunRegistry<AnalyzeEvent>;
+  /** How many analyses run at once; the rest wait their turn (D-214). */
+  slots: Slots;
   queue: JobQueue;
   pipelineDeps: Omit<AnalyzePipelineDeps, 'tracer' | 'categories' | 'productTypes' | 'feedback'>;
   log: FastifyBaseLogger;
@@ -51,8 +55,25 @@ export function parseMenuText(text: string | undefined): string[] {
     .slice(0, 120);
 }
 
+/** How long one product type index is reused; a seed run while the site is up shows within this time. */
+export const PRODUCT_TYPES_TTL_MS = 60_000;
+
 export class AnalyzeService {
+  private typeIndex: { at: number; index: Promise<ProductTypeIndex> } | undefined;
+
   constructor(private readonly deps: AnalyzeServiceDeps) {}
+
+  private productTypes(): Promise<ProductTypeIndex> {
+    const now = Date.now();
+    if (!this.typeIndex || now - this.typeIndex.at >= PRODUCT_TYPES_TTL_MS) {
+      const index = loadProductTypeIndex(this.deps.db);
+      this.typeIndex = { at: now, index };
+      index.catch(() => {
+        if (this.typeIndex?.index === index) this.typeIndex = undefined;
+      });
+    }
+    return this.typeIndex.index;
+  }
 
   async start(
     userId: string,
@@ -74,6 +95,8 @@ export class AnalyzeService {
       throw new AppError('VALIDATION_ERROR', 'En az bir fotoğraf ekle veya ürün adlarını yaz');
     }
 
+    if (this.deps.slots.full) throw new AppError('SERVICE_UNAVAILABLE', 'Şu an çok yoğun; bir dakika sonra tekrar dene');
+
     const graph = await CuisineGraph.load(db);
     const selectedCuisine = fields.cuisineId ? graph.get(fields.cuisineId) : undefined;
     if (fields.cuisineId && !selectedCuisine) throw notFound('Mutfak türü');
@@ -92,8 +115,9 @@ export class AnalyzeService {
     emit({ type: 'run', runId });
 
     const categories = await loadCategoryIndex(db);
-    // The knowledge base and what the team taught it, read fresh: an edit or a day of feedback counts on the next run.
-    const productTypes = await loadProductTypeIndex(db);
+    // What the team taught it, read fresh: a day of feedback counts on the next run. Product types change only through
+    // a seed, so one index (and what it has matched) serves a minute of analyses.
+    const productTypes = await this.productTypes();
     const feedback = await loadFeedbackIndex(db);
     const tracer = new AgentTracer({
       db,
@@ -107,37 +131,46 @@ export class AnalyzeService {
     // the same cuisine verdict as the live one did.
     const warnings: { code: string; message: string }[] = [];
     let classification: ClassificationDto | null = null;
-    const done = runAnalysis(
-      {
-        ...this.deps.pipelineDeps,
-        tracer,
-        categories,
-        productTypes,
-        feedback,
-        onAgentError: (agent, err) => this.deps.log.error({ err, runId, agent }, 'agent failed, run continues'),
-      },
-      {
-        runId,
-        userId,
-        images,
-        typedNames,
-        reuseItems: reuseItems ?? undefined,
-        notes: fields.notes,
-        mode: fields.mode,
-        focus: chat.focus,
-        seeds: chat.seeds,
-        selectedCuisine,
-        cuisineOptions,
-        graph,
-        signal: controller.signal,
-        emit: (event) => {
-          if (event.type === 'warning') warnings.push({ code: event.code, message: event.message });
-          if (event.type === 'classification') classification = event.classification;
-          emit(event);
-        },
-        saveCard: (card) => store.insertCard(runId, card),
-      },
-    )
+    let waited = false;
+    const queued = (position: number): void => {
+      waited = true;
+      emit({ type: 'progress', agent: 'queue', message: position === 1 ? 'Yoğunluk var: sıradaki analiz senin' : `Yoğunluk var: sıradasın, önünde ${position - 1} analiz var` });
+    };
+    const done = this.deps.slots
+      .run(() => {
+        if (waited) emit({ type: 'progress', agent: 'queue', message: 'Sıra geldi, menüye bakıyorum' });
+        return runAnalysis(
+          {
+            ...this.deps.pipelineDeps,
+            tracer,
+            categories,
+            productTypes,
+            feedback,
+            onAgentError: (agent, err) => this.deps.log.error({ err, runId, agent }, 'agent failed, run continues'),
+          },
+          {
+            runId,
+            userId,
+            images,
+            typedNames,
+            reuseItems: reuseItems ?? undefined,
+            notes: fields.notes,
+            mode: fields.mode,
+            focus: chat.focus,
+            seeds: chat.seeds,
+            selectedCuisine,
+            cuisineOptions,
+            graph,
+            signal: controller.signal,
+            emit: (event) => {
+              if (event.type === 'warning') warnings.push({ code: event.code, message: event.message });
+              if (event.type === 'classification') classification = event.classification;
+              emit(event);
+            },
+            saveCards: (cards) => store.insertCards(runId, cards),
+          },
+        );
+      }, { signal: controller.signal, onWait: queued })
       .then(async (result) => {
         await store.finishRun(runId, {
           status: result.status,

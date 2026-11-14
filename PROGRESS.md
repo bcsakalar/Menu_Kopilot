@@ -1,6 +1,6 @@
 # Durum
 
-Son güncelleme: 2026-11-13 · Canlı sürüm: `9aaddf3`
+Son güncelleme: 2026-11-14 · Canlı sürüm: `9aaddf3`
 
 ## Bugün ne çalışıyor
 
@@ -11,23 +11,31 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `9aaddf3`
   önerisi (D-206). Her ilk analiz (ekran görüntüsü, liste, tek ürün, yalnızca mutfak) **mutfağın hedefini geçecek kadar**
   ürün önerir: önce yazılan ürünün çeşitleri, sonra aynı türden ürünler, sonra mutfağın geri kalanı ("hamsi" → hamsi
   çeşitleri, balıklar, meze ve içecekler). Model yavaşsa havuz tamamlar (D-213).
+- **Çok kişide (D-214):** analiz başına sunucu işlemcisi 650 → yaklaşık 50 ms; aynı anda 20 analiz 1 saniyenin altında
+  (modeller hariç, `pnpm probe:load` ile ölçüldü). Aynı anda en çok 10 analiz çalışır, fazlası sırasını görerek bekler;
+  sıra da doluysa "Şu an çok yoğunuz" denir. Mesaj sınırı ziyaretçi başına (aynı ofisten yazanlar ayrı sayılır). Bir
+  model 429 verince o dakika kaldırabildiği kadar çağrı alır, fazlası zincirdeki sıradaki modele gider.
 - **Şablon havuzu:** 966 hazır şablon, 26 mutfak (Makarna & İtalyan, Mantı & Makarna'ya katıldı: D-212); her mutfakta
   havuz açılış hedefine yetiyor (D-207), paketli içecek seti; yönetimden **Excel ile toplu ekleme ve güncelleme**
   (örnek dosya, önizleme, dışa aktarma). Yönetimdeki liste bütün şablonları içerikleriyle, sayfa sayfa ve mutfağa göre
   gösterir.
-- **Yönetim paneli:** pano (14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
+- **Yönetim paneli:** pano (**anlık yük**: çalışan ve sıradaki analizler, süreler, sağlayıcı hataları; 14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1326, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1347, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
+  Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
+  uyarısı gelir (`ALERT_NTFY_URL`, D-214).
 
 ## Bilinen sorunlar
 
 - **Gemini zaman zaman aşırı yoğun.** 503 "high demand" ve hız limiti verdiğinde zincir Groq'a düşer; Groq'un ücretsiz
   katmanı da limite takılınca öneriler hazır havuzdan gelir ve kartın üstünde bir not görünür. Yoğun anlarda ilk analiz
-  20–30 saniyeyi bulabilir. Kalıcı çözüm ücretli Gemini katmanı.
+  20–30 saniyeyi bulabilir. 2026-11-13'te çağrıların %27'si bu yüzden başarısızdı; kişi sayısı arttıkça öneriler
+  giderek havuzdan gelir. Kalıcı çözüm ücretli Gemini katmanı, ardından `GLOBAL_DAILY_LLM_CALL_QUOTA` (bugün 3000 çağrı,
+  yaklaşık 780 analiz) ekip büyüklüğüne göre yükseltilir (D-214).
 - **Öğrenme döngüsü yeni veri almıyor.** Evet / Düşünecek / Hayır kaldırıldığı için (D-202) sistem restoranların tercihini
   artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
 - **Embedding kotası günde 1000 istek (Gemini ücretsiz katman).** Toplu şablon eklemesinden sonra kota dolarsa yeni
@@ -54,6 +62,6 @@ Son güncelleme: 2026-11-13 · Canlı sürüm: `9aaddf3`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-213 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-214 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

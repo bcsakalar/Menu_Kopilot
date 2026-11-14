@@ -60,27 +60,35 @@ export class AnalyzeStore {
   }
 
   /** Card payloads keep the whole DTO: the result screen renders straight from it, with no second lookup. */
-  async insertCard(runId: string, card: Omit<CardDto, 'id' | 'runId'>): Promise<CardDto> {
-    const [row] = await this.db
+  async insertCards(runId: string, cards: Omit<CardDto, 'id' | 'runId'>[]): Promise<CardDto[]> {
+    if (cards.length === 0) return [];
+    const rows = await this.db
       .insert(suggestionItems)
-      .values({
-        runId,
-        rawName: card.name,
-        normalizedName: normalizeTr(card.name),
-        matchedItemId: card.matchedTemplateId,
-        source: card.source,
-        section: card.section,
-        categoryKey: card.categoryKey,
-        targetName: card.targetName,
-        fixKind: card.fixKind,
-        payload: { ...card },
-        productType: card.productType,
-        confidence: card.confidence,
-        sortOrder: card.sortOrder,
-      })
-      .returning({ id: suggestionItems.id });
-    if (!row) throw new Error('card insert failed');
-    return { ...card, id: row.id, runId };
+      .values(
+        cards.map((card) => ({
+          runId,
+          rawName: card.name,
+          normalizedName: normalizeTr(card.name),
+          matchedItemId: card.matchedTemplateId,
+          source: card.source,
+          section: card.section,
+          categoryKey: card.categoryKey,
+          targetName: card.targetName,
+          fixKind: card.fixKind,
+          payload: { ...card },
+          productType: card.productType,
+          confidence: card.confidence,
+          sortOrder: card.sortOrder,
+        })),
+      )
+      .returning({ id: suggestionItems.id, sortOrder: suggestionItems.sortOrder });
+    // Matched by sort order, not by position: Postgres does not promise RETURNING in VALUES order.
+    const ids = new Map(rows.map((row) => [row.sortOrder, row.id]));
+    return cards.map((card) => {
+      const id = ids.get(card.sortOrder);
+      if (!id) throw new Error('card insert failed');
+      return { ...card, id, runId };
+    });
   }
 
   async finishRun(

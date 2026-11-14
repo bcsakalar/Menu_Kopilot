@@ -68,19 +68,38 @@ const tokenize = (text: string): string[] => normalizeTr(text).split(' ').filter
  * keywords score higher, so "ekmek arasi" beats "ekmek" and "tavuk doner" beats "tavuk".
  */
 export function matchScore(name: string, type: Pick<ProductTypeDef, 'keywords'>): number {
-  const words = tokenize(name);
-  const joined = ` ${words.join(' ')} `;
+  return scoreWords(spaced(name), compile(type.keywords));
+}
+
+/** A keyword ready to look for: padded with spaces, its score worked out once. */
+interface Matcher {
+  padded: string;
+  weight: number;
+}
+
+const compile = (keywords: readonly string[]): Matcher[] =>
+  keywords
+    .map((k) => k.trim())
+    .filter(Boolean)
+    .map((k) => ({ padded: ` ${k} `, weight: k.split(' ').length * 10 + k.length }));
+
+/** The name as matching sees it: normalized words between spaces, built once per name, not once per type. */
+const spaced = (name: string): string => ` ${tokenize(name).join(' ')} `;
+
+function scoreWords(joined: string, matchers: readonly Matcher[]): number {
   let best = 0;
-  for (const keyword of type.keywords) {
-    const k = keyword.trim();
-    if (!k) continue;
-    if (joined.includes(` ${k} `)) best = Math.max(best, k.split(' ').length * 10 + k.length);
-  }
+  for (const m of matchers) if (m.weight > best && joined.includes(m.padded)) best = m.weight;
   return best;
 }
 
+type Resolved = Readonly<{ type: ProductTypeDef; byName: boolean }>;
+const RESOLVED_LIMIT = 50_000;
+
 export class ProductTypeIndex {
   private readonly byKey: Map<string, ProductTypeDef>;
+  /** Each type's keywords, compiled once: the whole pool is matched against them on every analysis. */
+  private readonly matchers: readonly Matcher[][];
+  private readonly resolved = new Map<string, Resolved>();
   readonly types: readonly ProductTypeDef[];
 
   constructor(
@@ -98,6 +117,7 @@ export class ProductTypeIndex {
       forbiddenKeys: t.forbiddenGroups.map(normalizeTr).filter(Boolean),
     }));
     this.byKey = new Map(this.types.map((t) => [t.key, t]));
+    this.matchers = this.types.map((t) => compile(t.keywords));
   }
 
   get(key: string | null | undefined): ProductTypeDef | undefined {
@@ -117,11 +137,24 @@ export class ProductTypeIndex {
    * `classify`, plus whether the NAME decided it. A type guessed from the category or the cuisine is a weaker
    * ground for suggestions, and the card's confidence says so.
    */
-  resolve(name: string, cuisineSlug?: string | null, categoryKey?: string | null): { type: ProductTypeDef; byName: boolean } {
+  resolve(name: string, cuisineSlug?: string | null, categoryKey?: string | null): Resolved {
+    // One index serves many analyses (the analyze service keeps it), and each matches the same pool: remember answers.
+    // A newline never occurs in a product name (lists are split on it), so it cannot blur two keys.
+    const key = `${name}\n${cuisineSlug ?? ''}\n${categoryKey ?? ''}`;
+    const hit = this.resolved.get(key);
+    if (hit) return hit;
+    const answer = this.match(name, cuisineSlug, categoryKey);
+    if (this.resolved.size >= RESOLVED_LIMIT) this.resolved.clear();
+    this.resolved.set(key, answer);
+    return answer;
+  }
+
+  private match(name: string, cuisineSlug?: string | null, categoryKey?: string | null): Resolved {
     let best: ProductTypeDef | undefined;
     let bestScore = 0;
-    for (const type of this.types) {
-      const score = matchScore(name, type);
+    const joined = spaced(name);
+    for (const [i, type] of this.types.entries()) {
+      const score = scoreWords(joined, this.matchers[i]!);
       if (score === 0) continue;
       const bonus = (cuisineSlug && type.cuisines.includes(cuisineSlug) ? 1 : 0) + (type.priority ?? 0);
       if (score + bonus > bestScore) {
@@ -141,7 +174,8 @@ export class ProductTypeIndex {
    * köfte. What the kitchen can make follows all of them (D-213).
    */
   matching(name: string): ProductTypeDef[] {
-    return this.types.filter((type) => matchScore(name, type) > 0);
+    const joined = spaced(name);
+    return this.types.filter((_, i) => scoreWords(joined, this.matchers[i]!) > 0);
   }
 
   /** Plain panel row (packaged / poured drink): no description, no options, no ingredients. */

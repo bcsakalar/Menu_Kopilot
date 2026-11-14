@@ -1,6 +1,7 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { conversationDetailSchema } from '../chat/schemas.js';
+import type { LoadMonitor } from './load.js';
 import type { AdminService } from './service.js';
 
 const security = [{ bearerAuth: [] }];
@@ -44,7 +45,41 @@ const conversationRowSchema = z.object({
   createdAt: z.string(),
 });
 
-export const adminRoutes: FastifyPluginAsyncZod<{ service: AdminService }> = async (app, { service }) => {
+const loadSchema = z.object({
+  analyses: z.object({
+    running: z.number().int(),
+    waiting: z.number().int(),
+    size: z.number().int(),
+    queueMax: z.number().int(),
+    waitP95Ms: z.number().nullable(),
+  }),
+  lastQuarter: z.object({
+    runs: z.number().int(),
+    p50Ms: z.number().nullable(),
+    p95Ms: z.number().nullable(),
+    calls: z.number().int(),
+    failed: z.number().int(),
+    byProvider: z.array(z.object({ provider: z.string(), calls: z.number().int(), failed: z.number().int() })),
+  }),
+  pacing: z.array(z.object({ model: z.string(), inLastMinute: z.number().int(), ceiling: z.number().int() })),
+  process: z.object({ rssMb: z.number(), heapMb: z.number(), eventLoopP99Ms: z.number(), uptimeS: z.number() }),
+  alerts: z.array(z.object({ key: z.enum(['slow', 'failing', 'busy']), since: z.string() })),
+});
+
+export const adminRoutes: FastifyPluginAsyncZod<{ service: AdminService; load: LoadMonitor }> = async (app, { service, load }) => {
+  app.get(
+    '/admin/load',
+    {
+      schema: {
+        tags: ['admin'],
+        summary: 'Load right now: analyses running and waiting, the last quarter hour, provider failures (D-214)',
+        security,
+        response: { 200: loadSchema },
+      },
+    },
+    async () => load.snapshot(),
+  );
+
   app.get(
     '/admin/overview',
     {

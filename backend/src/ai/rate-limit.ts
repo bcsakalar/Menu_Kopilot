@@ -105,6 +105,64 @@ export class CooldownTracker {
   }
 }
 
+/**
+ * Calls per provider:model in the trailing minute, paced by what each model has shown it takes (D-214). No limit is
+ * configured anywhere: free and paid tiers differ by the hundreds and change without notice. A 429 says "this many
+ * in a minute was one too many", so that count, less one, becomes the model's ceiling; every quiet minute raises it
+ * by one, so a model that was only briefly busy is soon used at full speed again. A route at its ceiling is skipped
+ * and the chain moves on, instead of spending a call on a 429 we could have predicted.
+ */
+export class CallPacer {
+  private readonly calls = new Map<string, number[]>();
+  private readonly ceilings = new Map<string, { limit: number; at: number }>();
+
+  constructor(private readonly now: () => number = () => Date.now()) {}
+
+  record(key: string): void {
+    const list = this.recent(key);
+    list.push(this.now());
+    this.calls.set(key, list);
+  }
+
+  limited(key: string): void {
+    this.ceilings.set(key, { limit: Math.max(1, this.recent(key).length - 1), at: this.now() });
+  }
+
+  isFull(key: string): boolean {
+    const limit = this.ceiling(key);
+    return limit !== undefined && this.recent(key).length >= limit;
+  }
+
+  /** The learned ceiling per model, for the admin's load view; models that never hit a 429 are not listed. */
+  snapshot(): Record<string, { inLastMinute: number; ceiling: number }> {
+    const out: Record<string, { inLastMinute: number; ceiling: number }> = {};
+    for (const key of this.ceilings.keys()) {
+      const ceiling = this.ceiling(key);
+      if (ceiling !== undefined) out[key] = { inLastMinute: this.recent(key).length, ceiling };
+    }
+    return out;
+  }
+
+  private ceiling(key: string): number | undefined {
+    const entry = this.ceilings.get(key);
+    if (!entry) return undefined;
+    const grown = entry.limit + Math.floor((this.now() - entry.at) / 60_000);
+    // Grown back past anything it was ever asked for: forget it.
+    if (grown > entry.limit + 60) {
+      this.ceilings.delete(key);
+      return undefined;
+    }
+    return grown;
+  }
+
+  private recent(key: string): number[] {
+    const cutoff = this.now() - 60_000;
+    const list = (this.calls.get(key) ?? []).filter((at) => at > cutoff);
+    this.calls.set(key, list);
+    return list;
+  }
+}
+
 /** Exponential backoff with full jitter. */
 export function backoffDelayMs(
   attempt: number,

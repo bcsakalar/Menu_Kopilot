@@ -1124,3 +1124,43 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   sayıları bilerek yok: onlar yalnızca canlı veritabanında durur. Testler model hiç ürün
   vermezken 26 mutfağın hepsinde hedefin geçildiğini, çeşitlerin önde geldiğini ve mutfak sınırlarının tuttuğunu
   sınar (`test/e2e/target-fill.e2e.test.ts`).
+- **D-214** — **Çok kişide ayakta kalma: analiz başına işlemci 13 kat düştü, analizler sıraya girer, mesaj sınırı
+  ziyaretçiye bağlı, model çağrıları öğrenilen dakikalık sınırla dağıtılır, yük panoda ve ntfy'da** (kullanıcı isteği,
+  2026-11-14: "çok kişilerde de sistem ayakta olacak ve çalışacak"; "bütün aşamaları bitir"). Ölçüm: 2026-11-13'te
+  canlıda 23 ziyaretçi, 95 analiz, 364 model çağrısı vardı ve çağrıların %27'si başarısızdı (Gemini 45 kez aşırı yoğun,
+  15 süre aşımı, 13 hız limiti; Groq 10 hız limiti). Canlının şablon havuzunun (1723 şablon, kullanıcı verisi yok) yerel
+  kopyasında, modeller kapalıyken bir analiz 650 ms işlemci harcıyordu; 20 eşzamanlı analizin her biri 12,6 saniye
+  sürüyordu. (1) **İşlemci:** her analiz havuzun her şablonunu her ürün türüyle eşleştirirken adı tür başına baştan
+  normalleştiriyordu (analiz başına yaklaşık 82 bin gereksiz işlem). Artık ad bir kez normalleştirilir, anahtar
+  kelimeler indekste bir kez derlenir, `normalizeTr` kısa girdileri hatırlar, ürün türü indeksi bir dakika boyunca
+  analizler arasında paylaşılır ve verdiği cevapları hatırlar (ürün türleri yalnızca tohumla değişir). Sonuç: 650 →
+  yaklaşık 50 ms; 20 eşzamanlı analiz 12,6 → 0,6–0,9 saniye; öneriler birebir aynı (test: eski algoritmayla her tohum
+  şablonu × her tür aynı puanı alır). Şablon havuzu her analizde yine veritabanından okunur, kabul edilen şablonların
+  sırası taze kalsın diye; okuması ölçümde birkaç milisaniye. Plandaki "havuz önbelleği" yerine bu yapıldı. (2) Bir
+  analizin kartları 50 ayrı kayıt yerine tek seferde yazılır. (3) **Kuyruk:** bir API süreci aynı anda en çok
+  `ANALYSIS_CONCURRENCY` (10) analiz çalıştırır; fazlası sırasını görerek bekler ("Yoğunluk var: sıradasın, önünde 2
+  analiz var", sırası gelince "Sıra geldi"). Sıra da (`ANALYSIS_QUEUE_MAX`, 50) doluysa sohbet "Şu an çok yoğunuz. Bir
+  dakika sonra tekrar gönderir misin?" der ve analiz kaydı açılmaz. Sırada iptal edilen analiz yer tutmaz.
+  (4) **Mesaj sınırı:** IP başına dakikada 20 mesaj, aynı ağdan çıkan bir ofisi tek kişi sayıyordu. Artık sınır
+  ziyaretçi çerezi başına dakikada 20. Çerezsiz ilk mesajlar (her biri bir ziyaretçi açar) adres başına dakikada 30,
+  bir adresten gelen mesajların toplamı dakikada 120. Çerezin imzası doğrulanır (veritabanına gidilmez), sahte çerez
+  yeni gelen sayılır. Sayaçlar Redis'te tutulur, birden çok süreç aynı ziyaretçiyi bir kez sayar; Redis aksarsa istek
+  geçer, günlük kotalar yine tutar. (5) **Model çağrılarını dağıtma:** sağlayıcı sınırları hiçbir yerde yazılmaz,
+  çünkü ücretsiz ve ücretli katman yüzlerce kat fark eder ve haber vermeden değişir. Bir model 429 verdiğinde, son
+  dakikadaki çağrı sayısının bir eksiği o modelin tavanı olur. Tavandaki model atlanır ve zincir sıradakine geçer;
+  önceden bu çağrılar boşuna 429 alıyordu. Her sessiz dakika tavanı bir artırır, bir saat sonra tavan unutulur. Bu
+  "aşırı yoğun" (503) hatalarını çözmez: onlar Google tarafında, ücretli katman ister. (6) **İzleme:** yönetim
+  panosunda "Anlık yük" bölümü 15 saniyede bir yenilenir: çalışan ve sıradaki analizler, bekleme süresi, son 15
+  dakikadaki analiz süreleri (çoğu / en yavaş %5), YZ çağrıları ve sağlayıcı hataları, dakikalık sınırına yakın
+  modeller, bellek ve gecikme. `ALERT_NTFY_URL` verilirse dakikada bir denetim yapılır. Şu durumlarda bir bildirim, düzelince bir bildirim daha gelir, her dakika değil:
+  en yavaş %5 20 saniyeyi aşarsa (en az 5 analiz), sağlayıcı hataları çağrıların %30'unu aşarsa (en az 20 çağrı;
+  kendi kestiğimiz çağrılar sayılmaz) ya da iki denetim üst üste analiz sırada beklerse. (7) **Sunucu:** uygulama
+  konteynerinin bellek sınırı 384 → 512 MB (sunucuda yaklaşık 1 GB boş, uygulama boşta 71 MB). Yük testi betiği depoda:
+  `backend/scripts/load-probe.ts` (`pnpm probe:load 1 5 10 20`, modeller kapalı, havuzun bir kopyasına karşı).
+  **Yapılmayanlar:** ücretli Gemini katmanı ve günlük tavanların yükseltilmesi proje sahibinin kararı. Tavanlar zaten
+  ortam değişkeni (`GLOBAL_DAILY_LLM_CALL_QUOTA`, `DAILY_LLM_CALL_QUOTA`); ücretsiz katmanda yükseltmek yalnızca daha
+  çok hata getirir. İkinci süreç ve ayrı sunucu yapılmadı. Ölçümde tek süreç saniyede yaklaşık 20 analizlik işlemciyi
+  taşıyor, günlük YZ tavanı (yaklaşık 780 analiz) ise bundan çok önce doluyor; tek çekirdekli sunucuda ikinci süreç
+  kazanç getirmez. Gerekirse mesaj sayaçları zaten Redis'te; kuyruk ve öğrenilen tavanlar süreç başına kalır.
+  `/analyze` uçlarının canlı olay ve iptal kaydı da süreç başınadır: başka sürece düşen istek veritabanındaki anlık
+  görüntüyü alır. Bu uçları site değil, yalnızca API istemcileri kullanıyor.

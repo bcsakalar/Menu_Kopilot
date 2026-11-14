@@ -5,7 +5,7 @@ import { CircuitBreaker } from './circuit-breaker.js';
 import { PromptRepository } from './prompt-repository.js';
 import { GeminiProvider } from './providers/gemini.provider.js';
 import { GroqProvider } from './providers/groq.provider.js';
-import { CooldownTracker } from './rate-limit.js';
+import { CallPacer, CooldownTracker } from './rate-limit.js';
 import { RouteRepository } from './route-repository.js';
 import { AiRouter } from './router.js';
 import type { LLMProvider } from './types.js';
@@ -20,6 +20,7 @@ export interface AiServices {
   providers: Partial<Record<ProviderName, LLMProvider>>;
   breaker: CircuitBreaker;
   cooldowns: CooldownTracker;
+  pacer: CallPacer;
 }
 
 export interface AiOverrides {
@@ -42,11 +43,13 @@ export function createAiServices(config: AppConfig, db: Database, overrides: AiO
   const quota = new QuotaService(db, config.quota, () => new Date(now()));
   const breaker = new CircuitBreaker({ now });
   const cooldowns = new CooldownTracker(now);
+  const pacer = new CallPacer(now);
   const router = new AiRouter({
     providers,
     routes,
     breaker,
     cooldowns,
+    pacer,
     usage,
     quota,
     prompts,
@@ -54,7 +57,7 @@ export function createAiServices(config: AppConfig, db: Database, overrides: AiO
     ...(overrides.sleep ? { sleep: overrides.sleep } : {}),
     ...(overrides.random ? { random: overrides.random } : {}),
   });
-  return { router, prompts, routes, quota, usage, providers, breaker, cooldowns };
+  return { router, prompts, routes, quota, usage, providers, breaker, cooldowns, pacer };
 }
 
 export type { LLMProvider } from './types.js';

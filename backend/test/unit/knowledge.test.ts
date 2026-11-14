@@ -7,7 +7,7 @@ import { CUISINE_SLUGS } from '../../src/db/seed/cuisines.js';
 import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
-import { countWords, fitDescription, isForbiddenGroup, ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
+import { countWords, fitDescription, isForbiddenGroup, matchScore, ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
 import { namesVariant, sameProductName, variantConflict } from '../../src/lib/same-product.js';
 import { templateOptionGroupSchema } from '../../src/domain/template.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
@@ -31,6 +31,52 @@ const group = (name: string, options: string[], over: Partial<RawOptionGroup> = 
 });
 
 const want = { options: true, ingredients: true, description: true };
+
+describe('product type matching, made cheap (D-214)', () => {
+  /** The scoring as it was before keywords were compiled once: the reference the fast path must equal. */
+  const originalScore = (name: string, keywords: readonly string[]): number => {
+    const joined = ` ${normalizeTr(name).split(' ').filter(Boolean).join(' ')} `;
+    let best = 0;
+    for (const keyword of keywords) {
+      const k = keyword.trim();
+      if (!k) continue;
+      if (joined.includes(` ${k} `)) best = Math.max(best, k.split(' ').length * 10 + k.length);
+    }
+    return best;
+  };
+  const names = [...new Set(SEED_TEMPLATES.map((t) => t.payload.name))];
+
+  it('scores every seed template against every type exactly as before', () => {
+    for (const name of names) {
+      for (const t of index.types) expect(matchScore(name, t), `${name} / ${t.key}`).toBe(originalScore(name, t.keywords));
+    }
+  });
+
+  it('remembers an answer per name, cuisine and category — never one combination for another', () => {
+    const combos: [string | null, string | null][] = [
+      [null, null],
+      ['pide-lahmacun', null],
+      ['kebap-izgara', 'ana-yemek'],
+      ['balik-deniz', 'yan-urun'],
+      [null, 'tatli'],
+      ['kahve-tatli', 'icecek'],
+    ];
+    const lookups = names.flatMap((name) => combos.map(([cuisine, category]) => [name, cuisine, category] as const));
+    const fresh = () => new ProductTypeIndex(SEED_PRODUCT_TYPES, new Map(Object.entries(CUISINE_DEFAULT_TYPE)), new Map(Object.entries(CATEGORY_DEFAULT_TYPE)));
+    const forward = fresh();
+    const backward = fresh();
+    const first = lookups.map(([n, c, k]) => forward.resolve(n, c, k));
+    const reversed = [...lookups].reverse().map(([n, c, k]) => backward.resolve(n, c, k)).reverse();
+    const again = lookups.map(([n, c, k]) => forward.resolve(n, c, k));
+    for (const [i, [n, c, k]] of lookups.entries()) {
+      const label = `${n} / ${c} / ${k}`;
+      expect({ type: reversed[i]!.type.key, byName: reversed[i]!.byName }, label).toEqual({ type: first[i]!.type.key, byName: first[i]!.byName });
+      expect(again[i], label).toBe(first[i]);
+    }
+    // The cuisine and the category still decide for a name that says nothing.
+    expect(forward.resolve('Karışık', 'pide-lahmacun').type.key).not.toBe(forward.resolve('Karışık', null, 'tatli').type.key);
+  });
+});
 
 describe('knowledge base — product types', () => {
   it('every seeded row is usable: valid groups, 6–8 word fallback, known category', () => {

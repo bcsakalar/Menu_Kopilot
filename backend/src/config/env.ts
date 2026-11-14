@@ -47,6 +47,13 @@ const envSchema = z
 
     UPLOAD_MAX_FILES: z.coerce.number().int().min(1).max(10).default(5),
     UPLOAD_MAX_FILE_MB: z.coerce.number().min(0.5).max(20).default(8),
+
+    /** Analyses that run at once in one API process; the rest wait their turn (D-214). */
+    ANALYSIS_CONCURRENCY: z.coerce.number().int().min(1).max(200).default(10),
+    /** Analyses that may wait for a slot; one more is told the site is busy. */
+    ANALYSIS_QUEUE_MAX: z.coerce.number().int().min(0).max(1000).default(50),
+    /** ntfy topic URL for load alerts (slow analyses, failing providers, a full queue). Empty: no alerts. */
+    ALERT_NTFY_URL: z.url().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== 'production') return;
@@ -99,6 +106,11 @@ export interface AppConfig {
     maxFiles: number;
     maxFileBytes: number;
   };
+  analysis: {
+    concurrency: number;
+    queueMax: number;
+  };
+  alertNtfyUrl: string | undefined;
 }
 
 const emptyToUndefined = (value: string | undefined): string | undefined =>
@@ -154,6 +166,11 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
       maxFiles: env.UPLOAD_MAX_FILES,
       maxFileBytes: Math.round(env.UPLOAD_MAX_FILE_MB * 1024 * 1024),
     },
+    analysis: {
+      concurrency: env.ANALYSIS_CONCURRENCY,
+      queueMax: env.ANALYSIS_QUEUE_MAX,
+    },
+    alertNtfyUrl: emptyToUndefined(env.ALERT_NTFY_URL),
   };
 }
 

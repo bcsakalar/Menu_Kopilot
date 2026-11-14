@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { RequestBudget, estimateImageTokens } from '../../src/ai/budget.js';
 import { CircuitBreaker } from '../../src/ai/circuit-breaker.js';
 import {
+  CallPacer,
   CooldownTracker,
   backoffDelayMs,
   parseGoogleRetryDelayMs,
@@ -49,6 +50,44 @@ describe('CooldownTracker', () => {
 
     tracker.observe('groq:m', { remainingTokens: 100, resetTokensMs: 3_000 }, 2_000);
     expect(tracker.remainingMs('groq:m')).toBe(3_000);
+  });
+});
+
+describe('CallPacer (D-214)', () => {
+  it('paces nothing until a model answers 429, then holds it to what it took, less one', () => {
+    const pacer = new CallPacer(() => 0);
+    for (let i = 0; i < 12; i += 1) pacer.record('gemini:m');
+    expect(pacer.isFull('gemini:m')).toBe(false);
+    pacer.limited('gemini:m');
+    expect(pacer.snapshot()).toEqual({ 'gemini:m': { inLastMinute: 12, ceiling: 11 } });
+    expect(pacer.isFull('gemini:m')).toBe(true);
+    // Another model of the same provider is not held back by it.
+    expect(pacer.isFull('gemini:other')).toBe(false);
+  });
+
+  it('frees a model as its calls leave the trailing minute, and raises the ceiling by one per quiet minute', () => {
+    let now = 0;
+    const pacer = new CallPacer(() => now);
+    for (let i = 0; i < 5; i += 1) pacer.record('groq:m');
+    pacer.limited('groq:m');
+    expect(pacer.isFull('groq:m')).toBe(true);
+    now = 60_001;
+    expect(pacer.isFull('groq:m')).toBe(false);
+    expect(pacer.snapshot()['groq:m']).toEqual({ inLastMinute: 0, ceiling: 5 });
+    for (let i = 0; i < 5; i += 1) pacer.record('groq:m');
+    expect(pacer.isFull('groq:m')).toBe(true);
+    now = 3 * 60_000 + 1;
+    expect(pacer.snapshot()['groq:m']?.ceiling).toBe(7);
+  });
+
+  it('never sets a ceiling below one call a minute, and forgets it once it has grown back for an hour', () => {
+    let now = 0;
+    const pacer = new CallPacer(() => now);
+    pacer.limited('gemini:m');
+    expect(pacer.snapshot()['gemini:m']?.ceiling).toBe(1);
+    now = 61 * 60_000;
+    expect(pacer.snapshot()).toEqual({});
+    expect(pacer.isFull('gemini:m')).toBe(false);
   });
 });
 
