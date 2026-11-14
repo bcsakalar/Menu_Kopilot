@@ -23,7 +23,10 @@ export const MIN_CALLS = 20;
 /** The failures the provider is to blame for; a call we cut off ourselves (deadline, cancel) is not one. */
 export const PROVIDER_FAILURES = ['unavailable', 'rate_limited', 'timeout'] as const;
 
-export type AlertKey = 'slow' | 'failing' | 'busy';
+/** The share of the site's daily model ceiling past which the admin hears of it, hours before it runs out (D-216). */
+export const QUOTA_WARN_SHARE = 0.8;
+
+export type AlertKey = 'slow' | 'failing' | 'busy' | 'quota';
 
 export interface LoadSnapshot {
   analyses: { running: number; waiting: number; size: number; queueMax: number; waitP95Ms: number | null };
@@ -36,6 +39,8 @@ export interface LoadSnapshot {
     byProvider: { provider: string; calls: number; failed: number }[];
   };
   pacing: { model: string; inLastMinute: number; ceiling: number }[];
+  /** The site's model calls today against its daily ceiling (0: no ceiling). */
+  quota: { callsToday: number; dailyCalls: number };
   process: { rssMb: number; heapMb: number; eventLoopP99Ms: number; uptimeS: number };
   alerts: { key: AlertKey; since: string }[];
 }
@@ -44,6 +49,8 @@ export interface LoadMonitorDeps {
   db: Database;
   slots: Slots;
   pacer: CallPacer;
+  /** Today's model calls of the whole site and its ceiling (QuotaService.site). */
+  siteQuota: () => Promise<{ callsToday: number; dailyCalls: number }>;
   ntfyUrl: string | undefined;
   log: FastifyBaseLogger;
   fetch?: typeof fetch;
@@ -121,6 +128,7 @@ export class LoadMonitor {
         byProvider,
       },
       pacing: Object.entries(this.deps.pacer.snapshot()).map(([model, value]) => ({ model, ...value })),
+      quota: await this.deps.siteQuota(),
       process: {
         rssMb: Math.round(memory.rss / 1_048_576),
         heapMb: Math.round(memory.heapUsed / 1_048_576),
@@ -146,6 +154,10 @@ export class LoadMonitor {
           : null,
       // Two checks in a row: one burst that the queue absorbed in seconds is the queue doing its job.
       busy: queued && this.queuedLastCheck ? `Analiz kuyruğu dolu: ${load.analyses.running} analiz çalışıyor, ${load.analyses.waiting} analiz sırada.` : null,
+      quota:
+        load.quota.dailyCalls > 0 && load.quota.callsToday >= load.quota.dailyCalls * QUOTA_WARN_SHARE
+          ? `Günlük yapay zekâ tavanının %${Math.round((load.quota.callsToday / load.quota.dailyCalls) * 100)}'i kullanıldı (${load.quota.callsToday}/${load.quota.dailyCalls} çağrı). Dolarsa ekran görüntüleri gece yarısına kadar okunamaz; tavan GLOBAL_DAILY_LLM_CALL_QUOTA ile yükseltilir.`
+          : null,
     };
     this.queuedLastCheck = queued;
     for (const key of Object.keys(state) as AlertKey[]) {
@@ -182,4 +194,5 @@ const RECOVERED: Record<AlertKey, string> = {
   slow: 'Düzeldi: analizler yine normal sürede bitiyor.',
   failing: 'Düzeldi: yapay zekâ çağrıları yine yanıt veriyor.',
   busy: 'Düzeldi: analiz kuyruğu boşaldı.',
+  quota: 'Düzeldi: günlük yapay zekâ kotası yenilendi.',
 };

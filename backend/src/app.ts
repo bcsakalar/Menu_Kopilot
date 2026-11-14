@@ -233,7 +233,7 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     log: app.log,
   });
   app.decorate('services', { ai, queue, embedding, analyze: analyzeService });
-  const load = new LoadMonitor({ db, slots, pacer: ai.pacer, ntfyUrl: config.alertNtfyUrl, log: app.log });
+  const load = new LoadMonitor({ db, slots, pacer: ai.pacer, siteQuota: () => ai.quota.site(), ntfyUrl: config.alertNtfyUrl, log: app.log });
   load.start();
   app.addHook('onClose', async () => load.stop());
 

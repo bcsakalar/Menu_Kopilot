@@ -63,7 +63,8 @@ describe('settings & prompts API', () => {
   it('reports the daily quota', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/settings/quota', headers: bearer(token) });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toMatchObject({ allowed: true, callsToday: 0, dailyCalls: 300, timezone: 'Europe/Istanbul' });
+    // D-216: a whole day of calls for any rep.
+    expect(res.json()).toMatchObject({ allowed: true, callsToday: 0, dailyCalls: 1000, timezone: 'Europe/Istanbul' });
   });
 
   it('protects settings routes', async () => {

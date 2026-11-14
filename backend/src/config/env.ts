@@ -33,10 +33,18 @@ const envSchema = z
     GROQ_API_KEY: z.string().optional(),
     LOCAL_ONLY_MODE: bool.default(false),
 
-    DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(300),
-    DAILY_TOKEN_QUOTA: z.coerce.number().int().min(0).default(1_500_000),
-    /** The site is open to anyone: a cleared cookie gets a fresh per-visitor quota, this ceiling it cannot reset. */
-    GLOBAL_DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(3000),
+    /**
+     * Per rep and day (D-216). The busiest rep so far made 23 analyses and 72 calls in a day; an analysis takes about
+     * 3.5 calls and 9 000 tokens. 1000 calls and 5 M tokens are a whole day of calls for anyone.
+     */
+    DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(1000),
+    DAILY_TOKEN_QUOTA: z.coerce.number().int().min(0).default(5_000_000),
+    /**
+     * The whole site's ceiling: a cleared cookie gets a fresh per-visitor quota, this it cannot reset. It is shared by
+     * every rep, so it sits above what the free tiers serve in a day: there it never binds before the providers do.
+     * With billing on it is the spending ceiling (D-216).
+     */
+    GLOBAL_DAILY_LLM_CALL_QUOTA: z.coerce.number().int().min(0).default(10_000),
     QUOTA_TIMEZONE: z.string().default('Europe/Istanbul'),
     REQUEST_MAX_LLM_CALLS: z.coerce.number().int().min(1).default(6),
     REQUEST_MAX_INPUT_TOKENS: z.coerce.number().int().min(1000).default(25_000),

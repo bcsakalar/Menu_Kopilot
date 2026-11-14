@@ -1,4 +1,4 @@
-import { AI_BUSY } from '../../agents/chat.js';
+import { AI_BUSY, AI_SPENT } from '../../agents/chat.js';
 import type { AnalyzeResult, CountsDto } from '../analyze/schemas.js';
 
 const TOP_PRODUCTS = 3;
@@ -26,6 +26,8 @@ export function openingGaps(quality: CountsDto['quality']): string[] {
 /** A model call failed for want of capacity (overloaded, rate-limited), not because of the menu. */
 export const aiTrouble = (result: AnalyzeResult): boolean => result.warnings.some((w) => AI_TROUBLE.has(w.code));
 export const aiBusy = (result: AnalyzeResult): boolean => result.cards.length === 0 && aiTrouble(result);
+/** The rep's or the site's model quota for the day is spent (D-216). */
+export const aiSpent = (result: AnalyzeResult): boolean => result.warnings.some((w) => w.code === 'quota_exceeded');
 
 /** The next steps as buttons: the categories the menu is short of, then more of anything. */
 export function nextSteps(result: AnalyzeResult): string[] {
@@ -53,9 +55,11 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   if (!counts || result.menu.length === 0) {
     return {
       // Nothing read because every model was busy says so: "no menu here" sent reps hunting for a better screenshot.
-      text: aiTrouble(result)
-        ? `${AI_BUSY} Görüntüyü yeniden yapıştır ya da ürün adlarını virgülle yaz.`
-        : 'Bu görüntüde menü okuyamadım. Ürünlerin göründüğü bir ekran görüntüsü yapıştır ya da ürün adlarını virgülle yaz.',
+      text: aiSpent(result)
+        ? AI_SPENT
+        : aiTrouble(result)
+          ? `${AI_BUSY} Görüntüyü yeniden yapıştır ya da ürün adlarını virgülle yaz.`
+          : 'Bu görüntüde menü okuyamadım. Ürünlerin göründüğü bir ekran görüntüsü yapıştır ya da ürün adlarını virgülle yaz.',
       quickReplies: [],
     };
   }

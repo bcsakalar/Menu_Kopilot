@@ -141,7 +141,7 @@ describe('load alerts (D-214)', () => {
     await ctx.db.db.execute(sql`delete from suggestion_runs`);
     const userId = await adminId();
     await ctx.db.db.insert(suggestionRuns).values(Array.from({ length: 6 }, () => ({ userId, status: 'completed' as const, latencyMs: 25_000 })));
-    const monitor = new LoadMonitor({ db: ctx.db.db, slots: new Slots(4, 4), pacer: new CallPacer(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
+    const monitor = new LoadMonitor({ db: ctx.db.db, slots: new Slots(4, 4), pacer: new CallPacer(), siteQuota: () => ctx.ai.quota.site(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
 
     await monitor.check();
     await monitor.check();
@@ -169,7 +169,7 @@ describe('load alerts (D-214)', () => {
       ...Array.from({ length: 6 }, () => row(false, 'unavailable')),
       ...Array.from({ length: 4 }, () => row(false, 'aborted')),
     ]);
-    const monitor = new LoadMonitor({ db: ctx.db.db, slots: new Slots(4, 4), pacer: new CallPacer(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
+    const monitor = new LoadMonitor({ db: ctx.db.db, slots: new Slots(4, 4), pacer: new CallPacer(), siteQuota: () => ctx.ai.quota.site(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
     await monitor.check();
     expect(sent).toHaveLength(0);
     expect((await monitor.snapshot()).lastQuarter).toMatchObject({ calls: 20, failed: 6 });
@@ -189,7 +189,7 @@ describe('load alerts (D-214)', () => {
     let release: () => void = () => undefined;
     const running = slots.run(() => new Promise<void>((resolve) => (release = resolve)));
     const waiting = slots.run(() => Promise.resolve());
-    const monitor = new LoadMonitor({ db: ctx.db.db, slots, pacer: new CallPacer(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
+    const monitor = new LoadMonitor({ db: ctx.db.db, slots, pacer: new CallPacer(), siteQuota: () => ctx.ai.quota.site(), ntfyUrl: 'https://ntfy.test/topic', log: silent, fetch: fakeFetch });
 
     await monitor.check();
     expect(sent).toHaveLength(0);
@@ -203,12 +203,41 @@ describe('load alerts (D-214)', () => {
     monitor.stop();
   });
 
+  it('warns once the site has used 80 % of its daily model ceiling, and again when the day turns (D-216)', async () => {
+    sent.length = 0;
+    await ctx.db.db.execute(sql`delete from suggestion_runs`);
+    await ctx.db.db.execute(sql`delete from usage_log`);
+    let today = { callsToday: 7_999, dailyCalls: 10_000 };
+    const monitor = new LoadMonitor({
+      db: ctx.db.db,
+      slots: new Slots(4, 4),
+      pacer: new CallPacer(),
+      siteQuota: () => Promise.resolve(today),
+      ntfyUrl: 'https://ntfy.test/topic',
+      log: silent,
+      fetch: fakeFetch,
+    });
+    await monitor.check();
+    expect(sent).toHaveLength(0);
+    today = { callsToday: 8_000, dailyCalls: 10_000 };
+    await monitor.check();
+    await monitor.check();
+    expect(sent.map((s) => s.body)).toEqual([
+      "Günlük yapay zekâ tavanının %80'i kullanıldı (8000/10000 çağrı). Dolarsa ekran görüntüleri gece yarısına kadar okunamaz; tavan GLOBAL_DAILY_LLM_CALL_QUOTA ile yükseltilir.",
+    ]);
+    expect((await monitor.snapshot()).quota).toEqual(today);
+    today = { callsToday: 12, dailyCalls: 10_000 };
+    await monitor.check();
+    expect(sent.at(-1)).toEqual({ body: 'Düzeldi: günlük yapay zekâ kotası yenilendi.', priority: 'default' });
+    monitor.stop();
+  });
+
   it('stays silent without an ntfy address, and keeps counting', async () => {
     const calls: string[] = [];
     const monitor = new LoadMonitor({
       db: ctx.db.db,
       slots: new Slots(1, 1),
-      pacer: new CallPacer(),
+      pacer: new CallPacer(), siteQuota: () => ctx.ai.quota.site(),
       ntfyUrl: undefined,
       log: silent,
       fetch: (async (url: string) => {

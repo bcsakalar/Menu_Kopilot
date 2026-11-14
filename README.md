@@ -234,7 +234,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-216`'dan devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-217`'den devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -257,8 +257,8 @@ denetler.
 | `SEED_ON_START` | `true` | açılışta migration ve tohumlamayı çalıştır |
 | `GEMINI_API_KEY`, `GROQ_API_KEY` | — | sağlayıcı anahtarları; eksik olan zincirden düşer |
 | `LOCAL_ONLY_MODE` | `false` | hiçbir dış API'ye gitme, yalnızca havuz ve önbellek |
-| `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA` | `300`, `1500000` | ziyaretçi başına günlük kota |
-| `GLOBAL_DAILY_LLM_CALL_QUOTA` | `3000` | site geneli günlük tavan (çerezi silmek bunu sıfırlamaz) |
+| `DAILY_LLM_CALL_QUOTA`, `DAILY_TOKEN_QUOTA` | `1000`, `5000000` | ziyaretçi başına günlük kota; yalnızca sağlayıcının işlediği çağrılar sayılır (D-216) |
+| `GLOBAL_DAILY_LLM_CALL_QUOTA` | `10000` | site geneli günlük tavan (çerezi silmek bunu sıfırlamaz); %80'inde ntfy uyarısı (D-216) |
 | `QUOTA_TIMEZONE` | `Europe/Istanbul` | "günün" başladığı saat dilimi |
 | `REQUEST_MAX_LLM_CALLS`, `REQUEST_MAX_INPUT_TOKENS` | `6`, `25000` | analiz başına bütçe; her görüntü bir çağrı ve 4000 token ekler |
 | `RETRIEVAL_TRGM_THRESHOLD`, `RETRIEVAL_VECTOR_THRESHOLD` | `0.72`, `0.85` | havuz eşleşme eşikleri |
@@ -358,7 +358,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-215). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-216). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

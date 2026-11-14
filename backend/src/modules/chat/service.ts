@@ -270,7 +270,10 @@ export class ChatService {
   private async follow(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const conversationId = outgoing.conversation.id;
     const quick = shortcut(outgoing.text, last);
-    const decision = onlyNamed(quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId)), outgoing.text);
+    const agent = quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId));
+    // No model could read it (busy, or the day's quota spent): "Uzak Doğu için öneri sun" before any menu needs none (D-216).
+    const fallback = 'unanswered' in agent && !last?.menu.length ? await this.cuisineIn(outgoing.text) : undefined;
+    const decision = onlyNamed(fallback ? { ...agent, action: 'change_cuisine', cuisineSlug: fallback, reply: '' } : agent, outgoing.text);
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
     if (decision.action === 'answer') {
@@ -434,6 +437,24 @@ export class ChatService {
     // Every word of the name must be a product word: "Kebap salonuyuz" is a sentence about a kebap shop.
     if (words.length === 0 || words.length !== normalized.split(' ').length) return false;
     return (await this.poolWords(words)).length === words.length;
+  }
+
+  /**
+   * The cuisine a message names, read without a model: a cuisine whose name, or one part of it ("Pide" of
+   * "Pide & Lahmacun"), stands as whole words in the message; the longest such part wins.
+   */
+  private async cuisineIn(text: string): Promise<string | undefined> {
+    const said = ` ${normalizeTr(text)} `;
+    const rows = await this.deps.db.select({ slug: cuisines.slug, name: cuisines.name }).from(cuisines);
+    let best: { slug: string; length: number } | undefined;
+    for (const row of rows) {
+      const parts = [normalizeTr(row.name), ...row.name.split('&').map((part) => normalizeTr(part)), row.slug.replace(/-/gu, ' ')];
+      for (const part of parts) {
+        if (part.length < 3 || !said.includes(` ${part} `)) continue;
+        if (!best || part.length > best.length) best = { slug: row.slug, length: part.length };
+      }
+    }
+    return best?.slug;
   }
 
   private async isCuisineName(normalized: string): Promise<boolean> {

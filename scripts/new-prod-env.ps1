@@ -81,8 +81,8 @@ $lines = @(
   "GEMINI_API_KEY=$gemini"
   "GROQ_API_KEY=$groq"
   'LOCAL_ONLY_MODE=false'
-  'DAILY_LLM_CALL_QUOTA=300'
-  'DAILY_TOKEN_QUOTA=1500000'
+  'DAILY_LLM_CALL_QUOTA=1000'
+  'DAILY_TOKEN_QUOTA=5000000'
   'QUOTA_TIMEZONE=Europe/Istanbul'
   ''
   '# nginx proxies menu.example.com to 127.0.0.1:<API_PORT>.'

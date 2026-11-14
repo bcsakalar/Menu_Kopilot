@@ -11,7 +11,7 @@ import type { ImageInput } from '../../src/ai/types.js';
 import { QuotaService, UsageLogger } from '../../src/ai/usage.js';
 import { MODELS } from '../../src/config/models.js';
 import type { DbHandle } from '../../src/db/client.js';
-import { usageLog } from '../../src/db/schema/index.js';
+import { usageLog, users } from '../../src/db/schema/index.js';
 import { seedDatabase } from '../../src/db/seed/seed.js';
 import { FakeProvider, hashEmbedding, okJson } from '../helpers/fake-provider.js';
 import { createTestDb } from '../helpers/test-db.js';
@@ -241,6 +241,38 @@ describe('AiRouter', () => {
 
     const quota = await makeRouter({ dailyCalls: 1 }).generate({ task: 'agent.recommend', schema, system: 's', user: 'u' });
     expect(!quota.ok && quota.error.kind).toBe('quota_exceeded');
+  });
+
+  it('spends a day\'s quota only on calls the provider processed, never on the ones it turned away (D-216)', async () => {
+    const [user] = await handle.db.insert(users).values({ email: 'quota@visitor.local', name: 'Ziyaretçi', passwordHash: 'x' }).returning({ id: users.id });
+    const userId = user!.id;
+    const row = (success: boolean, errorCode: string | null, tokensOut = 0) => ({
+      userId,
+      taskKey: 'agent.recommend',
+      provider: 'gemini',
+      model: 'm',
+      tokensIn: 4000,
+      tokensOut,
+      latencyMs: 10,
+      success,
+      errorCode,
+    });
+    await handle.db.insert(usageLog).values([
+      row(true, null, 500),
+      row(false, 'invalid_output', 300),
+      // Turned away: overloaded, rate-limited, timed out, cut off by our own deadline. Their tokensIn is only an estimate.
+      row(false, 'unavailable'),
+      row(false, 'rate_limited'),
+      row(false, 'timeout'),
+      row(false, 'aborted'),
+    ]);
+    const quota = new QuotaService(handle.db, { dailyCalls: 3, dailyTokens: 9_000, globalDailyCalls: 3, timezone: 'Europe/Istanbul' });
+    expect(await quota.status(userId)).toMatchObject({ allowed: true, callsToday: 2, tokensToday: 8_800 });
+    expect(await quota.site()).toEqual({ callsToday: 2, dailyCalls: 3 });
+
+    await handle.db.insert(usageLog).values(row(true, null, 0));
+    const spent = await quota.status(userId);
+    expect(spent).toMatchObject({ allowed: false, callsToday: 3 });
   });
 
   it('never sends images to text-only models, and needs no JSON instructions for schema-enforcing models', async () => {

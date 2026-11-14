@@ -62,8 +62,9 @@ const loadSchema = z.object({
     byProvider: z.array(z.object({ provider: z.string(), calls: z.number().int(), failed: z.number().int() })),
   }),
   pacing: z.array(z.object({ model: z.string(), inLastMinute: z.number().int(), ceiling: z.number().int() })),
+  quota: z.object({ callsToday: z.number().int(), dailyCalls: z.number().int() }),
   process: z.object({ rssMb: z.number(), heapMb: z.number(), eventLoopP99Ms: z.number(), uptimeS: z.number() }),
-  alerts: z.array(z.object({ key: z.enum(['slow', 'failing', 'busy']), since: z.string() })),
+  alerts: z.array(z.object({ key: z.enum(['slow', 'failing', 'busy', 'quota']), since: z.string() })),
 });
 
 export const adminRoutes: FastifyPluginAsyncZod<{ service: AdminService; load: LoadMonitor }> = async (app, { service, load }) => {

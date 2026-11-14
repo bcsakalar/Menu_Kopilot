@@ -1184,3 +1184,27 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   IPv6 bağlantısı kendi /64 bloğuyla sayılır; adresin son kısmını değiştirerek yeni ziyaretçi açılamaz. Kalan
   korumalar adrese bağlı değil: ziyaretçi başına günlük kota, site geneli günlük tavan ve analiz kuyruğu (aynı anda
   10 analiz, 50 sırada; D-214). Canlıda bugüne kadar hiç 429 görülmedi; en yoğun dakikada bir adresten 3 mesaj geldi.
+- **D-216** — **Günlük kotalar gün sonunda kimseyi kilitlemez** (kullanıcı isteği, 2026-11-14: "QR menüde kişi başı 40
+  diye hız sınırı vardı, herkes aynı yerden geliyormuş, gün sonuna doğru herkes takılıyordu; bunu kontrol et, pazartesi
+  patlamayalım"). QR menüde sınır gün başına 40 işti ve IP'ye bağlıydı, bütün ofis aynı hakkı harcıyordu. Bu sistemde
+  dakikalık sınırlar her dakika sıfırlanır (D-215), ama üç şey gün sonunda aynı tabloyu doğurabilirdi:
+  1. Site geneli günlük tavan (3000 çağrı) herkes için ortaktı.
+  2. Sağlayıcının çevirdiği çağrılar da kotadan düşüyordu. Aşırı yoğun, hız limiti ya da süre aşımıyla dönen çağrılar
+     buna dahildi; 13 Kasım'da çağrıların dörtte biri böyleydi. Tahmini token'ları da temsilcinin token kotasından
+     düşüyordu.
+  3. Kota dolunca mesajlar yanlış şeyi söylüyordu. Ekran görüntüsüne "Bu görüntüde menü okuyamadım", serbest yazıya
+     "Birkaç saniye sonra tekrar dene" deniyordu; ikisi de gece yarısına kadar düzelmeyecekti.
+  Canlı ölçüm (son 8 gün): en yoğun temsilci bir günde 23 analiz ve 72 çağrı yaptı. Bir analiz ortalama 3,5 çağrı ve
+  9 000 token (p90: 6 çağrı, 17 000 token).
+  Yapılanlar:
+  - **Sayım:** yalnızca sağlayıcının işlediği çağrılar kotadan düşer: cevap verilenler, bozuk cevap verilenler (onlar
+    da faturalanır) ve çıktı yazıp kesilenler.
+  - **Kotalar:** temsilci başına günde 1000 çağrı ve 5 milyon token (önceden 300 ve 1,5 milyon), site geneli 10 000
+    çağrı (önceden 3000). Ücretsiz katmanda sağlayıcıların kendi günlük sınırı bu tavandan önce dolar, yani tavan orada
+    bağlamaz. Faturalama açılırsa tavan harcama sınırı olur.
+  - **Uyarı:** site tavanın %80'ine gelince ntfy uyarısı gelir, gün bitmeden; yönetim panosundaki "Anlık yük" de
+    gösterir.
+  - **Kota dolunca:** mesaj bunu açıkça söyler. Yazılan ürün listeleri, tek ürün adları ve hazır düğmeler havuzdan
+    çalışmaya devam eder. Menüsüz bir mesajda geçen mutfak adı ("Uzak Doğu için öneri sun", "Kebap") modelsiz de o
+    mutfaktan başlatır; bu, sağlayıcılar yoğunken de geçerlidir. Yalnızca ekran görüntüsü ve modelin anlaması gereken
+    serbest sorular ertesi güne kalır.

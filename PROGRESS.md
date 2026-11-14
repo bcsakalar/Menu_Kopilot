@@ -24,7 +24,7 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `81ec53c`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1350, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1355, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
   Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
@@ -35,8 +35,10 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `81ec53c`
 - **Gemini zaman zaman aşırı yoğun.** 503 "high demand" ve hız limiti verdiğinde zincir Groq'a düşer; Groq'un ücretsiz
   katmanı da limite takılınca öneriler hazır havuzdan gelir ve kartın üstünde bir not görünür. Yoğun anlarda ilk analiz
   20–30 saniyeyi bulabilir. 2026-11-13'te çağrıların %27'si bu yüzden başarısızdı; kişi sayısı arttıkça öneriler
-  giderek havuzdan gelir. Kalıcı çözüm ücretli Gemini katmanı, ardından `GLOBAL_DAILY_LLM_CALL_QUOTA` (bugün 3000 çağrı,
-  yaklaşık 780 analiz) ekip büyüklüğüne göre yükseltilir (D-214).
+  giderek havuzdan gelir. Kalıcı çözüm ücretli Gemini katmanı. Günlük kotalar cömert: temsilci başına 1000 çağrı, site
+  geneli 10 000; başarısız çağrılar kotadan düşmez, tavanın %80'inde ntfy uyarısı gelir. Ücretsiz katmanda sağlayıcıların
+  kendi günlük sınırı bundan önce dolar: o zaman ekran görüntüleri okunamaz, yazılan listeler, mutfak adları ve hazır
+  düğmeler havuzdan çalışır ve mesaj bunu açıkça söyler (D-216).
 - **Öğrenme döngüsü yeni veri almıyor.** Evet / Düşünecek / Hayır kaldırıldığı için (D-202) sistem restoranların tercihini
   artık öğrenmiyor; daha önce öğrendikleri çalışmaya devam ediyor. **Öğrenilenler** sayfası bu yüzden sabit.
 - **Embedding kotası günde 1000 istek (Gemini ücretsiz katman).** Toplu şablon eklemesinden sonra kota dolarsa yeni
@@ -63,6 +65,6 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `81ec53c`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-215 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-216 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

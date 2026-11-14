@@ -27,14 +27,16 @@ interface LoadData {
   analyses: { running: number; waiting: number; size: number; queueMax: number; waitP95Ms: number | null };
   lastQuarter: { runs: number; p50Ms: number | null; p95Ms: number | null; calls: number; failed: number; byProvider: { provider: string; calls: number; failed: number }[] };
   pacing: { model: string; inLastMinute: number; ceiling: number }[];
+  quota: { callsToday: number; dailyCalls: number };
   process: { rssMb: number; heapMb: number; eventLoopP99Ms: number; uptimeS: number };
-  alerts: { key: 'slow' | 'failing' | 'busy'; since: string }[];
+  alerts: { key: 'slow' | 'failing' | 'busy' | 'quota'; since: string }[];
 }
 
 const ALERT_LABEL: Record<LoadData['alerts'][number]['key'], string> = {
   slow: 'Analizler yavaş',
   failing: 'Yapay zekâ çağrıları sık başarısız',
   busy: 'Analiz kuyruğu dolu',
+  quota: "Günlük yapay zekâ tavanının %80'i doldu",
 };
 /** How often the load panel refreshes itself while the dashboard is open. */
 const LOAD_REFRESH_MS = 15_000;

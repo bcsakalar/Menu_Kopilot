@@ -81,6 +81,13 @@ export interface QuotaStatus {
 }
 
 /** Daily quota per visitor and for the whole site (config). When exceeded the pipelines answer from DB/cache only. */
+/**
+ * A call the provider processed: answered, answered unusably (invalid JSON is still billed), or wrote output before it
+ * failed. An overloaded, rate-limited or timed-out call costs nothing, so it must not spend a rep's day or the site's:
+ * on 2026-11-13 a quarter of all calls were such failures (D-216).
+ */
+export const processedCall = sql`(${usageLog.success} or ${usageLog.tokensOut} > 0 or ${usageLog.errorCode} = 'invalid_output')`;
+
 export class QuotaService {
   constructor(
     private readonly db: Database,
@@ -91,7 +98,10 @@ export class QuotaService {
   /** Today's calls of the whole site against its ceiling, for the admin panel. */
   async site(): Promise<{ callsToday: number; dailyCalls: number }> {
     const since = startOfDay(this.now(), this.config.timezone);
-    const [row] = await this.db.select({ calls: sql<number>`count(*)::int` }).from(usageLog).where(gte(usageLog.createdAt, since));
+    const [row] = await this.db
+      .select({ calls: sql<number>`(count(*) filter (where ${processedCall}))::int` })
+      .from(usageLog)
+      .where(gte(usageLog.createdAt, since));
     return { callsToday: row?.calls ?? 0, dailyCalls: this.config.globalDailyCalls ?? 0 };
   }
 
@@ -100,9 +110,9 @@ export class QuotaService {
     const mine = userId ? sql`${usageLog.userId} = ${userId}` : sql`${usageLog.userId} is null`;
     const [row] = await this.db
       .select({
-        calls: sql<number>`(count(*) filter (where ${mine}))::int`,
-        tokens: sql<number>`coalesce(sum(${usageLog.tokensIn} + ${usageLog.tokensOut}) filter (where ${mine}), 0)::int`,
-        siteCalls: sql<number>`count(*)::int`,
+        calls: sql<number>`(count(*) filter (where ${mine} and ${processedCall}))::int`,
+        tokens: sql<number>`coalesce(sum(${usageLog.tokensIn} + ${usageLog.tokensOut}) filter (where ${mine} and ${processedCall}), 0)::int`,
+        siteCalls: sql<number>`(count(*) filter (where ${processedCall}))::int`,
       })
       .from(usageLog)
       .where(gte(usageLog.createdAt, since));
