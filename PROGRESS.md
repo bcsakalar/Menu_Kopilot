@@ -1,6 +1,6 @@
 # Durum
 
-Son güncelleme: 2026-11-14 · Canlı sürüm: `db6287d`
+Son güncelleme: 2026-11-14 · Canlı sürüm: `c4f9148`
 
 ## Bugün ne çalışıyor
 
