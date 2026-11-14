@@ -61,7 +61,9 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   'agent.options.user': 3,
   // v2: an objection is answered with the sentence to read out.
   // v3: the platform is not named — "bir yemek sipariş platformu" (D-203).
-  'agent.chat.system': 6,
+  // v7: options for a product the menu does not show are completed, not refused; descriptions and option lists are left to
+  //     the system, never written into the reply or as "Şöyle söyle" (D-221).
+  'agent.chat.system': 7,
   'agent.chat.user': 2,
 };
 

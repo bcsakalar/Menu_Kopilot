@@ -23,6 +23,10 @@ import { itemsEnvelopeSchema } from '../../agents/schemas/shared.js';
  */
 export const HEDGE_AFTER_MS = 7_000;
 
+type Envelope = { items: unknown[] };
+/** A read that found products; an empty one may be a model that could not see the photo (D-221). */
+const readSomething = (result: RoutedResult<Envelope>): boolean => result.ok && result.value.items.length > 0;
+
 export interface VisionExtractSpec<I> {
   task: TaskKey;
   systemKey: PromptKey;
@@ -68,6 +72,16 @@ export class VisionExtractor {
     };
     let result = await this.hedged(request, ctx);
     const attempts = [...result.attempts];
+    // D-221. On production a fallback model answered three menu screenshots with an empty list in under a second, and
+    // the rep was told there was no menu on them. An empty read is asked once more, of another model: a second empty
+    // answer means the photo really holds no menu; no second answer at all means the providers are busy — said as
+    // such, and nothing is cached, so the next try reads the photo again.
+    if (result.ok && result.value.items.length === 0) {
+      const second = await this.router.generate({ ...request, excludeModels: [result.meta.model] }, ctx);
+      attempts.push(...second.attempts);
+      if (!second.ok && second.error.kind !== 'invalid_output') return { ok: false, error: second.error, attempts };
+      if (second.ok) result = second;
+    }
     if (!result.ok && result.error.kind === 'invalid_output' && result.route) {
       const repair = await this.prompts.render('repair.user', {
         errors: (result.error.issues ?? []).join('\n'),
@@ -82,16 +96,18 @@ export class VisionExtractor {
       const parsed = spec.itemSchema.safeParse(raw);
       return parsed.success ? [parsed.data] : [];
     });
-    await setJson(this.cache, key, { items }, this.ttlSeconds);
+    // An empty read is never kept: the same photo pasted again is read again.
+    if (items.length > 0) await setJson(this.cache, key, { items }, this.ttlSeconds);
     return { ok: true, items, cached: false, attempts, provider: result.meta.provider, model: result.meta.model };
   }
 
   /**
    * The chain in order, raced once (see [HEDGE_AFTER_MS]). The first good answer wins and the other call is
    * cancelled. A hedge that fails — a long menu cut by its output cap comes back as invalid JSON — does not end the
-   * read: the first call keeps going down its chain as it always did.
+   * read: the first call keeps going down its chain as it always did. An empty list is not a good answer while the
+   * other call may still read the menu (D-221).
    */
-  private async hedged<T>(request: RouterRequest<T>, ctx: CallContext): Promise<RoutedResult<T>> {
+  private async hedged<T extends Envelope>(request: RouterRequest<T>, ctx: CallContext): Promise<RoutedResult<T>> {
     const primaryAbort = new AbortController();
     const hedgeAbort = new AbortController();
     const signalFor = (own: AbortController): AbortSignal => (ctx.signal ? AbortSignal.any([ctx.signal, own.signal]) : own.signal);
@@ -108,10 +124,13 @@ export class VisionExtractor {
 
     const hedge = this.router.generate({ ...request, routeOffset: 1 }, { ...ctx, signal: signalFor(hedgeAbort) });
     const winner = await new Promise<'primary' | 'hedge' | null>((resolve) => {
-      let failed = 0;
+      let settled = 0;
+      let empty: 'primary' | 'hedge' | null = null;
       const settle = (name: 'primary' | 'hedge') => (result: RoutedResult<T>) => {
-        if (result.ok) resolve(name);
-        else if (++failed === 2) resolve(null);
+        settled += 1;
+        if (readSomething(result)) return resolve(name);
+        if (result.ok) empty ??= name;
+        if (settled === 2) resolve(empty);
       };
       void primary.then(settle('primary'));
       void hedge.then(settle('hedge'));

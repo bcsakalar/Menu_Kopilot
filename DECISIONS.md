@@ -1363,3 +1363,28 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
     kalır. Kaynak 1,25 kattan fazla büyütülecekse "bulanık görünebilir, daha büyük görsel iste" uyarısı çıkar.
   - **Hata düzeltmesi:** D-219'daki "Özel ölçü" seçiliyken görsel her çizimde yeni bir ölçü nesnesi aldığı için durmadan
     yeniden kodlanıyordu; ölçü artık yalnızca değerleri değişince yenilenir (tarayıcıda 3 saniyede 0 yeniden kodlama).
+- **D-221** — **Günün görüşmeleri incelendi: cevapsız kalan ekran görüntüleri ve yanlış anlaşılan istekler düzeltildi**
+  (kullanıcı isteği, 2026-11-14: "bugünkü kullanımları incele… saçmalar var, cevap vermedikleri var… sorunsuz hale
+  getirelim"). 15 görüşme tek tek okundu, model kayıtlarıyla karşılaştırıldı:
+  - **"Bu görüntüde menü okuyamadım" (3 kez) gerçek değildi.** Gemini meşgulken okuma zincirin ikinci modeline düştü; o
+    model menüyü göremeyip boş liste döndürdü (6 çıktı token'ı, 1 saniyenin altında) ve bu "menü yok" sayıldı. Bir
+    görüntüde ise yarışın yedek tarafı boş listeyle kazandı; Gemini aynı görüntüyü doğru okuduğunda cevap çoktan
+    gitmişti. Boş sonuç 30 gün önbellekte de kaldığından aynı görüntüyü tekrar yapıştırmak işe yaramıyordu. Şimdi:
+    boş liste yarışı kazanmaz; boş okuma bir kez başka bir modele sorulur (`excludeModels`); ikinci model de boş derse
+    görüntüde gerçekten menü yoktur, ikinci cevap hiç alınamazsa "servisler yoğun, tekrar dene" denir; boş sonuç
+    önbelleğe yazılmaz.
+  - **Virgüllü istek ürün listesi sanıldı:** "kebaplara ve lahmacuna, pideye opsiyon … öner" iki ürünlük menü olarak
+    okunup ürün önerildi. İçinde istek sözcüğü (opsiyon, açıklama, çıkarılabilir, malzeme; sonda öner, yaz, ekle…)
+    olan satır artık ürün değildir. "Karışık Malzemeli Pizza", "Yaz Salatası", "Çikolatalı Ekler" ürün kalır.
+  - **Menüde olmayan ürüne opsiyon reddediliyordu:** "makarnaya opsiyon öner" ve "suşiye opsiyon" "Şöyle söyle:
+    menünüzde … bulunmuyor" cevabını aldı. Temsilci istiyorsa restoran satıyordur: ürün menüye eklenir, opsiyonu ve
+    açıklaması hazırlanır, cevap "**Makarna** menüde yoktu, ekledim" der. Sohbet yönergesi buna göre değişti (v7):
+    açıklama ve opsiyon listesi cevaba modelce yazılmaz, "Şöyle söyle" yalnızca restorana okunacak cümle içindir.
+  - **Açıklama istendi, açıklama verilmedi:** ekran görüntüsüyle gelen "ürünlere açıklama önerir misin" yeni ürün
+    önerileriyle, botun kendi önerdiği "Diğer çorbalara açıklama yaz" ise "opsiyon ve malzemeleri hazırladım" cümlesiyle
+    cevaplandı. Açıklama istenince cevap artık açıklamaların kendisini panele yapıştırılacak biçimde listeler (en fazla
+    12 ürün); ekran görüntüsüyle gelen istekte bu, ürün sayısından hemen sonra gelir.
+  - **Sorun olmayanlar:** "Çatal" önerisi gerçek bir fırın ürünüdür (tuzlu çatal); "servisler yoğun" cevabı o anda
+    Groq'un dakikalık sınırı dolduğu için doğruydu.
+  - **Yapılmayan:** başka bir restoranın ekran görüntüsü aynı görüşmeye yapıştırılınca (tatlıcıya dürüm menüsü) menüler
+    birleşiyor; "poğaça çeşitleri" çeşit isteği yerine ürün adı olarak okunuyor. İkisi de ayrı karar ister.

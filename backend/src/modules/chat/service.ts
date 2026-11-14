@@ -14,7 +14,7 @@ import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { aiBusy, aiTrouble, ASK_MENU, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
+import { aiBusy, aiTrouble, ASK_MENU, completionAsk, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -35,6 +35,18 @@ const SENTENCE_WORDS = new Set(
   'merhaba selam selamlar günaydın iyi kolay gelsin teşekkürler sağol tamam lütfen bir bu şu ben biz siz için ne nasıl neden mı mi mu mü var yok değil ama gibi şimdi'.split(' '),
 );
 const isSentence = (name: string) => name.toLocaleLowerCase('tr').split(/\s+/u).some((word) => SENTENCE_WORDS.has(word));
+
+/**
+ * Words that ask for something (normalized starts): "kebaplara ve lahmacuna, pideye opsiyon … öner" is a request with a
+ * comma in it, not a two-product menu — read as one on production, it suggested products instead of options (D-221).
+ */
+const REQUEST_NOUN = /^(opsiyon|aciklama|cikarilabilir)|^malzeme(?!li)/u;
+// A verb only ends a request: "Yaz Salatası" and "Çikolatalı Ekler" are products.
+const REQUEST_VERB = /^(oner|hazirla|getir)|^(yaz|yazar|yazin|ekle|ekleyin|ekleyelim|istiyorum|lazim)$/u;
+const isRequest = (name: string) => {
+  const words = normalizeTr(name).split(' ');
+  return words.some((word) => REQUEST_NOUN.test(word)) || REQUEST_VERB.test(words.at(-1) ?? '');
+};
 
 /**
  * Words of a request, never of a product (normalized): "hamsi ile ilgili yemekler öner" names one product, hamsi. Also the
@@ -70,7 +82,7 @@ export function looksLikeProductList(text: string): boolean {
   return (
     names.length >= LIST_MIN_NAMES &&
     !text.includes('?') &&
-    names.every((n) => n.length <= LIST_MAX_NAME_CHARS && !isSentence(n))
+    names.every((n) => n.length <= LIST_MAX_NAME_CHARS && !isSentence(n) && !isRequest(n))
   );
 }
 
@@ -129,6 +141,15 @@ function focusOf(decision: ChatDecision): Partial<RunFocus> {
 function named(products: readonly string[], text: string): string[] {
   const said = normalizeTr(text).split(' ');
   return products.filter((p) => normalizeTr(p).split(' ').some((word) => word.length >= 3 && said.some((s) => s.startsWith(word))));
+}
+
+/** On the menu already, matched as the analysis matches a target: the same name, or one name inside the other. */
+function onMenu(menu: AnalyzeResult['menu'], target: string): boolean {
+  const wanted = normalizeTr(target);
+  return wanted.length >= 2 && menu.some((item) => {
+    const own = normalizeTr(item.name);
+    return own === wanted || own.includes(wanted) || wanted.includes(own);
+  });
 }
 
 function onlyNamed(decision: ChatDecision, text: string): ChatDecision {
@@ -248,7 +269,8 @@ export class ChatService {
         result = await this.runAgents(userId, outgoing, firstFields({ ...fields, ...cuisine }), {}, emit);
       }
       if (result.menu.length > 0) {
-        await this.reply(outgoing, summarize(result), result, emit);
+        // A screenshot sent with "açıklama önerir misin" answers that first (D-221).
+        await this.reply(outgoing, summarize(result, completionAsk(text)), result, emit);
         return;
       }
       // An invoice or a blurry shot recommended into the air: no cards, and the conversation keeps its earlier run.
@@ -285,11 +307,18 @@ export class ChatService {
     }
     // Products named before any menu start it: "lahmacun da var", "Adana için opsiyon yaz" — a first analysis that fills
     // to the target (D-213), in the cuisine the rep named before, if any.
-    const typed = decision.action === 'complete' && !last?.menu.length ? named(decision.targets, outgoing.text) : decision.addProducts;
+    // Options for a product the menu does not show ("makarnaya opsiyon öner"): the restaurant sells it, so it joins the
+    // menu and gets its options. On production the model answered such requests with "menüde makarna yok" (D-221).
+    const completing = decision.action === 'complete';
+    const typed = completing
+      ? named(last?.menu.length ? decision.targets.filter((target) => !onMenu(last.menu, target)) : decision.targets, outgoing.text)
+      : decision.addProducts;
+    const ask = completing ? completionAsk(outgoing.text) : { descriptions: false, options: false };
     if (!last?.menu.length && typed.length > 0) {
       const cuisine = last?.counts ? { cuisineId: last.counts.cuisineId } : {};
       const result = await this.runAgents(userId, outgoing, firstFields({ menuText: typed.join('\n'), ...cuisine }), {}, emit);
-      await this.reply(outgoing, summarize(result), result, emit);
+      // Asked for options or descriptions, the answer says what it completed, whatever words the request used.
+      await this.reply(outgoing, summarize(result, completing ? { ...ask, options: !ask.descriptions } : ask), result, emit);
       return;
     }
     // A cuisine named with no menu ("Uzak Doğu için öneri sun") or a switch of cuisine: a fresh start from it. The
@@ -317,9 +346,14 @@ export class ChatService {
     const focus = await this.focus(conversationId, last, want);
     const fields = continueFields(last, typed, decision.note);
     const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts }, emit);
-    const lead = decision.action === 'update_menu' ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.` : '';
+    const lead =
+      decision.action === 'update_menu'
+        ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.`
+        : completing && typed.length > 0
+          ? `**${typed.join(', ')}** menüde yoktu, ekledim: şu an ${result.counts?.current ?? 0} ürün var.`
+          : '';
     const quickReplies = aiBusy(result) ? [outgoing.text] : quick ? nextSteps(result) : answer.quickReplies;
-    await this.reply(outgoing, { quickReplies, text: followUp(result, lead) }, result, emit);
+    await this.reply(outgoing, { quickReplies, text: followUp(result, lead, ask.descriptions) }, result, emit);
   }
 
   private async focus(conversationId: string, last: AnalyzeResult, want: Partial<RunFocus>): Promise<RunFocus> {

@@ -11,5 +11,5 @@
 - **Anahtarlar yalnızca sunucuda.** `web/` altına sağlayıcı anahtarı ya da adresi yazılmaz; `.env*` commit edilmez.
 - **Ziyaretçi ortak veriye yazamaz.** Yeni bir uç `backend/src/app.ts` içinde doğru kapsama (açık / oturum / admin) bağlanır.
 - **Dil:** arayüz metinleri Türkçe; kod, kod yorumları ve commit mesajları İngilizce, `feat(web): …` biçiminde.
-- **Kararlar** `DECISIONS.md` sonuna `D-221`'den devam ederek eklenir.
+- **Kararlar** `DECISIONS.md` sonuna `D-222`'den devam ederek eklenir.
 - **Canlıya alma** (`scripts/deploy.ps1`, `ssh myserver`) proje sahibinin açık onayı olmadan yapılmaz.

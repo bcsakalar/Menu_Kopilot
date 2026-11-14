@@ -1,4 +1,5 @@
 import { AI_BUSY, AI_SPENT } from '../../agents/chat.js';
+import { normalizeTr } from '../../lib/normalize-tr.js';
 import type { AnalyzeResult, CountsDto } from '../analyze/schemas.js';
 
 const TOP_PRODUCTS = 3;
@@ -6,6 +7,36 @@ const MAX_REPLIES = 3;
 export const MORE_PRODUCTS = 'Daha fazla ürün öner';
 /** The run had no model to ask: saying "nothing fits" then would be a wrong verdict on the menu. */
 const AI_TROUBLE: ReadonlySet<string> = new Set(['recommend_failed', 'options_failed', 'slow_providers', 'agent_failed', 'extract_failed']);
+
+/** Descriptions listed in one answer: a menu's worth for the panel, short enough to read on the call. */
+const MAX_DESCRIPTIONS = 12;
+
+/**
+ * What the rep asked of the menu's products, read off the words (D-221): descriptions, options and ingredients, or
+ * neither. On production "ürünlere açıklama önerir misin" with a screenshot got new products and no description.
+ */
+export function completionAsk(text: string): { descriptions: boolean; options: boolean } {
+  const words = normalizeTr(text).split(' ');
+  return {
+    descriptions: words.some((word) => word.startsWith('aciklama')),
+    options: words.some((word) => /^(opsiyon|malzeme|ekstra|cikarilabilir|cikarilacak)/u.test(word)),
+  };
+}
+
+/**
+ * The products a run completed, said the way they were asked for: asked for descriptions, the descriptions themselves,
+ * ready to paste — "hazırladım" alone sent the rep looking through the cards.
+ */
+export function completionLines(result: AnalyzeResult, descriptions: boolean): string[] {
+  const done = result.cards.filter((c) => c.section === 'option');
+  if (done.length === 0) return [];
+  const described = done.filter((c) => c.shortDescription.trim() !== '').slice(0, MAX_DESCRIPTIONS);
+  if (descriptions && described.length > 0) {
+    return ['Açıklamalar, panele yapıştırmaya hazır:', ...described.map((c) => `- **${c.targetName ?? c.name}:** ${c.shortDescription.trim()}`)];
+  }
+  const names = done.slice(0, TOP_PRODUCTS).map((c) => c.targetName ?? c.name);
+  return [`**${names.join(', ')}** için opsiyon ve malzemeleri hazırladım.`];
+}
 
 const percent = (part: number, total: number) => `%${Math.round((part / Math.max(1, total)) * 100)}`;
 
@@ -50,7 +81,7 @@ export function reachLine(counts: CountsDto, offered: number): string {
  * The first thing the rep reads on the call, written without a model so it arrives with the cards: where the menu
  * stands, what to bring up first, and the next steps as buttons.
  */
-export function summarize(result: AnalyzeResult): { text: string; quickReplies: string[] } {
+export function summarize(result: AnalyzeResult, ask: { descriptions: boolean; options: boolean } = { descriptions: false, options: false }): { text: string; quickReplies: string[] } {
   const { counts, cards } = result;
   if (!counts || result.menu.length === 0) {
     return {
@@ -66,6 +97,8 @@ export function summarize(result: AnalyzeResult): { text: string; quickReplies: 
   const products = cards.filter((c) => c.section === 'new_product');
   // The gaps stand in the header and the card counts on the tabs: this answer says only what they cannot.
   const lines = [`**${counts.cuisineName}** menüsü: ${counts.current} ürün okudum, hedef ${counts.target}.`];
+  // What the rep asked for comes before what the menu still needs (D-221).
+  if (ask.descriptions || ask.options) lines.push(...completionLines(result, ask.descriptions));
   if (products.length > 0) {
     lines.push(reachLine(counts, products.length));
     lines.push(`Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`);
@@ -99,7 +132,7 @@ export function fromCuisine(result: AnalyzeResult): { text: string; quickReplies
  * What a follow-up run brought, from the run itself: a lead-in the model writes before the agents have run named
  * products that the guards then dropped, so the sentence and the cards disagreed.
  */
-export function followUp(result: AnalyzeResult, lead = ''): string {
+export function followUp(result: AnalyzeResult, lead = '', descriptions = false): string {
   const named = (section: 'new_product' | 'option'): string =>
     result.cards
       .filter((c) => c.section === section)
@@ -108,10 +141,9 @@ export function followUp(result: AnalyzeResult, lead = ''): string {
       .join(', ');
   const products = named('new_product');
   const more = result.cards.filter((c) => c.section === 'new_product').length - TOP_PRODUCTS;
-  const options = named('option');
   const lines = [
     ...(lead ? [lead] : []),
-    ...(options ? [`**${options}** için opsiyon ve malzemeleri hazırladım.`] : []),
+    ...completionLines(result, descriptions),
     ...(products ? [`Önerim: **${products}**${more > 0 ? ` ve ${more} ürün daha` : ''}.`] : []),
   ];
   if (lines.length > 0) return lines.join('\n');

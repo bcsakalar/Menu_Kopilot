@@ -24,6 +24,8 @@ export type RouterRequest<T> = Omit<GenerateStructuredOptions<T>, 'model' | 'par
    * they all answer, in parallel, in the time of a single call. Every route is still tried on failure.
    */
   routeOffset?: number;
+  /** Models this one request must not use: a second opinion is not asked of the model that gave the first (D-221). */
+  excludeModels?: readonly string[];
 };
 
 export interface CallContext {
@@ -137,7 +139,8 @@ export class AiRouter {
     return { ok: true };
   }
 
-  private skipReason(route: ResolvedRoute, request: { images?: RouterRequest<unknown>['images'] }): string | undefined {
+  private skipReason(route: ResolvedRoute, request: { images?: RouterRequest<unknown>['images']; excludeModels?: readonly string[] }): string | undefined {
+    if (request.excludeModels?.includes(route.model)) return 'excluded';
     const provider = this.deps.providers[route.provider];
     if (!provider || !provider.isConfigured()) return 'not_configured';
     const spec = getModelSpec(route.model);

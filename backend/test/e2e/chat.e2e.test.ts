@@ -93,6 +93,17 @@ describe('a typed product list', () => {
     expect(looksLikeProductList('merhaba, yeni bir restoranla görüşmeye başlıyorum')).toBe(false);
     expect(looksLikeProductList('iyi günler, kolay gelsin')).toBe(false);
   });
+
+  it('is not a request with a comma in it (D-221)', () => {
+    // Seen live: read as a two-product menu, it suggested products instead of options.
+    expect(looksLikeProductList('kebaplara ve lahmacuna, pideye opsiyon ekstra malzeme ve çıkarılabilir malzeme öner')).toBe(false);
+    expect(looksLikeProductList('mercimek, ezogelin için açıklama yaz')).toBe(false);
+    expect(looksLikeProductList('adana, urfa ekle')).toBe(false);
+    // Product names stay products, "Ekstra" in a name too.
+    expect(looksLikeProductList('Adana Kebap, Ekstra Acılı Adana, Ayran')).toBe(true);
+    expect(looksLikeProductList('Karışık Malzemeli Pizza, Kola')).toBe(true);
+    expect(looksLikeProductList('Yaz Salatası, Çikolatalı Ekler, Ayran')).toBe(true);
+  });
 });
 
 describe('the visitor cookie', () => {
@@ -274,6 +285,54 @@ describe('a conversation', () => {
     const cards = answer?.message.result.cards ?? [];
     expect(cards.map((c) => c.section)).toEqual(['option']);
     expect(cards[0]?.targetName).toContain('Adana');
+  });
+
+  it('completes a product the menu does not show by adding it, instead of saying it is not there (D-221)', async () => {
+    // Seen live: "makarnaya opsiyon öner" got "Şöyle söyle: menümüzde makarna bulunmuyor".
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'complete', reply: 'Bakıyorum.', targets: ['Adana Kebap', 'Lahmacun'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'adanaya ve lahmacuna opsiyon öner' }, first.cookie);
+    const [answer] = eventOf<{ message: { text: string; result: { menu: { name: string }[]; cards: CardDto[]; counts: { current: number } } } }>(sent, 'message');
+    expect(answer?.message.text).toContain('**Lahmacun** menüde yoktu, ekledim: şu an 4 ürün var.');
+    const names = answer?.message.result.menu.map((m) => m.name) ?? [];
+    expect(names).toContain('Lahmacun');
+    // What was on the menu is not added twice.
+    expect(names.filter((name) => name.includes('Adana'))).toHaveLength(1);
+    const completed = answer?.message.result.cards.filter((c) => c.section === 'option').map((c) => c.targetName ?? '') ?? [];
+    expect(completed.some((name) => name.includes('Lahmacun'))).toBe(true);
+    expect(completed.some((name) => name.includes('Adana'))).toBe(true);
+  });
+
+  it('answers a request for descriptions with the descriptions, ready to paste (D-221)', async () => {
+    // Seen live: "Diğer çorbalara açıklama yaz" was answered "opsiyon ve malzemeleri hazırladım", with no description.
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'complete', reply: 'Bakıyorum.', targets: ['Adana Kebap', 'Urfa Kebap'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'kebaplara açıklama yaz' }, first.cookie);
+    const [answer] = eventOf<{ message: { text: string; result: { cards: CardDto[] } } }>(sent, 'message');
+    const text = answer?.message.text ?? '';
+    expect(text).toContain('Açıklamalar, panele yapıştırmaya hazır:');
+    expect(text).not.toContain('opsiyon ve malzemeleri hazırladım');
+    for (const card of answer?.message.result.cards.filter((c) => c.section === 'option') ?? []) {
+      expect(text).toContain(`- **${card.targetName}:** ${card.shortDescription}`);
+    }
+  });
+
+  it('starts the menu from products named with a request for their options, and says it completed them (D-221)', async () => {
+    decision = { ...noDecision, action: 'complete', reply: 'Bakıyorum.', targets: ['Lahmacun', 'Kıymalı Pide'] };
+    const sent = await send({ text: 'lahmacuna ve kıymalı pideye opsiyon ekstra malzeme öner' });
+    const [answer] = eventOf<{ message: { text: string; result: { menu: { name: string }[] } | null } }>(sent, 'message');
+    expect(answer?.message.result?.menu.map((m) => m.name).sort()).toEqual(['Kıymalı Pide', 'Lahmacun']);
+    expect(answer?.message.text).toContain('için opsiyon ve malzemeleri hazırladım');
+  });
+
+  it('answers a screenshot sent with "açıklama önerir misin" with the descriptions first (D-221)', async () => {
+    const image = Buffer.from(fx.images.get('menu-kebapci.jpg')!.data);
+    const sent = await send({ text: 'ürünlere açıklama önerir misin' }, undefined, image);
+    const [answer] = eventOf<{ message: { text: string; result: { cards: CardDto[] } | null } }>(sent, 'message');
+    const lines = (answer?.message.text ?? '').split('\n');
+    expect(lines[0]).toContain('ürün okudum');
+    expect(lines[1]).toBe('Açıklamalar, panele yapıştırmaya hazır:');
+    expect(lines[2]).toMatch(/^- \*\*.+:\*\* .+/u);
   });
 
   it('takes what it learned about the menu into the count', async () => {

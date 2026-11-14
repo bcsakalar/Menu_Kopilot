@@ -11,7 +11,7 @@ import { VisionExtractor } from '../../src/modules/extraction/vision-extractor.j
  */
 
 type Items = { items: unknown[] };
-type Call = { offset: number; signal: AbortSignal | undefined };
+type Call = { offset: number; signal: AbortSignal | undefined; exclude: readonly string[] };
 
 const itemSchema = z.object({ name: z.string() });
 const spec = {
@@ -38,7 +38,7 @@ const ok = (provider: 'gemini' | 'groq', names: string[]): RoutedResult<Items> =
   route: { id: undefined, provider, model: `${provider}-model`, params: {}, priority: 0, enabled: true },
   attempts: [{ provider, model: `${provider}-model`, outcome: 'ok' }],
 });
-const failed = (kind: 'invalid_output' | 'aborted'): RoutedResult<Items> => ({
+const failed = (kind: 'invalid_output' | 'aborted' | 'unavailable'): RoutedResult<Items> => ({
   ok: false,
   error: { kind, message: kind, retryable: false } as never,
   attempts: [{ provider: 'groq', model: 'groq-model', outcome: kind }],
@@ -59,7 +59,7 @@ function extractorWith(answer: (call: Call) => Promise<RoutedResult<Items>>) {
   const calls: Call[] = [];
   const router = {
     generate: (request: RouterRequest<Items>, ctx: CallContext) => {
-      const call = { offset: request.routeOffset ?? 0, signal: ctx.signal };
+      const call = { offset: request.routeOffset ?? 0, signal: ctx.signal, exclude: request.excludeModels ?? [] };
       calls.push(call);
       return answer(call);
     },
@@ -98,5 +98,49 @@ describe('hedged photo read (D-195)', () => {
     expect(result.ok && result.items).toEqual([{ name: 'Uzun Menü' }]);
     expect(result.ok && result.provider).toBe('gemini');
     expect(calls).toHaveLength(2);
+  });
+});
+
+describe('an empty read is not the last word (D-221)', () => {
+  it('an empty hedge does not win the race: the slower first provider reads the menu', async () => {
+    const { read } = extractorWith((call) =>
+      call.offset === 0 ? later(80, ok('gemini', ['Mercimek Çorbası']), call.signal) : later(5, ok('groq', []), call.signal),
+    );
+    const result = await read();
+    expect(result.ok && result.items).toEqual([{ name: 'Mercimek Çorbası' }]);
+    expect(result.ok && result.provider).toBe('gemini');
+  });
+
+  it('an empty answer gets a second opinion from another model, which reads the menu', async () => {
+    const { calls, read } = extractorWith((call) =>
+      call.exclude.length === 0 ? later(5, ok('groq', []), call.signal) : later(5, ok('gemini', ['Adana Kebap']), call.signal),
+    );
+    const result = await read();
+    expect(result.ok && result.items).toEqual([{ name: 'Adana Kebap' }]);
+    expect(calls.map((c) => c.exclude)).toEqual([[], ['groq-model']]);
+  });
+
+  it('two empty answers mean no menu, and nothing is kept: the same photo is read again next time', async () => {
+    const { calls, read } = extractorWith((call) => later(5, ok(call.exclude.length === 0 ? 'groq' : 'gemini', []), call.signal));
+    const first = await read();
+    expect(first.ok && first.items).toEqual([]);
+    expect(calls).toHaveLength(2);
+    await read();
+    expect(calls).toHaveLength(4);
+  });
+
+  it('when no other model can answer, the read fails as busy instead of claiming there is no menu', async () => {
+    const { read } = extractorWith((call) => (call.exclude.length === 0 ? later(5, ok('groq', []), call.signal) : later(5, failed('unavailable'), call.signal)));
+    const result = await read();
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.error.kind).toBe('unavailable');
+  });
+
+  it('a menu that was read is kept: the same photo costs nothing the second time', async () => {
+    const { calls, read } = extractorWith((call) => later(5, ok('gemini', ['Ayran']), call.signal));
+    await read();
+    const again = await read();
+    expect(again.ok && again.cached).toBe(true);
+    expect(calls).toHaveLength(1);
   });
 });
