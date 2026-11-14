@@ -22,9 +22,9 @@ interface Reply {
   result: { cards: CardDto[]; counts: CountsDto | null } | null;
 }
 
-async function send(text: string, cookie?: string, image?: Buffer): Promise<{ reply: Reply; cookie: string }> {
+async function send(text: string, cookie?: string, image?: Buffer, conversationId?: string): Promise<{ reply: Reply; cookie: string; conversationId: string }> {
   host += 1;
-  const body = multipartBody({ text }, image ? [{ name: 'images', filename: 'menu.png', contentType: 'image/png', data: image }] : []);
+  const body = multipartBody({ text, ...(conversationId ? { conversationId } : {}) }, image ? [{ name: 'images', filename: 'menu.png', contentType: 'image/png', data: image }] : []);
   const res = await ctx.app.inject({
     method: 'POST',
     url: '/api/v1/chat/messages',
@@ -33,8 +33,10 @@ async function send(text: string, cookie?: string, image?: Buffer): Promise<{ re
     remoteAddress: `10.40.0.${host}`,
   });
   expect(res.statusCode).toBe(200);
-  const message = parseSse(res.body).find((e) => e.event === 'message')?.data as { message: Reply };
-  return { reply: message.message, cookie: cookie ?? String(res.headers['set-cookie']).split(';')[0]! };
+  const events = parseSse(res.body);
+  const message = events.find((e) => e.event === 'message')?.data as { message: Reply };
+  const conversation = events.find((e) => e.event === 'conversation')?.data as { conversation: { id: string } };
+  return { reply: message.message, cookie: cookie ?? String(res.headers['set-cookie']).split(';')[0]!, conversationId: conversation.conversation.id };
 }
 
 beforeAll(async () => {
@@ -70,5 +72,46 @@ describe('a spent daily quota (D-216)', () => {
     expect(first.reply.quickReplies).toContain('İçecek öner');
     const drinks = await send('İçecek öner', first.cookie);
     expect(drinks.reply.result?.cards.filter((c) => c.section === 'new_product').length ?? 0).toBeGreaterThan(0);
+  });
+});
+
+describe('the chat without a model keeps to what it can read (D-222)', () => {
+  it('reads "Tatlı öner" as desserts for the call, without switching the cuisine', async () => {
+    const start = await send('Ev Yemekleri için öneri sun');
+    expect(start.reply.result?.counts?.cuisineName).toBe('Ev Yemekleri');
+    const desserts = await send('Tatlı öner', start.cookie, undefined, start.conversationId);
+    expect(desserts.reply.result?.counts?.cuisineName).toBe('Ev Yemekleri');
+    const offered = desserts.reply.result?.cards.filter((c) => c.section === 'new_product') ?? [];
+    expect(offered.every((c) => c.categoryKey === 'tatli')).toBe(true);
+    // The start may already have offered the pool's desserts; the call offers some, and never the same one twice.
+    const before = start.reply.result?.cards.filter((c) => c.section === 'new_product' && c.categoryKey === 'tatli').map((c) => c.name) ?? [];
+    expect(before.length + offered.length).toBeGreaterThan(0);
+    expect(offered.filter((c) => before.includes(c.name))).toEqual([]);
+  });
+
+  it('does not take a long product list for a cuisine because one word names one', async () => {
+    // Seen live: "… çorbalar: süzme mercimek … şalgam" started the Çorba cuisine.
+    const { reply } = await send(
+      'gözleme çeşitleri ıspanaklı gözleme patatesli gözleme kaşarlı gözleme çorbalar süzme mercimek çorbası yoğurtlu çorba ayran kola fanta şalgam',
+    );
+    expect(reply.result?.counts?.cuisineName ?? null).not.toBe('Çorba');
+    expect(reply.text).toBe(AI_SPENT);
+  });
+
+  it('starts the menu with a product name typed alone', async () => {
+    const { reply } = await send('Tiramisu Cup');
+    expect(reply.result?.counts?.current).toBe(1);
+    expect(reply.text).toContain('ürün okudum');
+  });
+
+  it('answers the same cuisine asked twice with more of it, not the same start again', async () => {
+    const first = await send('Uzak Doğu için öneri sun');
+    const firstNames = first.reply.result?.cards.filter((c) => c.section === 'new_product').map((c) => c.name) ?? [];
+    const second = await send('Uzak Doğu mutfağı için öneri sun', first.cookie, undefined, first.conversationId);
+    const secondNames = second.reply.result?.cards.filter((c) => c.section === 'new_product').map((c) => c.name) ?? [];
+    expect(second.reply.text).not.toBe(first.reply.text);
+    expect(secondNames.length).toBeGreaterThan(0);
+    expect(secondNames.filter((name) => firstNames.includes(name))).toEqual([]);
+    expect(second.reply.result?.counts?.cuisineName).toBe('Uzak Doğu');
   });
 });

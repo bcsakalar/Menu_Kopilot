@@ -1,4 +1,4 @@
-import { countWords, fitDescription, isForbiddenGroup, SAVORY_INGREDIENTS, type ProductTypeDef } from '../domain/product-type.js';
+import { countWords, fitDescription, isForbiddenGroup, isGenericDescription, SAVORY_INGREDIENTS, type ProductTypeDef } from '../domain/product-type.js';
 import { templateOptionGroupSchema, type TemplateOptionGroup } from '../domain/template.js';
 import { normalizeTr } from '../lib/normalize-tr.js';
 import { containsPriceAmount, stripPriceAmounts } from '../lib/price-guard.js';
@@ -467,12 +467,15 @@ export function ground(suggestion: Suggestion, options: GroundOptions): Grounded
   // --- 5. description --------------------------------------------------------------------------------------------
   let description = '';
   if (options.want.description) {
-    const own = acceptableDescription(suggestion.description);
+    // A category's stock sentence is no description of this product: the type's own one is better (D-222).
+    const generic = isGenericDescription(suggestion.description, options.productName, options.alsoNamed);
+    const own = generic ? null : acceptableDescription(suggestion.description);
+    if (generic) notes.push('açıklama genel bir kalıptı, tipin açıklaması kullanıldı');
     if (own) description = own;
     else if (options.byName) {
       description = fitDescription(type.fallbackDescription) ?? '';
       if (description) filled.push('description');
-      if (suggestion.description && countWords(suggestion.description) > 0) {
+      if (!generic && suggestion.description && countWords(suggestion.description) > 0) {
         notes.push(`açıklama uygun değildi (${countWords(suggestion.description)} kelime), tipin açıklaması kullanıldı`);
       }
     }

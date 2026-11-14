@@ -115,14 +115,22 @@ export function summarize(result: AnalyzeResult, ask: { descriptions: boolean; o
 export const ASK_MENU =
   'Menünün ekran görüntüsünü yapıştır, ürünleri yaz (ör. "California Roll, Somon Maki") ya da mutfak türünü söyle (ör. "Uzak Doğu"); hemen başlarım.';
 
+/** A link is no menu: nothing here opens web pages, and on production the model answered one with "Menüyü inceliyorum" (D-222). */
+export const NO_LINKS = 'Bağlantıları açamıyorum. Menünün ekran görüntüsünü yapıştır ya da ürün adlarını virgülle yaz; hemen başlarım.';
+
 /** A start from the cuisine alone ("Uzak Doğu için öneri sun"), before any menu: its target and what such menus carry. */
-export function fromCuisine(result: AnalyzeResult): { text: string; quickReplies: string[] } {
+export function fromCuisine(
+  result: AnalyzeResult,
+  ask: { descriptions: boolean; options: boolean } = { descriptions: false, options: false },
+): { text: string; quickReplies: string[] } {
   const products = result.cards.filter((c) => c.section === 'new_product');
   if (!result.counts || products.length === 0) return { text: aiBusy(result) ? AI_BUSY : ASK_MENU, quickReplies: [] };
   const lines = [
     `**${result.counts.cuisineName}** için menüsüz başladım: hedef ${result.counts.target} ürün.`,
     reachLine(result.counts, products.length),
     `Önce şunları teklif et: **${products.slice(0, TOP_PRODUCTS).map((c) => c.name).join(', ')}**.`,
+    // "Suşici için opsiyon öner" with no menu: the options are on every card, and the answer says so (D-222).
+    ...(ask.options || ask.descriptions ? ['Her ürün kartında açıklaması, opsiyonları, çıkarılabilir ve ekstra malzemeleri hazır.'] : []),
     'Menünün ekran görüntüsünü yapıştırırsan ya da ürünleri yazarsan eksikleri tam çıkarırım.',
   ];
   return { text: lines.join('\n'), quickReplies: nextSteps(result) };

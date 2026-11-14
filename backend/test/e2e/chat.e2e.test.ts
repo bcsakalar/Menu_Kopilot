@@ -335,6 +335,48 @@ describe('a conversation', () => {
     expect(lines[2]).toMatch(/^- \*\*.+:\*\* .+/u);
   });
 
+  it('never answers "Menüyü güncelledim, şu an 0 ürün var" for an update that names nothing the rep said (D-222)', async () => {
+    const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
+    decision = { ...noDecision, action: 'update_menu', reply: 'Bakıyorum.', addProducts: ['Yeni İçecek'] };
+    const sent = await send({ conversationId: conversationIdOf(first), text: 'başka şeyler de varmış' }, first.cookie);
+    const [answer] = eventOf<{ message: { text: string; result: { cards: CardDto[]; counts: { current: number } } } }>(sent, 'message');
+    expect(answer?.message.text).not.toContain('Menüyü güncelledim');
+    expect(answer?.message.result.counts.current).toBe(3);
+    expect(answer?.message.result.cards.some((c) => c.section === 'new_product')).toBe(true);
+  });
+
+  it('says what it completed when the words ask for options, whatever action the model chose (D-222)', async () => {
+    decision = { ...noDecision, action: 'update_menu', reply: 'Bakıyorum.', addProducts: ['Lahmacun', 'Kıymalı Pide'] };
+    const sent = await send({ text: 'lahmacun ve kıymalı pide var opsiyon sun malzeme sun' });
+    const [answer] = eventOf<{ message: { text: string } }>(sent, 'message');
+    expect(answer?.message.text).toContain('için opsiyon ve malzemeleri hazırladım');
+  });
+
+  it('says the options are on the cards when a cuisine start was asked for options (D-222)', async () => {
+    decision = { ...noDecision, action: 'recommend', reply: 'Bakıyorum.', productCount: 5, cuisineSlug: 'uzak-dogu' };
+    const sent = await send({ text: 'Suşici için opsiyon öner' });
+    const [answer] = eventOf<{ message: { text: string } }>(sent, 'message');
+    expect(answer?.message.text).toContain('menüsüz başladım');
+    expect(answer?.message.text).toContain('Her ürün kartında açıklaması, opsiyonları');
+  });
+
+  it('reads "poğaça çeşitleri" as the product poğaça, not one called "Poğaça Çeşitleri" (D-222)', async () => {
+    decision = { ...noDecision, action: 'update_menu', reply: 'Bakıyorum.', addProducts: ['Poğaça Çeşitleri'] };
+    const sent = await send({ text: 'poğaça çeşitleri' });
+    const [answer] = eventOf<{ message: { result: { menu: { name: string }[] } | null } }>(sent, 'message');
+    expect(answer?.message.result?.menu.map((m) => m.name)).toEqual(['Poğaça']);
+  });
+
+  it('says it cannot open a link instead of pretending to read it, without a model (D-222)', async () => {
+    // Seen live: a QR menu link was answered "Menüyü inceliyorum".
+    chatPrompts.length = 0;
+    const sent = await send({ text: 'https://ornek.example/menu/2599' });
+    const [answer] = eventOf<{ message: { text: string; runId: string | null } }>(sent, 'message');
+    expect(answer?.message.text).toContain('Bağlantıları açamıyorum');
+    expect(answer?.message.runId).toBeNull();
+    expect(chatPrompts).toHaveLength(0);
+  });
+
   it('takes what it learned about the menu into the count', async () => {
     const first = await send({ text: 'Adana Kebap, Urfa Kebap, Ayran' });
     decision = { ...noDecision, action: 'update_menu', reply: 'Menüyü güncelledim.', addProducts: ['Lahmacun'], removeProducts: ['Ayran'] };

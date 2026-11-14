@@ -129,6 +129,8 @@ const NOISE_WORDS: ReadonlySet<string> = new Set([
   'cift', 'tek', 'sade', 'ozel', 'usta', 'ev', 'yapimi', 'usulu', 'klasik', 'geleneksel', 'taze', 'sikma', 've', 'ile',
   'bol', 'mini', 'maxi', 'mega', 'super', 'extra', 'ekstra', 'special', 'spesiyal', 'lezzet', 'nefis', 'gunun',
   'tatli', 'corba', 'icecek', 'kutu', 'sise', 'litre', 'litrelik', 'cl', 'ml', 'lt',
+  // A category word says no more than 'tatli' or 'corba' do: Çoban Salata is no variant of the sushi bar's Wakame Salatası (D-222).
+  'salata',
   // The bread a product is served in is no shared ingredient: "Ekmek Kadayıfı" is nothing like "Tam Ekmek Kokoreç".
   'ekmek', 'arasi',
 ]);

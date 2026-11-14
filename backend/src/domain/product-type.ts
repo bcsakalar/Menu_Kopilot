@@ -234,6 +234,25 @@ export const DESCRIPTION_MAX_WORDS = 8;
  * clause boundary that still leaves at least six words, otherwise at eight words. A description that is too short
  * is NOT padded with filler — the caller replaces it instead. Returns null when no acceptable form exists.
  */
+/** The stock phrases of the generator behind the imported pool's descriptions: true of no product in particular. */
+const GENERIC_PHRASES = /ürün adına (uygun|göre)|ürün çeşidine (göre|uygun)|temel alınarak|uygun pişirme yöntemi/iu;
+
+/**
+ * A description written for a category, not for the product (D-222): "Tavuk Şiş, baharatlı dana veya kuzu etinin kıyma,
+ * şiş ya da parça et formunda…" — the name, a comma, then the category's sentence — or one with the generator's stock
+ * phrases. 952 imported templates carry one; cut to panel length it read as a broken sentence, and for the chicken it
+ * was simply wrong. Such a text counts as no description.
+ */
+export function isGenericDescription(text: string | null | undefined, ...names: (string | null | undefined)[]): boolean {
+  const clean = (text ?? '').replace(/\s+/gu, ' ').trim().toLocaleLowerCase('tr-TR');
+  if (clean === '') return false;
+  if (GENERIC_PHRASES.test(clean)) return true;
+  return names.some((name) => {
+    const own = (name ?? '').replace(/\s+/gu, ' ').trim().toLocaleLowerCase('tr-TR');
+    return own.length > 1 && clean.startsWith(`${own},`);
+  });
+}
+
 export function fitDescription(text: string): string | null {
   const clean = text.replace(/\s+/gu, ' ').trim().replace(/[.;,:]+$/u, '');
   if (!clean) return null;

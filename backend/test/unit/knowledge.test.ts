@@ -7,7 +7,7 @@ import { CUISINE_SLUGS } from '../../src/db/seed/cuisines.js';
 import { CUISINE_TARGETS } from '../../src/db/seed/cuisine-targets.js';
 import { CATEGORY_DEFAULT_TYPE, CUISINE_DEFAULT_TYPE, SEED_PRODUCT_TYPES } from '../../src/db/seed/product-types.js';
 import { SEED_TEMPLATES } from '../../src/db/seed/templates.js';
-import { countWords, fitDescription, isForbiddenGroup, matchScore, ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
+import { countWords, fitDescription, isForbiddenGroup, isGenericDescription, matchScore, ProductTypeIndex, reconcileCategory } from '../../src/domain/product-type.js';
 import { namesVariant, sameProductName, variantConflict } from '../../src/lib/same-product.js';
 import { templateOptionGroupSchema } from '../../src/domain/template.js';
 import { normalizeTr } from '../../src/lib/normalize-tr.js';
@@ -194,6 +194,32 @@ describe('descriptions — 6 to 8 words', () => {
     expect(acceptableDescription('Izgarada pisen kiymali kofte, pilav ve sogan ile')).toBeNull();
     expect(acceptableDescription('Eşsiz lezzette muhteşem kebap, lavaş ve közle birlikte')).toBeNull();
     expect(acceptableDescription('Izgarada pişen köfte, pilav ve közlenmiş biberle')).toBe('Izgarada pişen köfte, pilav ve közlenmiş biberle.');
+  });
+});
+
+describe('a category sentence is no description (D-222)', () => {
+  it('tells the imported stock sentences from real descriptions', () => {
+    // Seen live: the imported pool's sentences, cut to panel length, read "Tavuk Şiş, baharatlı dana veya kuzu etinin kıyma."
+    expect(isGenericDescription('Tavuk Şiş, baharatlı dana veya kuzu etinin kıyma, şiş ya da parça et formunda hazırlanır.', 'Tavuk Şiş')).toBe(true);
+    expect(isGenericDescription('Kıymalı Pide, pide hamuru üzerine ürün adına uygun kıymalı harçla.', 'Pide')).toBe(true);
+    expect(isGenericDescription('Sucuklu Yumurta, yumurta temel alınarak tavada pişirilir.', 'Sucuklu Yumurta')).toBe(true);
+    expect(isGenericDescription('Caramel Latte, kahve bazının ürün çeşidine göre su ve süt ile hazırlanır.', 'Latte')).toBe(true);
+    // The restaurant's name or the pool's name may lead it.
+    expect(isGenericDescription('Adana Kebap, baharatlı dana veya kuzu etinin kıyma.', 'Adana', 'Adana Kebap')).toBe(true);
+
+    expect(isGenericDescription('Acılı zırh kıyması közde pişer, lavaşla servis edilir.', 'Adana Kebap')).toBe(false);
+    expect(isGenericDescription('Peynirli tel kadayıf, sıcak şerbet ve Antep fıstığıyla.', 'Künefe')).toBe(false);
+    expect(isGenericDescription('', 'Künefe')).toBe(false);
+    expect(isGenericDescription(null, 'Künefe')).toBe(false);
+  });
+
+  it('gives a card the type\'s description instead of the stock sentence', () => {
+    const result = ground(
+      { optionGroups: [], removable: [], extras: [], description: 'Mercimek Çorbası, ürün adına uygun bakliyat ve baharatla hazırlanıp sıcak servis edilir.' },
+      { productName: 'Mercimek Çorbası', type: type('corba'), byName: true, source: 'pool', want },
+    );
+    expect(result.description).toBe(type('corba').fallbackDescription);
+    expect(result.notes.join(' ')).toContain('genel bir kalıp');
   });
 });
 

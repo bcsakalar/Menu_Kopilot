@@ -14,7 +14,7 @@ import type { AnalyzeFields, AnalyzeResult } from '../analyze/schemas.js';
 import { parseMenuText, type AnalyzeService } from '../analyze/service.js';
 import type { AnalyzeStore } from '../analyze/store.js';
 import type { ChatEvent, ConversationDetail, ConversationDto, MessageDto } from './schemas.js';
-import { aiBusy, aiTrouble, ASK_MENU, completionAsk, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, openingGaps, summarize } from './summary.js';
+import { aiBusy, aiTrouble, ASK_MENU, completionAsk, followUp, fromCuisine, MORE_PRODUCTS, nextSteps, NO_LINKS, openingGaps, summarize } from './summary.js';
 
 const NEW_TITLE = 'Yeni görüşme';
 const TITLE_CHARS = 48;
@@ -63,6 +63,13 @@ const REQUEST_WORDS = new Set(
 const PRODUCT_NAME_WORDS = 4;
 /** Product words looked up in one cuisine start: a request names one or two products, never a dozen. */
 const MAX_SEEDS = 4;
+/**
+ * Without a model, a cuisine is read only off a message this short (D-222): on production a 35-word product list was
+ * taken for the "Çorba" cuisine because one of its words was "çorbalar".
+ */
+const FALLBACK_WORDS = 8;
+const wordCount = (text: string) => text.split(/\s+/u).filter(Boolean).length;
+const LINK = /(https?:\/\/|www\.)\S+/iu;
 
 /** The words of a text that could name a product: normalized, three letters or more, no request words. */
 const productWords = (text: string): string[] =>
@@ -143,6 +150,13 @@ function named(products: readonly string[], text: string): string[] {
   return products.filter((p) => normalizeTr(p).split(' ').some((word) => word.length >= 3 && said.some((s) => s.startsWith(word))));
 }
 
+/** One short name and nothing else: what a product typed alone looks like ("Tiramisu Cup", "çiğ köfte"). */
+function isLoneName(text: string): boolean {
+  const names = parseMenuText(text);
+  const name = names[0];
+  return names.length === 1 && !!name && !text.includes('?') && /\p{L}/u.test(name) && wordCount(name) <= PRODUCT_NAME_WORDS && !isSentence(name) && !isRequest(name);
+}
+
 /** On the menu already, matched as the analysis matches a target: the same name, or one name inside the other. */
 function onMenu(menu: AnalyzeResult['menu'], target: string): boolean {
   const wanted = normalizeTr(target);
@@ -152,8 +166,17 @@ function onMenu(menu: AnalyzeResult['menu'], target: string): boolean {
   });
 }
 
+/** "Poğaça Çeşitleri" asks for poğaças; the product it names is Poğaça (D-222). */
+const VARIETY = /^(cesit|cesid|turler)/u;
+const plainName = (name: string): string =>
+  name
+    .split(/\s+/u)
+    .filter((word) => !VARIETY.test(normalizeTr(word)))
+    .join(' ')
+    .trim() || name;
+
 function onlyNamed(decision: ChatDecision, text: string): ChatDecision {
-  return decision.action === 'update_menu' ? { ...decision, addProducts: named(decision.addProducts, text) } : decision;
+  return decision.action === 'update_menu' ? { ...decision, addProducts: named(decision.addProducts.map(plainName), text) } : decision;
 }
 
 /** One of the buttons of `nextSteps`, typed or clicked. */
@@ -242,6 +265,10 @@ export class ChatService {
       const snapshot = conversation.lastRunId ? await this.deps.store.snapshot(userId, conversation.lastRunId) : null;
       // The conversation's run: a menu, or a cuisine named before any menu (a run that read nothing never becomes it).
       const last = snapshot?.counts ? snapshot : null;
+      if (images.length === 0 && LINK.test(text)) {
+        await this.reply(outgoing, { text: NO_LINKS, quickReplies: [] }, null, emit);
+        return;
+      }
       const typedMenu = !last?.menu.length && (looksLikeProductList(text) || (await this.isProductName(text)));
       if (images.length > 0 || typedMenu) await this.analyzeMenu(userId, outgoing, last, emit);
       else await this.follow(userId, outgoing, last, emit);
@@ -291,14 +318,30 @@ export class ChatService {
 
   private async follow(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const conversationId = outgoing.conversation.id;
-    const quick = shortcut(outgoing.text, last);
+    const quick = shortcut(outgoing.text, last) ?? (last ? await this.categoryRequest(outgoing.text) : undefined);
     // Before any menu, a message that only names a cuisine and asks for it ("Tantuni için öneri sun", "Uzak Doğu") needs
     // no model: on production the model answered "Tantuni için öneri sun" by asking for a screenshot (D-217).
     const asked = !quick && !last?.menu.length ? await this.cuisineRequest(outgoing.text) : undefined;
     const agent = quick ?? (asked ? cuisineDecision(asked) : await runChatAgent(this.deps, await this.context(outgoing, last), userId));
     // No model could read it (busy, or the day's quota spent): "Uzak Doğu için öneri sun" before any menu needs none (D-216).
-    const fallback = 'unanswered' in agent && !last?.menu.length ? (await this.cuisineIn(outgoing.text))?.slug : undefined;
-    const decision = onlyNamed(fallback ? { ...agent, action: 'change_cuisine', cuisineSlug: fallback, reply: '' } : agent, outgoing.text);
+    // Only a short message of a conversation that has nothing yet: "Tatlı öner" once switched a soup start to desserts (D-222).
+    const unanswered = 'unanswered' in agent;
+    const fallback = unanswered && !last && wordCount(outgoing.text) <= FALLBACK_WORDS ? (await this.cuisineIn(outgoing.text))?.slug : undefined;
+    // …and a lone product name ("Tiramisu Cup") starts the menu with it, as the model would have (D-222).
+    const lone = unanswered && !last && !fallback && isLoneName(outgoing.text) ? parseMenuText(outgoing.text)[0] : undefined;
+    let decision = onlyNamed(
+      fallback
+        ? { ...agent, action: 'change_cuisine', cuisineSlug: fallback, reply: '' }
+        : lone
+          ? { ...agent, action: 'update_menu', addProducts: [lone], reply: '' }
+          : agent,
+      outgoing.text,
+    );
+    // "Suşi için rolları vesaire var": the model chose a menu update but named no product the rep said, and production
+    // answered "Menüyü güncelledim, şu an 0 ürün var". What is left is a wish for such products (D-222).
+    if (decision.action === 'update_menu' && decision.addProducts.length === 0 && decision.removeProducts.length === 0) {
+      decision = { ...recommendDecision(null), note: outgoing.text, quickReplies: decision.quickReplies };
+    }
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
     if (decision.action === 'answer') {
@@ -313,24 +356,30 @@ export class ChatService {
     const typed = completing
       ? named(last?.menu.length ? decision.targets.filter((target) => !onMenu(last.menu, target)) : decision.targets, outgoing.text)
       : decision.addProducts;
-    const ask = completing ? completionAsk(outgoing.text) : { descriptions: false, options: false };
+    // What the words ask of the products, whatever action the model chose: "tavuk dürüm, et dürüm var, opsiyon sun"
+    // came back as a menu update whose answer never mentioned the options (D-222).
+    const wants = completionAsk(outgoing.text);
+    const ask = completing && !wants.descriptions && !wants.options ? { ...wants, options: true } : wants;
     if (!last?.menu.length && typed.length > 0) {
       const cuisine = last?.counts ? { cuisineId: last.counts.cuisineId } : {};
       const result = await this.runAgents(userId, outgoing, firstFields({ menuText: typed.join('\n'), ...cuisine }), {}, emit);
-      // Asked for options or descriptions, the answer says what it completed, whatever words the request used.
-      await this.reply(outgoing, summarize(result, completing ? { ...ask, options: !ask.descriptions } : ask), result, emit);
+      await this.reply(outgoing, summarize(result, ask), result, emit);
       return;
     }
     // A cuisine named with no menu ("Uzak Doğu için öneri sun") or a switch of cuisine: a fresh start from it. The
     // products the request names lead what it suggests: "hamsi ile ilgili yemekler öner" (D-213).
     const cuisineId = (!last || decision.action === 'change_cuisine') && decision.cuisineSlug ? await this.cuisineId(decision.cuisineSlug) : undefined;
-    if (cuisineId) {
+    // The cuisine the call already started from, asked for again ("Uzak doğu mutfağı için öneri sun" twice): more of it,
+    // not the same start word for word, as production answered three times in a row (D-222).
+    const again = cuisineId !== undefined && !last?.menu.length && last?.counts?.cuisineId === cuisineId;
+    if (again) decision = { ...recommendDecision(null), note: outgoing.text };
+    if (cuisineId && !again) {
       const fresh = !last?.menu.length;
       const seeds = fresh ? await this.seedsOf(outgoing.text, cuisineId) : [];
       const notes = seeds.length > 0 ? { notes: outgoing.text } : {};
       const fields = last ? { ...continueFields(last, [], ''), cuisineId, ...notes } : firstFields({ cuisineId, ...notes });
       const result = await this.runAgents(userId, outgoing, fields, { seeds }, emit);
-      await this.reply(outgoing, result.menu.length > 0 ? summarize(result) : fromCuisine(result), result, emit);
+      await this.reply(outgoing, result.menu.length > 0 ? summarize(result, ask) : fromCuisine(result, ask), result, emit);
       return;
     }
     // Nothing to act on: say what would move the call on, never a bare "Bakıyorum.".
@@ -345,14 +394,16 @@ export class ChatService {
     }
     const focus = await this.focus(conversationId, last, want);
     const fields = continueFields(last, typed, decision.note);
-    const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts }, emit);
+    // The products a request names lead what it brings: "Suşi rolları ekle" brought curry and bulgogi (D-222).
+    const seeds = decision.action === 'recommend' && last.counts ? await this.seedsOf(outgoing.text, last.counts.cuisineId) : [];
+    const result = await this.runAgents(userId, outgoing, fields, { focus, remove: decision.removeProducts, seeds }, emit);
     const lead =
       decision.action === 'update_menu'
         ? `Menüyü güncelledim, şu an ${result.counts?.current ?? 0} ürün var.`
         : completing && typed.length > 0
           ? `**${typed.join(', ')}** menüde yoktu, ekledim: şu an ${result.counts?.current ?? 0} ürün var.`
           : '';
-    const quickReplies = aiBusy(result) ? [outgoing.text] : quick ? nextSteps(result) : answer.quickReplies;
+    const quickReplies = aiBusy(result) ? [outgoing.text] : quick || again ? nextSteps(result) : answer.quickReplies;
     await this.reply(outgoing, { quickReplies, text: followUp(result, lead, ask.descriptions) }, result, emit);
   }
 
@@ -504,6 +555,15 @@ export class ChatService {
     if (!found || found.part.split(' ').every((word) => REQUEST_WORDS.has(word))) return undefined;
     const words = normalizeTr(text).split(' ').filter((word) => word.length > 0);
     return words.every((word) => found.words.has(word) || REQUEST_WORDS.has(word)) ? found.slug : undefined;
+  }
+
+  /** "Tatlı öner" for any category, not only the ones the cuisine's table lists: no model needed to read it (D-222). */
+  private async categoryRequest(text: string): Promise<ChatDecision | undefined> {
+    const wanted = normalizeTr(text);
+    if (!wanted.endsWith(' oner')) return undefined;
+    const rows = await this.deps.db.select({ key: menuCategories.key, label: menuCategories.label }).from(menuCategories);
+    const row = rows.find((c) => wanted === normalizeTr(`${c.label} öner`));
+    return row ? recommendDecision(row.key) : undefined;
   }
 
   private async isCuisineName(normalized: string): Promise<boolean> {

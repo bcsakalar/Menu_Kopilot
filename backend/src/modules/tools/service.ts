@@ -1,6 +1,7 @@
 import { and, eq, ne } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { ingredients, itemAliases, menuItems, optionGroups, options } from '../../db/schema/index.js';
+import { isGenericDescription } from '../../domain/product-type.js';
 import { cleanItemName } from '../../lib/clean-name.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import { trigrams } from '../../lib/trigram.js';
@@ -129,7 +130,8 @@ export class ToolsService {
       .where(usable);
     const byItem = new Map<string, string[]>();
     for (const alias of aliases) byItem.set(alias.id, [...(byItem.get(alias.id) ?? []), alias.key]);
-    return items.map((item) => ({
+    // A category's stock sentence is not offered as a product's description (D-222).
+    return items.filter((item) => !isGenericDescription(item.description, item.name)).map((item) => ({
       name: item.name,
       description: item.description,
       importance: item.importance,

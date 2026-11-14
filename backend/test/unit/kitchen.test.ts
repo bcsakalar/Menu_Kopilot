@@ -108,6 +108,11 @@ describe('kitchen profile — the kind and the variants of what the menu sells',
     expect(adana.variant('Adana Dürüm')).toBe(true);
     expect(adana.variant('Urfa Kebap')).toBe(true);
     expect(adana.variant('Beyti')).toBe(false);
+    // Seen live (D-222): the sushi bar's Wakame Salatası brought Çoban, Tabule and Gavurdağı Salata as its variants.
+    const wakame = kitchen('Wakame Salatası', 'Karides Nigiri');
+    expect(wakame.variant('Çoban Salata')).toBe(false);
+    expect(wakame.variant('Tabule Salata')).toBe(false);
+    expect(wakame.variant('Deniz Yosunu Wakame')).toBe(true);
   });
 
   it('a start from the cuisine alone adopts the cuisine’s specialities; a menu’s own evidence always wins', () => {

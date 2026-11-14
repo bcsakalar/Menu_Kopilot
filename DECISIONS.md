@@ -1388,3 +1388,40 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
     Groq'un dakikalık sınırı dolduğu için doğruydu.
   - **Yapılmayan:** başka bir restoranın ekran görüntüsü aynı görüşmeye yapıştırılınca (tatlıcıya dürüm menüsü) menüler
     birleşiyor; "poğaça çeşitleri" çeşit isteği yerine ürün adı olarak okunuyor. İkisi de ayrı karar ister.
+- **D-222** — **13 ve 14 Kasım'ın mesajları canlıda yeniden denendi; bulunanlar düzeltildi** (kullanıcı isteği, 2026-11-14:
+  "canlıda dene aynı mesajları… ayın 13 ve 14… sorun olacak mı ona göre güncelle"). İki günün metin mesajları (52 mesaj,
+  26 görüşme) proje sahibinin Chrome'undan canlı siteye, temsilci hızında yeniden gönderildi; ekran görüntüleri
+  saklanmadığı için test menü görselleriyle denendi. Bulunanlar:
+  - **Havuzun 952 şablonunda açıklama bir kategori cümlesiydi.** İçe aktarılan şablonların açıklaması "Tavuk Şiş,
+    baharatlı dana veya kuzu etinin kıyma, şiş ya da parça et formunda…" biçiminde: ad, virgül, kategorinin genel
+    cümlesi ("ürün adına uygun", "ürün çeşidine göre"). Panele sığdırılınca yarım cümle kalıyor, tavuk için düpedüz
+    yanlış oluyordu; açıklama listesi (D-221) bunu görünür yaptı. Böyle bir metin artık açıklama sayılmaz: kart ürün
+    tipinin elle yazılmış açıklamasını alır, metin aracının ve Excel'in havuz önerileri (D-220) onu önermez. Havuzdaki
+    veri değiştirilmedi; bu şablonlara gerçek açıklama yazmak ayrı bir iş.
+  - **Model meşgulken yedek yollar fazla tahmin ediyordu:** "Tatlı öner" çorba görüşmesini Tatlı mutfağına çevirdi, 35
+    kelimelik ürün listesi içindeki "çorbalar" yüzünden Çorba mutfağı sanıldı. Modelsiz mutfak tahmini artık yalnızca
+    henüz hiçbir şey başlamamış görüşmede ve en fazla 8 kelimelik mesajda yapılır; "<kategori> öner" mutfağın tablosunda
+    olmayan kategori için de modelsiz çalışır; tek başına yazılmış kısa bir ürün adı ("Tiramisu Cup") modelsiz de menüyü
+    başlatır.
+  - **Aynı mutfak ikinci kez istenince aynı cevap kelimesi kelimesine tekrar ediliyordu** ("Uzak doğu mutfağı için öneri
+    sun" üç kez). Artık aynı mutfağın devamı gelir: verilmemiş ürünler.
+  - **"Menüyü güncelledim, şu an 0 ürün var":** "suşi için rolları vesaire var" mesajında model, temsilcinin adını
+    vermediği bir ürünle menü güncellemesi seçti. Eklenecek ya da çıkarılacak ürün kalmayan güncelleme artık bir öneri
+    isteğidir; mesajın andığı ürünler ("roll") önerileri yönlendirir. "Suşi rolları ekle" curry ve bulgogi getirmişti.
+  - **Opsiyon istendi, cevap söylemedi:** "tavuk dürümleri et dürümleri var opsiyon sun malzeme sun" menüyü başlattı ama
+    opsiyonlardan söz etmedi; "Suşici için opsiyon öner" mutfakla başladı ve opsiyonların kartlarda olduğunu söylemedi.
+    Mesajın sözcükleri opsiyon ya da açıklama istiyorsa cevap, modelin seçtiği aksiyondan bağımsız olarak bunu söyler.
+  - **Doğrulananlar:** virgüllü istek (D-221) artık ürün listesi sanılmıyor; ekran görüntüsüyle "ürünlere açıklama önerir
+    misin" açıklamaları en başta listeliyor; "opsiyon malzeme lazım" ile gelen tatlıcı görseli okunup opsiyonları
+    hazırlanıyor.
+  - **Bağlantı:** bir QR menü linkine model "Menüyü inceliyorum" dedi; site bağlantı açamaz. Bağlantı içeren mesaj artık
+    modelsiz "Bağlantıları açamıyorum, ekran görüntüsünü yapıştır ya da ürünleri yaz" cevabını alır.
+  - **Mutfağa yakışmayan alternatifler:** suşi menüsündeki Wakame Salatası yüzünden Çoban, Tabule ve Gavurdağı Salata
+    "varyant" sayılıp ilk önerildi; "salata" artık "tatlı" ve "çorba" gibi ürünün ne olduğunu söylemeyen kategori
+    sözcüğüdür.
+  - **"Poğaça çeşitleri":** menüye "Poğaça Çeşitleri" adlı ürün olarak giriyordu; "çeşitleri", "türleri" ürün adından
+    atılır, ürün Poğaça olur ve çeşitleri öneri olarak gelir.
+  - **Bilinen sınır:** aynı görüşmeye art arda farklı restoranların tek ürünü yazılınca (waffle, çiğ köfte, burger) mutfak
+    değişiyor ama menüde önceki ürün kalıyor; yeni restoran için "Yeni görüşme" açılmalı.
+  - **Not:** ilk deneme 40 saniyede 30 mesajla yapıldı; o hızda sağlayıcı sınırları dolup cevapların çoğu "yoğun" oldu.
+    Gerçek kullanım bu hızda değil; ikinci deneme her mesaj arasında 12 saniyeyle yapıldı.

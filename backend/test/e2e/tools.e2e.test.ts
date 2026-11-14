@@ -136,6 +136,31 @@ describe('POST /api/v1/tools/describe (D-220)', () => {
     expect(body!.items[0]!.ideas.map((idea) => idea.description)).not.toContain('Zıpzıplı köfte taslağı.');
   });
 
+  it('does not offer a category\'s stock sentence as a description (D-222)', async () => {
+    const [kebap] = await ctx.db.db.select({ id: cuisines.id }).from(cuisines).where(eq(cuisines.slug, 'kebap-izgara'));
+    await insertTemplate(ctx.db.db, {
+      cuisineId: kebap!.id,
+      payload: {
+        name: 'Fıstıklı Zırh Kebabı',
+        description: 'Fıstıklı Zırh Kebabı, baharatlı dana veya kuzu etinin kıyma, şiş ya da parça et formunda hazırlanır.',
+        servingNote: '',
+        portionInfo: '',
+        optionGroups: [],
+        removableIngredients: [],
+        extraIngredients: [],
+        tags: [],
+        allergenNotes: [],
+        upsellSuggestion: '',
+      },
+      source: 'imported',
+      approved: true,
+      needsReview: false,
+    });
+    ctx.app.services.tools.forget();
+    const { body } = await describeNames(['Fıstıklı Zırh Kebabı']);
+    expect(body!.items[0]!.ideas.map((idea) => idea.name)).not.toContain('Fıstıklı Zırh Kebabı');
+  });
+
   it('turns away an empty list, an oversized list and a name that is not text', async () => {
     expect((await describeNames([])).res.statusCode).toBe(400);
     expect((await describeNames(Array.from({ length: 501 }, (_, i) => `ürün ${i}`))).res.statusCode).toBe(400);
