@@ -141,3 +141,9 @@ export function parseCsv(text: string): string[][] {
   }
   return rows;
 }
+
+/** The table without the hidden columns, in the sheet's order: what is shown and what is saved. */
+export function pickColumns(header: readonly string[], rows: readonly string[][], hidden: ReadonlySet<number>): Table {
+  const keep = header.map((_, index) => index).filter((index) => !hidden.has(index));
+  return { header: keep.map((index) => header[index]!), rows: rows.map((row) => keep.map((index) => row[index] ?? '')) };
+}

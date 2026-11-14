@@ -21,9 +21,9 @@ describe('product and store names', () => {
     ['İSKENDER', 'İskender'],
     ['ISKENDER', 'İskender'],
     ['izgara köfte', 'Izgara Köfte'],
-    // "ve", "ile", "veya" stay small inside a name.
-    ['tavuk ve patates', 'Tavuk ve Patates'],
-    ['ET İLE PİLAV', 'Et ile Pilav'],
+    // Every word starts with a capital, "ve" and "ile" too (the team's rule, D-219).
+    ['tavuk ve patates', 'Tavuk Ve Patates'],
+    ['ET İLE PİLAV', 'Et İle Pilav'],
     // Units: small, spaced, in parentheses; a decimal point becomes a comma.
     ['KOLA 330ML', 'Kola (330 ml)'],
     ['izgara kofte 200gr', 'Izgara Köfte (200 gr)'],
@@ -81,13 +81,13 @@ describe('product and store names', () => {
     ['mutlu waffle - urfa dürüm', 'Mutlu Waffle - Urfa Dürüm'],
     ['MUTLU WAFFLE -URFA DÜRÜM', 'Mutlu Waffle - Urfa Dürüm'],
     ['mutlu waffle – urfa dürüm', 'Mutlu Waffle - Urfa Dürüm'],
-    // Symbols: spaced slash, plus and ampersand between words; fractions stay tight.
+    // Symbols: slash, plus and ampersand always spaced, a fraction too (the team's rule, D-219).
     ['ayran/kola', 'Ayran / Kola'],
     ['çorba+pilav', 'Çorba + Pilav'],
     ['pide&lahmacun', 'Pide & Lahmacun'],
-    ['1/2 ekmek döner', '1/2 Ekmek Döner'],
-    // Punctuation: no space before, one after; a name carries no full stop.
-    ['elma , armut .', 'Elma, Armut'],
+    ['1/2 ekmek döner', '1 / 2 Ekmek Döner'],
+    // Punctuation: no space before, one after; a full stop typed stays.
+    ['elma , armut .', 'Elma, Armut.'],
     ['tavuk,et,köfte', 'Tavuk, Et, Köfte'],
     ['• tavuk dürüm', 'Tavuk Dürüm'],
     ["Ali'nin yeri", "Ali'nin Yeri"],
@@ -97,6 +97,22 @@ describe('product and store names', () => {
     // Brands and packaging abbreviations keep their shape; a known flavour word gets its Turkish letters.
     ['coca cola 1.5 L PET', 'Coca-Cola (1,5 lt) PET'],
     ['ADANA DÜRÜM (ACILI)', 'Adana Dürüm (Acılı)'],
+    // The team's earlier tool's rule table, row by row (D-219).
+    ['sogan, yag, izgara', 'Soğan, Yağ, Izgara'],
+    ['200 GR, 1 KG, 33 CL', '(200 gr), (1 kg), (33 cl)'],
+    ['5 adet, 10 ad', '(5 Adet), (10 Adet)'],
+    ['300 ml, 1 kg, 5 Adet', '(300 ml), (1 kg), (5 Adet)'],
+    ["7'Li, 10'LU", "7'li, 10'lu"],
+    ['cig kofte, yogurtlu', 'Çiğ Köfte, Yoğurtlu'],
+    ['çiğköfte, kaşarlıtost', 'Çiğ Köfte, Kaşarlı Tost'],
+    ['coca/cola, 1/2', 'Coca / Cola, 1 / 2'],
+    ['merhaba,nasılsın?iyi!', 'Merhaba, Nasılsın? İyi!'],
+    ['COOKIE (5 ADET)', 'Cookie (5 Adet)'],
+    ['test(deneme)', 'Test (Deneme)'],
+    ['doner durum gozleme borek kiymali pastirma kokorec tursu kasar', 'Döner Dürüm Gözleme Börek Kıymalı Pastırma Kokoreç Turşu Kaşar'],
+    ['ayran 500 MİLİ', 'Ayran (500 ml)'],
+    // Where that table wrote "2'ar", Turkish reads "ikişer": the suffix follows how the number is read.
+    ['3 Er Adet, 2 Ar Adet', "3'er Adet, 2'şer Adet"],
   ];
   it.each(cases)('%s → %s', (input, expected) => {
     expect(name(input)).toBe(expected);

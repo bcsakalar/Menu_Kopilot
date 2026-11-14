@@ -1,5 +1,5 @@
 import { Check, ChevronDown, Copy, Download, Eraser } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { wordDiff } from './text/diff';
 import { formatLine, formatText, type TextKind } from './text/format';
 import { useLexicon } from './useLexicon';
@@ -17,19 +17,23 @@ const KINDS: { key: TextKind; label: string; placeholder: string }[] = [
 
 /** The rules, each shown on a live example: the table can never say something the tool does not do. */
 const RULES: { kind: TextKind; rule: string; example: string }[] = [
-  { kind: 'name', rule: 'Her kelime büyük harfle başlar; "ve", "ile" küçük kalır', example: 'tavuk ve patates dürüm' },
-  { kind: 'name', rule: 'Türkçe karakterler tamamlanır', example: 'cig kofte durum' },
-  { kind: 'name', rule: 'Birim parantez içinde ve küçük harfle', example: 'KOLA 330ML' },
+  { kind: 'name', rule: 'Her kelimenin ilk harfi büyük', example: 'trüflü hamburger ve patates' },
+  { kind: 'name', rule: 'Türkçe karakterler tamamlanır', example: 'sogan, yag, izgara' },
+  { kind: 'name', rule: 'Birimler küçük: gr, kg, ml, cl, lt', example: '200 GR, 1 KG, 33 CL' },
+  { kind: 'name', rule: 'Miktar ve birim parantez içine alınır', example: 'KOLA 330ML' },
   { kind: 'name', rule: 'Ondalık virgülle yazılır', example: 'su 0.5 lt' },
   { kind: 'name', rule: 'Adet ve porsiyon büyük harfle, parantez içinde', example: 'lahmacun 2 adet' },
   { kind: 'name', rule: 'Porsiyon ürün adıdır: parantez içinde ve büyük harfle', example: 'urfa porsiyon' },
   { kind: 'name', rule: 'Miktar adın sonuna gelir', example: '1 kg baklava' },
-  { kind: 'name', rule: 'Sayı eki kesme işaretiyle ve ses uyumuna göre', example: '6 li set, 2 ser adet' },
+  { kind: 'name', rule: 'Sayı eki kesme işaretiyle, küçük ve ses uyumuna göre', example: "7'Li, 10'LU, 6 li set" },
+  { kind: 'name', rule: 'Dağıtma eki: 3\'er, 2\'şer (ikişer), 6\'şar', example: '3 Er Adet, 2 Ar Adet' },
   { kind: 'name', rule: 'Bitişik yazılan kelimeler ayrılır', example: 'kaşarlıtost' },
   { kind: 'name', rule: 'Yazım hatası düzeltilir', example: 'patatez kızartması' },
   { kind: 'name', rule: 'Mağaza ve şube adı ayracı boşluklu tire', example: 'mutlu waffle -urfa dürüm' },
   { kind: 'name', rule: 'Kısaltma ve marka bozulmaz', example: 'XL MENÜ coca cola' },
-  { kind: 'name', rule: '/, + ve & iki yanında boşluk; kesir bitişik', example: 'ayran/kola 1/2 ekmek' },
+  { kind: 'name', rule: '/, + ve & her zaman boşluklu', example: 'coca/cola, 1/2, çorba+pilav' },
+  { kind: 'name', rule: 'Parantezden önce boşluk', example: 'cookie(5 adet)' },
+  { kind: 'name', rule: 'Noktalamadan önce boşluk yok, sonra var', example: 'merhaba,nasılsın?iyi! elma , armut .' },
   { kind: 'description', rule: 'Yalnızca cümle başı büyük, sonunda nokta', example: 'ÖZEL SOSLU IZGARA TAVUK, PİLAV İLE SERVİS EDİLİR' },
   { kind: 'description', rule: 'Özel adlar büyük kalır', example: 'antep fıstıklı baklava' },
   { kind: 'description', rule: 'Noktalamadan sonra boşluk, önce boşluk yok', example: 'taze domates , biber.yanında ayran' },
@@ -40,6 +44,8 @@ interface Settings {
   kind: TextKind;
   smart: boolean;
   copyOnPaste: boolean;
+  /** Text copied anywhere else is fixed and put back on the clipboard when the rep comes back to this tab. */
+  autoClipboard: boolean;
 }
 
 const SETTINGS_KEY = 'mk-text-tool';
@@ -47,9 +53,14 @@ const SETTINGS_KEY = 'mk-text-tool';
 function readSettings(): Settings {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as Partial<Settings>;
-    return { kind: saved.kind === 'description' ? 'description' : 'name', smart: saved.smart !== false, copyOnPaste: saved.copyOnPaste !== false };
+    return {
+      kind: saved.kind === 'description' ? 'description' : 'name',
+      smart: saved.smart !== false,
+      copyOnPaste: saved.copyOnPaste !== false,
+      autoClipboard: saved.autoClipboard !== false,
+    };
   } catch {
-    return { kind: 'name', smart: true, copyOnPaste: true };
+    return { kind: 'name', smart: true, copyOnPaste: true, autoClipboard: true };
   }
 }
 
@@ -60,6 +71,8 @@ export function TextTool() {
   const [notice, setNotice] = useState<string | null>(null);
   const [rulesOpen, setRulesOpen] = useState(false);
   const input = useRef<HTMLTextAreaElement>(null);
+  /** The last clipboard text seen or written: the tool's own fixed text is not fixed again. */
+  const lastClip = useRef<string | null>(null);
 
   const update = (patch: Partial<Settings>) => {
     setSettings((current) => {
@@ -85,12 +98,49 @@ export function TextTool() {
   const copy = async (value = result.text, message = 'Düzeltilmiş metin panoya kopyalandı') => {
     if (value.trim() === '') return;
     try {
+      lastClip.current = value;
       await navigator.clipboard.writeText(value);
       flash(message);
     } catch {
       flash('Kopyalanamadı; metni seçip Ctrl+C ile kopyala');
     }
   };
+
+  // The clipboard, fixed in the background (D-219): the rep copies a name in the panel or a seller's file, comes back to this
+  // tab, and the clipboard already holds the fixed text — nothing to paste here first. Off if the browser does not allow it.
+  useEffect(() => {
+    if (!settings.autoClipboard) return;
+    let busy = false;
+    const check = async () => {
+      if (busy || document.visibilityState !== 'visible' || !document.hasFocus()) return;
+      busy = true;
+      try {
+        const clip = await navigator.clipboard.readText();
+        // A huge clipboard (a whole document) is not a menu text: left alone.
+        if (clip.trim() === '' || clip === lastClip.current || clip.length > 200_000) return;
+        const fixed = formatText(clip, options).text;
+        lastClip.current = fixed;
+        setText(clip);
+        if (fixed !== clip) {
+          await navigator.clipboard.writeText(fixed);
+          flash('Panodaki metin düzeltildi; yapıştırmaya hazır');
+        }
+      } catch {
+        update({ autoClipboard: false });
+        flash('Tarayıcı panoyu okumaya izin vermedi; otomatik pano kapatıldı');
+      } finally {
+        busy = false;
+      }
+    };
+    window.addEventListener('focus', check);
+    document.addEventListener('visibilitychange', check);
+    void check();
+    return () => {
+      window.removeEventListener('focus', check);
+      document.removeEventListener('visibilitychange', check);
+    };
+    // update and flash are stable enough: re-subscribing on every render would read the clipboard each keystroke.
+  }, [settings.autoClipboard, options]);
 
   const lines = text === '' ? 0 : text.split(/\r?\n/u).filter((line) => line.trim() !== '').length;
 
@@ -115,6 +165,11 @@ export function TextTool() {
           <input type="checkbox" checked={settings.smart} onChange={(e) => update({ smart: e.target.checked })} />
           <span aria-hidden />
           Akıllı düzeltme
+        </label>
+        <label className="switch" title="Başka yerde kopyaladığın metin bu sekmeye dönünce düzeltilip panoya geri yazılır">
+          <input type="checkbox" checked={settings.autoClipboard} onChange={(e) => update({ autoClipboard: e.target.checked })} />
+          <span aria-hidden />
+          Otomatik pano
         </label>
         <label className="switch" title="Yapıştırdığın metnin düzeltilmiş hâli otomatik panoya kopyalanır">
           <input type="checkbox" checked={settings.copyOnPaste} onChange={(e) => update({ copyOnPaste: e.target.checked })} />

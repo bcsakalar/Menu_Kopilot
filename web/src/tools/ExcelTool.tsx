@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Download, FileSpreadsheet, Search, Sparkles, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { applyRules, guessKind, parseCsv, toTable, viewRows, type Table } from './excel/sheet';
+import { applyRules, guessKind, parseCsv, pickColumns, toTable, viewRows, type Table } from './excel/sheet';
 import type { TextKind } from './text/format';
 import { downloadRows } from './download';
 import { useLexicon } from './useLexicon';
@@ -37,6 +37,7 @@ export function ExcelTool() {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ column: number; direction: 'asc' | 'desc' } | null>(null);
   const [kinds, setKinds] = useState<ColumnKind[]>([]);
+  const [hidden, setHidden] = useState<Set<number>>(new Set());
   const [fixed, setFixed] = useState<{ rows: string[][]; cells: Set<string>; changed: number } | null>(null);
   const [showFixed, setShowFixed] = useState(true);
   const [limit, setLimit] = useState(PAGE);
@@ -50,6 +51,7 @@ export function ExcelTool() {
     const next = workbook?.sheets[index]?.table;
     setSheetIndex(index);
     setKinds(next ? next.header.map((title) => guessKind(title) ?? 'none') : []);
+    setHidden(new Set());
     setFixed(null);
     setSort(null);
     setQuery('');
@@ -92,7 +94,9 @@ export function ExcelTool() {
   const save = () => {
     if (!table || !book) return;
     const base = book.name.replace(/\.[^.]+$/u, '');
-    void downloadRows(fixed ? `${base}-duzeltilmis` : base, table.header, fixed ? fixed.rows : table.rows, book.sheets[sheetIndex]?.name.slice(0, 31) || 'Sayfa1');
+    // Only the columns shown are saved, in the sheet's order.
+    const picked = pickColumns(table.header, fixed ? fixed.rows : table.rows, hidden);
+    void downloadRows(fixed ? `${base}-duzeltilmis` : base, picked.header, picked.rows, book.sheets[sheetIndex]?.name.slice(0, 31) || 'Sayfa1');
   };
 
   const sortBy = (column: number) =>
@@ -220,6 +224,26 @@ export function ExcelTool() {
         </div>
       </section>
 
+      <div className="column-picker" role="group" aria-label="Gösterilen sütunlar">
+        <span className="muted small">Sütunlar</span>
+        {table.header.map((title, index) => (
+          <label key={`${title}-${index}`} className={`chip${hidden.has(index) ? '' : ' on'}`}>
+            <input
+              type="checkbox"
+              checked={!hidden.has(index)}
+              onChange={() => {
+                const next = new Set(hidden);
+                if (next.has(index)) next.delete(index);
+                else if (next.size < table.header.length - 1) next.add(index);
+                setHidden(next);
+              }}
+            />
+            {title}
+          </label>
+        ))}
+        {hidden.size > 0 && <span className="muted small">{hidden.size} sütun gizli; indirilen dosyaya da girmez</span>}
+      </div>
+
       <div className="toolbar">
         <label className="search">
           <Search size={15} aria-hidden />
@@ -244,7 +268,7 @@ export function ExcelTool() {
           <thead>
             <tr>
               <th className="row-number">#</th>
-              {table.header.map((title, index) => (
+              {table.header.map((title, index) => hidden.has(index) ? null : (
                 <th key={`${title}-${index}`} aria-sort={sort?.column === index ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
                   <button type="button" onClick={() => sortBy(index)}>
                     {title}
@@ -258,7 +282,7 @@ export function ExcelTool() {
             {shown.map((index) => (
               <tr key={index}>
                 <td className="row-number">{index + 2}</td>
-                {rows[index]!.map((cell, c) => (
+                {rows[index]!.map((cell, c) => hidden.has(c) ? null : (
                   <td key={c} className={fixed && showFixed && fixed.cells.has(`${index}:${c}`) ? 'fixed-cell' : undefined}>
                     {cell}
                   </td>

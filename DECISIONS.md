@@ -1264,16 +1264,16 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
 
   **Metin düzeltme** (`web/src/tools/text/`). Kural motoru tarayıcıda çalışır, yazdıkça düzeltir. İki kipi var:
   - **Ad** (ürün, mağaza, şube):
-    - Her kelime büyük harfle başlar, "ve", "ile", "veya" küçük kalır.
+    - Her kelime büyük harfle başlar, "ve", "ile", "veya" küçük kalır (D-219 ile değişti: hepsi büyük).
     - Birim parantez içinde ve küçük harfle yazılır: "(330 ml)", "(0,5 lt)"; ondalık virgülle.
     - Adet ve porsiyon büyük harfle ve parantez içinde: "(2 Adet)", "Urfa (Porsiyon)", "(Yarım Porsiyon)". Önceki
       araç da "Adet"i büyük yazıyordu.
     - Başa yazılan miktar sona gelir: "Baklava (1 kg)".
     - Sayı eki, sayının okunuşuna göre ses uyumuyla yazılır: 6'lı, 3'lü, 10'lu, 2'şer, 6'şar, 10'ar.
     - Mağaza ayracı " - " olarak yazılır.
-    - "/", "+" ve "&" iki yanında boşluk, kesir bitişik: "1/2".
+    - "/", "+" ve "&" iki yanında boşluk, kesir bitişik: "1/2" (D-219 ile değişti: kesir de boşluklu).
     - Kısaltma (XL, BBQ, PET) ve marka (Coca-Cola) korunur.
-    - Adın sonunda nokta olmaz.
+    - Adın sonunda nokta olmaz (D-219 ile değişti: yazılan nokta kalır).
   - **Açıklama:** yalnızca cümle başı büyük harfle yazılır. Antep, Türk gibi özel adlar korunur. Noktalamanın önünde
     boşluk olmaz, ardında olur. Sonuna nokta konur.
 
@@ -1312,3 +1312,29 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   **Testler** önce yazıldı: kural motoru için 90'dan fazla ad ve açıklama örneği, her birinin ikinci kez
   düzeltildiğinde değişmediği, sözlük kuralları, performans (1000 satır 1 saniyenin altında), CSV/Excel yardımcıları,
   gerçek bir .xlsx'in yazılıp geri okunması, görsel ölçü hesapları ve sözlük ucunun 3 e2e testi.
+- **D-219** — **Metin kuralları ekibin önceki aracının kural tablosuna uyduruldu; otomatik pano, Excel'de sütun seçimi,
+  özel görsel ölçüsü** (kullanıcı isteği, 2026-11-14: "bunlara bak, bunlara göre baktın mı, bilgiler var bunda").
+  Önceki aracın kural tablosundaki her örnek motordan geçirildi ve test olarak eklendi. Farklı çıkan noktalar:
+  - **Her kelimenin ilk harfi büyük**, "ve" ve "ile" dahil: "Tavuk Ve Patates". D-218'de Türkçe başlık yazımına göre
+    küçük bırakılıyordu; ekibin kuralı her kelime diyor.
+  - **"/", "+" ve "&" her zaman boşluklu**, kesir dahil: "1 / 2". Kuralın istisnası "her zaman boşluklu".
+  - **Yazılan nokta kalır:** "elma , armut ." → "Elma, Armut.". D-218 adlarda sondaki noktayı siliyordu.
+  - **"iyi" → "İyi":** sözlükte olmayan, düz harflerle yazılmış kelime artık yalnızca Türkçede olmayan harf dizileri
+    taşıyorsa (ch, sh, th, ck, ph, oo, ee, ea, ou, q, w, x, sonda y) yabancı sayılır ve noktasız I alır ("Chicken",
+    "Cookie"). Diğerleri Türkçe sayılır.
+  - **Eksik sözcük ve birim:** "kokorec" → "Kokoreç" temel sözlüğe, "MİLİ" → "ml" birimlere eklendi.
+  - **Bilerek farklı kalan:** önceki araç "2 Ar Adet" → "2'ar Adet" yazıyor; Türkçede "ikişer" okunduğu için doğrusu
+    "2'şer Adet". Motor eki sayının okunuşuna göre yazmaya devam eder (6'lı, 2'şer). Ekip yazılanı korumak isterse tek
+    bir kural.
+
+  Önceki araçta olup bizde eksik kalanlar eklendi:
+  - **Otomatik pano** (açılıp kapatılır, varsayılan açık): temsilci panelde ya da satıcının dosyasında bir metni
+    kopyalayıp bu sekmeye döndüğünde pano okunur, düzeltilir ve geri yazılır; bu sekmeye yapıştırmak gerekmez.
+    Tarayıcı izin vermezse kendiliğinden kapanır ve söyler. Aracın kendi yazdığı metni tekrar işlemez, 200 bin
+    karakterden büyük panoya dokunmaz.
+  - **Excel'de sütun seçimi:** istenmeyen sütunlar gizlenir; gizli sütunlar indirilen dosyaya da girmez.
+  - **Özel görsel ölçüsü:** genişlik, yükseklik ve KB sınırı verilir; "Oranı koru" açıkken bir kenar ötekini ve kaynağın
+    oranını izler.
+
+  Önceki aracın "Kolaj" ve Excel'deki hazır çıktı şablonları (ör. "Stok Güncelleme") yapılmadı: şablonların biçimi
+  bilinmiyor.

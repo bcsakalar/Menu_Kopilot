@@ -9,7 +9,8 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `816a98f`
 - **Araçlar (D-218):** sol üstte "Asistan | Araçlar" geçişi. **Metin düzeltme:** ürün/mağaza adı ve açıklama yazdıkça
   panelin kurallarına göre düzeltilir, yapıştırılan metin düzeltilip panoya kopyalanır; Türkçe karakter, yazım hatası ve
   bitişik kelime havuzun sözlüğüyle, yapay zekâsız. **Excel:** dosyayı aç, ara, sırala, ad ve açıklama sütunlarını
-  düzeltip indir. **Logo ve banner:** panel ölçüleri, 150 KB sınırı, JPEG/PNG. Hepsi tarayıcıda çalışır.
+  düzeltip indir, istenmeyen sütunları çıkar. **Logo ve banner:** panel ölçüleri ya da özel ölçü, 150 KB sınırı, JPEG/PNG.
+  Hepsi tarayıcıda çalışır. Kurallar ekibin önceki aracının kural tablosuyla birebir sınandı (D-219).
 - **Analiz:** altı ajanlık hat, ilk cevap normalde 6–11 saniye; hazır düğmeler ("Çorba öner") modelsiz, 1–3 saniye.
   Başlıkta **açılış kuralları** (ürün sayısı, 10 içecek, %70 açıklama, %20 fotoğraf, yazım düzeni) ve ek mutfak türü
   önerisi (D-206). Her ilk analiz (ekran görüntüsü, liste, tek ürün, yalnızca mutfak) **mutfağın hedefini geçecek kadar**
@@ -32,7 +33,7 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `816a98f`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1368, web 104; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1368, web 120; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
   Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
@@ -73,6 +74,6 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `816a98f`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-218 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-219 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

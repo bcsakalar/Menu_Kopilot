@@ -15,11 +15,11 @@ falafel fasulye fesleğen filtre fındık fındıklı fırın fırında fırınl
 garnitür gazoz geleneksel gibi gözleme güveç güzel günlük gram
 halka halkası hamburger hamsi hamur harmanlanır haşlama haşlanmış havuç hazırlanır hazırlanan helva hindi hindistancevizi
 ıhlamur ılık ıslak ıspanak ızgara ızgarada
-ile ilave ince için içecek içeceği içi içinde iki ikili iskender işkembe
+ıce ıced ile ilave ince iyi için içecek içeceği içi içinde iki ikili iskender işkembe
 jambon
 kabak kadayıf kahvaltı kahvaltılık kahve kahvesi kakao kakaolu kalamar kalın kanat kapya karamel karamelli karides karışık
 kase kaşar kaşarlı kavurma kavurmalı kavrulmuş kaymak kaymaklı kayısı kazandibi kebap kebabı kek kelle kepekli kereviz keşkül
-kiraz kişilik kızartma kızartması kızarmış kıyma kıymalı kola konya köfte köftesi köy köz közde közlenmiş közlü kremalı krema
+kiraz kişilik kızartma kızartması kızarmış kıyma kıymalı kola konya köfte köftesi köy kokoreç köz közde közlenmiş közlü kremalı krema
 krep kruvasan kuru kurabiye kuzu kuşbaşı kuşbaşılı kutu kullanılır kümes künefe kumpir
 labne lahana lahmacun latte lavaş lezzetli limon limonata limonlu lokma lokum lor
 makarna maden mangal mangalda mantar mantarlı mantı mantısı marul maydanoz menü menüsü mercimek meyve meyveli meze mezesi

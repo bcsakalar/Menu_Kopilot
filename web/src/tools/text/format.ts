@@ -43,6 +43,7 @@ const SYMBOL_UNITS: Readonly<Record<string, string>> = {
   kilogram: 'kg',
   ml: 'ml',
   mlt: 'ml',
+  mili: 'ml',
   mililitre: 'ml',
   mililiter: 'ml',
   cl: 'cl',
@@ -66,8 +67,6 @@ const WORD_UNITS: Readonly<Record<string, string>> = {
 };
 /** Words that size a portion written without a number: "Yarım Porsiyon". */
 const PORTION_SIZES = new Set(['yarim', 'tam', 'ceyrek', 'duble', 'buyuk', 'kucuk', 'orta']);
-/** Small inside a name. */
-const CONNECTORS = new Set(['ve', 'ile', 'veya']);
 /** Kept in capitals wherever they stand. */
 const ACRONYMS = new Set(['xs', 'xl', 'xxl', 'xxxl', 'bbq', 'vip', 'tl', 'kdv', 'diy', 'pet']);
 /** Brands written as two words that are one hyphenated name. */
@@ -82,6 +81,13 @@ const PROPER: ReadonlyMap<string, string> = new Map(
     'Tekirdağ', 'Edirne', 'Halep', 'Arnavut', 'Napoli', 'Coca-Cola', 'Pepsi', 'Fanta', 'Sprite', 'Nutella', 'Lotus', 'Oreo',
   ].map((name) => [fold(name), name]),
 );
+
+/**
+ * A plain-letter word the lexicon does not know looks foreign when it has letters or pairs Turkish does not write —
+ * "Chicken", "Wings", "Cookie", "Tea" — and is then capitalised with a plain I. Anything else is taken for Turkish: "iyi"
+ * is "İyi".
+ */
+const looksForeign = (word: string): boolean => /[qwx]|ch|sh|th|ck|ph|oo|ee|ea|ou|y$/u.test(word.toLowerCase());
 
 const isLetterWord = (token: Token | undefined): token is Extract<Token, { type: 'word' }> => token?.type === 'word';
 /** The punctuation mark a token is, or undefined for a word or a number. */
@@ -187,7 +193,7 @@ function fixWords(tokens: Token[], options: FormatOptions): Token[] {
     const key = fold(raw);
     if (!options.smart) {
       // Without the lexicon an ASCII word is lowered the plain way: "ICED" is "iced", not "ıced".
-      out.push({ ...token, text: turkishTyped ? trLower(raw) : raw.toLowerCase(), foreign: !turkishTyped });
+      out.push({ ...token, text: turkishTyped ? trLower(raw) : raw.toLowerCase(), foreign: !turkishTyped && looksForeign(raw) });
       continue;
     }
     const known = lexicon.spelling(key);
@@ -205,8 +211,8 @@ function fixWords(tokens: Token[], options: FormatOptions): Token[] {
       out.push({ ...token, text: lexicon.spelling(corrected)!, foreign: lexicon.isForeign(corrected) });
       continue;
     }
-    // Unknown: a word typed in Turkish letters is Turkish; one typed in plain letters is most likely foreign ("Chicken").
-    out.push({ ...token, text: turkishTyped ? trLower(raw) : raw.toLowerCase(), foreign: !turkishTyped });
+    // Unknown: a word typed in Turkish letters is Turkish; one in plain letters is foreign only if it looks it ("Chicken").
+    out.push({ ...token, text: turkishTyped ? trLower(raw) : raw.toLowerCase(), foreign: !turkishTyped && looksForeign(raw) });
   }
   return out;
 }
@@ -254,13 +260,13 @@ function wrapTrailingPortion(tokens: Token[]): Token[] {
   ];
 }
 
-function caseWord(token: Extract<Token, { type: 'word' }>, kind: TextKind, sentenceStart: boolean, firstWord: boolean): string {
+function caseWord(token: Extract<Token, { type: 'word' }>, kind: TextKind, sentenceStart: boolean): string {
   const key = fold(token.text);
   if (ACRONYMS.has(key)) return token.text.toLocaleUpperCase('en');
   const capital = (text: string) => (token.foreign ? plainCapitalize(text) : trCapitalize(text));
   if (kind === 'name') {
+    // Every word starts with a capital, "ve" and "ile" too: the team's rule (D-219).
     if ([...token.text].length === 1) return token.text.toLocaleUpperCase('en');
-    if (!firstWord && CONNECTORS.has(key)) return token.text;
     return capital(token.text);
   }
   const proper = PROPER.get(key);
@@ -282,7 +288,6 @@ function render(tokens: Token[], kind: TextKind): string {
   let out = '';
   let depth = 0;
   let sentenceStart = true;
-  let firstWord = true;
   // A run of the same mark ("!!", ",,") is one.
   const deduped = tokens.filter((token, i) => !(token.type === 'punct' && TRAILING.has(token.text) && token.text !== '.' && markOf(tokens[i - 1]) === token.text));
   deduped.forEach((token, i) => {
@@ -290,7 +295,8 @@ function render(tokens: Token[], kind: TextKind): string {
     const next = deduped[i + 1];
     const prevText = prev?.type === 'punct' ? prev.text : undefined;
     const tightSymbol = (symbol: Token | undefined, before: Token | undefined, after: Token | undefined): boolean =>
-      symbol?.type === 'punct' && (SPACED.has(symbol.text) ? before?.type === 'num' && after?.type === 'num' : symbol.text === '-' ? !symbol.space && !symbol.spacedAfter : false);
+      // "/", "+" and "&" are always spaced, a fraction too ("1 / 2", the team's rule, D-219); a hyphen only if it came spaced.
+      symbol?.type === 'punct' && symbol.text === '-' && !symbol.space && !symbol.spacedAfter && before !== undefined && after !== undefined;
 
     if (token.type === 'punct') {
       const mark = token.text;
@@ -326,8 +332,7 @@ function render(tokens: Token[], kind: TextKind): string {
     if (!glued) out += ' ';
 
     if (token.type === 'word') {
-      out += caseWord(token, kind, sentenceStart, firstWord);
-      firstWord = false;
+      out += caseWord(token, kind, sentenceStart);
     } else if (token.type === 'quant') {
       const value = `${token.amount} ${unitText(token.unit, kind)}`;
       out += kind === 'name' && depth === 0 ? `(${value})` : value;
@@ -338,7 +343,8 @@ function render(tokens: Token[], kind: TextKind): string {
   });
 
   out = out.replace(/\s+/gu, ' ').trim();
-  if (kind === 'name') return out.replace(/[\s.,;:]+$/u, '').replace(/^[\s.,;:]+/u, '');
+  // A name keeps the punctuation it was typed with ("Elma, Armut."); only stray leading marks go.
+  if (kind === 'name') return out.replace(/^[\s.,;:]+/u, '');
   out = out.replace(/^[\s.,;:]+/u, '');
   return out.length > 0 && !/[.!?…]$/u.test(out) ? `${out}.` : out;
 }

@@ -1,6 +1,6 @@
 import { Download, ImageUp, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { containRect, coverRect, IMAGE_PRESETS, outputName, type ImagePreset } from './image/fit';
+import { containRect, coverRect, customPreset, IMAGE_PRESETS, outputName, type ImagePreset } from './image/fit';
 
 /**
  * Logo ve banner (D-218): a seller's logo, banner or product photo brought to the panel's format — the right size, cropped
@@ -49,7 +49,8 @@ async function encode(canvas: HTMLCanvasElement, format: Format, maxBytes: numbe
 }
 
 export function ImageTool() {
-  const [preset, setPreset] = useState<ImagePreset>(IMAGE_PRESETS[0]!);
+  const [chosen, setChosen] = useState<ImagePreset['key']>('urun');
+  const [custom, setCustom] = useState({ width: 800, height: 800, maxKb: 150, lock: true });
   const [fit, setFit] = useState<Fit>('cover');
   const [format, setFormat] = useState<Format>('jpeg');
   const [background, setBackground] = useState('#ffffff');
@@ -59,6 +60,15 @@ export function ImageTool() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; y: number; focus: { x: number; y: number } } | null>(null);
+  const preset = chosen === 'ozel' ? customPreset(custom.width, custom.height, custom.maxKb) : IMAGE_PRESETS.find((p) => p.key === chosen)!;
+  /** With the ratio locked, one side follows the other and the source's shape. */
+  const resize = (side: 'width' | 'height', value: number) => {
+    setCustom((current) => {
+      if (!current.lock || !source) return { ...current, [side]: value };
+      const ratio = source.bitmap.width / source.bitmap.height;
+      return side === 'width' ? { ...current, width: value, height: Math.round(value / ratio) } : { ...current, height: value, width: Math.round(value * ratio) };
+    });
+  };
   const preview = useRef<HTMLImageElement>(null);
 
   const open = async (file: File | undefined) => {
@@ -217,8 +227,8 @@ export function ImageTool() {
           <fieldset>
             <legend>Ölçü</legend>
             {IMAGE_PRESETS.map((item) => (
-              <label key={item.key} className={`preset${item.key === preset.key ? ' active' : ''}`}>
-                <input type="radio" name="preset" checked={item.key === preset.key} onChange={() => setPreset(item)} />
+              <label key={item.key} className={`preset${item.key === chosen ? ' active' : ''}`}>
+                <input type="radio" name="preset" checked={item.key === chosen} onChange={() => setChosen(item.key)} />
                 <span>
                   <strong>{item.label}</strong>
                   <span className="muted small">
@@ -227,6 +237,33 @@ export function ImageTool() {
                 </span>
               </label>
             ))}
+            <label className={`preset${chosen === 'ozel' ? ' active' : ''}`}>
+              <input type="radio" name="preset" checked={chosen === 'ozel'} onChange={() => setChosen('ozel')} />
+              <span>
+                <strong>Özel ölçü</strong>
+                <span className="muted small">Genişlik, yükseklik ve boyut sınırını sen ver</span>
+              </span>
+            </label>
+            {chosen === 'ozel' && (
+              <div className="custom-size">
+                <label>
+                  Genişlik
+                  <input type="number" min={16} max={4000} value={custom.width} onChange={(e) => resize('width', Number(e.target.value))} />
+                </label>
+                <label>
+                  Yükseklik
+                  <input type="number" min={16} max={4000} value={custom.height} onChange={(e) => resize('height', Number(e.target.value))} />
+                </label>
+                <label>
+                  En fazla KB
+                  <input type="number" min={10} max={5000} value={custom.maxKb} onChange={(e) => setCustom((c) => ({ ...c, maxKb: Number(e.target.value) }))} />
+                </label>
+                <label className="lock">
+                  <input type="checkbox" checked={custom.lock} onChange={(e) => setCustom((c) => ({ ...c, lock: e.target.checked }))} />
+                  Oranı koru
+                </label>
+              </div>
+            )}
           </fieldset>
           <fieldset>
             <legend>Yerleşim</legend>

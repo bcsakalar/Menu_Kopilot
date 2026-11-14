@@ -6,7 +6,7 @@ import { fold } from '../text/turkish';
  */
 
 export interface ImagePreset {
-  key: 'urun' | 'logo' | 'banner';
+  key: 'urun' | 'logo' | 'banner' | 'ozel';
   label: string;
   hint: string;
   width: number;
@@ -19,6 +19,12 @@ export const IMAGE_PRESETS: readonly ImagePreset[] = [
   { key: 'logo', label: 'Mağaza logosu', hint: 'Kare, en fazla 150 KB', width: 500, height: 500, maxKb: 150 },
   { key: 'banner', label: 'Mağaza banner’ı', hint: '1035 × 390, en fazla 150 KB', width: 1035, height: 390, maxKb: 150 },
 ];
+
+/** A size of one's own (D-219): the given width, height and limit; the frame is never larger than this. */
+export function customPreset(width: number, height: number, maxKb: number): ImagePreset {
+  const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, Math.round(value) || low));
+  return { key: 'ozel', label: 'Özel ölçü', hint: '', width: clamp(width, 16, 4000), height: clamp(height, 16, 4000), maxKb: clamp(maxKb, 10, 5000) };
+}
 
 export interface Rect {
   x: number;

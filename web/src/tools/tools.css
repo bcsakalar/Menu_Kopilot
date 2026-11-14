@@ -289,6 +289,38 @@
   gap: 12px;
 }
 
+.column-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.column-picker .chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.column-picker .chip.on {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.column-picker .chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.column-picker .chip:has(input:focus-visible) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
 .search {
   display: inline-flex;
   align-items: center;
@@ -501,6 +533,35 @@
   gap: 10px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.custom-size {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.custom-size label {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.custom-size input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.custom-size .lock {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text);
 }
 
 .color-row > span:first-child {
