@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { users } from '../../src/db/schema/index.js';
 import type { CardDto } from '../../src/modules/analyze/schemas.js';
 import type { ConversationDetail } from '../../src/modules/chat/schemas.js';
-import { MESSAGES_PER_ADDRESS_PER_MINUTE, MESSAGES_PER_MINUTE, NEW_VISITORS_PER_MINUTE } from '../../src/modules/chat/routes.js';
+import { CHAT_LIMITS } from '../../src/modules/chat/routes.js';
 import { looksLikeProductList } from '../../src/modules/chat/service.js';
 import { FakeProvider, hashEmbedding, okJson, type FakeResponder } from '../helpers/fake-provider.js';
 import { fixtureResponder, loadFixtures, multipartBody, parseSse, type Fixtures } from '../helpers/fixtures.js';
@@ -332,16 +332,21 @@ describe('what a visitor may write', () => {
       remoteAddress: address,
     });
   };
+  /** A new rep: its first (empty) message creates the visitor, and the cookie comes back with the 400. */
   const visitorAt = async (address: string): Promise<string> => {
-    const body = multipartBody({ text: 'Tost, Ayran' }, []);
-    const res = await ctx.app.inject({ method: 'POST', url: '/api/v1/chat/messages', headers: body.headers, payload: body.payload, remoteAddress: address });
-    expect(res.statusCode).toBe(200);
-    return String(res.headers['set-cookie']).split(';')[0]!;
+    const res = await emptyFrom(address);
+    expect(res.statusCode).toBe(400);
+    const cookie = String(res.headers['set-cookie']).split(';')[0]!;
+    expect(cookie).toMatch(/^mk_visitor=/);
+    return cookie;
   };
 
-  it('stops an address minting visitors at 30 a minute, before anything is created (D-214)', async () => {
-    expect(NEW_VISITORS_PER_MINUTE).toBe(30);
-    for (let i = 0; i < NEW_VISITORS_PER_MINUTE; i += 1) expect((await emptyFrom('10.9.9.9')).statusCode).toBe(400);
+  it('is generous with one office: 30 a minute per rep, 200 new reps and 600 messages per address (D-215)', () => {
+    expect(CHAT_LIMITS).toEqual({ perVisitor: 30, newPerAddress: 200, perAddress: 600 });
+  });
+
+  it('stops an address minting visitors only past 200 a minute, before anything is created (D-215)', async () => {
+    for (let i = 0; i < CHAT_LIMITS.newPerAddress; i += 1) expect((await emptyFrom('10.9.9.9')).statusCode).toBe(400);
     const visitors = await ctx.db.db.select({ id: users.id }).from(users);
     const stopped = await emptyFrom('10.9.9.9');
     expect(stopped.statusCode).toBe(429);
@@ -349,32 +354,38 @@ describe('what a visitor may write', () => {
     expect(await ctx.db.db.select({ id: users.id }).from(users)).toHaveLength(visitors.length);
   });
 
-  it('stops one visitor at 20 messages a minute, but not a colleague behind the same office address (D-214)', async () => {
-    expect(MESSAGES_PER_MINUTE).toBe(20);
+  it('stops one rep past 30 messages a minute, but not a colleague behind the same office address (D-215)', async () => {
     const office = '10.9.8.1';
     const rep = await visitorAt(office);
     const colleague = await visitorAt(office);
-    // The first message came before the cookie existed, as a newcomer of the address: twenty more with the cookie.
-    for (let i = 0; i < MESSAGES_PER_MINUTE; i += 1) expect((await emptyFrom(office, rep)).statusCode).toBe(400);
+    // The first message came before the cookie existed, as a newcomer of the address: thirty more with the cookie.
+    for (let i = 0; i < CHAT_LIMITS.perVisitor; i += 1) expect((await emptyFrom(office, rep)).statusCode).toBe(400);
     expect((await emptyFrom(office, rep)).statusCode).toBe(429);
     expect((await emptyFrom(office, colleague)).statusCode).toBe(400);
-    // Another browser's cookie cannot be borrowed by forging it: an invalid token counts as a newcomer of the address.
+    // A forged cookie borrows nobody's allowance: an invalid token counts as a newcomer of the address.
     expect((await emptyFrom(office, 'mk_visitor=forged.token.value')).statusCode).toBe(400);
   });
 
-  it('holds a whole address to 120 messages a minute however many visitors it has (D-214)', async () => {
-    expect(MESSAGES_PER_ADDRESS_PER_MINUTE).toBe(120);
+  it('holds a whole address to 600 messages a minute however many reps share it (D-215)', async () => {
     const office = '10.9.7.1';
     const reps: string[] = [];
-    for (let i = 0; i < 7; i += 1) reps.push(await visitorAt(office));
-    // 7 first messages + 113 more spread over the seven: none reaches its own 20, the address reaches 120.
-    for (let i = 0; i < MESSAGES_PER_ADDRESS_PER_MINUTE - reps.length; i += 1) {
+    for (let i = 0; i < 22; i += 1) reps.push(await visitorAt(office));
+    // 22 first messages + 578 more spread over the 22: none reaches its own 30, the address reaches 600.
+    for (let i = 0; i < CHAT_LIMITS.perAddress - reps.length; i += 1) {
       expect((await emptyFrom(office, reps[i % reps.length])).statusCode).toBe(400);
     }
     expect((await emptyFrom(office, reps[0])).statusCode).toBe(429);
     expect((await emptyFrom(office)).statusCode).toBe(429);
     // Another address is untouched.
     expect((await emptyFrom('10.9.7.2', reps[1])).statusCode).toBe(400);
+  });
+
+  it('counts an IPv6 connection by its /64, so changing the last part of the address mints no more (D-215)', async () => {
+    for (let i = 0; i < CHAT_LIMITS.newPerAddress; i += 1) {
+      expect((await emptyFrom(`2001:db8:5:6::${(i + 1).toString(16)}`)).statusCode).toBe(400);
+    }
+    expect((await emptyFrom('2001:db8:5:6:ffff:ffff:ffff:ffff')).statusCode).toBe(429);
+    expect((await emptyFrom('2001:db8:5:7::1')).statusCode).toBe(400);
   });
 
   it('cannot start a run around the rate limited door', async () => {

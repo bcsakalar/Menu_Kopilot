@@ -170,7 +170,7 @@ dönerci olmayana döner önerilmesini bu engeller.
 | Mutfaklar, kategoriler, hazır şablonlar | `backend/src/db/seed/` (`cuisines.ts`, `categories.ts`, `templates-*.ts`, `product-types.ts`) |
 | Giriş ve çerezler | `backend/src/plugins/auth.ts`, `backend/src/modules/auth/` |
 | Rotaların bağlandığı yer | `backend/src/app.ts` (açık sohbet / oturum / yalnızca admin olarak üç kapsam) |
-| Yük: kuyruk, mesaj sınırı, uyarılar | `backend/src/lib/slots.ts`, `modules/chat/routes.ts`, `modules/admin/load.ts`; ölçüm `pnpm probe:load` (D-214) |
+| Yük: kuyruk, hız sınırları, uyarılar | `backend/src/lib/slots.ts`, `lib/visitor-limits.ts`, `modules/admin/load.ts`; ölçüm `pnpm probe:load` (D-214, D-215) |
 
 ## Sık yapılan işler
 
@@ -234,7 +234,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-215`'ten devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-216`'dan devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -320,9 +320,9 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
   `scripts/check-no-provider-keys.ps1` bulunursa derlemeyi durdurur.
 - **Site açıktır (D-200).** Ziyaretçi şifresiz bir kullanıcı kaydıdır ve HttpOnly, SameSite=Lax bir çerezle tanınır. Adresi
   bilen herkes kullanabildiği için üç sınır vardır: dakikalık mesaj sınırı, ziyaretçi başına günlük kota ve site geneli
-  günlük tavan. Tavan dolunca cevaplar yalnızca havuzdan gelir. Mesaj sınırı ziyaretçi başına dakikada 20'dir. Aynı
-  ofisten yazanlar ayrı sayılır; bir adres dakikada en çok 30 yeni ziyaretçi açabilir ve toplam 120 mesaj gönderebilir
-  (D-214).
+  günlük tavan. Tavan dolunca cevaplar yalnızca havuzdan gelir. Bir ofisin bütün temsilcileri aynı adresten geldiği
+  için sınırlar kişiye bağlıdır ve adrese göre cömerttir (D-215). Sohbette temsilci başına dakikada 30 mesaj, bir
+  adresten dakikada 200 yeni temsilci ve toplam 600 mesaj; geri bildirimde temsilci başına 10, adres başına 100.
 - **Ziyaretçi ortak hiçbir şeye yazamaz.** Şablon havuzu, öğrenme döngüsü ve ayarlar admin çerezinin arkasındadır
   (HttpOnly, SameSite=Strict, 12 saat). Üretim, geliştirme varsayılanlarıyla açılmayı reddeder.
 - **Ekran görüntüleri saklanmaz**, yalnızca önbellek için SHA-256 özetleri tutulur. Tarayıcı görüntüyü göndermeden önce
@@ -358,7 +358,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-214). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-215). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

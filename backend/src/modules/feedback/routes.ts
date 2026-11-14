@@ -1,17 +1,25 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { type VisitorLimits, visitorLimits } from '../../lib/visitor-limits.js';
 import { getAuthUser } from '../../plugins/auth.js';
 import { createFeedbackSchema, feedbackDtoSchema, feedbackListQuerySchema, feedbackListSchema, updateFeedbackSchema } from './schemas.js';
 import type { FeedbackService } from './service.js';
 
+/**
+ * Feedback per minute (D-215): five a minute per ADDRESS used to be the whole office's allowance. Now ten per rep, and
+ * an office's one address carries a hundred.
+ */
+export const FEEDBACK_LIMITS: VisitorLimits = { perVisitor: 10, newPerAddress: 100, perAddress: 100 };
+
 /** Anyone with the site open: the visitor cookie is the identity, like the chat (D-200). */
 export const feedbackRoutes: FastifyPluginAsyncZod<{ service: FeedbackService }> = async (app, { service }) => {
+  const limitFeedback = visitorLimits(app, 'feedback', FEEDBACK_LIMITS);
   app.post(
     '/feedback',
     {
-      // preHandler, not onRequest: the rate limit runs first, so a flood cannot mint a visitor per request.
+      // The limits run first (onRequest), the visitor is made after (preHandler): a flood cannot mint a visitor per request.
+      onRequest: [limitFeedback],
       preHandler: [app.ensureVisitor],
-      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
       schema: {
         tags: ['feedback'],
         summary: 'A rep sends feedback (suggestion, bug or other), optionally with the conversation on screen',

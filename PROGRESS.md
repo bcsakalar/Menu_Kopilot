@@ -13,7 +13,8 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `0fda1d2`
   çeşitleri, balıklar, meze ve içecekler). Model yavaşsa havuz tamamlar (D-213).
 - **Çok kişide (D-214):** analiz başına sunucu işlemcisi 650 → yaklaşık 50 ms; aynı anda 20 analiz 1 saniyenin altında
   (modeller hariç, `pnpm probe:load` ile ölçüldü). Aynı anda en çok 10 analiz çalışır, fazlası sırasını görerek bekler;
-  sıra da doluysa "Şu an çok yoğunuz" denir. Mesaj sınırı ziyaretçi başına (aynı ofisten yazanlar ayrı sayılır). Bir
+  sıra da doluysa "Şu an çok yoğunuz" denir. Hız sınırları kişi başına ve bir ofisin ortak adresine göre cömert: temsilci
+  başına dakikada 30 mesaj, bir adresten dakikada 600 mesaj (D-215). Bir
   model 429 verince o dakika kaldırabildiği kadar çağrı alır, fazlası zincirdeki sıradaki modele gider.
 - **Şablon havuzu:** 966 hazır şablon, 26 mutfak (Makarna & İtalyan, Mantı & Makarna'ya katıldı: D-212); her mutfakta
   havuz açılış hedefine yetiyor (D-207), paketli içecek seti; yönetimden **Excel ile toplu ekleme ve güncelleme**
@@ -23,7 +24,7 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `0fda1d2`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1347, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1350, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
   Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
@@ -62,6 +63,6 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `0fda1d2`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-214 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-215 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

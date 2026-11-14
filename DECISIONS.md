@@ -1164,3 +1164,23 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   kazanç getirmez. Gerekirse mesaj sayaçları zaten Redis'te; kuyruk ve öğrenilen tavanlar süreç başına kalır.
   `/analyze` uçlarının canlı olay ve iptal kaydı da süreç başınadır: başka sürece düşen istek veritabanındaki anlık
   görüntüyü alır. Bu uçları site değil, yalnızca API istemcileri kullanıyor.
+- **D-215** — **Hız sınırları bir ofisin ortak adresine göre cömert** (kullanıcı isteği, 2026-11-14: "herkes aynı
+  IP'den geliyor, QR menü sisteminde de hız sınırı koyduk, sonra ortak hız sınırıymış; cömert bir hız sınırı koy").
+  Canlı nginx kayıtlarında son günlerdeki 134 sohbet mesajının 81'i (%60) tek bir adresten geldi. Birkaç mesaj da
+  birçok şirketin çalışanını aynı adreste toplayan kurumsal proxy adreslerinden geldi. Gerçek adres doğru okunuyor:
+  nginx Cloudflare'in `CF-Connecting-IP` başlığından ziyaretçinin adresini alıp uygulamaya geçiriyor. Bu yüzden adrese
+  bağlı her sınır bütün ofisin ortak sınırı oluyordu. D-214'te sohbet zaten ziyaretçi çerezine bağlanmıştı, ama iki yer
+  kalmıştı: geri bildirim IP başına dakikada 5 idi (bütün ofis için beş), yönetici girişi de IP başına 5. Artık
+  (`lib/visitor-limits.ts`, sohbet ve geri bildirim aynı kuralı kullanıyor):
+  **Sohbet**
+  - temsilci başına dakikada 30 mesaj;
+  - bir adresten dakikada 200 yeni temsilci;
+  - bir adresten toplam dakikada 600 mesaj. Aynı anda yazan iki yüz temsilci sığar.
+  **Geri bildirim**
+  - temsilci başına dakikada 10;
+  - bir adresten toplam dakikada 100.
+  **Yönetici girişi**
+  - adres başına dakikada 10 (şifre denemesine karşı).
+  IPv6 bağlantısı kendi /64 bloğuyla sayılır; adresin son kısmını değiştirerek yeni ziyaretçi açılamaz. Kalan
+  korumalar adrese bağlı değil: ziyaretçi başına günlük kota, site geneli günlük tavan ve analiz kuyruğu (aynı anda
+  10 analiz, 50 sırada; D-214). Canlıda bugüne kadar hiç 429 görülmedi; en yoğun dakikada bir adresten 3 mesaj geldi.

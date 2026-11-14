@@ -1,47 +1,26 @@
-import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { AppError } from '../../lib/errors.js';
 import { openSse } from '../../lib/sse.js';
 import { readFieldsAndImages } from '../../lib/uploads.js';
+import { type VisitorLimits, visitorLimits } from '../../lib/visitor-limits.js';
 import { getAuthUser } from '../../plugins/auth.js';
 import { conversationDetailSchema, conversationDtoSchema, messageFieldsSchema } from './schemas.js';
 import type { ChatService } from './service.js';
 
 const idParams = z.object({ id: z.uuid() });
-/** One analysis costs several model calls: this is what keeps one browser from spending the day's quota in a minute. */
-export const MESSAGES_PER_MINUTE = 20;
-/** First messages (no cookie yet) per address: each creates a visitor, so this is what stops minting them (D-214). */
-export const NEW_VISITORS_PER_MINUTE = 30;
 /**
- * A whole office reaches the site from one address behind its router, so the address limit is loose: twenty reps
- * writing at full speed still fit under it (D-214).
+ * Chat messages per minute (D-215). A rep in a call sends a message every few seconds at most, so 30 never stops a
+ * person, only a runaway script. One address — an office, a corporate proxy — carries 200 new reps and 600 messages a
+ * minute: two hundred reps writing at once still fit. The daily quotas and the analysis queue guard the rest.
  */
-export const MESSAGES_PER_ADDRESS_PER_MINUTE = 120;
+export const CHAT_LIMITS: VisitorLimits = { perVisitor: 30, newPerAddress: 200, perAddress: 600 };
 
 export const chatRoutes: FastifyPluginAsyncZod<{
   service: ChatService;
   uploads: { maxFiles: number; maxFileBytes: number };
 }> = async (app, { service, uploads }) => {
-  const perVisitor = app.createRateLimit({
-    timeWindow: '1 minute',
-    keyGenerator: (request) => {
-      const visitor = app.sessionSubject(request);
-      return visitor ? `chat-visitor:${visitor}` : `chat-new:${request.ip}`;
-    },
-    max: (_request, key) => (key.startsWith('chat-new:') ? NEW_VISITORS_PER_MINUTE : MESSAGES_PER_MINUTE),
-  });
-  const perAddress = app.createRateLimit({
-    timeWindow: '1 minute',
-    keyGenerator: (request) => `chat-address:${request.ip}`,
-    max: MESSAGES_PER_ADDRESS_PER_MINUTE,
-  });
-  const limitMessages = async (request: FastifyRequest): Promise<void> => {
-    for (const limit of [perAddress, perVisitor]) {
-      const result = await limit(request);
-      if (!result.isAllowed && result.isExceeded) throw new AppError('RATE_LIMITED', 'Çok fazla istek; biraz sonra tekrar dene');
-    }
-  };
+  const limitMessages = visitorLimits(app, 'chat', CHAT_LIMITS);
 
   app.get(
     '/chat/conversations',

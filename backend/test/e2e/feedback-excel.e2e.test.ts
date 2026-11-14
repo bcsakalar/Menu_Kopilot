@@ -4,6 +4,7 @@ import writeXlsxFile from 'write-excel-file/node';
 import { conversations, cuisines, menuItems, users } from '../../src/db/schema/index.js';
 import { readTemplateSheet } from '../../src/modules/templates/excel.js';
 import type { ImportReport } from '../../src/modules/templates/schemas.js';
+import { FEEDBACK_LIMITS } from '../../src/modules/feedback/routes.js';
 import { multipartBody } from '../helpers/fixtures.js';
 import { type TestContext, bearer, createTestApp, loginAs } from '../helpers/test-app.js';
 
@@ -65,6 +66,27 @@ describe('feedback and the Excel template pool', () => {
     });
     expect(done.statusCode).toBe(200);
     expect(done.json()).toMatchObject({ status: 'done', adminNote: 'İçecek şablonları eklendi' });
+  });
+
+  it('gives each rep its own feedback allowance: an office address is not one person (D-215)', async () => {
+    expect(FEEDBACK_LIMITS).toEqual({ perVisitor: 10, newPerAddress: 100, perAddress: 100 });
+    const office = '10.30.0.1';
+    const send = (cookie?: string) =>
+      ctx.app.inject({
+        method: 'POST',
+        url: '/api/v1/feedback',
+        headers: cookie ? { cookie } : {},
+        payload: { kind: 'oneri', message: 'Daha çok tatlı önerisi olsun' },
+        remoteAddress: office,
+      });
+    const first = await send();
+    expect(first.statusCode).toBe(201);
+    const rep = String(first.headers['set-cookie']).split(';')[0]!;
+    const colleague = String((await send()).headers['set-cookie']).split(';')[0]!;
+    for (let i = 0; i < FEEDBACK_LIMITS.perVisitor; i += 1) expect((await send(rep)).statusCode).toBe(201);
+    expect((await send(rep)).statusCode).toBe(429);
+    // Before D-215 the whole address was stopped after five.
+    expect((await send(colleague)).statusCode).toBe(201);
   });
 
   it('the sample previews, imports once, and a second import changes nothing', async () => {

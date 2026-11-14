@@ -11,7 +11,8 @@ export const authRoutes: FastifyPluginAsyncZod<{ service: AuthService; secureCoo
   app.post(
     '/auth/login',
     {
-      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+      // Per address, for password guessing: a few admins behind one office address still have room (D-215).
+      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
       schema: {
         tags: ['auth'],
         summary: 'Admin panel sign-in: email + password; sets the admin cookie',
