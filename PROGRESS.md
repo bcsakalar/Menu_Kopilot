@@ -32,10 +32,11 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `8de339f`
   (örnek dosya, önizleme, dışa aktarma). Yönetimdeki liste bütün şablonları içerikleriyle, sayfa sayfa ve mutfağa göre
   gösterir.
 - **Yönetim paneli:** pano (**anlık yük**: çalışan ve sıradaki analizler, süreler, sağlayıcı hataları; 14 günlük seri, kuralların kaçırılma oranı, hedefine uzak mutfaklar), görüşmeler, geri
-  bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
+  bildirimler, şablon havuzu ve arşivi (makine yazısı açıklamaları yapay zekâya yazdırıp onaylama, D-223), mutfak türleri,
+  öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1394, web 134; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1400, web 134; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
   Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
@@ -76,6 +77,6 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `8de339f`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-222 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-223 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

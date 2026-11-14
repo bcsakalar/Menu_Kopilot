@@ -1425,3 +1425,18 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
     değişiyor ama menüde önceki ürün kalıyor; yeni restoran için "Yeni görüşme" açılmalı.
   - **Not:** ilk deneme 40 saniyede 30 mesajla yapıldı; o hızda sağlayıcı sınırları dolup cevapların çoğu "yoğun" oldu.
     Gerçek kullanım bu hızda değil; ikinci deneme her mesaj arasında 12 saniyeyle yapıldı.
+- **D-223** — **Havuzun makine yazısı açıklamaları için okunup onaylanan gerçek açıklamalar** (kullanıcı isteği,
+  2026-11-14: D-222'de önerilen işin burada yapılması). D-222 içe aktarılan 952 şablonun kategori cümlesi açıklamalarını
+  kartlardan uzak tuttu, ama yerine ürün tipinin ortak cümlesi geliyordu (bütün çorbalara "Günlük pişen sıcak çorba…").
+  - **Admin > Şablon havuzu > Açıklamalar:** kaç şablonun açıklamasının makine yazısı olduğunu gösterir. "20 açıklama
+    yazdır" en önemli 20 şablon için yapay zekâya tek çağrıda 6–8 kelimelik açıklama yazdırır (`agent.describe`
+    yönergesi, `agent.options` model zinciri). Admin okur, düzeltir, işaretlediklerini kaydeder; işaretini kaldırdıkları
+    o oturumda tekrar gelmez.
+  - **Okunmadan hiçbir şey yazılmaz:** öneri istemek veritabanına dokunmaz; kaydedilen her metin panelin kurallarından
+    geçer (6–8 kelime, Türkçe, reklam dili ve fiyat yok, ürün adıyla başlayan kategori cümlesi değil). Kurala uymayan
+    öneri boş gelir, admin kendisi yazar; kurala uymayan kayıt nedeniyle geri döner. Yalnızca onaylı şablonlar
+    değişir; taslaklar inceleme kuyruğunda kalır.
+  - Kayıttan sonra şablonun gömmesi yeniden hesaplanır (açıklama eşleşmeye girer) ve araçların havuz önbelleği boşalır.
+  - Uçlar yalnızca admin içindir: `GET /templates/descriptions`, `POST /templates/descriptions/propose`
+    (en fazla 40), `POST /templates/descriptions/apply` (en fazla 100).
+  - 952 şablon yaklaşık 48 tur demek; günlük model kotasına (D-216) göre parça parça yapılır.

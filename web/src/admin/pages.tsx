@@ -4,6 +4,7 @@ import { api, ApiError, patch, post, put } from '../api';
 import { RunBlock } from '../chat/RunBlock';
 import { RichText } from '../chat/ui';
 import { dateTimeLabel, groupRule, timeLabel } from '../format';
+import { Descriptions } from './Descriptions';
 import { ExcelTools } from './ExcelTools';
 import type { Conversation, OptionGroup, RunResult } from '../types';
 
@@ -257,6 +258,7 @@ export function Templates() {
       error={error ?? actionError}
     >
       <ExcelTools onImported={reload} />
+      <Descriptions onSaved={reload} />
       <div className="toolbar">
         <div className="segmented" role="group" aria-label="Şablon durumu">
           <button type="button" aria-pressed={view === 'true'} onClick={() => filter(setView)('true')}>

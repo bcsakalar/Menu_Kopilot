@@ -51,6 +51,7 @@ import { settingsRoutes } from './modules/settings/routes.js';
 import { SettingsService } from './modules/settings/service.js';
 import { templateRoutes } from './modules/templates/routes.js';
 import { TemplateService } from './modules/templates/service.js';
+import { descriptionRoutes, DescriptionService } from './modules/templates/descriptions.js';
 import { toolsRoutes } from './modules/tools/routes.js';
 import { ToolsService } from './modules/tools/service.js';
 import { usageRoutes } from './modules/usage/routes.js';
@@ -269,6 +270,9 @@ export async function buildApp(deps: AppDeps): Promise<App> {
         await admin.register(settingsRoutes, { service: settingsService });
         await admin.register(cuisineRoutes, { service: new CuisineService(db) });
         await admin.register(templateRoutes, { service: new TemplateService(db, queue) });
+        await admin.register(descriptionRoutes, {
+          service: new DescriptionService({ db, router: ai.router, prompts: ai.prompts, queue, onChange: () => toolsService.forget() }),
+        });
         await admin.register(learningRoutes, { service: new LearningService(db) });
         await admin.register(usageRoutes, {
           service: new UsageService(db, ai.quota, { timezone: config.quota.timezone }),

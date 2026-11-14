@@ -1,5 +1,6 @@
 import { CHAT_SYSTEM, CHAT_USER } from './chat.js';
 import { CLASSIFIER_SYSTEM, CLASSIFIER_USER } from './classifier.js';
+import { DESCRIBE_SYSTEM, DESCRIBE_USER } from './describe.js';
 import { EXTRACTOR_SYSTEM, EXTRACTOR_USER } from './extractor.js';
 import { OPTION_MODIFIER_SYSTEM, OPTION_MODIFIER_USER } from './option-modifier.js';
 import { PRODUCT_RECOMMENDER_SYSTEM, PRODUCT_RECOMMENDER_USER } from './product-recommender.js';
@@ -21,6 +22,8 @@ export const AGENT_PROMPT_KEYS = [
   'agent.options.user',
   'agent.chat.system',
   'agent.chat.user',
+  'agent.describe.system',
+  'agent.describe.user',
 ] as const;
 export type AgentPromptKey = (typeof AGENT_PROMPT_KEYS)[number];
 
@@ -65,6 +68,9 @@ export const AGENT_PROMPT_VERSIONS: Readonly<Record<AgentPromptKey, number>> = {
   //     the system, never written into the reply or as "Şöyle söyle" (D-221).
   'agent.chat.system': 7,
   'agent.chat.user': 2,
+  // v1: real panel descriptions for the pool's templates that carry a category's stock sentence (D-223).
+  'agent.describe.system': 1,
+  'agent.describe.user': 1,
 };
 
 export const AGENT_PROMPTS: Readonly<Record<AgentPromptKey, string>> = {
@@ -78,4 +84,6 @@ export const AGENT_PROMPTS: Readonly<Record<AgentPromptKey, string>> = {
   'agent.options.user': OPTION_MODIFIER_USER,
   'agent.chat.system': CHAT_SYSTEM,
   'agent.chat.user': CHAT_USER,
+  'agent.describe.system': DESCRIBE_SYSTEM,
+  'agent.describe.user': DESCRIBE_USER,
 };
