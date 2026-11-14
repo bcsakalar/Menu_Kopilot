@@ -8,6 +8,7 @@ import { Composer, type Attachment } from './Composer';
 import { FeedbackDialog } from './Feedback';
 import { RunBlock } from './RunBlock';
 import { CountMeter, RichText } from './ui';
+import { ModeSwitch } from '../ModeSwitch';
 
 const FIRST_PROMPT = 'Menünün ekran görüntüsünü yapıştır ya da ürünleri yaz…';
 const NEXT_PROMPT = 'Sor, iste ya da yeni ekran görüntüsü yapıştır…';
@@ -279,6 +280,7 @@ export function ChatApp() {
             <X size={18} />
           </button>
         </div>
+        <ModeSwitch current="assistant" />
         <button type="button" className="button primary new-call" onClick={startNew}>
           <Plus size={17} />
           Yeni görüşme

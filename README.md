@@ -151,6 +151,17 @@ olmaz. Onaylanmamış öneri temsilciye hiç sunulmaz. Havuzun tek başına ne v
 **Kitchen profile** (`agents/kitchen.ts`): menüdeki ürünlerden mutfağın neyi yapabildiğini çıkarır. Kokoreççiye waffle,
 dönerci olmayana döner önerilmesini bu engeller.
 
+**Araçlar (D-218):** sol üstteki "Asistan | Araçlar" geçişi `/araclar` sayfasını açar. Asistan olduğu gibi kalır. Araçlar
+tarayıcıda çalışır, metin ve dosyalar sunucuya gitmez; yapay zekâ kullanılmaz.
+
+- **Metin düzeltme:** ürün/mağaza adı ve açıklama, panelin yazım kurallarına göre yazdıkça düzeltilir. Yapıştırılan
+  metnin düzeltilmiş hâli panoya kopyalanır. Türkçe karakter tamamlama, yazım hatası ve bitişik kelime düzeltmesi
+  şablon havuzundan çıkan sözlükle yapılır (`GET /api/v1/tools/lexicon`, açık, yalnızca okuma).
+- **Excel:** .xlsx ya da .csv açılır; arama, sıralama, sayfa sekmeleri. Ad ve açıklama sütunları kurallarla düzeltilip
+  .xlsx olarak indirilir.
+- **Logo ve banner:** ürün görseli (1000 × 1000), mağaza logosu (500 × 500) ve banner (1035 × 390), en fazla 150 KB;
+  kırp ya da sığdır, JPEG ya da PNG.
+
 ## Proje yapısı: neyi nerede değiştiririm?
 
 | Klasör | İçerik |
@@ -178,6 +189,7 @@ dönerci olmayana döner önerilmesini bu engeller.
 | Giriş ve çerezler | `backend/src/plugins/auth.ts`, `backend/src/modules/auth/` |
 | Rotaların bağlandığı yer | `backend/src/app.ts` (açık sohbet / oturum / yalnızca admin olarak üç kapsam) |
 | Yük: kuyruk, hız sınırları, uyarılar | `backend/src/lib/slots.ts`, `lib/visitor-limits.ts`, `modules/admin/load.ts`; ölçüm `pnpm probe:load` (D-214, D-215) |
+| Araçlar: yazım kuralları, Excel, görsel | `web/src/tools/` (kurallar `text/format.ts`, sözlük `text/lexicon.ts`, testler `*.test.ts`); sözlük ucu `backend/src/modules/tools/` (D-218) |
 | Havuzun modelsiz cevabı, yapay zekâ önerileri | `agents/product-recommender.ts`, `agents/classifier.ts`, `modules/templates/template-store.ts` (`recordDrafts`); ölçüm `pnpm probe:pool` (D-217) |
 
 ## Sık yapılan işler
@@ -242,7 +254,7 @@ veriye yazabildiği bir uç açma.
 - **Prompt değişince sürüm artar**, **migration'ın geri dosyası olur.**
 - **Arayüz metinleri Türkçe**; kod, kod yorumları ve commit mesajları İngilizce (mevcut düzen).
 - **Commit mesajları** kısa ve kapsamlı: `feat(web): …`, `fix(api): …`, `docs: …`.
-- **Önemli kararlar** `DECISIONS.md` sonuna `D-218`'den devam ederek yazılır: ne karar verildi, neden.
+- **Önemli kararlar** `DECISIONS.md` sonuna `D-219`'dan devam ederek yazılır: ne karar verildi, neden.
 - **Canlıya alma** sunucu erişimi isteyen bir iştir; proje sahibiyle konuşmadan yapılmaz.
 
 ## Ortam değişkenleri
@@ -366,7 +378,7 @@ elle kopyalanır ve `nginx -t` ile denenir. Ayrıntılar, ilk kurulum ve geri d�
 | [`CLAUDE.md`](CLAUDE.md) | Yapay zekâ kod asistanları için kısa proje kuralları |
 | [`docs/DEPLOY_MYSERVER.md`](docs/DEPLOY_MYSERVER.md) | Sunucu, nginx, deploy, yedek, geri dönüş |
 | [`docs/SSE_EVENTS.md`](docs/SSE_EVENTS.md) | Akış olayları ve kart biçimi |
-| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-217). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
+| [`DECISIONS.md`](DECISIONS.md) | Bütün kararların günlüğü (D-001 … D-218). Eski kayıtlar İngilizce; yeniler Türkçe yazılabilir |
 | [`docs/PROVIDER_NOTES.md`](docs/PROVIDER_NOTES.md) | Gemini ve Groq araştırma notları (İngilizce) |
 | [`docs/ai-eval/`](docs/ai-eval/) | Öneri algoritması ve kalite ölçüm raporları |
 | [`docs/arsiv/`](docs/arsiv/) | Telefon uygulaması döneminden kalan belgeler; yalnızca tarihçe için |

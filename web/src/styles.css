@@ -1866,6 +1866,41 @@ button.stat.link-stat:hover {
   }
 }
 
+/* ---- mode switch (D-218): on the assistant's page and the tools' ---- */
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--selected);
+}
+
+.mode-switch a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.mode-switch a:hover {
+  color: var(--text);
+}
+
+.mode-switch a[aria-current='page'] {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

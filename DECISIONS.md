@@ -1246,3 +1246,69 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
   Gerçek modellerle 4 mutfakta 15 senaryo: 14'ü hedefe ulaştı. Kalan "Tantuni için öneri sun" madde 5 ile düzeldi ve
   tekrar denendi. Havuza yeni hazır şablon eklenmedi: ölçüm, her mutfağın havuzunun algoritma düzeldikten sonra yettiğini
   gösterdi; havuz bundan sonra onaylanan model önerileriyle ve Excel ile büyür.
+- **D-218** — **Araçlar sayfası: panelin yazım kuralları, Excel ve görsel ölçüleri, yapay zekâsız** (kullanıcı isteği,
+  2026-11-14: "mod değişikliği olacak, asistan olduğu gibi kalacak; metin düzeltme yapacağız, yazılan metni anında yazım
+  kuralına göre düzeltecek; Excel görme ve logo, banner da olursa iyi olur; mümkün olduğunca yapay zekâ değil algoritma
+  yapsın"). Ekibin önceki aracı (başka bir geliştiricinin sitesi) denendi. Şu noktalarda yetersiz kalıyordu:
+  - "Tavuk Ve Patates" diye "ve"yi büyük yazıyordu;
+  - "Mutlu Waffle-urfa Dürüm" diye mağaza adını bozuyordu;
+  - "6'li" yazıyordu, doğrusu "6'lı";
+  - "0.5 lt" ondalığını virgüle çevirmiyordu;
+  - "Coca-cola" ve "Xl Menü" diye markayı ve kısaltmayı bozuyordu;
+  - "Kaşarli" diye Türkçe karakteri yarım tamamlıyordu;
+  - "şeklde" gibi yazım hatalarını düzeltmiyordu;
+  - açıklama kipi yoktu.
+
+  **Mod.** Sol üstte "Asistan | Araçlar" geçişi var, `/araclar` ayrı bir sayfa. Asistanın ekranında yalnızca bu
+  geçiş eklendi. Araçlar ayrı yüklenir; asistan sayfasının boyutu değişmedi.
+
+  **Metin düzeltme** (`web/src/tools/text/`). Kural motoru tarayıcıda çalışır, yazdıkça düzeltir. İki kipi var:
+  - **Ad** (ürün, mağaza, şube):
+    - Her kelime büyük harfle başlar, "ve", "ile", "veya" küçük kalır.
+    - Birim parantez içinde ve küçük harfle yazılır: "(330 ml)", "(0,5 lt)"; ondalık virgülle.
+    - Adet ve porsiyon büyük harfle ve parantez içinde: "(2 Adet)", "Urfa (Porsiyon)", "(Yarım Porsiyon)". Önceki
+      araç da "Adet"i büyük yazıyordu.
+    - Başa yazılan miktar sona gelir: "Baklava (1 kg)".
+    - Sayı eki, sayının okunuşuna göre ses uyumuyla yazılır: 6'lı, 3'lü, 10'lu, 2'şer, 6'şar, 10'ar.
+    - Mağaza ayracı " - " olarak yazılır.
+    - "/", "+" ve "&" iki yanında boşluk, kesir bitişik: "1/2".
+    - Kısaltma (XL, BBQ, PET) ve marka (Coca-Cola) korunur.
+    - Adın sonunda nokta olmaz.
+  - **Açıklama:** yalnızca cümle başı büyük harfle yazılır. Antep, Türk gibi özel adlar korunur. Noktalamanın önünde
+    boşluk olmaz, ardında olur. Sonuna nokta konur.
+
+  **Akıllı düzeltme** (açılıp kapatılır), şablon havuzunun sözlüğüyle yapılır:
+  - Türkçe karakteri tamamlar: "cig kofte" → "Çiğ Köfte". En çok görülen yazım seçilir.
+  - Yazım hatasını düzeltir: "şeklde" → "şekilde". Temkinli çalışır: en az 5 harf, aynı ilk harf, sözlükte birden
+    çok kez görülmüş ve tek bir açık aday. Türkçe ekli bir biçimi kök sanıp düzeltmez ("pastanesi" → "pastane"
+    olmaz).
+  - Bitişik kelimeleri ayırır: "kaşarlıtost" → "Kaşarlı Tost", "büyükboypizza" → "Büyük Boy Pizza".
+
+  Bilinmeyen ve düz harflerle yazılmış kelime yabancı sayılır ve noktalı I kullanılmaz: "Chicken Wings", "Iced".
+  Sözlük, onaylı şablonların adlarından, açıklamalarından, opsiyonlarından ve malzemelerinden çıkar. Uç açıktır ve
+  yalnızca okuma yapar (`GET /api/v1/tools/lexicon`); ziyaretçi açmaz, 1 saat önbellekte kalır. Taslaklar ve arşiv
+  bu sözlüğe girmez. Sözlük gelmeden de temel menü kelimeleriyle çalışır.
+
+  Değişen kelimeler yeşille işaretlenir; yalnızca büyük/küçük harfi değişen kelime işaretlenmez. Yapıştırılan metin,
+  yapıştırma anında düzeltilip panoya kopyalanır. Kurallar tablosu canlı örneklerle motorun kendisinden üretilir, yani
+  araç ne yapıyorsa tabloda o görünür. Ayrıca "Excel olarak indir" (önce / sonra) var.
+
+  **Excel** (`web/src/tools/excel/`):
+  - .xlsx ve .csv tarayıcıda açılır; Türkçe Excel'in noktalı virgülü tanınır.
+  - Sayfa sekmeleri, aramada Türkçe karakter ve büyük/küçük harf fark etmez, sayılar sayı olarak sıralanır.
+  - Ad ve açıklama sütunları başlıklarından tahmin edilir, değiştirilebilir. Düzeltilen hücreler işaretlenir,
+    önce/sonra karşılaştırılabilir, .xlsx olarak indirilir.
+  - Eski .xls biçimi için ne yapılacağı söylenir.
+
+  **Logo ve banner** (`web/src/tools/image/`):
+  - Ölçüler: ürün görseli 1000 × 1000, mağaza logosu 500 × 500, banner 1035 × 390; hepsi en fazla 150 KB.
+  - Kırpma ya da sığdırma seçilir; kırpılan alan sürüklenerek kaydırılır.
+  - JPEG'de kalite, sınıra en yakın değer aranarak düşürülür. PNG'de kenarlar saydam kalır, sınır aşılırsa uyarı
+    verilir.
+  - Ctrl+V ile görsel yapıştırılabilir.
+  - Önceki aracın ölçü ve sınır değerleri esas alındı; ekibin resmî yazım kuralları belgesi bulunamadığı için kurallar,
+    kullanıcının anlattıkları ve önceki aracın kurallarıyla kuruldu.
+
+  **Testler** önce yazıldı: kural motoru için 90'dan fazla ad ve açıklama örneği, her birinin ikinci kez
+  düzeltildiğinde değişmediği, sözlük kuralları, performans (1000 satır 1 saniyenin altında), CSV/Excel yardımcıları,
+  gerçek bir .xlsx'in yazılıp geri okunması, görsel ölçü hesapları ve sözlük ucunun 3 e2e testi.

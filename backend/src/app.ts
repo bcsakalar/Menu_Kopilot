@@ -51,6 +51,8 @@ import { settingsRoutes } from './modules/settings/routes.js';
 import { SettingsService } from './modules/settings/service.js';
 import { templateRoutes } from './modules/templates/routes.js';
 import { TemplateService } from './modules/templates/service.js';
+import { toolsRoutes } from './modules/tools/routes.js';
+import { ToolsService } from './modules/tools/service.js';
 import { usageRoutes } from './modules/usage/routes.js';
 import { UsageService } from './modules/usage/service.js';
 import { authPlugin } from './plugins/auth.js';
@@ -78,6 +80,8 @@ export interface AppServices {
   queue: JobQueue;
   embedding: EmbeddingService;
   analyze: AnalyzeService;
+  /** The text tool's dictionary (D-218). */
+  tools: ToolsService;
 }
 
 declare module 'fastify' {
@@ -232,7 +236,8 @@ export async function buildApp(deps: AppDeps): Promise<App> {
     },
     log: app.log,
   });
-  app.decorate('services', { ai, queue, embedding, analyze: analyzeService });
+  const toolsService = new ToolsService(db);
+  app.decorate('services', { ai, queue, embedding, analyze: analyzeService, tools: toolsService });
   const load = new LoadMonitor({ db, slots, pacer: ai.pacer, siteQuota: () => ai.quota.site(), ntfyUrl: config.alertNtfyUrl, log: app.log });
   load.start();
   app.addHook('onClose', async () => load.stop());
@@ -253,6 +258,8 @@ export async function buildApp(deps: AppDeps): Promise<App> {
       // Open to anyone: a browser's cookie is all the identity there is (D-200).
       await api.register(chatRoutes, { service: chatService, uploads });
       await api.register(feedbackRoutes, { service: feedbackService });
+      // Read-only and the same for everyone: the tools page needs no visitor (D-218).
+      await api.register(toolsRoutes, { service: toolsService });
       await api.register(async (session) => {
         session.addHook('onRequest', session.authenticate);
         await session.register(analyzeRoutes, { service: analyzeService, uploads });
