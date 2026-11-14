@@ -19,7 +19,7 @@ interface OverviewData {
   site: { callsToday: number; dailyCalls: number };
   daily: { date: string; runs: number; conversations: number }[];
   quality: { runs: number; products: number; drinks: number; descriptions: number; images: number; writing: number };
-  pool: { templates: number; imported: number; cuisines: number; thin: { name: string; templates: number; target: number }[] };
+  pool: { templates: number; imported: number; drafts: number; cuisines: number; thin: { name: string; templates: number; target: number }[] };
   feedback: { new: number; open: number };
 }
 
@@ -155,6 +155,11 @@ function Pool({ pool, onTemplates }: { pool: OverviewData['pool']; onTemplates: 
       <p className="muted small">
         {n(pool.templates)} şablon, {pool.cuisines} mutfak{pool.imported > 0 ? ` · ${n(pool.imported)} şablon Excel'den geldi` : ''}
       </p>
+      {pool.drafts > 0 && (
+        <p className="insight">
+          <b>{n(pool.drafts)}</b> yapay zekâ önerisi onay bekliyor: Şablon havuzu → Yapay zekâ önerileri.
+        </p>
+      )}
       {pool.thin.length === 0 ? (
         <p>Her mutfağın havuzu hedefini karşılıyor.</p>
       ) : (

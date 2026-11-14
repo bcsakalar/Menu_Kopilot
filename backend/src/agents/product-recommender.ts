@@ -16,6 +16,7 @@ import {
   type ProductRecommenderOutput,
   type RecommendedProduct,
 } from './schemas/product-recommender.js';
+import { reconcileCategory } from '../domain/product-type.js';
 import type { TemplatePayload } from '../domain/template.js';
 import { getTemplates } from '../modules/templates/template-store.js';
 import { countCalls, type AgentDeps, type AgentRunContext, type ExistingItem } from './types.js';
@@ -48,8 +49,14 @@ const SHARES_A_WORD = 55;
 /** Spares past a fill-up run's total (D-213): a fifth of it, at least two. */
 const SPARE_SHARE = 0.2;
 const MIN_SPARES = 2;
-/** A product of the cuisine's own pool (or a related one) ranks a little higher than one from elsewhere. */
+/** A product of a related cuisine's pool ranks a little higher than one from elsewhere. */
 const RELATED_BONUS = 5;
+/**
+ * And one of the cuisine's own pool higher still (D-217). With no menu to judge by, every product of the family scored
+ * the same and importance decided: "Pide & Lahmacun için öneri sun" offered the parent kebap kitchen's Adana and Urfa
+ * and a single pide. Below the gap between the kitchen-fit tiers (15 → 30 → 40), so closeness to the menu still leads.
+ */
+const OWN_BONUS = 10;
 /**
  * Alternatives of one product type, at most: a pide shop gets two more pides and then lahmacun, gözleme or çorba —
  * not six pides, the very answer the category plan was built to stop.
@@ -193,8 +200,10 @@ async function loadPool(deps: Pick<AgentDeps, 'db' | 'categories'>, input: Produ
     // Rows seeded before the taxonomy existed have no category: classify them on the fly.
     let categoryKey = row.categoryKey ?? deps.categories.classify(row.name);
     const { type, byName } = input.kitchen.typeOf(row.name, categoryKey);
-    // A side stored as a main ("Turşu Tabağı", "Mısır") must not fill a kitchen's main-course slot (D-198).
+    // A side stored as a main ("Turşu Tabağı", "Mısır") must not fill a kitchen's main-course slot (D-198), nor a drink
+    // or a dessert stored as one ("Flat White" in a café's pool as a main, seen on production) its drink slot (D-217).
     if (byName && categoryKey === 'ana-yemek' && SIDE_CATEGORIES.has(type.categoryKey)) categoryKey = type.categoryKey;
+    else categoryKey = reconcileCategory(categoryKey, false, { type, byName }, (key) => deps.categories.has(key));
     const fit = input.kitchen.fit(row.name, type.key, byName);
     if (!fit.ok || input.kitchen.coversDrink(row.name, type.key)) continue;
     const inRelated = row.cuisineId !== null && related.has(row.cuisineId);
@@ -208,7 +217,7 @@ async function loadPool(deps: Pick<AgentDeps, 'db' | 'categories'>, input: Produ
       portionInfo: row.portionInfo,
       importance: row.importance,
       related: inRelated,
-      score: fit.score + (inRelated ? RELATED_BONUS : 0),
+      score: fit.score + (row.cuisineId === input.cuisine.id ? OWN_BONUS : inRelated ? RELATED_BONUS : 0),
       basedOn: fit.basedOn,
       sameType: input.kitchen.types.has(type.key),
       kind: input.kitchen.informative && input.kitchen.variant(row.name),
@@ -454,7 +463,22 @@ export async function runProductRecommender(
         const short = withSpares - items.length - extra.length;
         const same = short > 0 ? fromTemplates(deps, input, pool, open, short, isTaken) : [];
         for (const item of same) take(item.normalized, item.templateId);
-        return [...items, ...[...extra, ...same].map((item) => ({ ...item, overQuota: true }))];
+        // …and when the open categories have nothing left either, the cuisine's own products of its other categories:
+        // the café's sandwiches are still the café's, and better than an answer short of the target (D-217).
+        const still = short - same.length;
+        const openKeys = new Set(open.map((gap) => gap.key));
+        const own = pool.filter((row) => row.cuisineId === input.cuisine.id && !openKeys.has(row.categoryKey));
+        const ownRows = [...new Set(own.map((row) => row.categoryKey))].map((key) => ({
+          key,
+          label: deps.categories.label(key),
+          present: 0,
+          minItems: 0,
+          missing: 0,
+          want: still,
+        }));
+        const rest = still > 0 && ownRows.length > 0 ? fromTemplates(deps, input, own, ownRows, still, isTaken) : [];
+        for (const item of rest) take(item.normalized, item.templateId);
+        return [...items, ...[...extra, ...same, ...rest].map((item) => ({ ...item, overQuota: true }))];
       };
       const finish = (items: RecommendedItem[]): RecommendedItem[] => fillUp(items);
 

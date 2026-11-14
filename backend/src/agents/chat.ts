@@ -62,6 +62,18 @@ export const recommendDecision = (categoryKey: string | null): ChatDecision => (
 /** The decision when no model could read the message; `unanswered` lets the chat try what it can do without one. */
 export type ChatAnswer = ChatDecision & { unanswered?: true };
 
+/** A start from a cuisine the message names on its own (D-217): no model needed to read "Tantuni için öneri sun". */
+export const cuisineDecision = (cuisineSlug: string): ChatDecision => ({
+  ...NOTHING,
+  targets: [],
+  addProducts: [],
+  removeProducts: [],
+  quickReplies: [],
+  action: 'change_cuisine',
+  reply: '',
+  cuisineSlug,
+});
+
 const noAi = (message: string, spent: boolean): ChatAnswer => ({
   ...NOTHING,
   targets: [],

@@ -1,5 +1,9 @@
+import { and, eq, inArray } from 'drizzle-orm';
 import type { AttemptRecord } from '../ai/router.js';
+import type { Executor } from '../db/client.js';
+import { cuisines, itemAliases, menuItems } from '../db/schema/index.js';
 import type { ProductTypeIndex } from '../domain/product-type.js';
+import { normalizeTr } from '../lib/normalize-tr.js';
 import { CLASSIFIER_SCHEMA_NAME, classifierSchema, type PriceSegment } from './schemas/classifier.js';
 import { countCalls, type AgentDeps, type AgentRunContext } from './types.js';
 import { generateChecked } from './validator.js';
@@ -27,33 +31,98 @@ export interface ClassifierInput {
   guess?: CuisineOption | undefined;
 }
 
+/** Per normalized product name, the cuisines whose approved pool keeps it (by name or by alias). */
+export type PoolHomes = ReadonlyMap<string, ReadonlySet<string>>;
+
+/** Where the pool keeps each of these products: one query by name, one by alias (D-217). */
+export async function poolHomes(db: Executor, names: readonly string[]): Promise<Map<string, Set<string>>> {
+  const unique = [...new Set(names.map(normalizeTr).filter(Boolean))];
+  const homes = new Map<string, Set<string>>();
+  if (unique.length === 0) return homes;
+  const add = (name: string, slug: string): void => {
+    const set = homes.get(name) ?? new Set<string>();
+    set.add(slug);
+    homes.set(name, set);
+  };
+  const byName = await db
+    .select({ name: menuItems.normalizedName, slug: cuisines.slug })
+    .from(menuItems)
+    .innerJoin(cuisines, eq(cuisines.id, menuItems.cuisineId))
+    .where(and(eq(menuItems.approved, true), inArray(menuItems.normalizedName, unique)));
+  for (const row of byName) add(row.name, row.slug);
+  const byAlias = await db
+    .select({ name: itemAliases.normalizedAlias, slug: cuisines.slug })
+    .from(itemAliases)
+    .innerJoin(menuItems, eq(menuItems.id, itemAliases.menuItemId))
+    .innerJoin(cuisines, eq(cuisines.id, menuItems.cuisineId))
+    .where(and(eq(menuItems.approved, true), inArray(itemAliases.normalizedAlias, unique)));
+  for (const row of byAlias) add(row.name, row.slug);
+  return homes;
+}
+
+/** A product the pool keeps says more than its type: two votes, shared by the cuisines that keep it (D-217). */
+const POOL_VOTE = 2;
+/** The pool decides alone when this share of the menu is the leading cuisine's own products… */
+const DECISIVE_SHARE = 0.6;
+/** …and the leader is this far ahead of the next cuisine. */
+const DECISIVE_LEAD = 1.5;
+/** Nothing on the menu points anywhere: the mixed world kitchen is the least wrong guess (D-217). */
+export const GENERAL_CUISINE = 'dunya-mutfagi';
+
+export interface MenuCuisine {
+  guess: CuisineOption | undefined;
+  /** Set when the pool alone is clear enough to skip the model: how many products, and what share, back the guess. */
+  decisive: { found: number; share: number } | undefined;
+}
+
 /**
- * The cuisine read off the menu without a model (D-187): every product whose NAME identifies its type votes for the
- * cuisines that type is typical of — a full vote for the first (its home cuisine), a third for the others. Before this, a run whose
- * classifier could not answer (providers down, a low-confidence guess) fell back to the first cuisine in the list —
- * kebap — and a pizzeria was offered lahmacun. Undefined when nothing on the menu says anything.
+ * The cuisine read off the menu without a model (D-187, D-217). Each product votes:
+ *   - the cuisines whose pool keeps it, two votes shared among them ("Bol Soğanlı Tantuni" is only Tantuni's);
+ *   - the cuisines its type is typical of, a full vote for the type's home cuisine and a third for the others. A
+ *     type with no cuisine of its own ("Aile" makes "Çiğ Köfte Aile Boyu" a combo) hands the vote to the other types
+ *     the name names.
+ * Before the pool voted, a meze list ("Haydari, Kısır, Muhammara…") read as kebap, a tantuni as döner, and a name no
+ * type knew ("Buffalo Wings") as the first cuisine in the list.
  */
+export function readMenuCuisine(
+  itemNames: readonly string[],
+  productTypes: Pick<ProductTypeIndex, 'resolve' | 'matching'>,
+  options: readonly CuisineOption[],
+  homes: PoolHomes = new Map(),
+): MenuCuisine {
+  const votes = new Map<string, number>();
+  const vote = (slug: string, weight: number): void => {
+    votes.set(slug, (votes.get(slug) ?? 0) + weight);
+  };
+  for (const name of itemNames) {
+    const home = homes.get(normalizeTr(name));
+    if (home && home.size > 0) for (const slug of home) vote(slug, POOL_VOTE / home.size);
+    const { type, byName } = productTypes.resolve(name);
+    const voters = byName && type.cuisines.length > 0 ? [type] : productTypes.matching(name).filter((t) => t.cuisines.length > 0);
+    for (const voter of voters) voter.cuisines.forEach((slug, index) => vote(slug, (index === 0 ? 1 : 0.3) / voters.length));
+  }
+  const ranked = options
+    .map((option) => ({ option, votes: votes.get(option.slug) ?? 0 }))
+    .filter((entry) => entry.votes > 0)
+    .sort((a, b) => b.votes - a.votes);
+  const leader = ranked[0];
+  if (!leader) return { guess: undefined, decisive: undefined };
+  const found = itemNames.filter((name) => homes.get(normalizeTr(name))?.has(leader.option.slug)).length;
+  const share = found / Math.max(1, itemNames.length);
+  const ahead = leader.votes >= (ranked[1]?.votes ?? 0) * DECISIVE_LEAD;
+  const onlyHome = itemNames.length === 1 && found === 1 && homes.get(normalizeTr(itemNames[0]!))?.size === 1;
+  const decisive = ahead && ((found >= 2 && share >= DECISIVE_SHARE) || onlyHome) ? { found, share } : undefined;
+  return { guess: leader.option, decisive };
+}
+
+/** `readMenuCuisine`'s guess alone; undefined when nothing on the menu says anything. */
 export function guessCuisine(
   itemNames: readonly string[],
-  productTypes: Pick<ProductTypeIndex, 'resolve'>,
+  productTypes: Pick<ProductTypeIndex, 'resolve' | 'matching'>,
   options: readonly CuisineOption[],
+  homes: PoolHomes = new Map(),
 ): CuisineOption | undefined {
-  const votes = new Map<string, number>();
-  for (const name of itemNames) {
-    const { type, byName } = productTypes.resolve(name);
-    if (!byName || type.cuisines.length === 0) continue;
-    type.cuisines.forEach((slug, index) => votes.set(slug, (votes.get(slug) ?? 0) + (index === 0 ? 1 : 0.3)));
-  }
-  let best: CuisineOption | undefined;
-  let bestVotes = 0;
-  for (const option of options) {
-    const count = votes.get(option.slug) ?? 0;
-    if (count > bestVotes) {
-      best = option;
-      bestVotes = count;
-    }
-  }
-  return best;
+  return readMenuCuisine(itemNames, productTypes, options, homes).guess;
 }
 
 export interface ClassifierResult {

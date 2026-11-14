@@ -9,7 +9,7 @@ import { normalizeTr } from '../lib/normalize-tr.js';
 import { namesVariant, variantConflict } from '../lib/same-product.js';
 import type { CategoryGap } from '../domain/category.js';
 import { reconcileCategory } from '../domain/product-type.js';
-import { guessCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
+import { GENERAL_CUISINE, poolHomes, readMenuCuisine, runClassifier, type ClassifierResult, type CuisineOption } from './classifier.js';
 import { addTypedItems, joinItems, type MergedItem } from './dedupe.js';
 import { KitchenProfile } from './kitchen.js';
 import { runExtractor } from './extractor.js';
@@ -190,8 +190,12 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
   const selectedOption = input.selectedCuisine
     ? { id: input.selectedCuisine.id, slug: input.selectedCuisine.slug, name: input.selectedCuisine.name }
     : undefined;
-  // What the menu's product types say, without a model: the answer whenever the Classifier has none (D-187).
-  const guess = guessCuisine(merged.map((i) => i.name), deps.productTypes, input.cuisineOptions);
+  // What the pool and the menu's product types say, without a model: the answer whenever the Classifier has none
+  // (D-187), and the only one asked for when it is clear (D-217).
+  const names = merged.map((i) => i.name);
+  const homes = names.length > 0 ? await poolHomes(deps.db, names).catch(() => new Map<string, Set<string>>()) : new Map<string, Set<string>>();
+  const read = readMenuCuisine(names, deps.productTypes, input.cuisineOptions, homes);
+  const guess = read.guess ?? input.cuisineOptions.find((option) => option.slug === GENERAL_CUISINE);
   /** The user's pick, or the menu's own guess, or the first cuisine — used whenever the Classifier cannot answer. */
   const keepSelection = (reason: string): ClassifierResult => ({
     cuisine: selectedOption ?? guess ?? input.cuisineOptions[0]!,
@@ -203,9 +207,12 @@ export async function runAnalysis(deps: AnalyzePipelineDeps, input: AnalyzeRunIn
     attempts: [],
     llmCalls: 0,
   });
+  const poolSays = !selectedOption && read.decisive && guess ? read.decisive : undefined;
   const classification =
     input.focus
       ? { ...keepSelection('önceki analizin mutfak türü'), priceSegment: input.focus.priceSegment }
+      : poolSays
+      ? { ...keepSelection(`menüdeki ${merged.length} üründen ${poolSays.found} tanesi ${guess?.name ?? ''} havuzunda`), confidence: poolSays.share }
       : aiUsable && merged.length > 0
       ? await safely(
           'classifier',
@@ -550,7 +557,9 @@ function newProductCard(
 ): Omit<CardDto, 'id' | 'runId' | 'sortOrder'> {
   const pitch = newProductPitch({
     menuSize: context.menuSize,
-    sameKind: context.kitchen.close(item.productType),
+    // Every type the name names counts, not only the strongest: "Balık Çorbası" is a soup and a fish dish, and to a
+    // hamsi seller it is more of the same kind than an ayran (D-217).
+    sameKind: context.kitchen.close(item.productType) || deps.productTypes.matching(item.name).some((type) => context.kitchen.close(type.key)),
     variant: context.kitchen.variant(item.name),
     categoryKey: item.categoryKey,
     categoryLabel: deps.categories.label(item.categoryKey),

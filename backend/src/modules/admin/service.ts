@@ -131,6 +131,7 @@ export class AdminService {
       .select({
         templates: sql<number>`(count(*) filter (where ${menuItems.approved}))::int`,
         imported: sql<number>`(count(*) filter (where ${menuItems.approved} and ${menuItems.source} = 'imported'))::int`,
+        drafts: sql<number>`(count(*) filter (where not ${menuItems.approved} and ${menuItems.needsReview}))::int`,
       })
       .from(menuItems);
     const thin = rows
@@ -138,7 +139,7 @@ export class AdminService {
       .filter((r) => r.templates < r.target)
       .sort((a, b) => b.target - b.templates - (a.target - a.templates))
       .slice(0, THIN_CUISINES);
-    return { templates: totals?.templates ?? 0, imported: totals?.imported ?? 0, cuisines: rows.length, thin };
+    return { templates: totals?.templates ?? 0, imported: totals?.imported ?? 0, drafts: totals?.drafts ?? 0, cuisines: rows.length, thin };
   }
 
   private async feedbackCounts() {

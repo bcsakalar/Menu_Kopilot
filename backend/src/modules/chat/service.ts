@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
-import { recommendDecision, runChatAgent, type ChatContext } from '../../agents/chat.js';
+import { cuisineDecision, recommendDecision, runChatAgent, type ChatContext } from '../../agents/chat.js';
 import { topUp, type RunFocus } from '../../agents/plan.js';
 import type { ChatDecision } from '../../agents/schemas/chat.js';
 import type { PromptRepository } from '../../ai/prompt-repository.js';
@@ -270,9 +270,12 @@ export class ChatService {
   private async follow(userId: string, outgoing: OutgoingMessage, last: AnalyzeResult | null, emit: Emit): Promise<void> {
     const conversationId = outgoing.conversation.id;
     const quick = shortcut(outgoing.text, last);
-    const agent = quick ?? (await runChatAgent(this.deps, await this.context(outgoing, last), userId));
+    // Before any menu, a message that only names a cuisine and asks for it ("Tantuni için öneri sun", "Uzak Doğu") needs
+    // no model: on production the model answered "Tantuni için öneri sun" by asking for a screenshot (D-217).
+    const asked = !quick && !last?.menu.length ? await this.cuisineRequest(outgoing.text) : undefined;
+    const agent = quick ?? (asked ? cuisineDecision(asked) : await runChatAgent(this.deps, await this.context(outgoing, last), userId));
     // No model could read it (busy, or the day's quota spent): "Uzak Doğu için öneri sun" before any menu needs none (D-216).
-    const fallback = 'unanswered' in agent && !last?.menu.length ? await this.cuisineIn(outgoing.text) : undefined;
+    const fallback = 'unanswered' in agent && !last?.menu.length ? (await this.cuisineIn(outgoing.text))?.slug : undefined;
     const decision = onlyNamed(fallback ? { ...agent, action: 'change_cuisine', cuisineSlug: fallback, reply: '' } : agent, outgoing.text);
     const answer = { text: decision.reply, quickReplies: decision.quickReplies };
 
@@ -443,18 +446,30 @@ export class ChatService {
    * The cuisine a message names, read without a model: a cuisine whose name, or one part of it ("Pide" of
    * "Pide & Lahmacun"), stands as whole words in the message; the longest such part wins.
    */
-  private async cuisineIn(text: string): Promise<string | undefined> {
+  private async cuisineIn(text: string): Promise<{ slug: string; part: string; words: Set<string> } | undefined> {
     const said = ` ${normalizeTr(text)} `;
     const rows = await this.deps.db.select({ slug: cuisines.slug, name: cuisines.name }).from(cuisines);
-    let best: { slug: string; length: number } | undefined;
+    let best: { slug: string; part: string; words: Set<string> } | undefined;
     for (const row of rows) {
       const parts = [normalizeTr(row.name), ...row.name.split('&').map((part) => normalizeTr(part)), row.slug.replace(/-/gu, ' ')];
       for (const part of parts) {
         if (part.length < 3 || !said.includes(` ${part} `)) continue;
-        if (!best || part.length > best.length) best = { slug: row.slug, length: part.length };
+        if (!best || part.length > best.part.length) best = { slug: row.slug, part, words: new Set(parts.flatMap((p) => p.split(' '))) };
       }
     }
-    return best?.slug;
+    return best;
+  }
+
+  /**
+   * A message that is nothing but a request for a cuisine: every word is the cuisine's own or a request word ("için",
+   * "öneri", "sun", "mutfağı"). The cuisine word itself must not be a request word too: "tatlı" or "çorba" alone may
+   * mean the dessert or soup category, and the model decides those.
+   */
+  private async cuisineRequest(text: string): Promise<string | undefined> {
+    const found = await this.cuisineIn(text);
+    if (!found || found.part.split(' ').every((word) => REQUEST_WORDS.has(word))) return undefined;
+    const words = normalizeTr(text).split(' ').filter((word) => word.length > 0);
+    return words.every((word) => found.words.has(word) || REQUEST_WORDS.has(word)) ? found.slug : undefined;
   }
 
   private async isCuisineName(normalized: string): Promise<boolean> {

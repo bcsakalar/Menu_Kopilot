@@ -202,7 +202,7 @@ function TemplateDetail({ template }: { template: Template }) {
 }
 
 export function Templates() {
-  const [view, setView] = useState<'true' | 'false'>('true');
+  const [view, setView] = useState<'true' | 'review' | 'false'>('true');
   const [cuisineId, setCuisineId] = useState('');
   const [query, setQuery] = useState('');
   const [submitted, setSubmitted] = useState('');
@@ -262,6 +262,9 @@ export function Templates() {
           <button type="button" aria-pressed={view === 'true'} onClick={() => filter(setView)('true')}>
             Havuzdakiler
           </button>
+          <button type="button" aria-pressed={view === 'review'} onClick={() => filter(setView)('review')}>
+            Yapay zekâ önerileri
+          </button>
           <button type="button" aria-pressed={view === 'false'} onClick={() => filter(setView)('false')}>
             Arşiv
           </button>
@@ -286,7 +289,15 @@ export function Templates() {
         </div>
       </div>
       {!data && !error && <Loading />}
-      {data && data.data.length === 0 && <p>{view === 'false' ? 'Arşivde ürün yok.' : 'Bu filtreyle ürün bulunamadı.'}</p>}
+      {view === 'review' && (
+        <p className="admin-intro">
+          Yapay zekânın temsilcilere önerdiği ve kontrolden geçen yeni ürünler; en çok önerilen üstte. Havuza aldığın ürün
+          bundan sonra yapay zekâya sorulmadan önerilir. Sildiğin ürün arşive düşer ve bir daha aday olmaz.
+        </p>
+      )}
+      {data && data.data.length === 0 && (
+        <p>{view === 'false' ? 'Arşivde ürün yok.' : view === 'review' ? 'Onay bekleyen yapay zekâ önerisi yok.' : 'Bu filtreyle ürün bulunamadı.'}</p>
+      )}
       {data && data.data.length > 0 && (
         <>
           <p className="muted">
@@ -307,7 +318,7 @@ export function Templates() {
                     <strong>{template.name}</strong>
                     <span className="muted small template-meta">
                       {template.cuisineName} · {SOURCE_LABEL[template.source]}
-                      {template.usageCount > 0 && ` · ${template.usageCount} kez kullanıldı`}
+                      {template.usageCount > 0 && ` · ${template.usageCount} kez ${template.needsReview ? 'önerildi' : 'kullanıldı'}`}
                     </span>
                     <TemplateDetail template={template} />
                   </td>

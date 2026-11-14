@@ -25,7 +25,8 @@ export const templateListQuerySchema = z.object({
   cuisineId: z.uuid().optional(),
   source: templateSourceSchema.optional(),
   /** `true` (default) = the pool; `false` = drafts / archived seeds; `all` = both. */
-  approved: z.enum(['true', 'false', 'all']).default('true'),
+  /** `review`: the models' suggestions waiting for the team (D-217); `false`: the archive. */
+  approved: z.enum(['true', 'false', 'all', 'review']).default('true'),
   sort: z.enum(['usage', 'name', 'updated']).default('usage'),
   limit: z.coerce.number().int().min(1).max(500).default(100),
   offset: z.coerce.number().int().min(0).default(0),

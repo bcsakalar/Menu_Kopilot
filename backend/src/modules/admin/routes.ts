@@ -30,6 +30,8 @@ const overviewSchema = z.object({
   pool: z.object({
     templates: z.number().int(),
     imported: z.number().int(),
+    /** The models' suggestions waiting for the team (D-217). */
+    drafts: z.number().int(),
     cuisines: z.number().int(),
     thin: z.array(z.object({ name: z.string(), templates: z.number().int(), target: z.number().int() })),
   }),

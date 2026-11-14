@@ -277,11 +277,13 @@ export async function runValidator(deps: Deps, input: ValidatorInput, _run: Agen
           }
         }
         // An alternative of a menu product (D-198) is outside the category quota: the plan counted it separately.
-        const left = raw.alternative ? Number.POSITIVE_INFINITY : quota.get(raw.categoryKey);
-        if (left === undefined) {
+        const planned = raw.alternative ? Number.POSITIVE_INFINITY : quota.get(raw.categoryKey);
+        // The fill-up's last stage is the cuisine's own products of its other categories (D-217): within the total.
+        if (planned === undefined && !raw.overQuota) {
           dropped.push({ card: raw.name, reason: `kategori bu mutfakta yok (${raw.categoryKey})` });
           continue;
         }
+        const left = planned ?? 0;
         // A quick run's fill-up may go past its category, never past the run's total (D-189) — not even into a category
         // that still has room: an earlier fill-up already spent that room (D-213, one card too many on production data).
         if ((left <= 0 && !raw.overQuota) || (raw.overQuota && newProducts.length >= runTotal)) {

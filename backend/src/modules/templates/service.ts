@@ -78,7 +78,9 @@ export class TemplateService {
 
   async list(query: TemplateListQuery): Promise<{ data: TemplateDto[]; meta: { total: number; limit: number; offset: number } }> {
     const conditions: SQL[] = [];
-    if (query.approved !== 'all') conditions.push(eq(menuItems.approved, query.approved === 'true'));
+    if (query.approved === 'review') conditions.push(eq(menuItems.approved, false), eq(menuItems.needsReview, true));
+    else if (query.approved === 'false') conditions.push(eq(menuItems.approved, false), eq(menuItems.needsReview, false));
+    else if (query.approved === 'true') conditions.push(eq(menuItems.approved, true));
     if (query.cuisineId) conditions.push(eq(menuItems.cuisineId, query.cuisineId));
     if (query.source) conditions.push(eq(menuItems.source, query.source));
     const q = query.q ? normalizeTr(query.q) : '';
@@ -357,6 +359,11 @@ export class TemplateService {
   async remove(id: string): Promise<{ archived: boolean }> {
     const current = await getTemplate(this.db, id);
     if (!current) throw notFound('Şablon');
+    // A model's draft the admin removes is archived, not deleted: kept as rejected, it is never drafted again (D-217).
+    if (!current.approved && current.needsReview) {
+      await this.db.update(menuItems).set({ needsReview: false, updatedAt: new Date() }).where(eq(menuItems.id, id));
+      return { archived: true };
+    }
     if (current.source !== 'seed') {
       await this.db.delete(menuItems).where(eq(menuItems.id, id));
       return { archived: false };

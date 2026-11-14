@@ -128,6 +128,46 @@ export async function insertTemplate(db: Executor, input: NewTemplate): Promise<
   return row.id;
 }
 
+/**
+ * What the model suggested, kept for the team (D-217). Every new product a model wrote and the checks let through is
+ * stored as a draft of the run's cuisine — not approved, marked for review — and each further suggestion of the same
+ * product counts up, so the admin approves the products the models keep coming back to. Drafts are never offered to a
+ * rep: only approved templates are the pool. A product the cuisine's pool already has is not drafted, and one the
+ * admin archived (rejected) is not drafted again.
+ */
+export async function recordDrafts(
+  db: Executor,
+  cuisineId: string,
+  drafts: readonly { payload: TemplatePayload; categoryKey: string | null }[],
+): Promise<number> {
+  let written = 0;
+  for (const draft of drafts) {
+    const normalized = normalizeTr(draft.payload.name);
+    if (!normalized) continue;
+    const rows = await db
+      .select({ id: menuItems.id, approved: menuItems.approved, needsReview: menuItems.needsReview })
+      .from(menuItems)
+      .where(and(eq(menuItems.cuisineId, cuisineId), eq(menuItems.normalizedName, normalized)));
+    if (rows.some((row) => row.approved)) continue;
+    const unapproved = rows.find((row) => !row.approved);
+    if (unapproved && !unapproved.needsReview) continue;
+    if (unapproved) {
+      await db
+        .update(menuItems)
+        .set({ usageCount: sql`${menuItems.usageCount} + 1`, updatedAt: new Date() })
+        .where(eq(menuItems.id, unapproved.id));
+    } else {
+      const id = await insertTemplate(db, { cuisineId, payload: draft.payload, source: 'ai', approved: false, needsReview: true });
+      await db
+        .update(menuItems)
+        .set({ usageCount: 1, ...(draft.categoryKey ? { categoryKey: draft.categoryKey } : {}) })
+        .where(eq(menuItems.id, id));
+    }
+    written += 1;
+  }
+  return written;
+}
+
 export async function replaceTemplateContent(
   db: Executor,
   id: string,

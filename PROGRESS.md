@@ -11,6 +11,10 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `db6287d`
   önerisi (D-206). Her ilk analiz (ekran görüntüsü, liste, tek ürün, yalnızca mutfak) **mutfağın hedefini geçecek kadar**
   ürün önerir: önce yazılan ürünün çeşitleri, sonra aynı türden ürünler, sonra mutfağın geri kalanı ("hamsi" → hamsi
   çeşitleri, balıklar, meze ve içecekler). Model yavaşsa havuz tamamlar (D-213).
+- **Havuz ve model birlikte (D-217):** yapay zekâ kapalıyken de her mutfak hedefine ulaşır: canlı havuzun kopyasında 26
+  mutfak × 4 senaryonun 102'si (önce 91'i), mutfak başlangıcında önerilerin %91'i mutfağın kendi ürünü (önce %65).
+  Havuzdaki ürünler mutfağı modelsiz tanır (yanlış mutfak 13 senaryodan 2'ye indi). Modelin önerdiği yeni ürünler yönetimde
+  "Yapay zekâ önerileri" sekmesinde birikir; havuza alınan sonra modelsiz önerilir.
 - **Çok kişide (D-214):** analiz başına sunucu işlemcisi 650 → yaklaşık 50 ms; aynı anda 20 analiz 1 saniyenin altında
   (modeller hariç, `pnpm probe:load` ile ölçüldü). Aynı anda en çok 10 analiz çalışır, fazlası sırasını görerek bekler;
   sıra da doluysa "Şu an çok yoğunuz" denir. Hız sınırları kişi başına ve bir ofisin ortak adresine göre cömert: temsilci
@@ -24,7 +28,7 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `db6287d`
   bildirimler, şablon havuzu ve arşivi, mutfak türleri, öğrenilenler, modeller.
 - **Güvenlik:** ziyaretçi çerezi, admin girişi, üç katmanlı kota, CSP ve diğer başlıklar, ziyaretçinin ortak veriye
   yazamaması.
-- **Testler:** backend 1355, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
+- **Testler:** backend 1365, web 2; hepsi geçiyor. GitHub Actions da yeşil. Canlıda temsilci senaryoları tek tek denendi,
   çıkan sekiz sorun düzeltildi (D-208).
 - **Sunucu:** `myserver` üzerinde nginx + Cloudflare arkasında Docker Compose; her gece 03:30'da veritabanı yedeği.
   Uygulamanın bellek sınırı 512 MB. Analizler yavaşlarsa, sağlayıcı hataları %30'u aşarsa ya da kuyruk dolarsa ntfy
@@ -65,6 +69,6 @@ Son güncelleme: 2026-11-14 · Canlı sürüm: `db6287d`
 
 1. [`README.md`](README.md): kurulum, mimari, neyi nerede değiştireceğin.
 2. Seçenek B ile yerelde çalıştır, bir menü yapıştır, akışı uçtan uca gör.
-3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-216 kayıtları son ayların neden öyle olduğunu anlatır.
+3. [`DECISIONS.md`](DECISIONS.md) sonundaki D-198 … D-217 kayıtları son ayların neden öyle olduğunu anlatır.
 
 Telefon uygulaması döneminin ilerleme günlüğü: [`docs/arsiv/PROGRESS-telefon-donemi.md`](docs/arsiv/PROGRESS-telefon-donemi.md).

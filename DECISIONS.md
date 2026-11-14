@@ -1208,3 +1208,41 @@ with the before/after numbers: `docs/FAZ3_RAPOR.md`.
     çalışmaya devam eder. Menüsüz bir mesajda geçen mutfak adı ("Uzak Doğu için öneri sun", "Kebap") modelsiz de o
     mutfaktan başlatır; bu, sağlayıcılar yoğunken de geçerlidir. Yalnızca ekran görüntüsü ve modelin anlaması gereken
     serbest sorular ertesi güne kalır.
+- **D-217** — **Havuz ve model tek sistem: havuz mutfağın kendi sesiyle cevap verir, model yazdıkları ekibin onayıyla
+  havuzu büyütür** (kullanıcı isteği, 2026-11-14: "yapay zekâ çalışmasa dahi havuzdan düzgünce öneri vermesi lazım, ama
+  yapay zekâ da çalışsın; algoritma ve yapay zekâ ortak çalışacak, şablon havuzu perfect çalışmalı"). Ölçüm için
+  `scripts/pool-probe.ts` yazıldı (`pnpm probe:pool`). Canlının şablon havuzunun kopyasında (1723 şablon) her mutfağa
+  modeller kapalıyken dört mesaj gönderir: yalnızca mutfak adı, tek ürün, 5 ürünlük menü, hedefe 3 kala menü. Havuz her
+  mutfakta hedefin en az 1,3 katıydı, ama 103 senaryonun 12'si hedefin altında kaldı ve 13'ünde mutfak yanlış çıktı;
+  mutfak başlangıcında önerilerin ortalama yalnızca %65'i mutfağın kendi ürünüydü. Bulunan ve düzeltilenler:
+  1. **Menüsüz başlangıçta kendi mutfağı geri planda kalıyordu.** Ölçülecek menü olmadığı için bütün aile aynı puanı
+     alıyor, sırayı önem belirliyordu. "Pide & Lahmacun için öneri sun" üst mutfak Kebap'ın Adana ve Urfa'sını ve tek
+     bir pideyi getiriyordu; dönerde %14, börekte %19 kendi ürünü vardı. Artık mutfağın kendi ürünü akraba mutfağınkinden
+     bir kademe önde. Bu kademe, menüye yakınlık kademelerinin (15 → 30 → 40) altında kalır. Başlangıçta ortalama %91.
+  2. **Modelsiz mutfak tanıma yalnızca ürün türüne bakıyordu.** "Haydari, Kısır, Muhammara…" Kebap, "Bol Soğanlı
+     Tantuni" Döner (dürüm türünün evi) çıkıyordu. "Çiğ Köfte Aile Boyu" ("aile" onu kampanya yapıyor) ve "Buffalo
+     Wings" (hiçbir tür) listedeki ilk mutfağa, Dondurma'ya düşüyordu. Artık her ürün kendisini havuzunda tutan
+     mutfaklara iki oy verir; mutfaksız bir tür oyunu adın andığı diğer türlere bırakır; hiçbir şey bir yeri
+     göstermiyorsa Dünya Mutfağı seçilir. Menünün en az %60'ı önde giden mutfağın havuzundaysa ve o mutfak 1,5 kat
+     öndeyse model hiç sorulmaz: daha hızlı, kotadan yemez, sağlayıcı yoğunken de aynı sonucu verir. Belirsiz menüyü
+     model çözer. Yanlış mutfak 13 senaryodan 2'ye indi; kalan ikisi gerçekten belirsiz ("Deniz Mahsulleri Makarna",
+     "Pişi").
+  3. **Doldurma açık kategorilerde duruyordu.** Bir mutfağın havuzu kendi kategori listesi dışında ürün tutabilir. Kafe
+     havuzunda bir de veri hatası vardı: canlıda Flat White, Cortado ve Frappuccino "ana yemek" olarak kayıtlıydı; bu
+     yüzden kafe hedefin 3 altında kalıyordu. Artık içecek ya da tatlı türünden bir ürün o kategoride sayılır, ve açık
+     kategoriler bitince mutfağın kendi diğer ürünleriyle doldurulur. Son kontrol bunları toplam sınırı içinde geçirir.
+  4. **Kartların sırası.** "Balık Çorbası" hem çorba hem balıktır. Kart sırası artık adın andığı bütün türlere bakar;
+     hamsi satıcısına ayrandan önce gelir.
+  5. **Model mutfak adını kaçırabiliyordu.** Gerçek modelle denemede "Tantuni için öneri sun" mesajına "menünün ekran
+     görüntüsünü yapıştır" dedi. Menü yokken yalnızca bir mutfak adından ve istek kelimelerinden oluşan mesaj artık
+     modelsiz o mutfaktan başlar. Mutfak kelimesi aynı zamanda istek kelimesiyse ("tatlı", "çorba") karar yine modelde.
+  6. **Model yazdıkları havuzu büyütür, ekip onaylar.** Kabul düğmeleri kalktığından beri (D-202) modelin iyi ürünleri
+     havuza hiç girmiyordu. Artık modelin yazdığı ve kontrollerden geçen her yeni ürün, analizin mutfağına onay bekleyen
+     taslak olarak kaydedilir; aynı ürün tekrar önerildikçe sayacı artar. Yönetimde Şablon havuzu → Yapay zekâ önerileri
+     sekmesi en çok önerileni üstte gösterir, panoda da sayısı görünür. Havuza alınan ürün bundan sonra modelsiz
+     önerilir. Silinen taslak arşive düşer ve bir daha aday olmaz. Onaylanmamış taslak temsilciye hiç sunulmaz: havuz
+     yalnızca onaylı şablonlardır.
+  Sonuç (aynı kopya, modeller kapalı): 103 senaryonun 102'si hedefe ulaştı, 101'inde mutfak doğru, hiçbirinde tekrar yok.
+  Gerçek modellerle 4 mutfakta 15 senaryo: 14'ü hedefe ulaştı. Kalan "Tantuni için öneri sun" madde 5 ile düzeldi ve
+  tekrar denendi. Havuza yeni hazır şablon eklenmedi: ölçüm, her mutfağın havuzunun algoritma düzeldikten sonra yettiğini
+  gösterdi; havuz bundan sonra onaylanan model önerileriyle ve Excel ile büyür.

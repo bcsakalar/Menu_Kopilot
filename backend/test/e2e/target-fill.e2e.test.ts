@@ -233,13 +233,22 @@ describe('what the rep gives leads the suggestions', () => {
     expect(message.text).toContain('menüsüz başladım');
   });
 
-  it('a request word is no seed and a cuisine word no product: "Kebap" goes to the chat agent, "tatlı" too', async () => {
-    decision = { ...noDecision, action: 'change_cuisine', reply: 'Başlıyorum.', cuisineSlug: 'kebap-izgara' };
+  it('a cuisine named on its own starts that cuisine without the model; "tatlı" alone still asks the chat agent (D-217)', async () => {
+    // The model would say something else: the cuisine is read without it.
+    decision = { ...noDecision, action: 'answer', reply: 'Menünün ekran görüntüsünü yapıştır.' };
     const before = chatCalls;
     const { message } = await send({ text: 'Kebap' });
-    expect(chatCalls).toBe(before + 1);
+    expect(chatCalls).toBe(before);
+    expect(message.result!.counts!.cuisineName).toBe('Kebap');
     expect(message.result!.menu).toHaveLength(0);
+    expectPastTarget(message.result!);
     expectDistinct(message.result!);
+    const asked = await send({ text: 'Tantuni için öneri sun' });
+    expect(chatCalls).toBe(before);
+    expect(asked.message.result!.counts!.cuisineName).toBe('Tantuni');
+    // A sentence with more in it than the cuisine is the model's to read.
+    await send({ text: 'Kebap salonuyuz menüyü sonra atarım' });
+    expect(chatCalls).toBe(before + 1);
     decision = { ...noDecision, action: 'answer', reply: 'Hangi mutfak?' };
     await send({ text: 'tatlı' });
     expect(chatCalls).toBe(before + 2);

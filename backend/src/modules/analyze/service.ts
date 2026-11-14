@@ -16,7 +16,7 @@ import { AppError, isUniqueViolation, notFound } from '../../lib/errors.js';
 import { normalizeTr } from '../../lib/normalize-tr.js';
 import { sameProductName } from '../../lib/same-product.js';
 import { CuisineGraph } from '../retrieval/cuisine-graph.js';
-import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, replaceTemplateContent } from '../templates/template-store.js';
+import { addAliases, findApprovedByName, getTemplate, incrementUsage, insertTemplate, recordDrafts, replaceTemplateContent } from '../templates/template-store.js';
 import type { RunRegistry } from '../../lib/run-registry.js';
 import type { Slots } from '../../lib/slots.js';
 import { diffFeedback, forgetCardFeedback, recordFeedback } from './feedback.js';
@@ -184,6 +184,7 @@ export class AnalyzeService {
           ...(result.model ? { model: result.model } : {}),
         });
         emit({ type: 'done', status: result.status, stats: result.stats });
+        await this.keepDrafts(result.counts?.cuisineId, result.cards);
       })
       .catch(async (err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
@@ -193,6 +194,16 @@ export class AnalyzeService {
       });
 
     return { runId, done };
+  }
+
+  /** The run's model-written products, kept as drafts for the team (D-217). A failure here never fails the run. */
+  private async keepDrafts(cuisineId: string | undefined, cards: readonly CardDto[]): Promise<void> {
+    if (!cuisineId) return;
+    const drafts = cards.flatMap((card) =>
+      card.section === 'new_product' && card.source === 'ai' && card.payload ? [{ payload: card.payload, categoryKey: card.categoryKey }] : [],
+    );
+    if (drafts.length === 0) return;
+    await recordDrafts(this.deps.db, cuisineId, drafts).catch((err: unknown) => this.deps.log.warn({ err }, 'drafts not recorded'));
   }
 
   subscribe(runId: string, listener: (event: AnalyzeEvent) => void): (() => void) | undefined {
